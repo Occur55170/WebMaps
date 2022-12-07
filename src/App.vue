@@ -1,11 +1,12 @@
 <script setup>
+
 import WebMap from './components/WebMap.vue'
 // import searchBar from './components/searchBar.vue'
 import Tool from './components/Tool.vue'
 
-  const state = {
-    pickedContract: '123'
-  }
+  // const state = {
+  //   pickedContract: '123'
+  // }
 </script>
 
 <template>
@@ -16,11 +17,14 @@ import Tool from './components/Tool.vue'
 </template>
 
 <style scoped>
-.main{
+.main {
   position: fixed;
+  top: 0;
+  left: 0;
   z-index: 220;
 }
-.mapContent{
+
+.mapContent {
   position: fixed;
   top: 0;
   left: 0px;
