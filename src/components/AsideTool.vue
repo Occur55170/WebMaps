@@ -1,14 +1,12 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 export default {
-  setup(props, { emit }) {
-    const state = reactive({
-      test: '000'
+  setup(props, { emit }){
+    const state=reactive({
     })
-    const name = ref('winnie')
+    const name = ref()
     return {
       state,
-      name
     }
   }
 }
@@ -16,11 +14,8 @@ export default {
 
 <template>
   <div>
-    <input type="text">
-    {{ name }}
   </div>
 </template>
 
 <style>
-
 </style>
