@@ -12,9 +12,9 @@ import SearchBar from './components/SearchBar.vue'
   </div>
     <SearchBar class="SearchBar" />
     <LayoutTool class="LayoutTool" />
-  <AsideTool class="AsideTool" />
-  <WebMap class="mapContent" />
-</template>
+    <AsideTool class="AsideTool" />
+    <WebMap class="mapContent" />
+  </template>
 
 <style>
 /* @import '@/assets/css/all.css'; */
@@ -35,7 +35,7 @@ import SearchBar from './components/SearchBar.vue'
 }
 .AsideTool{
   position: fixed;
-  top: 0;
+  top: 50%;
   right: 0;
   z-index: 220;
 }

@@ -12,6 +12,7 @@
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.3",
     "leaflet": "^1.9.3",
+    "leaflet.locatecontrol": "^0.79.0",
     "vue": "^3.2.41"
   },
   "devDependencies": {
