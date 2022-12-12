@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bepo65/leaflet.fullscreen": "^2.0.2",
     "@popperjs/core": "^2.11.6",
     "bootstrap": "^5.2.3",
     "leaflet": "^1.9.3",

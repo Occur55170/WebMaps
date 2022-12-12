@@ -3,8 +3,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import "leaflet.locatecontrol";
 export default {
     setup(props, { emit }) {
-        const state = reactive({
-        })
+        const state = reactive({})
         const name = ref()
         function location() {
             // let latlng ={
@@ -15,7 +14,7 @@ export default {
             var lc = L.control.locate({
                 position: "topright",
                 strings: {
-                title: "Show me where I am, yo!"
+                    title: "Show me where I am, yo!"
                 }
             }).addTo(map);
         }

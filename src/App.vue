@@ -8,33 +8,41 @@ import SearchBar from './components/SearchBar.vue'
 </script>
 
 <template>
+  <SearchBar class="SearchBar" />
   <div class="main">
-  </div>
-    <SearchBar class="SearchBar" />
     <LayoutTool class="LayoutTool" />
-    <AsideTool class="AsideTool" />
-    <WebMap class="mapContent" />
-  </template>
+    <!-- <AsideTool class="AsideTool" /> -->
+  </div>
+  <WebMap class="mapContent" />
+</template>
 
 <style>
 /* @import '@/assets/css/all.css'; */
 /* @import '@/assets/css/all.css'; */
 /* @import styles from '@/assets/css/all.css' */
-
-.SearchBar{
+.main{
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 10;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.SearchBar{
+  position: absolute;
+  top: 20px;
+  left: 20px;
   z-index: 220;
 }
 .LayoutTool {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   z-index: 220;
 }
 .AsideTool{
-  position: fixed;
+  position: absolute;
   top: 50%;
   right: 0;
   z-index: 220;
@@ -44,6 +52,7 @@ import SearchBar from './components/SearchBar.vue'
   position: fixed;
   top: 0;
   left: 0px;
+  z-index: 0;
   outline: none;
 }
 </style>
