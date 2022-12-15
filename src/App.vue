@@ -11,8 +11,8 @@ import SearchBar from './components/SearchBar.vue'
   <SearchBar class="SearchBar" />
   <div class="main">
     <LayoutTool class="LayoutTool" />
-    <!-- <AsideTool class="AsideTool" /> -->
   </div>
+    <AsideTool class="AsideTool" />
   <WebMap class="mapContent" />
 </template>
 

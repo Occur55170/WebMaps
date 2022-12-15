@@ -11,7 +11,6 @@ import '@bepo65/leaflet.fullscreen/Control.FullScreen.css';
 export default {
     setup(props, { emit }) {
         const state = reactive({
-            pickedContract: '999'
         })
 
         // 跟使用者要位置
@@ -55,8 +54,15 @@ export default {
             var map = L.map('map', {
                 zoomControl: false,
                 fullscreenControl: true,
+                fullscreenControlOptions: {
+                  position: 'bottomright',
+                  title: "進入全螢幕",
+                  titleCancel: "離開全螢幕",
+                  content: null,
+                  forceSeparateButton: true,
+                  forcePseudoFullscreen: false,
+                }
             }).setView(center, zoom);
-
 
             L.control.zoom({
                 position: 'bottomright'
@@ -69,31 +75,13 @@ export default {
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             }).addTo(map);
-            // var lc = map.control.locate().addTo(map);
+
             L.control.locate({
                 position: "bottomright",
                 icon: 'locate',
                 iconLoading: 'loading',
                 iconElementTag: 'div'
             }).addTo(map);
-
-            L.control.fullscreen({
-                position: 'bottomright',
-                content: '123',
-                // content: '<img class="p-1" src="https://rawcdn.githack.com/gravitystorm/openstreetmap-carto/eae09090b64c361be3ff7bfd1975be7638a6b36c/symbols/man_made/tower_lattice.svg">',
-                title: '進入全螢幕',
-                titleCancel: '離開全螢幕',
-                // forceSeparateButton: true,
-                forcePseudoFullscreen: true,
-            }).addTo(map);
-            // const fullscreenBtn = document.querySelector('.leaflet-control-zoom-fullscreen');
-            // map.on('enterFullscreen', () => {
-            //     console.log('<p>離開全螢幕</p>');
-            // });
-            // map.on('exitFullscreen', () => {
-            //     console.log('<p>進入全螢幕</p>');
-            // });
-
         })
 
         return {
@@ -139,5 +127,6 @@ export default {
 
 .leaflet-control-locate a.leaflet-bar-part div.locate {
     background-image: url(https://rawcdn.githack.com/gravitystorm/openstreetmap-carto/eae09090b64c361be3ff7bfd1975be7638a6b36c/symbols/man_made/tower_lattice.svg);
+    /* background-image: url(/assets/img/IconoirPosition.svg); */
 }
 </style>

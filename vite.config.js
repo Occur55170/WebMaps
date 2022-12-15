@@ -6,13 +6,24 @@ import Icons from 'unplugin-icons/vite'//一樣先引入套件
 import IconsResolver from 'unplugin-icons/resolver'
 
 export default defineConfig({
-plugins: [
-  vue(),
-  Components({
-    resolvers: IconsResolver({
-      prefix: 'icon'  // 可以為 icon component加上前贅字來區分元件
+  plugins: [
+    vue(),
+    Components({
+      resolvers: IconsResolver({
+        prefix: 'icon'  // 可以為 icon component加上前贅字來區分元件
+      }),
     }),
-  }),
-  Icons(),//一樣定義引入的套件
-],
+    // css: {
+    //   modules: {
+    //     localsConvention: 'camelCase'
+    //   }
+    // }
+    Icons(),//一樣定義引入的套件
+  ],
+
+  css: {
+    modules: {
+      localsConvention: 'camelCase'
+    }
+  }
 })
