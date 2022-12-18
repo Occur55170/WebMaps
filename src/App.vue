@@ -22,8 +22,8 @@ import SearchBar from './components/SearchBar.vue'
 /* @import styles from '@/assets/css/all.css' */
 .main{
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 36px;
+  left: 36px;
   z-index: 10;
   padding: 20px;
   box-sizing: border-box;

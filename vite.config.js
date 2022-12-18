@@ -20,10 +20,11 @@ export default defineConfig({
     // }
     Icons(),//一樣定義引入的套件
   ],
-
   css: {
-    modules: {
-      localsConvention: 'camelCase'
-    }
+    // preprocessorOptions: {
+    //   scss: {
+    //     additionalData: `@import "./src/assets/global.scss";`
+    //   }
+    // }
   }
 })

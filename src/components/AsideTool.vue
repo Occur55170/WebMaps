@@ -2,7 +2,8 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import "leaflet.locatecontrol"
 import all from './../assets/styles/all.css'
-import HelloWorldCss from './../assets/styles/HelloWorldCss.css'
+// import HelloWorldCss from '../assets/styles/helloWorld.module.scss'
+
 export default {
     setup(props, { emit }) {
         const state = reactive({})
@@ -38,23 +39,18 @@ export default {
                 </path>
             </svg>
         </a> -->
-        <!-- <p :class="HelloWorldCss['style_title__s0dsl']">Click on the Vite and Vue logos to learn more</p> -->
+        <p class="qaz">Click on the Vite and Vue logos to learn more</p>
     </div>
 </template>
 
-<style lang="scss" scoped>
-// .aside {
-//     width: 30px;
-//     height: 30px;
-//     background: #fff;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-// }
-.aside {
-  background: red;
-  width: 50px;
-  height: 50px;
+<style lang="scss">
+.qaz{
+  // color: $blue;
 }
+// .aside {
+//   background: red;
+//   width: 50px;
+//   height: 50px;
+// }
 </style>
 
