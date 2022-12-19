@@ -13,18 +13,14 @@ export default defineConfig({
         prefix: 'icon'  // 可以為 icon component加上前贅字來區分元件
       }),
     }),
-    // css: {
-    //   modules: {
-    //     localsConvention: 'camelCase'
-    //   }
-    // }
     Icons(),//一樣定義引入的套件
   ],
   css: {
-    // preprocessorOptions: {
-    //   scss: {
-    //     additionalData: `@import "./src/assets/global.scss";`
-    //   }
-    // }
+    preprocessorOptions: {
+      scss: {
+        additionalData: '@import "./src/assets/styles/global.scss";',
+        javascriptEnabled: true
+      }
+    }
   }
 })
