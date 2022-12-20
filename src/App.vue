@@ -13,8 +13,6 @@ import "leaflet.locatecontrol"
 import '@bepo65/leaflet.fullscreen/Control.FullScreen'
 import '@bepo65/leaflet.fullscreen/Control.FullScreen.css'
 
-
-
 export default {
     setup(props, { emit }) {
         const state = reactive({
@@ -56,7 +54,7 @@ export default {
 
         onMounted(() => {
             // 放置地圖
-            let zoom = 17; // 0 - 18
+            let zoom = 17; // 縮放程度
             let center = [24.801583, 120.971859]; // 中心點座標
             var map = L.map('map', {
                 zoomControl: false,

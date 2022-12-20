@@ -1,6 +1,24 @@
-<script setup>
+<script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 
+export default {
+  setup(props, { emit }){
+    const state=reactive({
+    })
+    const name = ref()
+    const condition =function(){
+
+    }
+    const spliteWindow = function(){
+        console.log('123')
+    }
+    return {
+      state,
+      condition,
+      spliteWindow
+    }
+  }
+}
 </script>
 
 <template>
@@ -10,7 +28,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
         </div>
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4">
-                <a href="" class="text-white">
+                <a href="" class="text-white" @click.prevent="">
                     <svg viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="2">
@@ -23,7 +41,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
                 </a>
             </li>
             <li class="me-4">
-                <a href="" class="text-white">
+                <a href="" class="text-white" @click.prevent="condition">
                     <svg viewBox="0 0 24 24">
                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="1.5"
@@ -32,7 +50,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
                 </a>
             </li>
             <li class="me-4">
-                <a href="" class="text-white">
+                <a href="" class="text-white" @click.prevent="spliteWindow">
                     <svg viewBox="0 0 20 20">
                         <path fill="currentColor"
                             d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
@@ -40,14 +58,11 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
                 </a>
             </li>
         </ul>
-        <!-- <p class="mos">lorem</p> -->
+        <div class="conditionWrap"></div>
     </div>
 </template>
 
 <style scoped lang="scss">
-// .mos{
-//     color: $blue;
-// }
 .searchbar {
     width: 322px;
     position: relative;
@@ -77,7 +92,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 
 a {
     display: block;
-    background: rgba(30, 30, 30, 0.9);
+    background: $black-deep;
     border-radius: 10px;
     width: 44px;
     height: 44px;
