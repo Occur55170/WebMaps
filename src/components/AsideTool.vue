@@ -31,14 +31,16 @@ export default {
 
 <template>
   <div class="aside">
+    <a href="" @click="showLocal">123</a>
   </div>
 </template>
 
 <style lang="scss">
 .aside {
-  background: red;
   width: 50px;
   height: 50px;
+  font-weight: bold;
 }
+
 </style>
 
