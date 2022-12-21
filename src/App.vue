@@ -112,89 +112,89 @@ export default {
     <WebMap class="mapContent" />
 </template>
 
-<style>
-.main {
-    position: fixed;
-    top: 36px;
-    left: 36px;
-    z-index: 10;
-    padding: 20px;
-    box-sizing: border-box;
-}
+<style lang="sass">
+.main
+    position: fixed
+    top: 36px
+    left: 36px
+    z-index: 10
+    padding: 20px
+    box-sizing: border-box
 
-.SearchBar {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 220;
-}
 
-.LayoutTool {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 220;
-}
+.SearchBar
+    position: absolute
+    top: 20px
+    left: 20px
+    z-index: 220
 
-.AsideTool {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    z-index: 220;
-}
 
-.mapContent {
-    position: fixed;
-    top: 0;
-    left: 0px;
-    z-index: 0;
-    outline: none;
-}
+.LayoutTool
+    position: absolute
+    top: 0
+    left: 0
+    z-index: 220
 
-#map {
-    position: fixed;
-    top: 0;
-    left: 0px;
-    z-index: 0;
-    outline: none;
-    width: 100%;
-    height: 100%;
-}
 
-/* .leaflet-top.leaflet-right {
-    top:50%;
-    transform: translate(-50%, 0%);
-} */
+.AsideTool
+    position: absolute
+    top: 50%
+    right: 0
+    z-index: 220
 
-.leaflet-control-locate a.leaflet-bar-part div {
-    background-position: left 8px top 8px;
-    background-repeat: no-repeat;
-    width: 30px;
-    height: 30px;
-}
 
-.leaflet-control-locate a.leaflet-bar-part div.loading {
-    background-image: url(https://i0.wp.com/www.letswrite.tw/wp-content/uploads/2022/03/letswritw_logo_u_512.png?fit=512%2C512&ssl=1);
-}
+.mapContent
+    position: fixed
+    top: 0
+    left: 0px
+    z-index: 0
+    outline: none
 
-.leaflet-control-locate a.leaflet-bar-part div.locate {
-    position: relative;
-}
 
-.leaflet-touch .leaflet-bar a {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+#map
+    position: fixed
+    top: 0
+    left: 0px
+    z-index: 0
+    outline: none
+    width: 100%
+    height: 100%
 
-.leaflet-control-locate a.leaflet-bar-part div.locate {
-    width: 18px;
-    height: 18px;
-    --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4s-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7z'/%3E%3C/svg%3E");
-    mask: var(--un-icon) no-repeat;
-    mask-size: 100% 100%;
-    -webkit-mask: var(--un-icon) no-repeat;
-    -webkit-mask-size: 100% 100%;
-    background-color: currentColor;
-}
+
+/* .leaflet-top.leaflet-right
+    top:50%
+    transform: translate(-50%, 0%)
+ */
+
+.leaflet-control-locate a.leaflet-bar-part div
+    background-position: left 8px top 8px
+    background-repeat: no-repeat
+    width: 30px
+    height: 30px
+
+
+.leaflet-control-locate a.leaflet-bar-part div.loading
+    background-image: url(https://i0.wp.com/www.letswrite.tw/wp-content/uploads/2022/03/letswritw_logo_u_512.png?fit=512%2C512&ssl=1)
+
+
+.leaflet-control-locate a.leaflet-bar-part div.locate
+    position: relative
+
+
+.leaflet-touch .leaflet-bar a
+    display: flex
+    justify-content: center
+    align-items: center
+
+
+.leaflet-control-locate a.leaflet-bar-part div.locate
+    width: 18px
+    height: 18px
+    --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 24 24' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4s-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7s7 3.13 7 7s-3.13 7-7 7z'/%3E%3C/svg%3E")
+    mask: var(--un-icon) no-repeat
+    mask-size: 100% 100%
+    -webkit-mask: var(--un-icon) no-repeat
+    -webkit-mask-size: 100% 100%
+    background-color: currentColor
+
 </style>

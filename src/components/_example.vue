@@ -17,5 +17,5 @@ export default {
   </div>
 </template>
 
-<style>
+<style lang="sass">
 </style>

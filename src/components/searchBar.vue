@@ -62,47 +62,46 @@ export default {
     </div>
 </template>
 
-<style scoped lang="scss">
-.searchbar {
-    width: 322px;
-    position: relative;
-    input {
-        width: 100%;
-        margin-bottom: 15px;
-        border-radius: 20px;
-        border: 0;
-        padding: 10px 20px;
-    }
-    &::after{
-        content: '';
-        position: absolute;
-        right: 30px;
-        top: 20%;
-        --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 1024 1024' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M1014.64 969.04L703.71 656.207c57.952-69.408 92.88-158.704 92.88-256.208c0-220.912-179.088-400-400-400s-400 179.088-400 400s179.088 400 400 400c100.368 0 192.048-37.056 262.288-98.144l310.496 312.448c12.496 12.497 32.769 12.497 45.265 0c12.48-12.496 12.48-32.752 0-45.263zM396.59 736.527c-185.856 0-336.528-150.672-336.528-336.528S210.734 63.471 396.59 63.471c185.856 0 336.528 150.672 336.528 336.528S582.446 736.527 396.59 736.527z'/%3E%3C/svg%3E");
-        mask: var(--un-icon) no-repeat;
-        mask-size: 100% 100%;
-        -webkit-mask: var(--un-icon) no-repeat;
-        -webkit-mask-size: 100% 100%;
-        background-color: currentColor;
-        color: inherit;
-        width: 1.2em;
-        height: 1.2em;
-    }
-}
+<style lang="sass" scoped>
+@import "./src/assets/styles/global.scss"
 
-a {
-    display: block;
-    background: $black-deep;
-    border-radius: 10px;
-    width: 44px;
-    height: 44px;
-    padding: 10px;
-    box-sizing: border-box;
-}
+.searchbar
+    width: 322px
+    position: relative
+    input
+        width: 100%
+        margin-bottom: 15px
+        border-radius: 20px
+        border: 0
+        padding: 10px 20px
+    &::after
+        content: ''
+        position: absolute
+        right: 30px
+        top: 20%
+        --un-icon: url("data:image/svg+xml;utf8,%3Csvg viewBox='0 0 1024 1024' width='1.2em' height='1.2em' xmlns='http://www.w3.org/2000/svg' %3E%3Cpath fill='currentColor' d='M1014.64 969.04L703.71 656.207c57.952-69.408 92.88-158.704 92.88-256.208c0-220.912-179.088-400-400-400s-400 179.088-400 400s179.088 400 400 400c100.368 0 192.048-37.056 262.288-98.144l310.496 312.448c12.496 12.497 32.769 12.497 45.265 0c12.48-12.496 12.48-32.752 0-45.263zM396.59 736.527c-185.856 0-336.528-150.672-336.528-336.528S210.734 63.471 396.59 63.471c185.856 0 336.528 150.672 336.528 336.528S582.446 736.527 396.59 736.527z'/%3E%3C/svg%3E")
+        mask: var(--un-icon) no-repeat
+        mask-size: 100% 100%
+        -webkit-mask: var(--un-icon) no-repeat
+        -webkit-mask-size: 100% 100%
+        background-color: currentColor
+        color: inherit
+        width: 1.2em
+        height: 1.2em
 
-svg {
-    font-size: 24px;
-    width: 100%;
-    height: 100%;
-}
+
+a
+    display: block
+    background: $black-deep
+    border-radius: 10px
+    width: 44px
+    height: 44px
+    padding: 10px
+    box-sizing: border-box
+
+svg
+    font-size: 24px
+    width: 100%
+    height: 100%
+
 </style>

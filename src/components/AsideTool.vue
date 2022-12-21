@@ -35,12 +35,10 @@ export default {
   </div>
 </template>
 
-<style lang="scss">
-.aside {
-  width: 50px;
-  height: 50px;
-  font-weight: bold;
-}
-
+<style lang="sass">
+.aside
+  width: 50px
+  height: 50px
+  font-weight: bold
 </style>
 
