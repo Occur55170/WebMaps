@@ -1,23 +1,27 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import $ from 'jquery'
 
 export default {
-  setup(props, { emit }){
-    const state=reactive({
-    })
-    const name = ref()
-    const condition =function(){
+    props: {},
+    setup(props, { emit }) {
+        const state = reactive({
+            spliteWindow: false
+        })
+        const name = ref()
+        const condition = function () {
 
+        }
+        const onTurnSpliteWindow = function () {
+            // $('.conditionWrap').slideToggle();
+            state.spliteWindow = !state.spliteWindow
+        }
+        return {
+            state,
+            condition,
+            onTurnSpliteWindow
+        }
     }
-    const spliteWindow = function(){
-        console.log('123')
-    }
-    return {
-      state,
-      condition,
-      spliteWindow
-    }
-  }
 }
 </script>
 
@@ -49,16 +53,30 @@ export default {
                     </svg>
                 </a>
             </li>
-            <li class="me-4">
-                <a href="" class="text-white" @click.prevent="spliteWindow">
+            <li class="me-4 position-relative">
+                <a href="" class="text-white" @click.prevent="onTurnSpliteWindow">
                     <svg viewBox="0 0 20 20">
-                        <path fill="currentColor"
-                            d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
+                        <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                     </svg>
                 </a>
+                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.spliteWindow">
+                    <li class="mt-2">
+                        <a href="" class="text-white">
+                            <svg viewBox="0 0 20 20">
+                                <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
+                            </svg>
+                        </a>
+                    </li>
+                    <li class="mt-2">
+                        <a href="" class="text-white">
+                            <svg viewBox="0 0 20 20">
+                                <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
+                            </svg>
+                        </a>
+                    </li>
+                </ul>
             </li>
         </ul>
-        <div class="conditionWrap"></div>
     </div>
 </template>
 
@@ -98,6 +116,8 @@ a
     height: 44px
     padding: 10px
     box-sizing: border-box
+    :hover
+        // background:
 
 svg
     font-size: 24px

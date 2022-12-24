@@ -1,11 +1,12 @@
 <script>
-// import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import $ from 'jquery'
+
 import WebMap from './components/WebMap.vue'
 import AsideTool from './components/AsideTool.vue'
 import LayoutTool from './components/LayoutTool.vue'
 import SearchBar from './components/SearchBar.vue'
 
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -44,19 +45,16 @@ export default {
             //     lng:121.5712388
             // }
             // L.control.locate({setView: true, maxZoom: 15}).addTo(map);
-            var lc = L.control.locate({
+            let lc = L.control.locate({
                 position: "topright",
-                strings: {
-                    title: "Show me where I am, yo!"
-                }
             }).addTo(map);
         }
 
         onMounted(() => {
             // 放置地圖
-            let zoom = 17; // 縮放程度
-            let center = [24.801583, 120.971859]; // 中心點座標
-            var map = L.map('map', {
+            const zoom = 17; // 縮放程度
+            const center = [24.801583, 120.971859]; // 中心點座標
+            const map = L.map('map', {
                 zoomControl: false,
                 fullscreenControl: true,
                 fullscreenControlOptions: {
@@ -87,7 +85,10 @@ export default {
                 position: "bottomright",
                 icon: 'locate',
                 iconLoading: 'loading',
-                iconElementTag: 'div'
+                iconElementTag: 'div',
+                strings: {
+                    title: "Show me where I am, yo!"
+                }
             }).addTo(map);
 
         })
