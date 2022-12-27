@@ -28,61 +28,15 @@ const overlay = ref(null) // 覆蓋物實例
 const currentCoordinate = ref('') // 彈跳視窗信息
 
 let state = {
-    lang: 120.971859,
-    lon: 24.801583
+    lng: 120.971859,
+    lat: 24.801583
 }
-
-
-const iconFeature = new Feature({
-    geometry: new Point([ 120.97149309072053, 24.80208800746974 ]),
-    name: 'Null Island',
-    population: 4000,
-    rainfall: 500,
-});
-
-const iconStyle = new Style({
-    image: new Icon({
-        anchor: [0.5, 100],
-        anchorXUnits: 'fraction',
-        anchorYUnits: 'pixels',
-        // 圖片連結需修改
-        src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-    }),
-});
-iconFeature.setStyle(iconStyle);
-
-const vectorSource = new VectorSource({
-    features: [iconFeature],
-});
-
-// const marker = new Vector({
-//     source: new Vector({
-//         features: [
-//             new Feature({
-//                 geometry: new Point([ 120.97149309072053, 24.80208800746974 ]),
-//                 name: 'Null Island',
-//                 population: 4000,
-//                 rainfall: 500,
-//             })
-//         ]
-//     }),
-//     style: new Style({
-//         image: new Icon({
-//             anchor: [0.5, 100],
-//             anchorXUnits: 'fraction',
-//             anchorYUnits: 'pixels',
-//             // 圖片連結需修改
-//             src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-//         }),
-//     })
-// })
 
 const view = new View({
     projection: 'EPSG:4326', // 投影座標系
-    center: [state.lang, state.lon],
+    center: [state.lng, state.lat],
     zoom: 17,
 });
-
 
 // 初始化地圖
 function initMap() {
@@ -111,10 +65,12 @@ function initMap() {
         view: view,
         overlays: [overlay.value] // 绑定一個覆蓋物
     })
+    return map
 
-    map.addLayer(vectorSource);
     mapClick() // 在地圖初始化完成後再绑定點擊事件
 }
+
+
 
 // 點擊地圖事件
 function mapClick() {
@@ -130,16 +86,40 @@ function closePopup() {
     overlay.value.setPosition(undefined) // setPosition 传入undefined會隐藏彈跳視窗元素
     currentCoordinate.value = '' // 把彈跳視窗内容清空
 }
+function addPoint(targetLng, targetLat){
+    const marker = new Vector({
+        source: new VectorSource({
+            features: [
+                new Feature({
+                    geometry: new Point([targetLng, targetLat]),
+                    name: 'Null Island',
+                    population: 4000,
+                    rainfall: 500,
+                })
+            ]
+        }),
+        style: new Style({
+            image: new Icon({
+                anchor: [0.5, 100],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                // 圖片連結需修改
+                src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
+            }),
+        })
+    })
+    map.value.addLayer(marker);
+}
 
-
+// 移動到當前位置
 function moveCurrentPosition() {
     navigator.geolocation.getCurrentPosition(function (pos) {
-        const coords = fromLonLat([pos.coords.longitude, pos.coords.latitude]);
         view.animate({
             center: [pos.coords.longitude, pos.coords.latitude],
             zoom: 17,
             duration: 100,
         });
+        addPoint(pos.coords.longitude, pos.coords.latitude)
     })
 }
 
@@ -150,6 +130,7 @@ onMounted(() => {
 
 <template>
     <div class="" @click="moveCurrentPosition">定位</div>
+    <div class="" @click="addPoint">新增座標點</div>
     <!-- 地圖容器 -->
     <div id="map" class="map__x" ref="mapCom"></div>
 
@@ -160,7 +141,6 @@ onMounted(() => {
         <!-- 彈跳視窗内容（展示座標信息） -->
         <div class="content">{{ currentCoordinate }}</div>
     </div>
-    <div class="" @click="moveCurrentPosition">123</div>
 </template>
 
 <style lang="sass">
