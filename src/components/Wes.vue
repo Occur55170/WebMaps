@@ -1,12 +1,23 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Map, View } from 'ol' // 引入容器绑定模塊和視圖模塊
+import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
 import Tile from 'ol/layer/Tile' // 瓦片加载器
-import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
-import 'ol/ol.css' // ol提供的css样式（必须引入）
 import { fromLonLat } from 'ol/proj'
+
+import Point from 'ol/geom/Point'
+import VectorSource from 'ol/source/Vector.js';
+import { Icon, Style } from 'ol/style.js';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
+
+import 'ol/ol.css' // ol提供的css样式（必须引入）
+
+// import 導入圖片方式有誤
+// import iconPng from '/src/assets/img/IconoirPosition'
+import iconPng from '../assets/img/IconoirPosition.svg' // 引入图标图片
+// import icnPg from '@/assets/img/IconoirPosition.svg'
+
 
 const mapCom = ref(null) // 地圖容器
 const popupCom = ref(null) // 彈跳視窗容器
@@ -15,15 +26,41 @@ const overlay = ref(null) // 覆蓋物實例
 const currentCoordinate = ref('') // 彈跳視窗信息
 
 let state = {
-    lang:120.971859,
+    lang: 120.971859,
     lon: 24.801583
 }
+
+
+const iconFeature = new Feature({
+
+    geometry: new Point([120.97203066137695, 24.802312560852055]),
+    name: 'Null Island',
+    population: 4000,
+    rainfall: 500,
+});
+
+const iconStyle = new Style({
+    image: new Icon({
+        anchor: [0.5, 46],
+        anchorXUnits: 'fraction',
+        anchorYUnits: 'pixels',
+        // 圖片連結需修改
+        src: 'https://www.public.com.tw/images/logo.png',
+    }),
+});
+
+iconFeature.setStyle(iconStyle);
+
+const vectorSource = new VectorSource({
+    features: [iconFeature],
+});
 
 const view = new View({
     projection: 'EPSG:4326', // 投影座標系
     center: [state.lang, state.lon],
     zoom: 17,
 });
+
 
 // 初始化地圖
 function initMap() {
@@ -44,7 +81,10 @@ function initMap() {
                 //     url: 'http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}'
                 // }),
                 source: new OSM() // 圖層數據
-            })
+            }),
+            new VectorLayer({
+                source: vectorSource,
+            }),
         ],
         view: view,
         overlays: [overlay.value] // 绑定一個覆蓋物

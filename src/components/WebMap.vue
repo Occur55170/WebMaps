@@ -1,12 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+
 import { Map, View } from 'ol' // 引入容器绑定模塊和視圖模塊
 import Tile from 'ol/layer/Tile' // 瓦片加载器
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
-import 'ol/ol.css' // ol提供的css样式（必须引入）
 import { fromLonLat } from 'ol/proj'
+import 'ol/ol.css' // ol提供的css样式（必须引入）
 
 const mapCom = ref(null) // 地圖容器
 const popupCom = ref(null) // 彈跳視窗容器
