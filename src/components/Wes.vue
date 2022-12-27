@@ -7,15 +7,17 @@ import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 import { fromLonLat } from 'ol/proj'
 
 import Point from 'ol/geom/Point'
-import VectorSource from 'ol/source/Vector.js';
-import { Icon, Style } from 'ol/style.js';
-import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
+import VectorSource from 'ol/source/Vector.js'
+import { Icon, Style } from 'ol/style.js'
+import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
 import 'ol/ol.css' // ol提供的css样式（必须引入）
 
 // import 導入圖片方式有誤
 // import iconPng from '/src/assets/img/IconoirPosition'
-import iconPng from '../assets/img/IconoirPosition.svg' // 引入图标图片
+// import iconPng from '../assets/img/IconoirPosition.svg' // 引入图标图片
+import icnPg from '../assets/img/IconoirPosition.svg'
+
 // import icnPg from '@/assets/img/IconoirPosition.svg'
 
 
@@ -32,8 +34,7 @@ let state = {
 
 
 const iconFeature = new Feature({
-
-    geometry: new Point([120.97203066137695, 24.802312560852055]),
+    geometry: new Point([ 120.97149309072053, 24.80208800746974 ]),
     name: 'Null Island',
     population: 4000,
     rainfall: 500,
@@ -41,19 +42,40 @@ const iconFeature = new Feature({
 
 const iconStyle = new Style({
     image: new Icon({
-        anchor: [0.5, 46],
+        anchor: [0.5, 100],
         anchorXUnits: 'fraction',
         anchorYUnits: 'pixels',
         // 圖片連結需修改
-        src: 'https://www.public.com.tw/images/logo.png',
+        src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
     }),
 });
-
 iconFeature.setStyle(iconStyle);
 
 const vectorSource = new VectorSource({
     features: [iconFeature],
 });
+
+// const marker = new Vector({
+//     source: new Vector({
+//         features: [
+//             new Feature({
+//                 geometry: new Point([ 120.97149309072053, 24.80208800746974 ]),
+//                 name: 'Null Island',
+//                 population: 4000,
+//                 rainfall: 500,
+//             })
+//         ]
+//     }),
+//     style: new Style({
+//         image: new Icon({
+//             anchor: [0.5, 100],
+//             anchorXUnits: 'fraction',
+//             anchorYUnits: 'pixels',
+//             // 圖片連結需修改
+//             src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
+//         }),
+//     })
+// })
 
 const view = new View({
     projection: 'EPSG:4326', // 投影座標系
@@ -82,14 +104,15 @@ function initMap() {
                 // }),
                 source: new OSM() // 圖層數據
             }),
-            new VectorLayer({
-                source: vectorSource,
-            }),
+            // new VectorLayer({
+            //     source: vectorSource,
+            // }),
         ],
         view: view,
         overlays: [overlay.value] // 绑定一個覆蓋物
     })
 
+    map.addLayer(vectorSource);
     mapClick() // 在地圖初始化完成後再绑定點擊事件
 }
 
