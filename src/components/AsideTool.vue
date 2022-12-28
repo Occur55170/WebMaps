@@ -1,44 +1,55 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-import "leaflet.locatecontrol"
-// import HelloWorldCss from '../assets/styles/helloWorld.module.scss'
-
 export default {
-  setup(props, { emit }) {
-    const state = reactive({})
-    const name = ref()
-    function location() {
-      // let latlng ={
-      //     lat:25.0565767,
-      //     lng:121.5712388
-      // }
-      // L.control.locate({setView: true, maxZoom: 15}).addTo(map);
-      var lc = L.control.locate({
-        position: "topright",
-        strings: {
-          title: "Show me where I am, yo!"
-        }
-      }).addTo(map);
-    }
+    props: {
+        id:{
+            Type: String,
+            default: 0
+        },
+    },
+    setup(props, { emit }){
+        console.log(props)
+        const state=reactive({
+        })
+        // const map = ref(null) // 地圖容器
 
-    return {
-      state,
-      location
+        function zoomIn() {
+            let view = map.value.getView() // 获取当前视图
+            let zoom = view.getZoom() // 获取当前缩放级别
+            view.setZoom(zoom + 1)
+        }
+
+        function zoomOut() {
+            let view = map.value.getView() // 获取当前视图
+            let zoom = view.getZoom() // 获取当前缩放级别
+            view.setZoom(zoom - 1)
+        }
+        return {
+            zoomIn,
+            zoomOut
+        }
     }
-  }
 }
+
 </script>
 
 <template>
-  <div class="aside">
-    <a href="" @click="showLocal">123</a>
-  </div>
+    <div class="aside">
+        <div class="a" @click="zoomIn">放大</div>
+        <div class="a" @click="zoomOut">縮小</div>
+    </div>
 </template>
 
 <style lang="sass">
 .aside
-  width: 50px
   height: 50px
   font-weight: bold
+
+.a
+    background: #fff
+    margin: 20px
+    padding: 20px
+    font-size: 20px
+    border: 1px solid #000
 </style>
 

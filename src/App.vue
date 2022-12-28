@@ -4,10 +4,8 @@ import $ from 'jquery'
 
 import WebMap from './components/WebMap.vue'
 import Wes from './components/Wes.vue'
-// import AsideTool from './components/AsideTool.vue'
 import LayoutTool from './components/LayoutTool.vue'
 import SearchBar from './components/SearchBar.vue'
-
 
 export default {
   setup(props, { emit }){
@@ -27,7 +25,6 @@ export default {
     <div class="main">
         <LayoutTool class="LayoutTool" />
     </div>
-    <!-- <AsideTool class="AsideTool" /> -->
 
     <!-- <WebMap class="mapContent" /> -->
     <Wes class="mapContent" />

@@ -1,11 +1,13 @@
-<script setup>
-import { ref, onMounted } from 'vue'
+<script>
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
 import Tile from 'ol/layer/Tile' // 瓦片加载器
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 import { fromLonLat } from 'ol/proj'
 
+import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
@@ -13,144 +15,109 @@ import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
 import 'ol/ol.css' // ol提供的css样式（必须引入）
 
-// import 導入圖片方式有誤
-// import iconPng from '/src/assets/img/IconoirPosition'
-// import iconPng from '../assets/img/IconoirPosition.svg' // 引入图标图片
-import icnPg from '../assets/img/IconoirPosition.svg'
+import AsideTool from './AsideTool.vue'
 
-
-
-const mapCom = ref(null) // 地圖容器
-const popupCom = ref(null) // 彈跳視窗容器
-const map = ref(null) // 地圖實例
-const overlay = ref(null) // 覆蓋物實例
-const currentCoordinate = ref('') // 彈跳視窗信息
-
-let state = {
-    lng: 120.971859,
-    lat: 24.801583
-}
-
-const view = new View({
-    projection: 'EPSG:4326', // 投影座標系
-    center: [state.lng, state.lat],
-    zoom: 17,
-});
-
-// 初始化地圖
-function initMap() {
-    // 註冊一個覆蓋物
-    overlay.value = new Overlay({
-        element: popupCom.value, // 彈跳視窗标签，在html里
-        autoPan: true, // 如果彈跳視窗在底圖邊緣时，底圖會移動
-        autoPanAnimation: { // 底圖移動動畫
-            duration: 250
-        }
+export default {
+  setup(props, { emit }){
+    const state=reactive({
+        lng: 120.971859,
+        lat: 24.801583
     })
-    const compass = new Overlay({
-        positioning: 'center-center',
-        element: document.getElementById('compass'),
-        stopEvent: false
+    const mapCom = ref(null) // 地圖容器
+    const popupCom = ref(null) // 彈跳視窗容器
+    const map = ref(null) // 地圖實例
+    const overlay = ref(null) // 覆蓋物實例
+    const currentCoordinate = ref('') // 彈跳視窗信息
+
+    const view = new View({
+        projection: 'EPSG:4326', // 投影座標系
+        center: [state.lng, state.lat],
+        zoom: 17,
     });
-    map.value = new Map({
-        target: mapCom.value,
-        layers: [ // 圖層
-            new Tile({
-                name: 'defaultLayer',
-                // source: new XYZ({ // 瓦片底圖地址
-                //     url: 'http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}'
-                // }),
-                source: new OSM() // 圖層數據
-            }),
-            // new VectorLayer({
-            //     source: vectorSource,
-            // }),
-        ],
-        view: view,
-        overlays: [
-            overlay.value, // 绑定一個覆蓋物
-            compass
-        ]
-    })
-    return map
 
-    mapClick() // 在地圖初始化完成後再绑定點擊事件
-}
-
-// 點擊地圖事件
-function mapClick() {
-    map.value.on('singleclick', evt => { // 绑定一個點擊事件
-        const coordinate = evt.coordinate // 獲取座標
-        currentCoordinate.value = coordinate // 保存座標点
-        overlay.value.setPosition(coordinate) // 設置覆蓋物出现的位置
-    })
-}
-
-// 關閉彈跳視窗
-function closePopup() {
-    overlay.value.setPosition(undefined) // setPosition 传入undefined會隐藏彈跳視窗元素
-    currentCoordinate.value = '' // 把彈跳視窗内容清空
-}
-function addPoint(targetLng, targetLat){
-    const marker = new Vector({
-        source: new VectorSource({
-            features: [
-                new Feature({
-                    geometry: new Point([targetLng, targetLat]),
-                    name: 'Null Island',
-                    population: 4000,
-                    rainfall: 500,
-                })
-            ]
-        }),
-        style: new Style({
-            image: new Icon({
-                anchor: [0.5, 100],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'pixels',
-                // 圖片連結需修改
-                src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-            }),
+    // 初始化地圖
+    function initMap() {
+        // 註冊一個覆蓋物
+        overlay.value = new Overlay({
+            element: popupCom.value, // 彈跳視窗標籤，在html里
+            autoPan: true, // 如果彈跳視窗在底圖邊緣时，底圖會移動
+            autoPanAnimation: { // 底圖移動動畫
+                duration: 250
+            }
         })
-    })
-    map.value.addLayer(marker);
-}
+        map.value = new Map({
+            target: mapCom.value,
+            layers: [ // 圖層
+                new Tile({
+                    name: 'defaultLayer',
+                    // source: new XYZ({ // 瓦片底圖地址
+                    //     url: 'http://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineStreetPurplishBlue/MapServer/tile/{z}/{y}/{x}'
+                    // }),
+                    source: new OSM() // 圖層數據
+                })
+            ],
+            view: view,
+            overlays: [overlay.value] // 绑定一個覆蓋物
+        })
 
-// 移動到當前位置
-function moveCurrentPosition() {
-    navigator.geolocation.getCurrentPosition(function (pos) {
-        view.animate({
-            center: [pos.coords.longitude, pos.coords.latitude],
-            zoom: 17,
-            duration: 100,
-        });
-        addPoint(pos.coords.longitude, pos.coords.latitude)
-    })
-}
+    }
 
-onMounted(() => {
-    initMap()
-})
+    function addPoint(targetLng, targetLat){
+        const marker = new Vector({
+            source: new VectorSource({
+                features: [
+                    new Feature({
+                        geometry: new Point([targetLng, targetLat]),
+                        name: 'Null Island',
+                        population: 4000,
+                        rainfall: 500,
+                    })
+                ]
+            }),
+            style: new Style({
+                image: new Icon({
+                    anchor: [0.5, 100],
+                    anchorXUnits: 'fraction',
+                    anchorYUnits: 'pixels',
+                    // 圖片連結需修改
+                    src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
+                }),
+            })
+        })
+        map.value.addLayer(marker);
+    }
+    function moveCurrentPosition() {
+        navigator.geolocation.getCurrentPosition(function (pos) {
+            const coords = fromLonLat([pos.coords.longitude, pos.coords.latitude]);
+            view.animate({
+                center: [pos.coords.longitude, pos.coords.latitude],
+                zoom: 17,
+                duration: 100,
+            });
+            addPoint(pos.coords.longitude, pos.coords.latitude)
+        })
+    }
+
+    onMounted(() => {
+        initMap()
+    })
+
+    return {
+        state,
+        mapCom,
+        moveCurrentPosition,
+    }
+  }
+}
 </script>
 
 <template>
     <div class="" @click="moveCurrentPosition">定位</div>
-    <div class="" @click="addPoint">新增座標點</div>
+
     <!-- 地圖容器 -->
     <div id="map" class="map__x" ref="mapCom"></div>
 
-    <!-- 彈跳視窗容器 -->
-    <div ref="popupCom" class="popup">
-        <!-- 關閉按钮 -->
-        <span class="icon-close" @click="closePopup">✖</span>
-        <!-- 彈跳視窗内容（展示座標信息） -->
-        <div class="content">{{ currentCoordinate }}</div>
-    </div>
-    <!-- The compass will be added here -->
-    <div id="compass">
-        123
-        <!-- <img src="compass.png" alt="Compass"> -->
-    </div>
+    <AsideTool class="asideTool" id="qwe" />
 </template>
 
 <style lang="sass">
@@ -158,6 +125,11 @@ onMounted(() => {
     width: 100vw
     height: 100vh
     border: 1px solid #eee
+
+.asideTool
+    position: absolute
+    right: 0
+    top: 50%
 
 .ol-zoom
     left: unset
