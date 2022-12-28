@@ -28,5 +28,7 @@ export default defineConfig({
         javascriptEnabled: true
       }
     }
-  }
+  },
+  // 輸出路徑設定
+  base: "/Map_Demo"
 })

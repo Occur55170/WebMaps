@@ -18,7 +18,6 @@ import 'ol/ol.css' // ol提供的css样式（必须引入）
 // import iconPng from '../assets/img/IconoirPosition.svg' // 引入图标图片
 import icnPg from '../assets/img/IconoirPosition.svg'
 
-// import icnPg from '@/assets/img/IconoirPosition.svg'
 
 
 const mapCom = ref(null) // 地圖容器
@@ -48,6 +47,11 @@ function initMap() {
             duration: 250
         }
     })
+    const compass = new Overlay({
+        positioning: 'center-center',
+        element: document.getElementById('compass'),
+        stopEvent: false
+    });
     map.value = new Map({
         target: mapCom.value,
         layers: [ // 圖層
@@ -63,14 +67,15 @@ function initMap() {
             // }),
         ],
         view: view,
-        overlays: [overlay.value] // 绑定一個覆蓋物
+        overlays: [
+            overlay.value, // 绑定一個覆蓋物
+            compass
+        ]
     })
     return map
 
     mapClick() // 在地圖初始化完成後再绑定點擊事件
 }
-
-
 
 // 點擊地圖事件
 function mapClick() {
@@ -140,6 +145,11 @@ onMounted(() => {
         <span class="icon-close" @click="closePopup">✖</span>
         <!-- 彈跳視窗内容（展示座標信息） -->
         <div class="content">{{ currentCoordinate }}</div>
+    </div>
+    <!-- The compass will be added here -->
+    <div id="compass">
+        123
+        <!-- <img src="compass.png" alt="Compass"> -->
     </div>
 </template>
 
