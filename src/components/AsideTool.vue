@@ -6,23 +6,26 @@ export default {
             Type: String,
             default: 0
         },
+        map:{}
     },
     setup(props, { emit }){
         console.log(props)
+        // const emit = defineEmits(['add'])
         const state=reactive({
         })
         // const map = ref(null) // 地圖容器
 
         function zoomIn() {
-            let view = map.value.getView() // 获取当前视图
-            let zoom = view.getZoom() // 获取当前缩放级别
-            view.setZoom(zoom + 1)
+            emit('add','add')
+            // let view = map.value.getView() // 获取当前视图
+            // let zoom = view.getZoom() // 获取当前缩放级别
+            // view.setZoom(zoom + 1)
         }
 
         function zoomOut() {
-            let view = map.value.getView() // 获取当前视图
-            let zoom = view.getZoom() // 获取当前缩放级别
-            view.setZoom(zoom - 1)
+            // let view = map.value.getView() // 获取当前视图
+            // let zoom = view.getZoom() // 获取当前缩放级别
+            // view.setZoom(zoom - 1)
         }
         return {
             zoomIn,

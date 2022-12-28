@@ -27,12 +27,14 @@ export default {
     const popupCom = ref(null) // 彈跳視窗容器
     const map = ref(null) // 地圖實例
     const overlay = ref(null) // 覆蓋物實例
+    const compass = ref(null) // 覆蓋物實例
     const currentCoordinate = ref('') // 彈跳視窗信息
 
     const view = new View({
         projection: 'EPSG:4326', // 投影座標系
         center: [state.lng, state.lat],
         zoom: 17,
+        rotation: 1,
     });
 
     // 初始化地圖
@@ -45,8 +47,17 @@ export default {
                 duration: 250
             }
         })
+        compass.value = new Overlay({
+            element: compass.value,
+            positioning: 'center-center',
+            stopEvent: false
+        });
+        // map.addOverlay(compass);
         map.value = new Map({
             target: mapCom.value,
+            // controls: default({
+            //     rotate: true
+            // }),
             layers: [ // 圖層
                 new Tile({
                     name: 'defaultLayer',
@@ -57,7 +68,10 @@ export default {
                 })
             ],
             view: view,
-            overlays: [overlay.value] // 绑定一個覆蓋物
+            overlays: [
+                overlay.value,
+                compass.value,
+            ] // 绑定一個覆蓋物
         })
 
         mapClick() // 在地圖初始化完成後再绑定點擊事件
@@ -145,10 +159,6 @@ export default {
 </script>
 
 <template>
-    <div class="" @click="moveCurrentPosition">定位</div>
-    <div class="" @click="addPoint">新增座標點</div>
-    <div class="" @click="zoomIn">放大</div>
-    <div class="" @click="zoomOut">縮小</div>
     <!-- 地圖容器 -->
     <div id="map" class="map__x" ref="mapCom"></div>
 
@@ -159,7 +169,15 @@ export default {
         <!-- 彈跳視窗内容（展示座標信息） -->
         <div class="content">{{ currentCoordinate }}</div>
     </div>
-    <AsideTool class="asideTool" />
+    <!-- <AsideTool class="asideTool" /> -->
+    <div ref="compass" class="compass">
+        <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
+    </div>
+    <div class="asideTool">
+        <div class="" @click="moveCurrentPosition">定位</div>
+        <div class="" @click="zoomIn">放大</div>
+        <div class="" @click="zoomOut">縮小</div>
+    </div>
 </template>
 
 <style lang="sass">
@@ -172,12 +190,37 @@ export default {
     position: absolute
     right: 0
     top: 50%
+    z-index: 220
+    transform: translateY(-50%)
+    div
+        background: #fff
+        margin: 20px
+        padding: 20px
+        font-size: 20px
+        border: 1px solid #000
+.compass
+    position: absolute
+    right: 0
+    bottom: 0
+    width: 100px
+    height: 100px
+    transform: rotateZ(-90deg)
+    img
+        width: 100%
+        height: 100%
+.ol-rotate.ol-hidden
+    opacity: 1 !important
+    visibility: unset !important
+.ol-rotate-reset
+    width: 60px !important
+    height: 60px !important
 
 .ol-zoom
     left: unset
     right: 0
     top: 50%
     z-index: 220
+    display: none
 
 .popup
     width: 300px

@@ -117,7 +117,10 @@ export default {
     <!-- 地圖容器 -->
     <div id="map" class="map__x" ref="mapCom"></div>
 
-    <AsideTool class="asideTool" id="qwe" />
+    <AsideTool class="asideTool" 
+    @add="()=>{
+        window.console.log('add')
+    }"/>
 </template>
 
 <style lang="sass">
