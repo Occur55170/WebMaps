@@ -12,6 +12,7 @@ import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
 import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+// import {Control, defaults as defaultControls} from 'ol/control.js';
 
 import 'ol/ol.css' // ol提供的css样式（必须引入）
 
@@ -55,9 +56,6 @@ export default {
         // map.addOverlay(compass);
         map.value = new Map({
             target: mapCom.value,
-            // controls: default({
-            //     rotate: true
-            // }),
             layers: [ // 圖層
                 new Tile({
                     name: 'defaultLayer',
@@ -71,7 +69,9 @@ export default {
             overlays: [
                 overlay.value,
                 compass.value,
-            ] // 绑定一個覆蓋物
+            ], // 绑定一個覆蓋物
+            //地圖小工具可以縮小視窗
+            controls: [],
         })
 
         mapClick() // 在地圖初始化完成後再绑定點擊事件
@@ -148,6 +148,8 @@ export default {
     return {
         state,
         mapCom,
+        popupCom,
+        currentCoordinate,
         mapClick,
         closePopup,
         moveCurrentPosition,
@@ -163,7 +165,7 @@ export default {
     <div id="map" class="map__x" ref="mapCom"></div>
 
     <!-- 彈跳視窗容器 -->
-    <div ref="popupCom" class="popup">
+    <div class="popup" ref="popupCom">
         <!-- 關閉按钮 -->
         <span class="icon-close" @click="closePopup">✖</span>
         <!-- 彈跳視窗内容（展示座標信息） -->
@@ -198,6 +200,8 @@ export default {
         padding: 20px
         font-size: 20px
         border: 1px solid #000
+
+// 範例用 需修改
 .compass
     position: absolute
     right: 0
@@ -208,19 +212,13 @@ export default {
     img
         width: 100%
         height: 100%
+
 .ol-rotate.ol-hidden
     opacity: 1 !important
     visibility: unset !important
 .ol-rotate-reset
     width: 60px !important
     height: 60px !important
-
-.ol-zoom
-    left: unset
-    right: 0
-    top: 50%
-    z-index: 220
-    display: none
 
 .popup
     width: 300px

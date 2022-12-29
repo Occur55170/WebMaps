@@ -26,8 +26,8 @@ export default {
         <LayoutTool class="LayoutTool" />
     </div>
 
-    <WebMap class="mapContent" />
-    <!-- <Wes class="mapContent" /> -->
+    <!-- <WebMap class="mapContent" /> -->
+    <Wes class="mapContent" />
 </template>
 
 <style lang="sass">
@@ -55,13 +55,4 @@ export default {
     top: 0
     left: 0
     z-index: 220
-
-
-.AsideTool
-    position: absolute
-    top: 50%
-    right: 0
-    z-index: 220
-
-
 </style>
