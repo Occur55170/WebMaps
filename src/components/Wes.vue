@@ -21,8 +21,8 @@ import AsideTool from './AsideTool.vue'
 export default {
   setup(props, { emit }){
     const state=reactive({
-        lng: 120.971859,
-        lat: 24.801583
+        defaultCenter: [ 120.971859, 24.801583], //lng, lat
+        defaultCenterZoom: 17,
     })
     const mapCom = ref(null) // 地圖容器
     const popupCom = ref(null) // 彈跳視窗容器
@@ -33,8 +33,8 @@ export default {
 
     const view = new View({
         projection: 'EPSG:4326', // 投影座標系
-        center: [state.lng, state.lat],
-        zoom: 17,
+        center: state.defaultCenter,
+        zoom: state.defaultCenterZoom,
         rotation: 1,
     });
 
@@ -69,9 +69,9 @@ export default {
             overlays: [
                 overlay.value,
                 compass.value,
-            ], // 绑定一個覆蓋物
+            ],
             //地圖小工具可以縮小視窗
-            controls: [],
+            // controls: [],
         })
 
     }
@@ -109,7 +109,6 @@ export default {
         })
         map.value.addLayer(marker);
     }
-
     // 關閉彈跳視窗
     function closePopup() {
         overlay.value.setPosition(undefined) // setPosition 传入undefined會隐藏彈跳視窗元素
@@ -129,15 +128,23 @@ export default {
     }
 
     function zoomIn() {
-        let view = map.value.getView() // 获取当前视图
-        let zoom = view.getZoom() // 获取当前缩放级别
-        view.setZoom(zoom + 1)
+        let zoom = view.getZoom()
+        view.animate({
+            zoom: zoom + 1,
+        })
     }
 
     function zoomOut() {
-        let view = map.value.getView() // 获取当前视图
-        let zoom = view.getZoom() // 获取当前缩放级别
-        view.setZoom(zoom - 1)
+        let zoom = view.getZoom()
+        view.animate({
+            zoom: zoom - 1,
+        })
+    }
+
+    function toNorth(){
+        view.animate({
+            rotation: 0,
+        })
     }
 
     onMounted(() => {
@@ -153,7 +160,8 @@ export default {
         closePopup,
         moveCurrentPosition,
         zoomIn,
-        zoomOut
+        zoomOut,
+        toNorth
     }
   }
 }
@@ -170,7 +178,7 @@ export default {
         <!-- 彈跳視窗内容（展示座標信息） -->
         <div class="content">{{ currentCoordinate }}</div>
     </div>
-    <!-- <AsideTool class="asideTool" /> -->
+    <AsideTool class="asideTool" :map="map"/>
     <div ref="compass" class="compass">
         <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
     </div>
@@ -178,6 +186,7 @@ export default {
         <div class="" @click="moveCurrentPosition">定位</div>
         <div class="" @click="zoomIn">放大</div>
         <div class="" @click="zoomOut">縮小</div>
+        <div class="" @click="toNorth">指北</div>
     </div>
 </template>
 

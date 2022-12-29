@@ -26,8 +26,8 @@ export default {
         <LayoutTool class="LayoutTool" />
     </div>
 
-    <!-- <WebMap class="mapContent" /> -->
-    <Wes class="mapContent" />
+    <WebMap class="mapContent" />
+    <!-- <Wes class="mapContent" /> -->
 </template>
 
 <style lang="sass">

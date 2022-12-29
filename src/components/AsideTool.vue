@@ -9,7 +9,9 @@ export default {
         map:{}
     },
     setup(props, { emit }){
-        console.log(props)
+        setTimeout(()=>{
+            console.log(props)
+        }, 10000)
         // const emit = defineEmits(['add'])
         const state=reactive({
         })
