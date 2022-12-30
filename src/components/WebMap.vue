@@ -75,6 +75,7 @@ export default {
                 ], // 绑定一個覆蓋物
                 //地圖小工具可以縮小視窗
                 controls: [],
+
             })
 
             mapClick() // 在地圖初始化完成後再绑定點擊事件

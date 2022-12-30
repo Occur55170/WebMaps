@@ -12,7 +12,7 @@ import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
 import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-// import {Control, defaults as defaultControls} from 'ol/control.js';
+// import {Control, defaults as defaultControls} from 'ol/control.js'
 
 import 'ol/ol.css' // ol提供的css样式（必须引入）
 
