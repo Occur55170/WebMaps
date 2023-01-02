@@ -113,12 +113,6 @@ export default {
         // 地圖旋轉事件
         function mapRotate() {
             defaultView.on('change:rotation', evt => {
-            //     // const coordinate = evt.coordinate // 獲取座標
-            //     // currentCoordinate.value = coordinate // 保存座標点
-            //     // coordinateBox.value.setPosition(coordinate) // 設置覆蓋物出现的位置
-            //     // 獲取地圖目前的旋轉程度
-                // console.log(evt.getRotation())
-
                 const rotation = map.value.getView().getRotation();
                 const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
                 console.log(`地圖旋轉角度為 ${rotationDegrees}`);
@@ -126,9 +120,6 @@ export default {
                 //  轉動遮照
                 const newMask = document.getElementById('compass');
                 newMask.style.transform = `rotate(${rotationDegrees}rad)`;
-                // compass.value.setElement(newMask);
-                // compassBox.current.style.transform = `rotate(${rotation}rad)`;
-                // $('.compass').css('transform', `rotate(${rotationDegrees}deg);`)
             });
         }
 
