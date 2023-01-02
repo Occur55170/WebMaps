@@ -16,10 +16,14 @@ export default {
             // $('.conditionWrap').slideToggle();
             state.spliteWindow = !state.spliteWindow
         }
+        const emitTest = function (){
+            emit('change')
+        }
         return {
             state,
             condition,
-            onTurnSpliteWindow
+            onTurnSpliteWindow,
+            emitTest
         }
     }
 }
@@ -75,6 +79,11 @@ export default {
                         </a>
                     </li>
                 </ul>
+            </li>
+            <li class="">
+                <a href="" class="w-auto text-white" @click.prevent="emitTest">
+                    測試圖片
+                </a>
             </li>
         </ul>
     </div>

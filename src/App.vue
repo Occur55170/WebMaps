@@ -7,11 +7,17 @@ import Wes from './components/Wes.vue'
 import LayoutTool from './components/LayoutTool.vue'
 import SearchBar from './components/SearchBar.vue'
 
+import opp from './components/opp.vue'
+
+
 export default {
   setup(props, { emit }){
     const state=reactive({
     })
-    const name = ref()
+
+    const gogo = function(){
+        console.log('123')
+    }
     return {
       state,
     }
@@ -21,13 +27,14 @@ export default {
 </script>
 
 <template>
-    <SearchBar class="SearchBar" />
+    <SearchBar class="SearchBar" change="gogo" />
     <div class="main">
         <LayoutTool class="LayoutTool" />
     </div>
 
-    <WebMap class="mapContent" />
-    <!-- <Wes class="mapContent" /> -->
+    <!-- <WebMap /> -->
+    <!-- <opp /> -->
+    <Wes class="mapContent" />
 </template>
 
 <style lang="sass">

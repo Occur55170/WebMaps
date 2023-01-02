@@ -1,73 +1,50 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
 import Tile from 'ol/layer/Tile' // 瓦片加载器
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
-import {TileArcGISRest} from 'ol/source.js';
-
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
 import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-
-import {Image as ImageLayer} from 'ol/layer.js';
-import ImageWMS from 'ol/source/ImageWMS'
 import {FullScreen, defaults as defaultControls} from 'ol/control.js';
 
+import ImageLayer from 'ol/layer/Image';
+import ImageWMS from 'ol/source/ImageWMS';
 
-import 'ol/ol.css' // ol提供的css样式
+import 'ol/ol.css' // ol提供的css样式（必须引入）
 import riverpoly from '../assets/img/riverpoly.jpg'
-
-
-import * as control from 'ol/control'
-import * as coordinate from 'ol/coordinate';
-
 
 export default {
     props: {
-        // class: ''
+        class: ''
     },
     setup(props, { emit }) {
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
-            // defaultCenter: [ 273.8004913269816, 34.102244310601684 ],
-            // defaultCenterZoom: 10,
         })
         const mapCom = ref(null) // 地圖容器
+        const popupCom = ref(null) // 彈跳視窗容器
         const map = ref(null) // 地圖實例
-        const compassBox = ref(null) // 覆蓋物實例/
-
-
-        const mousePositionTxt = ref(null)
-
-        const url =
-        'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
-        'USA/MapServer';
-
+        const overlay = ref(null) // 覆蓋物實例
+        const compass = ref(null) // 覆蓋物實例
+        const currentCoordinate = ref('') // 彈跳視窗
 
         const defaultLayers = [ // 圖層
-            new TileLayer({
-                preload: Infinity,
+            new Tile({
                 name: 'defaultLayer',
                 source: new OSM() // 圖層數據
             }),
-            // new TileLayer({
-            //     preload: Infinity,
-            //     // extent: [-13884991, 2870341, -7455066, 6338219],
-            //     source: new TileArcGISRest({
-            //         url: url,
-            //     }),
-            // }),
             // new ImageLayer({
-            //     extent: [120.971859, 24.801583],
             //     source: new ImageWMS({
-            //         url: riverpoly,
+            //         url: 'http://demo.boundlessgeo.com/geoserver/wms',
+            //         params: {'LAYERS': 'topp:states'},
+            //         serverType: 'geoserver',
             //         ratio: 1,
             //         projection: 'EPSG:4326'
             //     })
@@ -82,53 +59,68 @@ export default {
             rotation:1
         });
 
-        compassBox.value = new Overlay({
-            element: compassBox.value,
-            positioning: 'center-center',
-            stopEvent: false,
-            rotation:0
-        })
-
-
         // 初始化地圖
         function initMap() {
+            // 註冊一個覆蓋物
+            overlay.value = new Overlay({
+                source:[],
+                element: popupCom.value, // 彈跳視窗標籤，在html里
+                autoPan: true, // 如果彈跳視窗在底圖邊緣时，底圖會移動
+                autoPanAnimation: { // 底圖移動動畫
+                    duration: 250
+                }
+            })
+            compass.value = new Overlay({
+                element: compass.value,
+                positioning: 'center-center',
+                stopEvent: false
+            });
+
             map.value = new Map({
                 target: mapCom.value,
                 layers: defaultLayers,
                 view: defaultView,
                 overlays: [
-                    compassBox.value,
-                ],
-                controls: [
-                    new FullScreen()
-                ],
+                    overlay.value,
+                    compass.value,
+                ], // 绑定一個覆蓋物
                 controls: [
                     new FullScreen()
                 ]
+                // controls: defaultControls().extend([new FullScreen()]),
             })
 
         }
 
+        // 點擊地圖事件
+        function mapClick() {
+            map.value.on('singleclick', evt => { // 绑定一個點擊事件
+                const coordinate = evt.coordinate // 獲取座標
+                currentCoordinate.value = coordinate // 保存座標点
+                overlay.value.setPosition(coordinate) // 設置覆蓋物出现的位置
+            })
+        }
+        // 關閉彈跳視窗
+        function closePopup() {
+            overlay.value.setPosition(undefined) // setPosition 传入undefined會隐藏彈跳視窗元素
+            currentCoordinate.value = '' // 把彈跳視窗内容清空
+        }
 
         // 地圖旋轉事件
         function mapRotate() {
-            defaultView.on('change:rotation', evt => {
-            //     // const coordinate = evt.coordinate // 獲取座標
-            //     // currentCoordinate.value = coordinate // 保存座標点
-            //     // coordinateBox.value.setPosition(coordinate) // 設置覆蓋物出现的位置
-            //     // 獲取地圖目前的旋轉程度
-                // console.log(evt.getRotation())
+            // map.value.on('rotate', evt => { // 绑定一個點擊事件
+            //     const coordinate = evt.coordinate // 獲取座標
+            //     currentCoordinate.value = coordinate // 保存座標点
+            //     overlay.value.setPosition(coordinate) // 設置覆蓋物出现的位置
+            // })
+            console.log('rotate,gogo ')
+            map.value.on('rotate', evt => {
+                // 獲取地圖目前的旋轉程度
+                var rotation = map.getView().getRotation();
+                console.log(rotation)
 
-                const rotation = map.value.getView().getRotation();
-                const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
-                console.log(`地圖旋轉角度為 ${rotationDegrees}`);
-
-                //  轉動遮照
-                const newMask = document.getElementById('compass');
-                newMask.style.transform = `rotate(${rotationDegrees}rad)`;
-                // compass.value.setElement(newMask);
-                // compassBox.current.style.transform = `rotate(${rotation}rad)`;
-                // $('.compass').css('transform', `rotate(${rotationDegrees}deg);`)
+                // 轉動遮照
+                shadowLayer.getSource().rotate(rotation);
             });
         }
 
@@ -189,17 +181,10 @@ export default {
             })
         }
 
-
         onMounted(() => {
             initMap()
             nextTick(()=>{
-                const rotation = map.value.getView().getRotation();
-                const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
-                console.log(`地圖旋轉角度為 ${rotationDegrees}`);
-
-                //  轉動遮照
-                const newMask = document.getElementById('compass');
-                newMask.style.transform = `rotate(${rotationDegrees}rad)`;
+                mapClick() // 在地圖初始化完成後再绑定點擊事件
                 mapRotate()
             })
         })
@@ -207,6 +192,9 @@ export default {
         return {
             state,
             mapCom,
+            popupCom,
+            currentCoordinate,
+            closePopup,
             moveCurrentPosition,
             zoomIn,
             zoomOut,
@@ -221,17 +209,25 @@ export default {
     <!-- 地圖容器 -->
     <div id="map" class="map__x" ref="mapCom"></div>
 
+    <!-- 彈跳視窗容器 -->
+    <div class="popup" ref="popupCom">
+        <!-- 關閉按钮 -->
+        <span class="icon-close" @click="closePopup">✖</span>
+        <!-- 彈跳視窗内容（展示座標信息） -->
+        <div class="content">{{ currentCoordinate }}</div>
+    </div>
     <div class="asideTool">
         <div class="" @click="moveCurrentPosition">定位</div>
         <div class="" @click="zoomIn">放大</div>
         <div class="" @click="zoomOut">縮小</div>
     </div>
-    <div ref="compassBox" class="compass" id="compass" @click="toNorth">
+    <div ref="compass" class="compass" @click="toNorth">
         <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
+        <!-- <img :src="riverpoly" alt=""> -->
     </div>
 </template>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .map__x
     width: 100vw
     height: 100vh
@@ -257,11 +253,45 @@ export default {
     bottom: 0
     width: 100px
     height: 100px
+    transform: rotateZ(-90deg)
     img
-        transform: rotateZ(-90deg)
         width: 100%
         height: 100%
-.ol-full-screen button
-    width: 50px
-    height: 50px
+
+.ol-rotate.ol-hidden
+    opacity: 1 !important
+    visibility: unset !important
+.ol-rotate-reset
+    width: 60px !important
+    height: 60px !important
+
+.popup
+    width: 300px
+    height: 100px
+    background: #fff
+    position: absolute
+    top: -115px
+    left: -150px
+    box-sizing: border-box
+    padding: 10px
+
+    &::after
+        content: ''
+        display: block
+        position: absolute
+        width: 20px
+        height: 20px
+        background: #fff
+        bottom: -10px
+        left: 50%
+        transform: translateX(-50%) rotate(45deg)
+
+    .icon-close
+        position: absolute
+        top: 0px
+        right: 8px
+        cursor: pointer
+
+    .content
+        margin-top: 14px
 </style>
