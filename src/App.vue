@@ -13,13 +13,21 @@ import opp from './components/opp.vue'
 export default {
   setup(props, { emit }){
     const state=reactive({
+        count:1,
     })
 
-    const gogo = function(){
-        console.log('123')
+    const changeLayouts = function(value){
+        console.log('value')
+        console.log(value)
+        if(state.count !== value){
+            // add
+            // rm
+            state.count = value
+        }
     }
     return {
       state,
+      changeLayouts
     }
   }
 }
@@ -27,14 +35,14 @@ export default {
 </script>
 
 <template>
-    <SearchBar class="SearchBar" change="gogo" />
+    <SearchBar class="SearchBar" @Layouts="changeLayouts" />
     <div class="main">
         <LayoutTool class="LayoutTool" />
     </div>
 
     <!-- <WebMap /> -->
     <!-- <opp /> -->
-    <Wes class="mapContent" />
+    <Wes class="mapContent" :yyds="count" />
 </template>
 
 <style lang="sass">

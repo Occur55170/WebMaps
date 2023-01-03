@@ -30,7 +30,7 @@ import * as coordinate from 'ol/coordinate';
 
 export default {
     props: {
-        // class: ''
+        yyds: ''
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -43,8 +43,8 @@ export default {
         const map = ref(null) // 地圖實例
         const compassBox = ref(null) // 覆蓋物實例/
 
-
-        const mousePositionTxt = ref(null)
+        const mapCom2 = ref(null) // 地圖容器
+        const map2 = ref(null) // 地圖實例
 
         const url =
         'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
@@ -89,7 +89,6 @@ export default {
             rotation:0
         })
 
-
         // 初始化地圖
         function initMap() {
             map.value = new Map({
@@ -102,13 +101,8 @@ export default {
                 controls: [
                     new FullScreen()
                 ],
-                controls: [
-                    new FullScreen()
-                ]
             })
-
         }
-
 
         // 地圖旋轉事件
         function mapRotate() {
@@ -180,6 +174,26 @@ export default {
             })
         }
 
+        function changeLayout(){
+            // 获取当前地图容器，并进行判断
+            // let target = map.value.getTarget() === 'map1' ? 'map2' : 'map1'
+
+            // 重新设置地图容器
+            // map.value.setTarget(target)
+
+            // map2.value = new Map({
+            //     target: 'map2',
+            //     layers: defaultLayers,
+            //     view: defaultView,
+            //     overlays: [
+            //         compassBox.value,
+            //     ],
+            //     controls: [
+            //         new FullScreen()
+            //     ],
+            // })
+
+        }
 
         onMounted(() => {
             initMap()
@@ -202,6 +216,7 @@ export default {
             zoomIn,
             zoomOut,
             toNorth,
+            changeLayout,
             riverpoly
         }
     }
@@ -210,12 +225,16 @@ export default {
 
 <template>
     <!-- 地圖容器 -->
-    <div id="map" class="map__x" ref="mapCom"></div>
+    <div class="row flex-nowrap">
+        <div id="map1" class="map__x" ref="mapCom"></div>
+        <!-- <div id="map2" class="map__x" ref="mapCom2"></div> -->
+    </div>
 
     <div class="asideTool">
         <div class="" @click="moveCurrentPosition">定位</div>
         <div class="" @click="zoomIn">放大</div>
         <div class="" @click="zoomOut">縮小</div>
+        <div class="" @click="changeLayout">123</div>
     </div>
     <div ref="compassBox" class="compass" id="compass" @click="toNorth">
         <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
@@ -224,7 +243,7 @@ export default {
 
 <style lang="sass">
 .map__x
-    width: 100vw
+    width: 100%
     height: 100vh
     border: 1px solid #eee
 
@@ -241,7 +260,7 @@ export default {
         font-size: 20px
         border: 1px solid #000
 
-// 指北針範例用 需修改
+// bug
 .compass
     position: absolute
     right: 0
