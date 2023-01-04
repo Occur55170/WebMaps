@@ -1,5 +1,6 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+
 import $ from 'jquery'
 
 import WebMap from './components/WebMap.vue'
@@ -11,19 +12,24 @@ import opp from './components/opp.vue'
 
 
 export default {
+    components: {
+        Wes
+    },
   setup(props, { emit }){
     const state=reactive({
         count:1,
     })
-
+    const doSomething = function() {
+      // 在此處執行所需的操作
+      console.log(this)
+    }
     const changeLayouts = function(value){
-        console.log('value')
-        console.log(value)
         if(state.count !== value){
-            // add
-            // rm
             state.count = value
         }
+        // this.$refs.wes.gogo('123')
+            // add
+            // rm
     }
     return {
       state,
@@ -42,7 +48,10 @@ export default {
 
     <!-- <WebMap /> -->
     <!-- <opp /> -->
-    <Wes class="mapContent" :yyds="count" />
+    <div class="mapContent">
+        <Wes :yyds="doSomething()" />
+    </div>
+    <!-- <button style="position:fixed;top: 0;left: 50%; z-index:99999;" @click="changeLayouts">123</button> -->
 </template>
 
 <style lang="sass">

@@ -24,13 +24,9 @@ import 'ol/ol.css' // ol提供的css样式
 import riverpoly from '../assets/img/riverpoly.jpg'
 
 
-import * as control from 'ol/control'
-import * as coordinate from 'ol/coordinate';
-
-
 export default {
     props: {
-        yyds: ''
+        yyds,
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -175,24 +171,31 @@ export default {
         }
 
         function changeLayout(){
-            // 获取当前地图容器，并进行判断
-            // let target = map.value.getTarget() === 'map1' ? 'map2' : 'map1'
+            console.log(props.yyds)
+            const map2 = document.createElement('div')
+            map2.setAttribute('id','map2')
+            map2.setAttribute('class','w-100')
+            document.getElementById('mapWrap').appendChild(map2)
 
-            // 重新设置地图容器
-            // map.value.setTarget(target)
-
-            // map2.value = new Map({
-            //     target: 'map2',
-            //     layers: defaultLayers,
-            //     view: defaultView,
-            //     overlays: [
-            //         compassBox.value,
-            //     ],
-            //     controls: [
-            //         new FullScreen()
-            //     ],
-            // })
-
+            const center2 = Object.values(map.value.getView().getCenter())
+            const zoom2 = map.value.getView().getZoom()
+            const proj2 = map.value.getView().getProjection()
+            map2.value = new Map({
+                target: 'map2',
+                layers:[
+                    new TileLayer({
+                        preload: Infinity,
+                        name: 'defaultLayer',
+                        source: new OSM() // 圖層數據
+                    })
+                ],
+                view: new View({
+                    projection: proj2, // 投影座標系
+                    center: center2,
+                    zoom: zoom2,
+                }),
+                controls: [],
+            })
         }
 
         onMounted(() => {
@@ -225,27 +228,29 @@ export default {
 
 <template>
     <!-- 地圖容器 -->
-    <div class="row flex-nowrap">
-        <div id="map1" class="map__x" ref="mapCom"></div>
-        <!-- <div id="map2" class="map__x" ref="mapCom2"></div> -->
+    <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
+        <div id="map1" ref="mapCom"></div>
     </div>
 
     <div class="asideTool">
         <div class="" @click="moveCurrentPosition">定位</div>
         <div class="" @click="zoomIn">放大</div>
         <div class="" @click="zoomOut">縮小</div>
-        <div class="" @click="changeLayout">123</div>
+        <div class="" @click="changeLayout">新增地圖 {{ state.mapCount }} </div>
     </div>
     <div ref="compassBox" class="compass" id="compass" @click="toNorth">
         <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
     </div>
 </template>
 
-<style lang="sass">
-.map__x
-    width: 100%
+<style lang="sass" scoped>
+
+.mapWrap
+    justify-content: space-between
     height: 100vh
-    border: 1px solid #eee
+
+.mapWrap div
+    width: 100%
 
 .asideTool
     position: absolute
