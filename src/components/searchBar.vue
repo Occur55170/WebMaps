@@ -18,7 +18,7 @@ export default {
             state.spliteWindow = !state.spliteWindow
         }
         const changeLayouts = function (value){
-            emit('Layouts', value)
+            emit('layouts', value)
         }
         return {
             state,

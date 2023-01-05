@@ -13,45 +13,46 @@ import opp from './components/opp.vue'
 
 export default {
     components: {
-        Wes
+        WebMap,
+        // Wes
     },
-  setup(props, { emit }){
-    const state=reactive({
-        count:1,
-    })
-    const doSomething = function() {
-      // 在此處執行所需的操作
-      console.log(this)
-    }
-    const changeLayouts = function(value){
-        if(state.count !== value){
-            state.count = value
+    setup(props, { emit }) {
+        const state = reactive({
+            count: 1,
+            math: 0,
+        })
+        const onChangeLayoutMath = function (value) {
+            if (state.count !== value) {
+                state.count = value
+            }
+            // nextTick(()=>{
+            //     window.$refs.wen.gogo()
+            // })
         }
-        // this.$refs.wes.gogo('123')
-            // add
-            // rm
+
+        return {
+            state,
+            onChangeLayoutMath,
+        }
     }
-    return {
-      state,
-      changeLayouts
-    }
-  }
 }
 
 </script>
 
 <template>
-    <SearchBar class="SearchBar" @Layouts="changeLayouts" />
+    <!-- <SearchBar class="SearchBar" @layouts="onChangeLayoutMath" /> -->
+    <SearchBar class="SearchBar" @layouts="(value)=>{
+        this.$refs.map.changeLayout(value)
+    }" />
     <div class="main">
         <LayoutTool class="LayoutTool" />
     </div>
 
-    <!-- <WebMap /> -->
     <!-- <opp /> -->
     <div class="mapContent">
-        <Wes :yyds="doSomething()" />
+        <WebMap ref="map" id="qqq" />
+        <!-- <Wes :count="state.count" /> -->
     </div>
-    <!-- <button style="position:fixed;top: 0;left: 50%; z-index:99999;" @click="changeLayouts">123</button> -->
 </template>
 
 <style lang="sass">
