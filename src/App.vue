@@ -42,7 +42,7 @@ export default {
 <template>
     <!-- <SearchBar class="SearchBar" @layouts="onChangeLayoutMath" /> -->
     <SearchBar class="SearchBar" @layouts="(value)=>{
-        this.$refs.map.changeLayout(value)
+        this.$refs.map.changeMapCount(value)
     }" />
     <div class="main">
         <LayoutTool class="LayoutTool" />
@@ -50,8 +50,8 @@ export default {
 
     <!-- <opp /> -->
     <div class="mapContent">
-        <WebMap ref="map" id="qqq" />
-        <!-- <Wes :count="state.count" /> -->
+        <!-- <WebMap ref="map" /> -->
+        <Wes ref="map"  />
     </div>
 </template>
 

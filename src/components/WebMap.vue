@@ -40,7 +40,6 @@ export default {
         const map = ref(null) // 地圖實例
         const compassBox = ref(null) // 覆蓋物實例/
 
-        const mapCom2 = ref(null) // 地圖容器
         const url =
             'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
             'USA/MapServer';
@@ -246,7 +245,7 @@ export default {
             <div class="" @click="moveCurrentPosition">定位</div>
             <div class="" @click="zoomIn">放大</div>
             <div class="" @click="zoomOut">縮小</div>
-            <div class="" @click="changeLayout">新增地圖</div>
+            <div class="" @click="changeLayout">新增圖層</div>
         </div>
         <div ref="compassBox" class="compass" id="compass" @click="toNorth">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
