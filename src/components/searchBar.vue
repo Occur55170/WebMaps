@@ -9,22 +9,23 @@ export default {
         // const emit = defineEmits(['change', 'change2'])
 
         const state = reactive({
-            spliteWindow: false
+            layerCondition: false,
+            splitWindow: false,
         })
-        const condition = function () {
-
-        }
-        const onTurnLayouts = function () {
-            state.spliteWindow = !state.spliteWindow
-        }
         const changeLayouts = function (value){
             emit('layouts', value)
         }
+        const moveTo = function (){
+            emit('moveTo')
+        }
+        const exampleChange = function (e){
+            emit('mapMode', e.target.checked)
+        }
         return {
             state,
-            condition,
-            onTurnLayouts,
-            changeLayouts
+            changeLayouts,
+            exampleChange,
+            moveTo
         }
     }
 }
@@ -49,22 +50,45 @@ export default {
                     </svg>
                 </a>
             </li>
-            <li class="me-4">
-                <a href="" class="text-white" @click.prevent="condition">
+            <li class="me-4 position-relative">
+                <a href="" class="text-white" @click.prevent="state.layerCondition = !state.layerCondition">
                     <svg viewBox="0 0 24 24">
                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="1.5"
                             d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3l5.571-3m-11.142 0L2.25 7.5L12 2.25l9.75 5.25l-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75L2.25 16.5l4.179-2.25m11.142 0l-5.571 3l-5.571-3" />
                     </svg>
                 </a>
+                <div class="condition bg-white position-absolute start-0 top-100 mt-2 " v-if="state.layerCondition">
+                    <div class="p-3">
+                        <p>1.點擊<div class="text-blue" @click="moveTo">前往示範案例</div></p>
+                        <div>
+                            <input type="checkbox" name="example" id="example" @change="exampleChange">
+                            <label for="example">2.開啟圖層</label>
+                        </div>
+                        <!-- <ul>
+                            <li><a href=""></a></li>
+                            <li><a href=""></a></li>
+                            <li><a href=""></a></li>
+                            <li><a href=""></a></li>
+                        </ul>
+                        <div>
+                            <p></p>
+                            <p></p>
+                            <p></p>
+                            <p></p>
+                            <p></p>
+                            <p></p>
+                        </div> -->
+                    </div>
+                </div>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="text-white" @click.prevent="onTurnLayouts">
+                <a href="" class="text-white" @click.prevent="()=>{state.splitWindow = !state.splitWindow}">
                     <svg viewBox="0 0 20 20">
                         <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                     </svg>
                 </a>
-                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.spliteWindow">
+                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.splitWindow">
                     <li class="mt-2">
                         <a href="" @click.prevent="changeLayouts(1)" class="text-white">
                             <svg viewBox="0 0 20 20">
@@ -111,8 +135,6 @@ export default {
         color: inherit
         width: 1.2em
         height: 1.2em
-
-
 a
     display: block
     background: $black-deep
@@ -128,5 +150,9 @@ svg
     font-size: 24px
     width: 100%
     height: 100%
+.condition
+    width: 500px
+    // height: 500px
+
 
 </style>

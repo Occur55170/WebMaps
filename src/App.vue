@@ -25,14 +25,14 @@ export default {
             if (state.count !== value) {
                 state.count = value
             }
-            // nextTick(()=>{
-            //     window.$refs.wen.gogo()
-            // })
         }
-
+        function mapMode(value){
+            console.log(value)
+        }
         return {
             state,
             onChangeLayoutMath,
+            mapMode
         }
     }
 }
@@ -41,17 +41,26 @@ export default {
 
 <template>
     <!-- <SearchBar class="SearchBar" @layouts="onChangeLayoutMath" /> -->
-    <SearchBar class="SearchBar" @layouts="(value)=>{
-        this.$refs.map.changeMapCount(value)
-    }" />
+    <SearchBar class="SearchBar"
+        @moveTo="(value)=>{
+            this.$refs.map.moveTo(value)
+        }"
+        @mapMode="(value)=>{
+            let target = 1
+            this.$refs.map.addLayout({target, value})
+        }"
+        @layouts="(value)=>{
+            this.$refs.map.changeMapCount(value)
+        }"
+    />
     <div class="main">
         <LayoutTool class="LayoutTool" />
     </div>
 
     <!-- <opp /> -->
     <div class="mapContent">
-        <!-- <WebMap ref="map" /> -->
-        <Wes ref="map"  />
+        <WebMap ref="map" />
+        <!-- <Wes ref="map"  /> -->
     </div>
 </template>
 

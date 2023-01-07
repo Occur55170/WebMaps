@@ -3,7 +3,6 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
-import Tile from 'ol/layer/Tile' // 瓦片加载器
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
@@ -40,10 +39,6 @@ export default {
         const map = ref(null) // 地圖實例
         const compassBox = ref(null) // 覆蓋物實例/
 
-        const url =
-            'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
-            'USA/MapServer';
-
         const defaultLayers = [ // 圖層
             new TileLayer({
                 preload: Infinity,
@@ -53,13 +48,6 @@ export default {
                 //     url: basemapURL,
                 // }),
             }),
-            // new TileLayer({
-            //     preload: Infinity,
-            //     // extent: [-13884991, 2870341, -7455066, 6338219],
-            //     source: new TileArcGISRest({
-            //         url: url,
-            //     }),
-            // }),
             // new ImageLayer({
             //     extent: [120.971859, 24.801583],
             //     source: new ImageWMS({
@@ -137,7 +125,6 @@ export default {
             })
             map.value.addLayer(marker);
         }
-
         // 移動到當前位置
         function moveCurrentPosition() {
             navigator.geolocation.getCurrentPosition(function (pos) {
@@ -149,36 +136,33 @@ export default {
                 addPoint(pos.coords.longitude, pos.coords.latitude)
             })
         }
-
         function zoomIn() {
             let zoom = defaultView.getZoom()
             defaultView.animate({
                 zoom: zoom + 1,
             })
         }
-
         function zoomOut() {
             let zoom = defaultView.getZoom()
             defaultView.animate({
                 zoom: zoom - 1,
             })
         }
-
         function toNorth() {
             defaultView.animate({
                 rotation: 0,
             })
         }
-        function changeLayout(value) {
+        function changeMapCount(value) {
             if (value > 1) {
-                addLayout()
+                addMapCount()
             } else {
                 if (document.getElementById('map2')) {
                     document.getElementById('map2').remove()
                 }
             }
         }
-        function addLayout() {
+        function addMapCount() {
             const map2 = document.createElement('div')
             map2.setAttribute('id', 'map2')
             map2.setAttribute('class', 'w-100')
@@ -204,6 +188,28 @@ export default {
                 controls: [],
             })
         }
+        function moveTo(){
+            defaultView.animate({
+                center: [-96.794027, 31.624217],
+                zoom: 10,
+                duration: 100,
+            });
+        }
+        function addLayout({target, value}){
+            console.log({target, value})
+            if(value){
+                const url =
+                    'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
+                    'USA/MapServer';
+                let a = new TileLayer({
+                    preload: Infinity,
+                    source: new TileArcGISRest({
+                        url: url,
+                    }),
+                });
+                map.value.getLayers().extend([a]);
+            }
+        }
 
         onMounted(() => {
             initMap()
@@ -227,7 +233,9 @@ export default {
             zoomIn,
             zoomOut,
             toNorth,
-            changeLayout,
+            changeMapCount,
+            addLayout,
+            moveTo,
             riverpoly,
         }
     }
@@ -245,7 +253,7 @@ export default {
             <div class="" @click="moveCurrentPosition">定位</div>
             <div class="" @click="zoomIn">放大</div>
             <div class="" @click="zoomOut">縮小</div>
-            <div class="" @click="changeLayout">新增圖層</div>
+            <div class="" @click="addLayout">新增圖層</div>
         </div>
         <div ref="compassBox" class="compass" id="compass" @click="toNorth">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">

@@ -188,12 +188,14 @@ export default {
                 controls: [],
             })
         }
-        function addLayout(){
+        function moveTo(){
             defaultView.animate({
                 center: [-96.794027, 31.624217],
-                zoom: 17,
+                zoom: 12,
                 duration: 100,
             });
+        }
+        function addLayout(){
             const url =
                 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
                 'USA/MapServer';
@@ -230,6 +232,7 @@ export default {
             toNorth,
             changeMapCount,
             addLayout,
+            moveTo,
             riverpoly,
         }
     }
