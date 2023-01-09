@@ -13,6 +13,9 @@
     "bootstrap": "^5.2.3",
     "jquery": "^3.6.3",
     "ol": "^7.2.2",
+    "ol-cesium": "^2.13.1",
+    "ol-ext": "^4.0.4",
+    "olcs": "^2.13.1",
     "vue": "^3.2.41"
   },
   "devDependencies": {

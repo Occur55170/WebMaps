@@ -53,8 +53,8 @@ export default {
 
     <!-- <opp /> -->
     <div class="mapContent">
-        <WebMap ref="map" />
-        <!-- <Wes ref="map"  /> -->
+        <!-- <WebMap ref="map" /> -->
+        <Wes ref="map"  />
     </div>
 </template>
 

@@ -41,14 +41,19 @@ export default {
         const compassBox = ref(null) // 覆蓋物實例/
 
         const defaultLayers = [ // 圖層
+            // new TileLayer({
+            //     preload: Infinity,
+            //     name: 'defaultLayer',
+            //     source: new OSM() // 圖層數據
+            //     // source: new TileArcGISRest({
+            //     //     url: basemapURL,
+            //     // }),
+            // }),
             new TileLayer({
-                preload: Infinity,
-                name: 'defaultLayer',
-                source: new OSM() // 圖層數據
-                // source: new TileArcGISRest({
-                //     url: basemapURL,
-                // }),
-            }),
+                source: new XYZ({
+                    url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+                })
+            })
             // new ImageLayer({
             //     extent: [120.971859, 24.801583],
             //     source: new ImageWMS({
