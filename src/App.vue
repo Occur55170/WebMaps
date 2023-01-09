@@ -21,17 +21,11 @@ export default {
             count: 1,
             math: 0,
         })
-        const onChangeLayoutMath = function (value) {
-            if (state.count !== value) {
-                state.count = value
-            }
-        }
         function mapMode(value){
             console.log(value)
         }
         return {
             state,
-            onChangeLayoutMath,
             mapMode
         }
     }
@@ -49,8 +43,8 @@ export default {
             let target = 1
             this.$refs.map.addLayout({target, value})
         }"
-        @layouts="(value)=>{
-            this.$refs.map.changeMapCount(value)
+        @layouts="(action)=>{
+            this.$refs.map.changeMapCount(action)
         }"
     />
     <div class="main">

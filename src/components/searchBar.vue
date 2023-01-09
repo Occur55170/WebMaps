@@ -9,11 +9,24 @@ export default {
         // const emit = defineEmits(['change', 'change2'])
 
         const state = reactive({
-            layerCondition: false,
-            splitWindow: false,
+            toolSwitch: {
+                threeDimensional: false,
+                layerCondition: false,
+                splitWindow: false,
+            }
         })
-        const changeLayouts = function (value){
-            emit('layouts', value)
+        function toolSwitch(target){
+            Object.keys(state.toolSwitch).forEach(node=>{
+                if(node == target){
+                    state.toolSwitch[node] = !state.toolSwitch[node]
+                } else {
+                    state.toolSwitch[node] = false
+                }
+            })
+        }
+
+        const changeLayouts = function (action){
+            emit('layouts', action)
         }
         const moveTo = function (){
             emit('moveTo')
@@ -23,6 +36,7 @@ export default {
         }
         return {
             state,
+            toolSwitch,
             changeLayouts,
             exampleChange,
             moveTo
@@ -38,7 +52,7 @@ export default {
         </div>
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4">
-                <a href="" class="text-white" @click.prevent="">
+                <a href="" class="text-white" @click.prevent="toolSwitch('threeDimensional')">
                     <svg viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="2">
@@ -51,14 +65,14 @@ export default {
                 </a>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="text-white" @click.prevent="state.layerCondition = !state.layerCondition">
+                <a href="" class="text-white" @click.prevent="toolSwitch('layerCondition')">
                     <svg viewBox="0 0 24 24">
                         <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="1.5"
                             d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3l5.571-3m-11.142 0L2.25 7.5L12 2.25l9.75 5.25l-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75L2.25 16.5l4.179-2.25m11.142 0l-5.571 3l-5.571-3" />
                     </svg>
                 </a>
-                <div class="condition bg-white position-absolute start-0 top-100 mt-2 " v-if="state.layerCondition">
+                <div class="condition bg-white position-absolute start-0 top-100 mt-2 " v-if="state.toolSwitch.layerCondition">
                     <div class="p-3">
                         <p>1.點擊<div class="text-blue" @click="moveTo">前往示範案例</div></p>
                         <div>
@@ -83,21 +97,21 @@ export default {
                 </div>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="text-white" @click.prevent="()=>{state.splitWindow = !state.splitWindow}">
+                <a href="" class="text-white" @click.prevent="toolSwitch('splitWindow')">
                     <svg viewBox="0 0 20 20">
                         <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                     </svg>
                 </a>
-                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.splitWindow">
+                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindow">
                     <li class="mt-2">
-                        <a href="" @click.prevent="changeLayouts(1)" class="text-white">
+                        <a href="" @click.prevent="changeLayouts('remove')" class="text-white">
                             <svg viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>
                         </a>
                     </li>
                     <li class="mt-2">
-                        <a href="" @click.prevent="changeLayouts(2)" class="text-white">
+                        <a href="" @click.prevent="changeLayouts('add')" class="text-white">
                             <svg viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>

@@ -21,6 +21,7 @@ import { FullScreen, defaults as defaultControls } from 'ol/control.js';
 
 import 'ol/ol.css' // ol提供的css样式
 import riverpoly from '../assets/img/riverpoly.jpg'
+import { def } from '@vue/shared'
 
 
 export default {
@@ -136,7 +137,26 @@ export default {
                 addPoint(pos.coords.longitude, pos.coords.latitude)
             })
         }
+        function zoom(targetNum = 1, action){
+            // let target = targetNum == 2 ? map2.value : map.value
+            // let view = target/
+            // switch(targetNum){
+            //     case 1:
+            //         let view = map.value.getView()
+            //         let zoom = view.getZoom()
+            //         view.animate({
+            //             zoom = action == 'In'
+            //         })
+            //         break;
+            //     case 2:
+            //         let zoom = map2.value.getView().getZoom()
+
+            //         break;
+            // }
+        }
         function zoomIn() {
+            let target = 2 == 2 ? map.value : map2.value
+            console.log(target.getView())
             let zoom = defaultView.getZoom()
             defaultView.animate({
                 zoom: zoom + 1,
@@ -153,13 +173,18 @@ export default {
                 rotation: 0,
             })
         }
-        function changeMapCount(value) {
-            if (value > 1) {
-                addMapCount()
-            } else {
-                if (document.getElementById('map2')) {
-                    document.getElementById('map2').remove()
-                }
+        function changeMapCount(action) {
+            switch (action) {
+                case 'add':
+                    if (!document.getElementById('map2')) {
+                        addMapCount()
+                    }
+                    break;
+                case 'remove':
+                    if (document.getElementById('map2')) {
+                        document.getElementById('map2').remove()
+                    }
+                    break;
             }
         }
         function addMapCount() {
@@ -188,16 +213,17 @@ export default {
                 controls: [],
             })
         }
-        function moveTo(){
+
+        // example
+        function moveTo() {
             defaultView.animate({
                 center: [-96.794027, 31.624217],
                 zoom: 10,
                 duration: 100,
             });
         }
-        function addLayout({target, value}){
-            console.log({target, value})
-            if(value){
+        function addLayout({ target, value }) {
+            if (value) {
                 const url =
                     'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
                     'USA/MapServer';
