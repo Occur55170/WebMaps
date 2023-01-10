@@ -143,21 +143,22 @@ export default {
             })
         }
         function zoom(targetNum = 1, action){
-            // let target = targetNum == 2 ? map2.value : map.value
-            // let view = target/
-            // switch(targetNum){
-            //     case 1:
-            //         let view = map.value.getView()
-            //         let zoom = view.getZoom()
-            //         view.animate({
-            //             zoom = action == 'In'
-            //         })
-            //         break;
-            //     case 2:
-            //         let zoom = map2.value.getView().getZoom()
-
-            //         break;
-            // }
+            if(targetNum == 1){
+                let view = map.value.getView().getZoom()
+                let zoom = view.getZoom()
+                view.animate({
+                    zoom: (zoom + action == 'In' ? 1 : -1)
+                    // zoom = action == 'In'
+                })
+            }
+            if(targetNum == 2){
+                let view = map2.value.getView().getZoom()
+                let zoom = view.getZoom()
+                view.animate({
+                    zoom: (zoom + action == 'In' ? 1 : -1)
+                    // zoom = action == 'In'
+                })
+            }
         }
         function zoomIn() {
             let target = 2 == 2 ? map.value : map2.value
