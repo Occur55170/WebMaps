@@ -10,7 +10,6 @@ import SearchBar from './components/SearchBar.vue'
 
 import opp from './components/opp.vue'
 
-
 export default {
     components: {
         WebMap,
@@ -24,6 +23,8 @@ export default {
         function mapMode(value){
             console.log(value)
         }
+        onMounted(()=>{
+        })
         return {
             state,
             mapMode

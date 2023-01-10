@@ -21,6 +21,11 @@ export default defineConfig({
     }),
     Icons(),//一樣定義引入的套件
   ],
+//   resolve: {
+//     alias: {
+//       '@': resolve(__dirname, 'src'),
+//     }
+//   },
   css: {
     preprocessorOptions: {
       scss: {
@@ -30,5 +35,6 @@ export default defineConfig({
     }
   },
   // 輸出路徑設定
-  base: "/Map_Demo"
+//   base: "/Map_Demo"
+    base: '.',
 })
