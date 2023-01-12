@@ -5,9 +5,6 @@ import $ from 'jquery'
 export default {
     props: {},
     setup(props, { emit }) {
-        //定義emit跟props的變數
-        // const emit = defineEmits(['change', 'change2'])
-
         const state = reactive({
             toolSwitch: {
                 threeDimensional: false,
@@ -32,6 +29,7 @@ export default {
             emit('moveTo')
         }
         const exampleChange = function (e){
+            console.log(e.target.checked)
             emit('mapMode', e.target.checked)
         }
         return {

@@ -1,6 +1,5 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-
 import $ from 'jquery'
 
 import WebMap from './components/WebMap.vue'
@@ -13,21 +12,30 @@ import opp from './components/opp.vue'
 export default {
     components: {
         WebMap,
-        // Wes
+        Wes
     },
     setup(props, { emit }) {
         const state = reactive({
             count: 1,
             math: 0,
+            targetMap: 1,
+            aMap: true,
+            bMap: false,
         })
-        function mapMode(value){
-            console.log(value)
+
+        const abMap = function (e){
+            emit('mapMode', e.target.checked)
+            if(e.target.checked){
+                state.aMap= true
+            } else {
+                state.aMap= false
+            }
         }
         onMounted(()=>{
         })
         return {
             state,
-            mapMode
+            abMap
         }
     }
 }
@@ -35,14 +43,18 @@ export default {
 </script>
 
 <template>
-    <!-- <SearchBar class="SearchBar" @layouts="onChangeLayoutMath" /> -->
+    <div style="position:fixed;right:0;z-index: 999;background: #fff;padding: 20px;">
+        <div>
+            <input type="checkbox" name="example" id="example" v-model="state.aMap" :value="false">
+            <label for="example">切換(僅可切換一次)</label>
+        </div>
+    </div>
     <SearchBar class="SearchBar"
         @moveTo="(value)=>{
             this.$refs.map.moveTo(value)
         }"
         @mapMode="(value)=>{
-            let target = 1
-            this.$refs.map.addLayout({target, value})
+            this.$refs.map.addLayout(value)
         }"
         @layouts="(action)=>{
             this.$refs.map.changeMapCount(action)
@@ -54,8 +66,8 @@ export default {
 
     <!-- <opp /> -->
     <div class="mapContent">
-        <!-- <WebMap ref="map" /> -->
-        <Wes ref="map"  />
+        <div v-if="state.aMap"><WebMap ref="map" /></div>
+        <div v-if="!state.aMap"><Wes ref="map" /></div>
     </div>
 </template>
 

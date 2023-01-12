@@ -26,46 +26,24 @@ import { def } from '@vue/shared'
 
 export default {
     props: {
-        // count: {
-        //     type: Number,
-        //     default: ''
-        // },
     },
     setup(props, { emit }) {
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
         })
-        const mapCom = ref(null) // 地圖容器
-        const map = ref(null) // 地圖實例
-        const compassBox = ref(null) // 覆蓋物實例/
+        const compassBox = ref(null)
 
-        const defaultLayers = [ // 圖層
+        const defaultLayers = [
             new TileLayer({
                 preload: Infinity,
                 name: 'defaultLayer',
-                source: new OSM() // 圖層數據
-                // source: new TileArcGISRest({
-                //     url: basemapURL,
-                // }),
+                source: new OSM()
             }),
-            // new TileLayer({
-            //     source: new XYZ({
-            //         url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            //     })
-            // })
-            // new ImageLayer({
-            //     extent: [120.971859, 24.801583],
-            //     source: new ImageWMS({
-            //         url: riverpoly,
-            //         ratio: 1,
-            //         projection: 'EPSG:4326'
-            //     })
-            // })
         ];
 
         const defaultView = new View({
-            projection: 'EPSG:4326', // 投影座標系
+            projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
             // 測試用
@@ -81,8 +59,12 @@ export default {
 
         // 初始化地圖
         function initMap() {
-            map.value = new Map({
-                target: mapCom.value,
+            const map1 = document.createElement('div')
+            map1.setAttribute('id', 'map1')
+            map1.setAttribute('class', 'w-100')
+            document.getElementById('mapWrap').appendChild(map1)
+            map1.value = new Map({
+                target: 'map1',
                 layers: defaultLayers,
                 view: defaultView,
                 overlays: [
@@ -97,7 +79,7 @@ export default {
         // 地圖旋轉事件
         function mapRotate() {
             defaultView.on('change:rotation', evt => {
-                const rotation = map.value.getView().getRotation();
+                const rotation = map1.value.getView().getRotation();
                 const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
                 console.log(`地圖旋轉角度為 ${rotationDegrees}`);
 
@@ -129,7 +111,7 @@ export default {
                     }),
                 })
             })
-            map.value.addLayer(marker);
+            map1.value.addLayer(marker);
         }
         // 移動到當前位置
         function moveCurrentPosition() {
@@ -142,55 +124,33 @@ export default {
                 addPoint(pos.coords.longitude, pos.coords.latitude)
             })
         }
-        function zoom(targetNum = 1, action){
-            if(targetNum == 1){
-                let view = map.value.getView().getZoom()
-                let zoom = view.getZoom()
-                view.animate({
-                    zoom: (zoom + action == 'In' ? 1 : -1)
-                    // zoom = action == 'In'
-                })
+        function controlMap(action, targetNum = 1){
+            let target = targetNum == 1 ? map1 : map2
+            let targetView = target.value.getView()
+            switch(action){
+                case 'In':
+                    targetView.animate({
+                        zoom: targetView.getZoom() + 1,
+                    })
+                    break;
+                case 'Out':
+                    targetView.animate({
+                        zoom: targetView.getZoom() - 1,
+                    })
+                    break;
+                case 'toNorth':
+                    targetView.animate({
+                        rotation: 0,
+                    })
+                    break;
             }
-            if(targetNum == 2){
-                let view = map2.value.getView().getZoom()
-                let zoom = view.getZoom()
-                view.animate({
-                    zoom: (zoom + action == 'In' ? 1 : -1)
-                    // zoom = action == 'In'
-                })
-            }
-        }
-        function zoomIn() {
-            let target = 2 == 2 ? map.value : map2.value
-            console.log(target.getView())
-            let zoom = defaultView.getZoom()
-            defaultView.animate({
-                zoom: zoom + 1,
-            })
-        }
-        function zoomOut() {
-            let zoom = defaultView.getZoom()
-            defaultView.animate({
-                zoom: zoom - 1,
-            })
-        }
-        function toNorth() {
-            defaultView.animate({
-                rotation: 0,
-            })
         }
         function changeMapCount(action) {
-            switch (action) {
-                case 'add':
-                    if (!document.getElementById('map2')) {
-                        addMapCount()
-                    }
-                    break;
-                case 'remove':
-                    if (document.getElementById('map2')) {
-                        document.getElementById('map2').remove()
-                    }
-                    break;
+            if(action === 'add' && !document.getElementById('map2')){
+                addMapCount()
+            }
+            if(action === 'remove' && document.getElementById('map2')){
+                document.getElementById('map2').remove()
             }
         }
         function addMapCount() {
@@ -199,20 +159,20 @@ export default {
             map2.setAttribute('class', 'w-100')
             document.getElementById('mapWrap').appendChild(map2)
 
-            const center2 = Object.values(map.value.getView().getCenter())
-            const zoom2 = map.value.getView().getZoom()
-            const proj2 = map.value.getView().getProjection()
+            const center2 = Object.values(map1.value.getView().getCenter())
+            const zoom2 = map1.value.getView().getZoom()
+            const proj2 = map1.value.getView().getProjection()
             map2.value = new Map({
                 target: 'map2',
                 layers: [
                     new TileLayer({
                         preload: Infinity,
                         name: 'defaultLayer',
-                        source: new OSM() // 圖層數據
+                        source: new OSM()
                     })
                 ],
                 view: new View({
-                    projection: proj2, // 投影座標系
+                    projection: proj2,
                     center: center2,
                     zoom: zoom2,
                 }),
@@ -228,7 +188,7 @@ export default {
                 duration: 100,
             });
         }
-        function addLayout({ target, value }) {
+        function addLayout(value) {
             if (value) {
                 const url =
                     'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
@@ -239,18 +199,19 @@ export default {
                         url: url,
                     }),
                 });
-                map.value.getLayers().extend([a]);
+                map1.value.getLayers().extend([a]);
             }
         }
 
         onMounted(() => {
+            console.log('1')
             initMap()
             nextTick(() => {
-                const rotation = map.value.getView().getRotation();
+                const rotation = map1.value.getView().getRotation();
                 const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
                 console.log(`地圖旋轉角度為 ${rotationDegrees}`);
 
-                //  轉動遮照animation bug
+                // bug
                 const newMask = document.getElementById('compass');
                 newMask.style.transform = `rotate(${rotationDegrees}rad)`;
                 mapRotate()
@@ -260,15 +221,12 @@ export default {
         return {
             state,
             props,
-            mapCom,
             moveCurrentPosition,
-            zoomIn,
-            zoomOut,
-            toNorth,
             changeMapCount,
             addLayout,
             moveTo,
             riverpoly,
+            controlMap,
         }
     }
 }
@@ -278,16 +236,18 @@ export default {
     <div>
         <!-- 地圖容器 -->
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-            <div id="map1" ref="mapCom"></div>
         </div>
 
         <div class="asideTool">
+            <!-- <div>
+                <input type="radio" name="" id="">
+                <input type="radio" name="" id="">
+            </div> -->
             <div class="" @click="moveCurrentPosition">定位</div>
-            <div class="" @click="zoomIn">放大</div>
-            <div class="" @click="zoomOut">縮小</div>
-            <div class="" @click="addLayout">新增圖層</div>
+            <div class="" @click="controlMap('In')">放大</div>
+            <div class="" @click="controlMap('Out')">縮小</div>
         </div>
-        <div ref="compassBox" class="compass" id="compass" @click="toNorth">
+        <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
         </div>
     </div>

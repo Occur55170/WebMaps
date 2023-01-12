@@ -7,5 +7,7 @@ import "bootstrap"
 import $ from 'jquery'
 
 
+import 'ol/ol.css'
+import 'ol-cesium/dist/olcs.css'
 
 createApp(App).mount('#app')
