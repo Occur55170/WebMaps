@@ -149,11 +149,11 @@ export default {
                     break;
             }
         }
-        function changeMapCount(action) {
-            if(action === 'add' && !document.getElementById('map2')){
+        function changeMapCount(count) {
+            if(count === 2 && !document.getElementById('map2')){
                 addMapCount()
             }
-            if(action === 'remove' && document.getElementById('map2')){
+            if(count === 1 && document.getElementById('map2')){
                 document.getElementById('map2').remove()
             }
         }
@@ -204,6 +204,7 @@ export default {
             }
         }
         function addLayout(value) {
+            console.log(value)
             if (value) {
                 const url =
                     'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
@@ -247,11 +248,10 @@ export default {
 </script>
 
 <template>
-    <div>
+    <div ref="child">
         <!-- 地圖容器 -->
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
         </div>
-
         <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
         </div>

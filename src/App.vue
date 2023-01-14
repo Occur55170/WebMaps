@@ -19,6 +19,7 @@ export default {
         return {
             count: 1,
             isActive: true,
+            targetNum: 1
         }
     },
     methods: {
@@ -30,31 +31,34 @@ export default {
             this.$refs.child.addLayout(value)
         },
         layouts(action){
-            this.count = action == 'add' ? 2 : 1
+            const vm = this
+            vm.count = action == 'add' ? 2 : 1
             // 有找到元素就不加
-            if(action && !(document.getElementById('ele'))){
-                const ele = document.createElement('button')
-                ele.setAttribute('id', 'ele')
-                document.getElementById('asideTool').appendChild(ele)
-                // const ele = document.querySelector('button')
-
-                const switchBtn = createSwitch(ele, {
+            if(action && !(document.getElementById('switchControl'))){
+                const switchControl = document.createElement('button')
+                switchControl.setAttribute('id', 'switchControl')
+                switchControl.setAttribute('class', 'order-0')
+                document.getElementById('asideTool').appendChild(switchControl)
+                const switchBtn = createSwitch(switchControl, {
                     text: ['左', '右'],
                     onChange: (checked) => {
                         console.log('checked', checked)
+                        vm.targetNum = !checked ? 1 : 2
                     },
                 })
             }
-            this.$refs.child.changeMapCount(this.count)
+            vm.$refs.child.changeMapCount(vm.count)
         },
-        controlMap(action){
-            this.$refs.child.controlMap(action)
+        controlMap(action, value){
+            console.log(123)
+            console.log(action, value)
+            this.$refs.child.controlMap(action, value)
         }
     },
     computed:{
         asideToolPosition(){
             return this.count == 1
-        }
+        },
     },
     components: {
         WebMap,
@@ -66,7 +70,6 @@ export default {
             math: 0,
             targetMap: 1,
             aMap: false,
-            isOn: false,
         })
 
         function abMap (e){
@@ -99,12 +102,12 @@ export default {
         <div>
             <!-- <input type="checkbox" name="example" id="example" v-model="state.aMap" :value="false"> -->
             <!-- <label for="example">切換(僅可切換一次)</label> -->
-            <a href="" @click.prevent="moveTo(-96.794027, 31.624217)">123 00{{ count }}</a>
+            <a href="" @click.prevent="controlMap('moveTo', {xAxis:-96.794027, yAxis:31.624217})">123 00{{ count }}</a>
         </div>
     </div>
 
     <SearchBar class="SearchBar"
-        @moveTo="moveTo"
+        @moveTo="controlMap('moveTo', {xAxis:-96.794027, yAxis:31.624217})"
         @mapMode="(value)=>mapMode(value)"
         @layouts="(action)=>layouts(action)"
     />
@@ -114,19 +117,19 @@ export default {
         id="asideTool"
         :class="{
             'top-50 end-0 translate-middle-y': asideToolPosition,
-            'd-flex flex-nowrap top-0 start-50 translate-middle-x': !asideToolPosition,
+            'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
         }"
         >
             <!-- <switch-button v-model="isActive" v-if="!asideToolPosition" /> -->
-            <div class="" @click="moveTo">定位</div>
-            <div class="" @click="controlMap('In')">放大</div>
-            <div class="" @click="controlMap('Out')">縮小{{ this.isOn  }} </div>
+            <div class="asideTool-btn order-1" @click="controlMap('moveTo')">定位</div>
+            <div class="asideTool-btn order-1" @click="controlMap('In')">放大</div>
+            <div class="asideTool-btn order-1" @click="controlMap('Out')">縮小</div>
         </div>
     <div class="main">
     </div>
 
     <!-- <opp /> -->
-    <Wes ref="child" />
+    <Wes ref="child" :targetNum="targetNum"/>
     <!-- <div class="mapContent">
         <div v-if="state.aMap"><WebMap ref="WebMap" :count="state.count" /></div>
         <div v-if="!state.aMap"><Wes ref="child" /></div>
@@ -134,7 +137,7 @@ export default {
 </template>
 
 <style lang="sass">
-// @import './assets/styles/all.module.scss'
+@import './assets/styles/all.module.scss'
 
 .mapContent
     height: 100vh
@@ -162,10 +165,10 @@ export default {
 
 .asideTool
     z-index: 220
-    div
-        background: #fff
-        margin: 20px
-        padding: 20px
-        font-size: 20px
-        border: 1px solid #000
+    // div
+    //     background: #fff
+    //     margin: 20px
+    //     padding: 20px
+    //     font-size: 20px
+    //     border: 1px solid #000
 </style>
