@@ -10,12 +10,15 @@ import SearchBar from './components/SearchBar.vue'
 import opp from './components/opp.vue'
 // import createSwitch,{ deleteSwitch } from 'switch-button'
 // import 'switch-button/dist/index.css'
-import ToggleSwitchButton from "toggle-switch-button-vue"
+
+
+import createSwitch,{ deleteSwitch } from 'switch-button'
 
 export default {
     data(){
         return {
-            count: 1
+            count: 1,
+            isActive: true,
         }
     },
     methods: {
@@ -28,6 +31,20 @@ export default {
         },
         layouts(action){
             this.count = action == 'add' ? 2 : 1
+            // 有找到元素就不加
+            if(action && !(document.getElementById('ele'))){
+                const ele = document.createElement('button')
+                ele.setAttribute('id', 'ele')
+                document.getElementById('asideTool').appendChild(ele)
+                // const ele = document.querySelector('button')
+
+                const switchBtn = createSwitch(ele, {
+                    text: ['左', '右'],
+                    onChange: (checked) => {
+                        console.log('checked', checked)
+                    },
+                })
+            }
             this.$refs.child.changeMapCount(this.count)
         },
         controlMap(action){
@@ -41,7 +58,7 @@ export default {
     },
     components: {
         WebMap,
-        Wes
+        Wes,
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -49,6 +66,7 @@ export default {
             math: 0,
             targetMap: 1,
             aMap: false,
+            isOn: false,
         })
 
         function abMap (e){
@@ -60,16 +78,20 @@ export default {
             }
         }
         onMounted(()=>{
+                // change status will update view
+                // switchBtn.checked = true
+                // switchBtn.loading = true
+                // switchBtn.disabled = true
 
+                // delete switch button
+                // deleteSwitch(ele)
         })
         return {
             state,
             abMap,
-            // moveTo
         }
     }
 }
-
 </script>
 
 <template>
@@ -80,25 +102,25 @@ export default {
             <a href="" @click.prevent="moveTo(-96.794027, 31.624217)">123 00{{ count }}</a>
         </div>
     </div>
+
     <SearchBar class="SearchBar"
         @moveTo="moveTo"
         @mapMode="(value)=>mapMode(value)"
         @layouts="(action)=>layouts(action)"
     />
         <!-- <LayoutTool class="LayoutTool" /> -->
-        <div class="asideTool position-absolute "
+        <!-- id="asideTool" -->
+        <div class="asideTool position-absolute"
+        id="asideTool"
         :class="{
             'top-50 end-0 translate-middle-y': asideToolPosition,
             'd-flex flex-nowrap top-0 start-50 translate-middle-x': !asideToolPosition,
         }"
         >
-            <div v-if="!asideToolPosition">
-                <input type="radio" name="" id="">
-                <input type="radio" name="" id="">
-            </div>
+            <!-- <switch-button v-model="isActive" v-if="!asideToolPosition" /> -->
             <div class="" @click="moveTo">定位</div>
             <div class="" @click="controlMap('In')">放大</div>
-            <div class="" @click="controlMap('Out')">縮小 </div>
+            <div class="" @click="controlMap('Out')">縮小{{ this.isOn  }} </div>
         </div>
     <div class="main">
     </div>
@@ -112,6 +134,8 @@ export default {
 </template>
 
 <style lang="sass">
+// @import './assets/styles/all.module.scss'
+
 .mapContent
     height: 100vh
     width: 100vw

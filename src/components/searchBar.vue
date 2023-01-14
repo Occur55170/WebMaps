@@ -122,8 +122,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@import "./src/assets/styles/global.scss"
-
+@import '../assets/styles/all.module.scss'
 .searchbar
     width: 322px
     position: relative
@@ -155,8 +154,11 @@ a
     height: 44px
     padding: 10px
     box-sizing: border-box
-    :hover
-        // background:
+    &:hover
+        background: $blue-light
+        width: 44px
+        height: 44px
+        border-radius: 10px
 
 svg
     font-size: 24px
