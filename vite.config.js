@@ -31,7 +31,10 @@ export default defineConfig({
       }
     }
   },
+  configureWebpack: {
+    externals: { 'jquery': '$' },
+  },
   // 輸出路徑設定
-//   base: "/Map_Demo"
+    // base: "/Map_Demo"
     base: '.',
 })

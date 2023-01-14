@@ -16,6 +16,7 @@
     "ol-cesium": "^2.13.1",
     "ol-ext": "^4.0.4",
     "olcs": "^2.13.1",
+    "toggle-switch-button-vue": "^1.0.0",
     "vue": "^3.2.41"
   },
   "devDependencies": {

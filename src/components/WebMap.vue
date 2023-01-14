@@ -26,6 +26,10 @@ import { def } from '@vue/shared'
 
 export default {
     props: {
+        count: {
+            type: Number,
+            default: ''
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -181,12 +185,23 @@ export default {
         }
 
         // example
-        function moveTo() {
-            defaultView.animate({
-                center: [-96.794027, 31.624217],
-                zoom: 10,
-                duration: 100,
-            });
+        function moveTo(x,y) {
+            if(x && y){
+                defaultView.animate({
+                    center: [x, y],
+                    zoom: 10,
+                    duration: 100,
+                });
+            } else {
+                navigator.geolocation.getCurrentPosition(function (pos) {
+                    defaultView.animate({
+                        center: [pos.coords.longitude, pos.coords.latitude],
+                        zoom: 17,
+                        duration: 100,
+                    });
+                    addPoint(pos.coords.longitude, pos.coords.latitude)
+                })
+            }
         }
         function addLayout(value) {
             if (value) {
@@ -204,7 +219,6 @@ export default {
         }
 
         onMounted(() => {
-            console.log('1')
             initMap()
             nextTick(() => {
                 const rotation = map1.value.getView().getRotation();
@@ -238,15 +252,6 @@ export default {
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
         </div>
 
-        <div class="asideTool">
-            <!-- <div>
-                <input type="radio" name="" id="">
-                <input type="radio" name="" id="">
-            </div> -->
-            <div class="" @click="moveCurrentPosition">定位</div>
-            <div class="" @click="controlMap('In')">放大</div>
-            <div class="" @click="controlMap('Out')">縮小</div>
-        </div>
         <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
         </div>
@@ -262,18 +267,6 @@ export default {
 .mapWrap div
     width: 100%
 
-.asideTool
-    position: absolute
-    right: 0
-    top: 50%
-    z-index: 220
-    transform: translateY(-50%)
-    div
-        background: #fff
-        margin: 20px
-        padding: 20px
-        font-size: 20px
-        border: 1px solid #000
 
 // bug
 .compass

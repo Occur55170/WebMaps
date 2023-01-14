@@ -1,13 +1,15 @@
 import { createApp } from 'vue'
-// import './style.css'
+
 import './assets/styles/all.css'
 import App from './App.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import "bootstrap"
 import $ from 'jquery'
 
+import componentRegister from './componentRegister'
 
-import 'ol/ol.css'
-import 'ol-cesium/dist/olcs.css'
+const app = createApp(App)
 
-createApp(App).mount('#app')
+app.use(componentRegister)
+
+app.mount('#app')
