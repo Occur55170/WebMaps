@@ -17,19 +17,41 @@ import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import { Image as ImageLayer } from 'ol/layer.js';
 import ImageWMS from 'ol/source/ImageWMS'
 import { FullScreen, defaults as defaultControls } from 'ol/control.js';
-
+import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
 
 import 'ol/ol.css' // ol提供的css样式
-import riverpoly from '../assets/img/riverpoly.jpg'
 import { def } from '@vue/shared'
 
 
+import { Viewer } from 'cesium';
+
+
 export default {
+    data() {
+        return {
+            viewer: null,
+        };
+    },
+    mounted() {
+        this.viewer = new Viewer('map', {
+            animation: false,
+            baseLayerPicker: false,
+            fullscreenButton: true,
+            geocoder: false,
+            homeButton: false,
+            infoBox: false,
+            sceneModePicker: false,
+            selectionIndicator: false,
+            timeline: false,
+            navigationHelpButton: false,
+            navigationInstructionsInitiallyVisible: false,
+        });
+    },
     props: {
-        count: {
-            type: Number,
-            default: ''
-        },
+        // count: {
+        //     type: Number,
+        //     default: ''
+        // },
         targetNum: {
             type: Number,
             default: 1
@@ -121,21 +143,11 @@ export default {
             })
             map1.value.addLayer(marker);
         }
-        // 移動到當前位置
-        function moveCurrentPosition() {
-            navigator.geolocation.getCurrentPosition(function (pos) {
-                defaultView.animate({
-                    center: [pos.coords.longitude, pos.coords.latitude],
-                    zoom: 17,
-                    duration: 100,
-                });
-                addPoint(pos.coords.longitude, pos.coords.latitude)
-            })
-        }
-        function controlMap(action, value){
+
+        function controlMap(action, value) {
             let target = props.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
-            switch(action){
+            switch (action) {
                 case 'In':
                     targetView.animate({
                         zoom: targetView.getZoom() + 1,
@@ -148,8 +160,8 @@ export default {
                     break;
                 case 'moveTo':
                     console.log(value)
-                    if(value){
-                        const { xAxis,yAxis } = value
+                    if (value) {
+                        const { xAxis, yAxis } = value
                         targetView.animate({
                             center: [xAxis, yAxis],
                             zoom: 10,
@@ -171,16 +183,30 @@ export default {
                         rotation: 0,
                     })
                     break;
+                case 'fullScreen':
+                    let target = props.targetNum == 1 ? map1 : map2
+                    if (target.requestFullscreen) {
+                    target.requestFullscreen();
+                    } else if (target.msRequestFullscreen) {
+                    target.msRequestFullscreen();
+                    } else if (target.mozRequestFullScreen) {
+                    target.mozRequestFullScreen();
+                    } else if (target.webkitRequestFullscreen) {
+                    target.webkitRequestFullscreen();
+                    }
+                    break;
             }
         }
+
         function changeMapCount(count) {
-            if(count === 2 && !document.getElementById('map2')){
+            if (count === 2 && !document.getElementById('map2')) {
                 addMapCount()
             }
-            if(count === 1 && document.getElementById('map2')){
+            if (count === 1 && document.getElementById('map2')) {
                 document.getElementById('map2').remove()
             }
         }
+
         function addMapCount() {
             const map2 = document.createElement('div')
             map2.setAttribute('id', 'map2')
@@ -207,38 +233,18 @@ export default {
                 controls: [],
             })
         }
-
-        // example
-        function moveTo(x,y) {
-            if(x && y){
-                defaultView.animate({
-                    center: [x, y],
-                    zoom: 10,
-                    duration: 100,
-                });
-            } else {
-                navigator.geolocation.getCurrentPosition(function (pos) {
-                    defaultView.animate({
-                        center: [pos.coords.longitude, pos.coords.latitude],
-                        zoom: 17,
-                        duration: 100,
-                    });
-                    addPoint(pos.coords.longitude, pos.coords.latitude)
-                })
-            }
-        }
         function addLayout(value) {
             if (value) {
                 const url =
                     'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
                     'USA/MapServer';
-                let a = new TileLayer({
+                let newLayer = new TileLayer({
                     preload: Infinity,
                     source: new TileArcGISRest({
                         url: url,
                     }),
                 });
-                map1.value.getLayers().extend([a]);
+                map1.value.getLayers().extend([newLayer]);
             }
         }
 
@@ -259,11 +265,8 @@ export default {
         return {
             state,
             props,
-            moveCurrentPosition,
             changeMapCount,
             addLayout,
-            moveTo,
-            riverpoly,
             controlMap,
         }
     }
@@ -273,6 +276,7 @@ export default {
 <template>
     <div ref="child">
         <!-- 地圖容器 -->
+        <div id="map" class="d-none"></div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
         </div>
         <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">

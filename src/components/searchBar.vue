@@ -21,14 +21,16 @@ export default {
                 }
             })
         }
+        function changeAngleView(){
+        }
 
-        const changeLayouts = function (action){
+        function changeLayouts(action){
             emit('layouts', action)
         }
-        const moveTo = function (){
+        function moveTo(){
             emit('moveTo')
         }
-        const exampleChange = function (e){
+        function exampleChange(e){
             console.log(e.target.checked)
             emit('mapMode', e.target.checked)
         }

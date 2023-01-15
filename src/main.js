@@ -10,8 +10,8 @@ import componentRegister from './componentRegister'
 import './assets/styles/all.module.scss'
 
 
+
 const app = createApp(App)
-// app.use(createSwitch)
 app.use(componentRegister)
 
 app.mount('#app')

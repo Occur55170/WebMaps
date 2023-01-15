@@ -30,6 +30,10 @@ export default {
             type: Number,
             default: ''
         },
+        targetNum: {
+            type: Number,
+            default: 1
+        }
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -117,19 +121,8 @@ export default {
             })
             map1.value.addLayer(marker);
         }
-        // 移動到當前位置
-        function moveCurrentPosition() {
-            navigator.geolocation.getCurrentPosition(function (pos) {
-                defaultView.animate({
-                    center: [pos.coords.longitude, pos.coords.latitude],
-                    zoom: 17,
-                    duration: 100,
-                });
-                addPoint(pos.coords.longitude, pos.coords.latitude)
-            })
-        }
-        function controlMap(action, targetNum = 1){
-            let target = targetNum == 1 ? map1 : map2
+        function controlMap(action, value){
+            let target = props.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
             switch(action){
                 case 'In':
@@ -141,6 +134,26 @@ export default {
                     targetView.animate({
                         zoom: targetView.getZoom() - 1,
                     })
+                    break;
+                case 'moveTo':
+                    console.log(value)
+                    if(value){
+                        const { xAxis,yAxis } = value
+                        targetView.animate({
+                            center: [xAxis, yAxis],
+                            zoom: 10,
+                            duration: 100,
+                        });
+                    } else {
+                        navigator.geolocation.getCurrentPosition(function (pos) {
+                            targetView.animate({
+                                center: [pos.coords.longitude, pos.coords.latitude],
+                                zoom: 17,
+                                duration: 100,
+                            });
+                            addPoint(pos.coords.longitude, pos.coords.latitude)
+                        })
+                    }
                     break;
                 case 'toNorth':
                     targetView.animate({
@@ -204,7 +217,6 @@ export default {
             }
         }
         function addLayout(value) {
-            console.log(value)
             if (value) {
                 const url =
                     'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
@@ -236,7 +248,6 @@ export default {
         return {
             state,
             props,
-            moveCurrentPosition,
             changeMapCount,
             addLayout,
             moveTo,
@@ -266,6 +277,7 @@ export default {
 
 .mapWrap div
     width: 100%
+
 
 
 // bug
