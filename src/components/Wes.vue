@@ -3,6 +3,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
+// olPerspectiveMap
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
@@ -20,33 +21,9 @@ import { FullScreen, defaults as defaultControls } from 'ol/control.js';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
 
 import 'ol/ol.css' // ol提供的css样式
-import { def } from '@vue/shared'
-
-
-import { Viewer } from 'cesium';
 
 
 export default {
-    data() {
-        return {
-            viewer: null,
-        };
-    },
-    mounted() {
-        this.viewer = new Viewer('map', {
-            animation: false,
-            baseLayerPicker: false,
-            fullscreenButton: true,
-            geocoder: false,
-            homeButton: false,
-            infoBox: false,
-            sceneModePicker: false,
-            selectionIndicator: false,
-            timeline: false,
-            navigationHelpButton: false,
-            navigationInstructionsInitiallyVisible: false,
-        });
-    },
     props: {
         // count: {
         //     type: Number,
@@ -100,9 +77,7 @@ export default {
                 overlays: [
                     compassBox.value,
                 ],
-                controls: [
-                    new FullScreen()
-                ],
+                controls: [],
             })
         }
 
@@ -233,6 +208,7 @@ export default {
                 controls: [],
             })
         }
+
         function addLayout(value) {
             if (value) {
                 const url =
@@ -247,7 +223,6 @@ export default {
                 map1.value.getLayers().extend([newLayer]);
             }
         }
-
         onMounted(() => {
             initMap()
             nextTick(() => {
@@ -267,16 +242,14 @@ export default {
             props,
             changeMapCount,
             addLayout,
-            controlMap,
+            controlMap
         }
     }
 }
 </script>
 
 <template>
-    <div ref="child">
-        <!-- 地圖容器 -->
-        <div id="map" class="d-none"></div>
+    <div ref="mapCom">
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
         </div>
         <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
@@ -294,8 +267,6 @@ export default {
 .mapWrap div
     width: 100%
 
-
-
 // bug
 .compass
     position: absolute
@@ -307,7 +278,4 @@ export default {
         transform: rotateZ(-90deg)
         width: 100%
         height: 100%
-.ol-full-screen button
-    width: 50px
-    height: 50px
 </style>

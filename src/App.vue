@@ -8,28 +8,31 @@ import LayoutTool from './components/LayoutTool.vue'
 import SearchBar from './components/SearchBar.vue'
 
 import opp from './components/opp.vue'
+// import threeDimensionMap from './components/threeDimensionMap.vue'
 // import createSwitch,{ deleteSwitch } from 'switch-button'
 // import 'switch-button/dist/index.css'
 
 
-import createSwitch,{ deleteSwitch } from 'switch-button'
+import createSwitch, { deleteSwitch } from 'switch-button'
 
 export default {
-    data(){
+    data() {
         return {
             count: 1,
-            isActive: true,
             targetNum: 1
         }
     },
     methods: {
-        mapMode(value){
-            this.$refs.child.addLayout(value)
+        mapMode(value) {
+            this.$refs.mapCom.addLayout(value)
         },
-        layouts(action){
+        layouts(action) {
             const vm = this
             vm.count = action == 'add' ? 2 : 1
-            if(action && !(document.getElementById('switchControl'))){
+            if (vm.count == 1 && document.getElementById('switchControl')) {
+                document.getElementById('switchControl').remove()
+            }
+            if (vm.count == 2 && !(document.getElementById('switchControl'))) {
                 const switchControl = document.createElement('button')
                 switchControl.setAttribute('id', 'switchControl')
                 switchControl.setAttribute('class', 'order-0')
@@ -41,20 +44,21 @@ export default {
                     },
                 })
             }
-            vm.$refs.child.changeMapCount(vm.count)
+            vm.$refs.mapCom.changeMapCount(vm.count)
         },
-        controlMap(action, value){
-            this.$refs.child.controlMap(action, value)
+        controlMap(action, value) {
+            this.$refs.mapCom.controlMap(action, value)
         }
     },
-    computed:{
-        asideToolPosition(){
+    computed: {
+        asideToolPosition() {
             return this.count == 1
         },
     },
     components: {
         WebMap,
         Wes,
+        // threeDimensionMap,
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -62,27 +66,34 @@ export default {
             math: 0,
             targetMap: 1,
             aMap: false,
+            isMapType: '2D',
         })
 
-        function abMap (e){
+        function abMap(e) {
             emit('mapMode', e.target.checked)
-            if(e.target.checked){
-                state.aMap= true
+            if (e.target.checked) {
+                state.aMap = true
             } else {
-                state.aMap= false
+                state.aMap = false
             }
         }
-        onMounted(()=>{
-                // change status will update view
-                // switchBtn.checked = true
-                // switchBtn.loading = true
-                // switchBtn.disabled = true
+        function onChangeDimensionMap(value) {
+            console.log(value)
+            state.isMapType = value ? '3D' : '2D'
+        }
+        onMounted(() => {
+            // change status will update view
+            // switchBtn.checked = true
+            // switchBtn.loading = true
+            // switchBtn.disabled = true
 
-                // delete switch button
-                // deleteSwitch(ele)
+            // delete switch button
+            // deleteSwitch(ele)
         })
+        console.log(state.isMapType)
         return {
             state,
+            onChangeDimensionMap,
             abMap,
         }
     }
@@ -90,38 +101,39 @@ export default {
 </script>
 
 <template>
-            <!-- <input type="checkbox" name="example" id="example" v-model="state.aMap" :value="false"> -->
-            <!-- <label for="example">切換(僅可切換一次)</label> -->
-            <!-- <a href="" @click.prevent="controlMap('moveTo', {xAxis:-96.794027, yAxis:31.624217})">123 00{{ count }}</a> -->
+    <!-- <input type="checkbox" name="example" id="example" v-model="state.aMap" :value="false"> -->
+    <!-- <label for="example">切換(僅可切換一次)</label> -->
+    <!-- <a href="" @click.prevent="controlMap('moveTo', {xAxis:-96.794027, yAxis:31.624217})">123 00{{ count }}</a> -->
 
     <SearchBar class="SearchBar"
-        @moveTo="controlMap('moveTo', {xAxis:-96.794027, yAxis:31.624217})"
-        @mapMode="(value)=>mapMode(value)"
-        @layouts="(action)=>layouts(action)"
+        @moveTo="controlMap('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
+        @mapMode="(value) => mapMode(value)"
+        @layouts="(action) => layouts(action)"
+        @onChangeDimensionMap="(value) => onChangeDimensionMap(value)"
     />
-        <!-- <LayoutTool class="LayoutTool" /> -->
-        <!-- id="asideTool" -->
-        <div class="asideTool position-absolute"
-        id="asideTool"
-        :class="{
-            'top-50 end-0 translate-middle-y': asideToolPosition,
-            'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
-        }"
-        >
-            <div class="asideTool-btn order-1" @click="controlMap('fullScreen')">全螢幕</div>
-            <div class="asideTool-btn order-1" @click="controlMap('moveTo')">定位</div>
-            <div class="asideTool-btn order-1" @click="controlMap('In')">放大</div>
-            <div class="asideTool-btn order-1" @click="controlMap('Out')">縮小</div>
-        </div>
+    <!-- <LayoutTool class="LayoutTool" /> -->
+    <!-- id="asideTool" -->
+    <div class="asideTool position-absolute" id="asideTool" :class="{
+        'top-50 end-0 translate-middle-y': asideToolPosition,
+        'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
+    }">
+        <div class="asideTool-btn order-1" @click="controlMap('fullScreen')">全螢幕</div>
+        <div class="asideTool-btn order-1" @click="controlMap('moveTo')">定位</div>
+        <div class="asideTool-btn order-1" @click="controlMap('In')">放大</div>
+        <div class="asideTool-btn order-1" @click="controlMap('Out')">縮小</div>
+    </div>
+
     <div class="main">
+        <div v-if="state.isMapType === '2D'">
+            <!-- <Wes ref="mapCom" :targetNum="targetNum" /> -->
+            <WebMap ref="mapCom"  :targetNum="targetNum" />
+        </div>
+        <div v-if="state.isMapType === '3D'">
+            <threeDimensionMap />
+        </div>
     </div>
 
     <!-- <opp /> -->
-    <Wes ref="child" :targetNum="targetNum"/>
-    <!-- <div class="mapContent">
-        <div v-if="state.aMap"><WebMap ref="WebMap" :count="state.count" /></div>
-        <div v-if="!state.aMap"><Wes ref="child" /></div>
-    </div> -->
 </template>
 
 <style lang="sass">
@@ -132,11 +144,10 @@ export default {
     width: 100vw
 .main
     position: fixed
-    top: 36px
-    left: 36px
-    z-index: 10
-    padding: 20px
-    box-sizing: border-box
+    top: 0
+    left: 0
+    height: 100%
+    width: 100%
 
 .SearchBar
     position: absolute
@@ -150,13 +161,6 @@ export default {
     top: 0
     left: 0
     z-index: 220
-
 .asideTool
     z-index: 220
-    // div
-    //     background: #fff
-    //     margin: 20px
-    //     padding: 20px
-    //     font-size: 20px
-    //     border: 1px solid #000
 </style>

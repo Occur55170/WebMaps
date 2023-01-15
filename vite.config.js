@@ -26,7 +26,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
             }),
             Icons(),
             cesium(),
-            'vite-plugin-sass',,
+            // 'vite-plugin-sass',
             {
               includePaths: ['./src/styles']
             }
