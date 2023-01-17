@@ -25,10 +25,6 @@ import 'ol/ol.css' // ol提供的css样式
 
 export default {
     props: {
-        // count: {
-        //     type: Number,
-        //     default: ''
-        // },
         targetNum: {
             type: Number,
             default: 1
@@ -119,22 +115,45 @@ export default {
             map1.value.addLayer(marker);
         }
 
-        function controlMap(action, value) {
-            let target = props.targetNum == 1 ? map1 : map2
-            let targetView = target.value.getView()
+        function controlMap(action) {
+            // let target = props.targetNum == 1 ? map1 : map2
+            let View = map1.value.getView()
             switch (action) {
                 case 'In':
-                    targetView.animate({
-                        zoom: targetView.getZoom() + 1,
+                    View.animate({
+                        zoom: View.getZoom() + 1,
                     })
                     break;
                 case 'Out':
-                    targetView.animate({
-                        zoom: targetView.getZoom() - 1,
+                    View.animate({
+                        zoom: View.getZoom() - 1,
                     })
                     break;
+                case 'toNorth':
+                    View.animate({
+                        rotation: 0,
+                    })
+                    break;
+                case 'fullScreen':
+                    let target = map1
+                    if (target.requestFullscreen) {
+                        target.requestFullscreen()
+                    } else if (target.msRequestFullscreen) {
+                        target.msRequestFullscreen()
+                    } else if (target.mozRequestFullScreen) {
+                        target.mozRequestFullScreen()
+                    } else if (target.webkitRequestFullscreen) {
+                        target.webkitRequestFullscreen()
+                    }
+                    break;
+            }
+        }
+
+        function layerControl(action, value) {
+            let target = props.targetNum == 1 ? map1 : map2
+            let targetView = target.value.getView()
+            switch (action) {
                 case 'moveTo':
-                    console.log(value)
                     if (value) {
                         const { xAxis, yAxis } = value
                         targetView.animate({
@@ -153,33 +172,31 @@ export default {
                         })
                     }
                     break;
-                case 'toNorth':
-                    targetView.animate({
-                        rotation: 0,
-                    })
+                case 'mapMode':
+                    if (value) {
+                        const url =
+                            'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
+                            'USA/MapServer';
+                        let newLayer = new TileLayer({
+                            preload: Infinity,
+                            source: new TileArcGISRest({
+                                url: url,
+                            }),
+                        });
+                        map1.value.getLayers().extend([newLayer]);
+                    }
+                    // 尚未關閉layout
                     break;
-                case 'fullScreen':
-                    let target = props.targetNum == 1 ? map1 : map2
-                    if (target.requestFullscreen) {
-                    target.requestFullscreen();
-                    } else if (target.msRequestFullscreen) {
-                    target.msRequestFullscreen();
-                    } else if (target.mozRequestFullScreen) {
-                    target.mozRequestFullScreen();
-                    } else if (target.webkitRequestFullscreen) {
-                    target.webkitRequestFullscreen();
+                case 'layouts':
+                    if (value === 2 && !document.getElementById('map2')) {
+                        addMapCount()
+                    }
+                    if (value === 1 && document.getElementById('map2')) {
+                        document.getElementById('map2').remove()
                     }
                     break;
             }
-        }
 
-        function changeMapCount(count) {
-            if (count === 2 && !document.getElementById('map2')) {
-                addMapCount()
-            }
-            if (count === 1 && document.getElementById('map2')) {
-                document.getElementById('map2').remove()
-            }
         }
 
         function addMapCount() {
@@ -200,29 +217,11 @@ export default {
                         source: new OSM()
                     })
                 ],
-                view: new View({
-                    projection: proj2,
-                    center: center2,
-                    zoom: zoom2,
-                }),
+                view: defaultView,
                 controls: [],
             })
         }
 
-        function addLayout(value) {
-            if (value) {
-                const url =
-                    'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
-                    'USA/MapServer';
-                let newLayer = new TileLayer({
-                    preload: Infinity,
-                    source: new TileArcGISRest({
-                        url: url,
-                    }),
-                });
-                map1.value.getLayers().extend([newLayer]);
-            }
-        }
         onMounted(() => {
             initMap()
             nextTick(() => {
@@ -240,9 +239,8 @@ export default {
         return {
             state,
             props,
-            changeMapCount,
-            addLayout,
-            controlMap
+            controlMap,
+            layerControl
         }
     }
 }
@@ -250,8 +248,7 @@ export default {
 
 <template>
     <div ref="mapCom">
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-        </div>
+        <div class="w-100 d-flex flex-nowrap mapWrap yys" id="mapWrap"></div>
         <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
         </div>
@@ -259,15 +256,12 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-
 .mapWrap
     justify-content: space-between
     height: 100vh
 
 .mapWrap div
     width: 100%
-
-
 
 // bug
 .compass

@@ -23,31 +23,29 @@ export default {
         }
     },
     methods: {
-        mapMode(value) {
-            this.$refs.mapCom.addLayout(value)
-        },
-        layouts(action) {
-            const vm = this
-            vm.count = action == 'add' ? 2 : 1
-            if (vm.count == 1 && document.getElementById('switchControl')) {
-                document.getElementById('switchControl').remove()
-            }
-            if (vm.count == 2 && !(document.getElementById('switchControl'))) {
-                const switchControl = document.createElement('button')
-                switchControl.setAttribute('id', 'switchControl')
-                switchControl.setAttribute('class', 'order-0')
-                document.getElementById('asideTool').appendChild(switchControl)
-                const switchBtn = createSwitch(switchControl, {
-                    text: ['左', '右'],
-                    onChange: (checked) => {
-                        vm.targetNum = Number(!checked ? 1 : 2)
-                    },
-                })
-            }
-            vm.$refs.mapCom.changeMapCount(vm.count)
-        },
         controlMap(action, value) {
             this.$refs.mapCom.controlMap(action, value)
+        },
+        layerControl(action, value) {
+            console.log(action)
+            if(action == 'layouts'){
+                if (value == 1 && document.getElementById('switchControl')) {
+                    document.getElementById('switchControl').remove()
+                }
+                if (value == 2 && !(document.getElementById('switchControl'))) {
+                    const switchControl = document.createElement('button')
+                    switchControl.setAttribute('id', 'switchControl')
+                    switchControl.setAttribute('class', 'order-0')
+                    document.getElementById('asideTool').appendChild(switchControl)
+                    const switchBtn = createSwitch(switchControl, {
+                        text: ['左', '右'],
+                        onChange: (checked) => {
+                            vm.targetNum = Number(!checked ? 1 : 2)
+                        },
+                    })
+                }
+            }
+            this.$refs.mapCom.layerControl(action, value)
         }
     },
     computed: {
@@ -65,68 +63,47 @@ export default {
             count: 1,
             math: 0,
             targetMap: 1,
-            aMap: false,
             isMapType: '2D',
         })
 
-        function abMap(e) {
-            emit('mapMode', e.target.checked)
-            if (e.target.checked) {
-                state.aMap = true
-            } else {
-                state.aMap = false
-            }
-        }
         function onChangeDimensionMap(value) {
-            console.log(value)
             state.isMapType = value ? '3D' : '2D'
         }
-        onMounted(() => {
-            // change status will update view
-            // switchBtn.checked = true
-            // switchBtn.loading = true
-            // switchBtn.disabled = true
 
-            // delete switch button
-            // deleteSwitch(ele)
+        onMounted(() => {
+
         })
-        console.log(state.isMapType)
+
         return {
             state,
             onChangeDimensionMap,
-            abMap,
         }
     }
 }
 </script>
 
 <template>
-    <!-- <input type="checkbox" name="example" id="example" v-model="state.aMap" :value="false"> -->
-    <!-- <label for="example">切換(僅可切換一次)</label> -->
-    <!-- <a href="" @click.prevent="controlMap('moveTo', {xAxis:-96.794027, yAxis:31.624217})">123 00{{ count }}</a> -->
-
     <SearchBar class="SearchBar"
-        @moveTo="controlMap('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
-        @mapMode="(value) => mapMode(value)"
-        @layouts="(action) => layouts(action)"
+        @moveTo="layerControl('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
+        @mapMode="(value) => layerControl('mapMode', value)"
+        @layouts="(value) => layerControl('layouts', value)"
         @onChangeDimensionMap="(value) => onChangeDimensionMap(value)"
     />
-    <!-- <LayoutTool class="LayoutTool" /> -->
-    <!-- id="asideTool" -->
-    <div class="asideTool position-absolute" id="asideTool" :class="{
+    <div class="asideTool position-absolute" id="asideTool"
+    :class="{
         'top-50 end-0 translate-middle-y': asideToolPosition,
         'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
     }">
         <div class="asideTool-btn order-1" @click="controlMap('fullScreen')">全螢幕</div>
-        <div class="asideTool-btn order-1" @click="controlMap('moveTo')">定位</div>
+        <div class="asideTool-btn order-1" @click="layerControl('moveTo')">定位</div>
         <div class="asideTool-btn order-1" @click="controlMap('In')">放大</div>
         <div class="asideTool-btn order-1" @click="controlMap('Out')">縮小</div>
     </div>
 
     <div class="main">
         <div v-if="state.isMapType === '2D'">
-            <!-- <Wes ref="mapCom" :targetNum="targetNum" /> -->
-            <WebMap ref="mapCom"  :targetNum="targetNum" />
+            <Wes ref="mapCom" :targetNum="targetNum" />
+            <!-- <WebMap ref="mapCom"  :targetNum="targetNum" /> -->
         </div>
         <div v-if="state.isMapType === '3D'">
             <threeDimensionMap />

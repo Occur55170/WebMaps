@@ -49,7 +49,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         },
         // 輸出路徑設定
         // base: env.VITE_BASE, //不同模式設定不同路徑
-        base: '/Map_Demo',
+        base: '/Map_Demo/',
         // base: './',
     }
 })
