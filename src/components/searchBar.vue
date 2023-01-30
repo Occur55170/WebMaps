@@ -21,26 +21,27 @@ export default {
             // console.log('onViewChange')
         }
 
-        function changeLayouts(value){
-            emit('layouts', value)
+        function onChangeLayouts(value){
+            emit('onChangeLayouts', value)
         }
-        function moveTo(){
-            emit('moveTo')
+        function onMoveTo(){
+            emit('onMoveTo')
         }
-        function exampleChange(e){
-            emit('mapMode', e.target.checked)
+        function onExampleChange(e){
+            emit('onMapMode', e.target.checked)
         }
         function onChangeDimensionMap(e){
-            emit('onChangeDimensionMap', e.target.checked)
+            let value = e.target.checked ? '3D' : '2D'
+            emit('onChangeDimensionMap', value)
         }
         return {
             state,
             toolSwitch,
             onViewChange,
-            changeLayouts,
+            onChangeLayouts,
             onChangeDimensionMap,
-            exampleChange,
-            moveTo
+            onExampleChange,
+            onMoveTo
         }
     }
 }
@@ -81,9 +82,9 @@ export default {
                 </a>
                 <div class="condition bg-white position-absolute start-0 top-100 mt-2" v-if="state.selectFeature == 'layerConditionBtn'">
                     <div class="p-3">
-                        <p>1.點擊<div class="text-blue" @click="moveTo">前往示範案例</div></p>
+                        <p>1.點擊<div class="text-blue" @click="onMoveTo">前往示範案例</div></p>
                         <div>
-                            <input type="checkbox" name="example" id="example" @change="exampleChange">
+                            <input type="checkbox" name="example" id="example" @change="onExampleChange">
                             <label for="example">2.開啟圖層</label>
                         </div>
                         <!-- <ul>
@@ -111,14 +112,14 @@ export default {
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.selectFeature == 'splitWindowBtn'">
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="changeLayouts(1)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeLayouts(1)">
                             <svg viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>
                         </a>
                     </li>
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="changeLayouts(2)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeLayouts(2)">
                             <svg viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>

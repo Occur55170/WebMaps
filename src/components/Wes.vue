@@ -187,7 +187,7 @@ export default {
                     }
                     // 尚未關閉layout
                     break;
-                case 'layouts':
+                case 'changeLayouts':
                     if (value === 2 && !document.getElementById('map2')) {
                         addMapCount()
                     }
@@ -195,8 +195,10 @@ export default {
                         document.getElementById('map2').remove()
                     }
                     break;
+                case 'changeDimensionMap':
+                    console.log(value)
+                    break;
             }
-
         }
 
         function addMapCount() {

@@ -2,16 +2,13 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 
-import WebMap from './components/WebMap.vue'
-import Wes from './components/Wes.vue'
-import LayoutTool from './components/LayoutTool.vue'
-import SearchBar from './components/SearchBar.vue'
+// import WebMap from './components/WebMap.vue'
+// import Wes from './components/Wes.vue'
+// import LayoutTool from './components/LayoutTool.vue'
+// import SearchBar from './components/SearchBar.vue'
 
-import opp from './components/opp.vue'
+// import opp from './components/opp.vue'
 // import threeDimensionMap from './components/threeDimensionMap.vue'
-// import createSwitch,{ deleteSwitch } from 'switch-button'
-// import 'switch-button/dist/index.css'
-
 
 import createSwitch, { deleteSwitch } from 'switch-button'
 
@@ -28,7 +25,8 @@ export default {
         },
         layerControl(action, value) {
             console.log(action)
-            if(action == 'layouts'){
+            const vm = this
+            if(action === 'changeLayouts'){
                 if (value == 1 && document.getElementById('switchControl')) {
                     document.getElementById('switchControl').remove()
                 }
@@ -53,11 +51,6 @@ export default {
             return this.count == 1
         },
     },
-    components: {
-        WebMap,
-        Wes,
-        // threeDimensionMap,
-    },
     setup(props, { emit }) {
         const state = reactive({
             count: 1,
@@ -66,17 +59,8 @@ export default {
             isMapType: '2D',
         })
 
-        function onChangeDimensionMap(value) {
-            state.isMapType = value ? '3D' : '2D'
-        }
-
-        onMounted(() => {
-
-        })
-
         return {
             state,
-            onChangeDimensionMap,
         }
     }
 }
@@ -84,10 +68,10 @@ export default {
 
 <template>
     <SearchBar class="SearchBar"
-        @moveTo="layerControl('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
-        @mapMode="(value) => layerControl('mapMode', value)"
-        @layouts="(value) => layerControl('layouts', value)"
-        @onChangeDimensionMap="(value) => onChangeDimensionMap(value)"
+        @onMoveTo="layerControl('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
+        @onMapMode="(value) => layerControl('mapMode', value)"
+        @onChangeLayouts="(value) => layerControl('changeLayouts', value)"
+        @onChangeDimensionMap="(value) => layerControl('changeDimensionMap', value)"
     />
     <div class="asideTool position-absolute" id="asideTool"
     :class="{

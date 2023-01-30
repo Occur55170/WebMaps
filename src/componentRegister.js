@@ -1,3 +1,4 @@
+// 自動將components內的所有檔案import進去
 import { defineAsyncComponent } from 'vue'
 const components = import.meta.glob('./components/global/*.vue')
 export default function install(app){
