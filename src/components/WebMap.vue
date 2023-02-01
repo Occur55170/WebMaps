@@ -115,7 +115,7 @@ export default {
             map1.value.addLayer(marker);
         }
 
-        function controlMap(action) {
+        function mapControl(action) {
             // let target = props.targetNum == 1 ? map1 : map2
             let View = map1.value.getView()
             switch (action) {
@@ -239,7 +239,7 @@ export default {
         return {
             state,
             props,
-            controlMap,
+            mapControl,
             layerControl
         }
     }
@@ -248,8 +248,8 @@ export default {
 
 <template>
     <div ref="mapCom">
-        <div class="w-100 d-flex flex-nowrap mapWrap yys" id="mapWrap"></div>
-        <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
+        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
+        <div ref="compassBox" class="compass" id="compass" @click="mapControl('toNorth')">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
         </div>
     </div>

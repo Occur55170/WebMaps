@@ -1,5 +1,5 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
@@ -7,18 +7,19 @@ import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模�
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
-import { TileArcGISRest } from 'ol/source.js';
+import { TileArcGISRest } from 'ol/source.js'
 
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
-import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
-import { Image as ImageLayer } from 'ol/layer.js';
+import { Image as ImageLayer } from 'ol/layer.js'
 import ImageWMS from 'ol/source/ImageWMS'
-import { FullScreen, defaults as defaultControls } from 'ol/control.js';
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
+import { FullScreen, defaults as defaultControls } from 'ol/control.js'
+import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
+import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import 'ol/ol.css' // ol提供的css样式
 
@@ -115,7 +116,7 @@ export default {
             map1.value.addLayer(marker);
         }
 
-        function controlMap(action) {
+        function mapControl(action) {
             // let target = props.targetNum == 1 ? map1 : map2
             let View = map1.value.getView()
             switch (action) {
@@ -196,7 +197,39 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
-                    console.log(value)
+                    console.log(props.targetNum)
+                    target.innerHTML = ''
+                    if(value === '3D'){
+                        const layer = new Tile({
+                            name: "OSM",
+                            preload: Infinity,
+                            source: new OSM()
+                        })
+                        target.value = new PerspectiveMap({
+                            target: target,
+                            layers: [layer],
+                            view: targetView,
+                            overlays: [
+                                compassBox.value,
+                            ],
+                            controls: [],
+                        })
+                    } else {
+                        const layer = new TileLayer({
+                            preload: Infinity,
+                            name: 'defaultLayer',
+                            source: new OSM()
+                        })
+                        target.value = new Map({
+                            target: target,
+                            layers: [layer],
+                            view: targetView,
+                            overlays: [
+                                compassBox.value,
+                            ],
+                            controls: [],
+                        })
+                    }
                     break;
             }
         }
@@ -241,8 +274,8 @@ export default {
         return {
             state,
             props,
-            controlMap,
-            layerControl
+            mapControl,
+            layerControl,
         }
     }
 }
@@ -250,8 +283,8 @@ export default {
 
 <template>
     <div ref="mapCom">
-        <div class="w-100 d-flex flex-nowrap mapWrap yys" id="mapWrap"></div>
-        <div ref="compassBox" class="compass" id="compass" @click="controlMap('toNorth')">
+        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
+        <div ref="compassBox" class="compass" id="compass" @click="mapControl('toNorth')">
             <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
         </div>
     </div>

@@ -1,5 +1,5 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance  } from 'vue'
 import $ from 'jquery'
 
 // import WebMap from './components/WebMap.vue'
@@ -20,11 +20,11 @@ export default {
         }
     },
     methods: {
-        controlMap(action, value) {
-            this.$refs.mapCom.controlMap(action, value)
+        mapControl(action, value) {
+            this.$refs.mapCom.mapControl(action, value)
         },
         layerControl(action, value) {
-            console.log(action)
+            // console.log(action)
             const vm = this
             if(action === 'changeLayouts'){
                 if (value == 1 && document.getElementById('switchControl')) {
@@ -52,6 +52,7 @@ export default {
         },
     },
     setup(props, { emit }) {
+        const { proxy } = getCurrentInstance();
         const state = reactive({
             count: 1,
             math: 0,
@@ -78,10 +79,10 @@ export default {
         'top-50 end-0 translate-middle-y': asideToolPosition,
         'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
     }">
-        <div class="asideTool-btn order-1" @click="controlMap('fullScreen')">全螢幕</div>
+        <div class="asideTool-btn order-1" @click="mapControl('fullScreen')">全螢幕</div>
         <div class="asideTool-btn order-1" @click="layerControl('moveTo')">定位</div>
-        <div class="asideTool-btn order-1" @click="controlMap('In')">放大</div>
-        <div class="asideTool-btn order-1" @click="controlMap('Out')">縮小</div>
+        <div class="asideTool-btn order-1" @click="mapControl('In')">放大</div>
+        <div class="asideTool-btn order-1" @click="mapControl('Out')">縮小</div>
     </div>
 
     <div class="main">

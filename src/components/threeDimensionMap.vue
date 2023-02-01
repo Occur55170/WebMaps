@@ -3,19 +3,8 @@ import OSM from 'ol/source/OSM'
 import Map from 'ol/Map';
 import View from 'ol/View';
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-// import TileLayer from 'ol/layer/Tile';
 import XYZ from 'ol/source/XYZ';
-// import Imageline from 'ol-ext/control/Imageline';
-
-// import { PerspectiveView } from "ol/PluggableMap.js";
-
-
-// import { createMap } from 'ol'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap";
-import { fromLonLat } from "ol/proj";
-import { defaults as defaultControls } from 'ol/control.js';
-// import ScaleLine from 'ol-ext/control/ScaleLine';
-// import { useThreeDimension } from 'ol-ext/interaction/ThreeDimension';
 
 import 'ol-ext/dist/ol-ext.css'
 
