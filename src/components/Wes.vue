@@ -29,6 +29,10 @@ export default {
         targetNum: {
             type: Number,
             default: 1
+        },
+        layerList: {
+            type: Array,
+            default: []
         }
     },
     setup(props, { emit }) {
@@ -117,7 +121,6 @@ export default {
         }
 
         function mapControl(action) {
-            // let target = props.targetNum == 1 ? map1 : map2
             let View = map1.value.getView()
             switch (action) {
                 case 'In':
@@ -153,6 +156,7 @@ export default {
         function layerControl(action, value) {
             let target = props.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
+            let targetLayers = target.value.getLayers()
             switch (action) {
                 case 'moveTo':
                     if (value) {
@@ -174,21 +178,30 @@ export default {
                     }
                     break;
                 case 'mapMode':
-                    if (value) {
-                        const url =
-                            'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
-                            'USA/MapServer';
+                    let layersName = value.layersName
+                    if (value.checked) {
+                        console.log(props.layerList)
+                        // 預設寫好設定檔案
                         let newLayer = new TileLayer({
+                            // name 要針對每個圖層寫死
+                            name: 'america',
+                            className: 'america',
                             preload: Infinity,
                             source: new TileArcGISRest({
-                                url: url,
+                                url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
                             }),
-                        });
-                        map1.value.getLayers().extend([newLayer]);
+                        })
+                        targetLayers.extend([newLayer])
+                    } else {
+                        var layers = targetLayers.getArray();
+                        layers.forEach(node => {
+                            if(node.get('name') == layersName){
+                                target.value.removeLayer(node);
+                            }
+                        })
                     }
-                    // 尚未關閉layout
                     break;
-                case 'changeLayouts':
+                case 'changeMapCount':
                     if (value === 2 && !document.getElementById('map2')) {
                         addMapCount()
                     }
@@ -197,7 +210,6 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
-                    console.log(props.targetNum)
                     target.innerHTML = ''
                     if(value === '3D'){
                         const layer = new Tile({
@@ -255,6 +267,19 @@ export default {
                 view: defaultView,
                 controls: [],
             })
+        }
+
+        function addLayers() {
+            // test
+            const layer = new TileLayer({
+                preload: Infinity,
+                name: 'defaultLayer',
+                source: new OSM()
+            })
+            map1.value.getLayers().extend([layer]);
+        }
+        function showLayers() {
+            console.log(map1.value.getLayers().getArray())
         }
 
         onMounted(() => {

@@ -21,14 +21,18 @@ export default {
             // console.log('onViewChange')
         }
 
-        function onChangeLayouts(value){
-            emit('onChangeLayouts', value)
+        function onChangeMapCount(value){
+            emit('onChangeMapCount', value)
         }
         function onMoveTo(){
             emit('onMoveTo')
         }
         function onExampleChange(e){
-            emit('onMapMode', e.target.checked)
+            let value = {
+                checked: e.target.checked,
+                layersName: 'america',
+            }
+            emit('onMapMode', value)
         }
         function onChangeDimensionMap(e){
             let value = e.target.checked ? '3D' : '2D'
@@ -38,7 +42,7 @@ export default {
             state,
             toolSwitch,
             onViewChange,
-            onChangeLayouts,
+            onChangeMapCount,
             onChangeDimensionMap,
             onExampleChange,
             onMoveTo
@@ -112,14 +116,14 @@ export default {
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.selectFeature == 'splitWindowBtn'">
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeLayouts(1)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeMapCount(1)">
                             <svg viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>
                         </a>
                     </li>
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeLayouts(2)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeMapCount(2)">
                             <svg viewBox="0 0 20 20">
                                 <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>

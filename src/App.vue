@@ -12,22 +12,33 @@ import $ from 'jquery'
 
 import createSwitch, { deleteSwitch } from 'switch-button'
 
+//
+import { TileArcGISRest } from 'ol/source.js'
+
 export default {
-    data() {
-        return {
-            count: 1,
-            targetNum: 1
+    setup(props, { emit }) {
+        const { proxy } = getCurrentInstance();
+        const state = reactive({
+            targetNum: 1,
+            isMapType: '2D',
+            layerList: [
+                {
+                    name:'acerica',
+                    layerData: new TileArcGISRest({
+                        url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
+                    }),
+                }
+            ]
+        })
+
+        function mapControl(action, value) {
+            proxy.$refs.mapCom.mapControl(action, value)
         }
-    },
-    methods: {
-        mapControl(action, value) {
-            this.$refs.mapCom.mapControl(action, value)
-        },
-        layerControl(action, value) {
-            // console.log(action)
-            const vm = this
-            if(action === 'changeLayouts'){
+        function layerControl(action, value) {
+            console.log(action, value)
+            if(action === 'changeMapCount'){
                 if (value == 1 && document.getElementById('switchControl')) {
+                    state.targetNum = 1
                     document.getElementById('switchControl').remove()
                 }
                 if (value == 2 && !(document.getElementById('switchControl'))) {
@@ -38,30 +49,23 @@ export default {
                     const switchBtn = createSwitch(switchControl, {
                         text: ['左', '右'],
                         onChange: (checked) => {
-                            vm.targetNum = Number(!checked ? 1 : 2)
+                            state.targetNum = Number(!checked ? 1 : 2)
                         },
                     })
                 }
             }
-            this.$refs.mapCom.layerControl(action, value)
+            proxy.$refs.mapCom.layerControl(action, value)
         }
-    },
-    computed: {
-        asideToolPosition() {
-            return this.count == 1
-        },
-    },
-    setup(props, { emit }) {
-        const { proxy } = getCurrentInstance();
-        const state = reactive({
-            count: 1,
-            math: 0,
-            targetMap: 1,
-            isMapType: '2D',
-        })
-
+        function onChangeLayerList({name, uid, action}) {
+            console.log(1, name)
+            console.log(2, uid)
+            console.log(3, action)
+        }
         return {
             state,
+            mapControl,
+            layerControl,
+            onChangeLayerList
         }
     }
 }
@@ -71,13 +75,13 @@ export default {
     <SearchBar class="SearchBar"
         @onMoveTo="layerControl('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
         @onMapMode="(value) => layerControl('mapMode', value)"
-        @onChangeLayouts="(value) => layerControl('changeLayouts', value)"
+        @onChangeMapCount="(value) => layerControl('changeMapCount', value)"
         @onChangeDimensionMap="(value) => layerControl('changeDimensionMap', value)"
     />
-    <div class="asideTool position-absolute" id="asideTool"
+    <div class="asideTool position-absolute top-50 end-0 translate-middle-y" id="asideTool"
     :class="{
-        'top-50 end-0 translate-middle-y': asideToolPosition,
-        'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
+        // 'top-50 end-0 translate-middle-y': asideToolPosition,
+        // 'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
     }">
         <div class="asideTool-btn order-1" @click="mapControl('fullScreen')">全螢幕</div>
         <div class="asideTool-btn order-1" @click="layerControl('moveTo')">定位</div>
@@ -87,7 +91,10 @@ export default {
 
     <div class="main">
         <div v-if="state.isMapType === '2D'">
-            <Wes ref="mapCom" :targetNum="targetNum" />
+            <Wes ref="mapCom"
+                :targetNum="state.targetNum" :layerList="state.layerList"
+                @onChangeLayerList="({name, uid, action})=>{onChangeLayerList({name, uid, action})}"
+            />
             <!-- <WebMap ref="mapCom"  :targetNum="targetNum" /> -->
         </div>
         <div v-if="state.isMapType === '3D'">

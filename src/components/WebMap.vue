@@ -1,5 +1,5 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
@@ -7,18 +7,19 @@ import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模�
 import OSM from 'ol/source/OSM'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
-import { TileArcGISRest } from 'ol/source.js';
+import { TileArcGISRest } from 'ol/source.js'
 
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
-import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
-import { Image as ImageLayer } from 'ol/layer.js';
+import { Image as ImageLayer } from 'ol/layer.js'
 import ImageWMS from 'ol/source/ImageWMS'
-import { FullScreen, defaults as defaultControls } from 'ol/control.js';
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
+import { FullScreen, defaults as defaultControls } from 'ol/control.js'
+import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
+import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import 'ol/ol.css' // ol提供的css样式
 
@@ -28,6 +29,10 @@ export default {
         targetNum: {
             type: Number,
             default: 1
+        },
+        layerList: {
+            type: Array,
+            default: []
         }
     },
     setup(props, { emit }) {
@@ -116,7 +121,6 @@ export default {
         }
 
         function mapControl(action) {
-            // let target = props.targetNum == 1 ? map1 : map2
             let View = map1.value.getView()
             switch (action) {
                 case 'In':
@@ -152,6 +156,7 @@ export default {
         function layerControl(action, value) {
             let target = props.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
+            let targetLayers = target.value.getLayers()
             switch (action) {
                 case 'moveTo':
                     if (value) {
@@ -173,21 +178,30 @@ export default {
                     }
                     break;
                 case 'mapMode':
-                    if (value) {
-                        const url =
-                            'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
-                            'USA/MapServer';
+                    let layersName = value.layersName
+                    if (value.checked) {
+                        console.log(props.layerList)
+                        // 預設寫好設定檔案
                         let newLayer = new TileLayer({
+                            // name 要針對每個圖層寫死
+                            name: 'america',
+                            className: 'america',
                             preload: Infinity,
                             source: new TileArcGISRest({
-                                url: url,
+                                url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
                             }),
-                        });
-                        map1.value.getLayers().extend([newLayer]);
+                        })
+                        targetLayers.extend([newLayer])
+                    } else {
+                        var layers = targetLayers.getArray();
+                        layers.forEach(node => {
+                            if(node.get('name') == layersName){
+                                target.value.removeLayer(node);
+                            }
+                        })
                     }
-                    // 尚未關閉layout
                     break;
-                case 'layouts':
+                case 'changeMapCount':
                     if (value === 2 && !document.getElementById('map2')) {
                         addMapCount()
                     }
@@ -195,8 +209,41 @@ export default {
                         document.getElementById('map2').remove()
                     }
                     break;
+                case 'changeDimensionMap':
+                    target.innerHTML = ''
+                    if(value === '3D'){
+                        const layer = new Tile({
+                            name: "OSM",
+                            preload: Infinity,
+                            source: new OSM()
+                        })
+                        target.value = new PerspectiveMap({
+                            target: target,
+                            layers: [layer],
+                            view: targetView,
+                            overlays: [
+                                compassBox.value,
+                            ],
+                            controls: [],
+                        })
+                    } else {
+                        const layer = new TileLayer({
+                            preload: Infinity,
+                            name: 'defaultLayer',
+                            source: new OSM()
+                        })
+                        target.value = new Map({
+                            target: target,
+                            layers: [layer],
+                            view: targetView,
+                            overlays: [
+                                compassBox.value,
+                            ],
+                            controls: [],
+                        })
+                    }
+                    break;
             }
-
         }
 
         function addMapCount() {
@@ -222,6 +269,19 @@ export default {
             })
         }
 
+        function addLayers() {
+            // test
+            const layer = new TileLayer({
+                preload: Infinity,
+                name: 'defaultLayer',
+                source: new OSM()
+            })
+            map1.value.getLayers().extend([layer]);
+        }
+        function showLayers() {
+            console.log(map1.value.getLayers().getArray())
+        }
+
         onMounted(() => {
             initMap()
             nextTick(() => {
@@ -240,7 +300,7 @@ export default {
             state,
             props,
             mapControl,
-            layerControl
+            layerControl,
         }
     }
 }
