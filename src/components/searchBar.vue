@@ -4,7 +4,12 @@ import $ from 'jquery'
 
 export default {
     name: 'LayerControl',
-    props: {},
+    props: {
+        mapStatus: {
+            type: Array,
+            default: []
+        }
+    },
     setup(props, { emit }) {
         const state = reactive({
             selectFeature: '',
@@ -13,6 +18,8 @@ export default {
                 layerConditionBtn: false,
                 splitWindowBtn: false,
             },
+            dimensionMapStatus: computed(()=>props.mapStatus.find(node=>node.name === 'DimensionMap')?.uid),
+            hasLayers: computed(()=>props.mapStatus.filter(node=>node.name !== 'DimensionMap'))
         })
         function toolSwitch(target){
             state.selectFeature = target
@@ -39,6 +46,7 @@ export default {
             emit('onChangeDimensionMap', value)
         }
         return {
+            props,
             state,
             toolSwitch,
             onViewChange,
@@ -62,15 +70,14 @@ export default {
                     <svg viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="2">
-                            <path
-                                d="M16.466 7.5C15.643 4.237 13.952 2 12 2C9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2m2.194-8.093l3.814 1.86l-1.86 3.814" />
-                            <path
-                                d="M19 15.57c-1.804.885-4.274 1.43-7 1.43c-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" />
+                            <path d="M16.466 7.5C15.643 4.237 13.952 2 12 2C9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2m2.194-8.093l3.814 1.86l-1.86 3.814" />
+                            <path d="M19 15.57c-1.804.885-4.274 1.43-7 1.43c-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" />
                         </g>
                     </svg>
                 </a>
                 <div class="condition bg-white position-absolute start-0 top-100 mt-2" v-if="state.selectFeature == 'threeDimensionalBtn'">
                     <div class="p-3">
+                        <p>地圖一狀態 {{ state.dimensionMapStatus }}</p>
                         <input type="checkbox" name="DimensionMap" id="DimensionMap" @change="onChangeDimensionMap">
                         <label for="DimensionMap">切換2D.3D</label>
                     </div>
@@ -86,6 +93,7 @@ export default {
                 </a>
                 <div class="condition bg-white position-absolute start-0 top-100 mt-2" v-if="state.selectFeature == 'layerConditionBtn'">
                     <div class="p-3">
+                        <p>地圖一狀態 {{ state.hasLayers }}</p>
                         <p>1.點擊<div class="text-blue" @click="onMoveTo">前往示範案例</div></p>
                         <div>
                             <input type="checkbox" name="example" id="example" @change="onExampleChange">

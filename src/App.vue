@@ -21,6 +21,7 @@ export default {
         const state = reactive({
             targetNum: 1,
             isMapType: '2D',
+            mapStatus: [],
             layerList: [
                 {
                     name:'acerica',
@@ -35,7 +36,6 @@ export default {
             proxy.$refs.mapCom.mapControl(action, value)
         }
         function layerControl(action, value) {
-            console.log(action, value)
             if(action === 'changeMapCount'){
                 if (value == 1 && document.getElementById('switchControl')) {
                     state.targetNum = 1
@@ -56,7 +56,18 @@ export default {
             }
             proxy.$refs.mapCom.layerControl(action, value)
         }
-        function onChangeLayerList({name, uid, action}) {
+        function onChangeLayerList(layerData) {
+            const { name } = layerData
+            let target = state.mapStatus.findIndex(node=>node.name == name && node.targetNum == state.targetNum)
+            if(target !== -1){
+                layerData.targetNum = state.targetNum
+                state.mapStatus[target] = layerData
+            } else {
+                layerData.targetNum = state.targetNum
+                state.mapStatus.push(layerData)
+            }
+        }
+        function test({name, uid, action}) {
             console.log(1, name)
             console.log(2, uid)
             console.log(3, action)
@@ -65,7 +76,8 @@ export default {
             state,
             mapControl,
             layerControl,
-            onChangeLayerList
+            onChangeLayerList,
+            test,
         }
     }
 }
@@ -73,6 +85,7 @@ export default {
 
 <template>
     <SearchBar class="SearchBar"
+        :mapStatus="state.mapStatus"
         @onMoveTo="layerControl('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
         @onMapMode="(value) => layerControl('mapMode', value)"
         @onChangeMapCount="(value) => layerControl('changeMapCount', value)"
@@ -90,11 +103,13 @@ export default {
     </div>
 
     <div class="main">
+        <p>地圖一狀態: {{ state.mapStatus }} 地圖二狀態:</p>
         <div v-if="state.isMapType === '2D'">
             <Wes ref="mapCom"
                 :targetNum="state.targetNum" :layerList="state.layerList"
-                @onChangeLayerList="({name, uid, action})=>{onChangeLayerList({name, uid, action})}"
+                @onChangeLayerList="(layerData)=>{onChangeLayerList(layerData)}"
             />
+            <!-- @onChangeLayerList="({name, uid, action})=>{onChangeLayerList({name, uid, action})}" -->
             <!-- <WebMap ref="mapCom"  :targetNum="targetNum" /> -->
         </div>
         <div v-if="state.isMapType === '3D'">

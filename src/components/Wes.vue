@@ -157,6 +157,7 @@ export default {
             let target = props.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
             let targetLayers = target.value.getLayers()
+            let layerData
             switch (action) {
                 case 'moveTo':
                     if (value) {
@@ -180,7 +181,6 @@ export default {
                 case 'mapMode':
                     let layersName = value.layersName
                     if (value.checked) {
-                        console.log(props.layerList)
                         // 預設寫好設定檔案
                         let newLayer = new TileLayer({
                             // name 要針對每個圖層寫死
@@ -200,6 +200,11 @@ export default {
                             }
                         })
                     }
+                    layerData = {
+                        name: 'america',
+                        uid: value
+                    }
+                    emit('onChangeLayerList', layerData)
                     break;
                 case 'changeMapCount':
                     if (value === 2 && !document.getElementById('map2')) {
@@ -242,6 +247,12 @@ export default {
                             controls: [],
                         })
                     }
+                    // name uid mapTarge
+                    layerData = {
+                        name: 'DimensionMap',
+                        uid: value
+                    }
+                    emit('onChangeLayerList', layerData)
                     break;
             }
         }
