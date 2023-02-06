@@ -18,30 +18,30 @@ export default {
                 layerConditionBtn: false,
                 splitWindowBtn: false,
             },
-            dimensionMapStatus: computed(()=>props.mapStatus.find(node=>node.name === 'DimensionMap')?.uid),
-            hasLayers: computed(()=>props.mapStatus.filter(node=>node.name !== 'DimensionMap'))
+            dimensionMapStatus: computed(() => props.mapStatus.find(node => node.name === 'DimensionMap')?.uid),
+            hasLayers: computed(() => props.mapStatus.filter(node => node.name !== 'DimensionMap'))
         })
-        function toolSwitch(target){
+        function toolSwitch(target) {
             state.selectFeature = target
         }
-        function onViewChange(){
+        function onViewChange() {
             // console.log('onViewChange')
         }
 
-        function onChangeMapCount(value){
+        function onChangeMapCount(value) {
             emit('onChangeMapCount', value)
         }
-        function onMoveTo(){
+        function onMoveTo() {
             emit('onMoveTo')
         }
-        function onExampleChange(e){
+        function onExampleChange(e) {
             let value = {
                 checked: e.target.checked,
                 layersName: 'america',
             }
             emit('onMapMode', value)
         }
-        function onChangeDimensionMap(e){
+        function onChangeDimensionMap(e) {
             let value = e.target.checked ? '3D' : '2D'
             emit('onChangeDimensionMap', value)
         }
@@ -66,16 +66,20 @@ export default {
         </div>
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4">
-                <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('threeDimensionalBtn'),onViewChange()">
+                <a href="" class="MapFeatureBtn text-white"
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), onViewChange()">
                     <svg viewBox="0 0 24 24">
                         <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
                             stroke-width="2">
-                            <path d="M16.466 7.5C15.643 4.237 13.952 2 12 2C9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2m2.194-8.093l3.814 1.86l-1.86 3.814" />
-                            <path d="M19 15.57c-1.804.885-4.274 1.43-7 1.43c-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" />
+                            <path
+                                d="M16.466 7.5C15.643 4.237 13.952 2 12 2C9.239 2 7 6.477 7 12s2.239 10 5 10c.342 0 .677-.069 1-.2m2.194-8.093l3.814 1.86l-1.86 3.814" />
+                            <path
+                                d="M19 15.57c-1.804.885-4.274 1.43-7 1.43c-5.523 0-10-2.239-10-5s4.477-5 10-5c4.838 0 8.873 1.718 9.8 4" />
                         </g>
                     </svg>
                 </a>
-                <div class="condition bg-white position-absolute start-0 top-100 mt-2" v-if="state.selectFeature == 'threeDimensionalBtn'">
+                <div class="condition bg-white position-absolute start-0 top-100 mt-2"
+                    v-if="state.selectFeature == 'threeDimensionalBtn'">
                     <div class="p-3">
                         <p>地圖一狀態 {{ state.dimensionMapStatus }}</p>
                         <input type="checkbox" name="DimensionMap" id="DimensionMap" @change="onChangeDimensionMap">
@@ -91,20 +95,27 @@ export default {
                             d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3l5.571-3m-11.142 0L2.25 7.5L12 2.25l9.75 5.25l-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75L2.25 16.5l4.179-2.25m11.142 0l-5.571 3l-5.571-3" />
                     </svg>
                 </a>
-                <div class="condition bg-white position-absolute start-0 top-100 mt-2" v-if="state.selectFeature == 'layerConditionBtn'">
+                <div class="condition bg-white position-absolute start-0 top-100 mt-2"
+                    v-if="state.selectFeature == 'layerConditionBtn'">
                     <div class="p-3">
                         <p>地圖一狀態 {{ state.hasLayers }}</p>
-                        <p>1.點擊<div class="text-blue" @click="onMoveTo">前往示範案例</div></p>
+                        <p>1.點擊
+                        <div class="text-blue" @click="onMoveTo">前往示範案例</div>
+                        </p>
                         <div>
                             <input type="checkbox" name="example" id="example" @change="onExampleChange">
                             <label for="example">2.開啟圖層</label>
                         </div>
-                        <!-- <ul>
-                            <li><a href=""></a></li>
-                            <li><a href=""></a></li>
-                            <li><a href=""></a></li>
-                            <li><a href=""></a></li>
-                        </ul>
+                        <p class="">圖層選項</p>
+                        <div>
+                            <ul>
+                                <li><a href="">核心圖層</a></li>
+                                <li><a href="">衛星影像</a></li>
+                                <li><a href="">航空照片</a></li>
+                                <li><a href="">核心圖層 </a></li>
+                            </ul>
+                        </div>
+                        <!--
                         <div>
                             <p></p>
                             <p></p>
@@ -119,21 +130,25 @@ export default {
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
                     <svg viewBox="0 0 20 20">
-                        <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
+                        <path fill="currentColor"
+                            d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                     </svg>
                 </a>
-                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.selectFeature == 'splitWindowBtn'">
+                <ul class="list-unstyled position-absolute start-0 top-100 p-0"
+                    v-if="state.selectFeature == 'splitWindowBtn'">
                     <li class="mt-2">
                         <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeMapCount(1)">
                             <svg viewBox="0 0 20 20">
-                                <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
+                                <path fill="currentColor"
+                                    d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>
                         </a>
                     </li>
                     <li class="mt-2">
                         <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeMapCount(2)">
                             <svg viewBox="0 0 20 20">
-                                <path fill="currentColor" d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
+                                <path fill="currentColor"
+                                    d="M2 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2-1a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h5.5V5H4Zm12 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-5.5v10H16Zm-4.5-1a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Zm2.5-.5a.5.5 0 1 1-1 0a.5.5 0 0 1 1 0Zm1.5.5a.5.5 0 1 0 0-1a.5.5 0 0 0 0 1Z" />
                             </svg>
                         </a>
                     </li>

@@ -67,10 +67,8 @@ export default {
                 state.mapStatus.push(layerData)
             }
         }
-        function test({name, uid, action}) {
-            console.log(1, name)
-            console.log(2, uid)
-            console.log(3, action)
+        function test() {
+            // $.ajax('')
         }
         return {
             state,
@@ -101,9 +99,9 @@ export default {
         <div class="asideTool-btn order-1" @click="mapControl('In')">放大</div>
         <div class="asideTool-btn order-1" @click="mapControl('Out')">縮小</div>
     </div>
-
+    <button @click="test">testAPI</button>
     <div class="main">
-        <p>地圖一狀態: {{ state.mapStatus }} 地圖二狀態:</p>
+        <!-- <p>地圖一狀態: {{ state.mapStatus }} 地圖二狀態:</p> -->
         <div v-if="state.isMapType === '2D'">
             <Wes ref="mapCom"
                 :targetNum="state.targetNum" :layerList="state.layerList"
