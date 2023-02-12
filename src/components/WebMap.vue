@@ -158,12 +158,14 @@ export default {
             let targetView = target.value.getView()
             let targetLayers = target.value.getLayers()
             let layerData
+            // let a = [ 1.748904, 52.469845]
             switch (action) {
                 case 'moveTo':
                     if (value) {
                         const { xAxis, yAxis } = value
                         targetView.animate({
                             center: [xAxis, yAxis],
+                            // center: [ 1.748904, 52.469845],
                             zoom: 10,
                             duration: 100,
                         });

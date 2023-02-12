@@ -67,24 +67,24 @@ export default {
                 state.mapStatus.push(layerData)
             }
         }
-        function test() {
-            // $.ajax('')
-        }
         return {
             state,
             mapControl,
             layerControl,
             onChangeLayerList,
-            test,
         }
     }
 }
 </script>
 
 <template>
+    <!-- 121.00507828593254 -->
+    <!-- 24.754325687885284 -->
+    <!-- 121.00974363189721 -->
+    <!-- 24.758991033849956 -->
     <SearchBar class="SearchBar"
         :mapStatus="state.mapStatus"
-        @onMoveTo="layerControl('moveTo', { xAxis: -96.794027, yAxis: 31.624217 })"
+        @onMoveTo="layerControl('moveTo', { xAxis: 121.00507828593254, yAxis: 24.754325687885284 })"
         @onMapMode="(value) => layerControl('mapMode', value)"
         @onChangeMapCount="(value) => layerControl('changeMapCount', value)"
         @onChangeDimensionMap="(value) => layerControl('changeDimensionMap', value)"
@@ -99,7 +99,6 @@ export default {
         <div class="asideTool-btn order-1" @click="mapControl('In')">放大</div>
         <div class="asideTool-btn order-1" @click="mapControl('Out')">縮小</div>
     </div>
-    <button @click="test">testAPI</button>
     <div class="main">
         <!-- <p>地圖一狀態: {{ state.mapStatus }} 地圖二狀態:</p> -->
         <div v-if="state.isMapType === '2D'">
@@ -108,7 +107,10 @@ export default {
                 @onChangeLayerList="(layerData)=>{onChangeLayerList(layerData)}"
             />
             <!-- @onChangeLayerList="({name, uid, action})=>{onChangeLayerList({name, uid, action})}" -->
-            <!-- <WebMap ref="mapCom"  :targetNum="targetNum" /> -->
+            <!-- <WebMap ref="mapCom"
+                :targetNum="state.targetNum" :layerList="state.layerList"
+                @onChangeLayerList="(layerData)=>{onChangeLayerList(layerData)}"
+            /> -->
         </div>
         <div v-if="state.isMapType === '3D'">
             <threeDimensionMap />

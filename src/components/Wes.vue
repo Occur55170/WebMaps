@@ -1,348 +1,176 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
-
-import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
-// olPerspectiveMap
+import { Map, View } from 'ol'
+import Tile from 'ol/layer/Tile'
 import OSM from 'ol/source/OSM'
-import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
+import 'ol/ol.css'
 
-import { TileArcGISRest } from 'ol/source.js'
+import EsriJSON from 'ol/format/EsriJSON.js';
+import VectorSource from 'ol/source/Vector.js';
+import XYZ from 'ol/source/XYZ.js';
+import { Fill, Stroke, Style } from 'ol/style.js';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
+import { createXYZ } from 'ol/tilegrid.js';
+import { fromLonLat } from 'ol/proj.js';
+import { tile as tileStrategy } from 'ol/loadingstrategy.js';
+import GeoJSON from 'ol/format/GeoJSON';
 
-import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
-import Point from 'ol/geom/Point'
-import VectorSource from 'ol/source/Vector.js'
-import { Icon, Style } from 'ol/style.js'
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
-import { Image as ImageLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS'
-import { FullScreen, defaults as defaultControls } from 'ol/control.js'
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
-
-import 'ol/ol.css' // ol提供的css样式
-
+const map = ref(null) // 绑定地图实例的变量
 
 export default {
-    props: {
-        targetNum: {
-            type: Number,
-            default: 1
-        },
-        layerList: {
-            type: Array,
-            default: []
-        }
-    },
     setup(props, { emit }) {
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
-            defaultCenterZoom: 17,
-        })
-        const compassBox = ref(null)
-
-        const defaultLayers = [
-            new TileLayer({
-                preload: Infinity,
-                name: 'defaultLayer',
-                source: new OSM()
-            }),
-        ];
-
-        const defaultView = new View({
-            projection: 'EPSG:4326',
-            center: state.defaultCenter,
-            zoom: state.defaultCenterZoom,
-            // 測試用
-            rotation: 1
-        });
-
-        compassBox.value = new Overlay({
-            element: compassBox.value,
-            positioning: 'center-center',
-            stopEvent: false,
-            rotation: 0
         })
 
-        // 初始化地圖
+        let map;
+
         function initMap() {
-            const map1 = document.createElement('div')
-            map1.setAttribute('id', 'map1')
-            map1.setAttribute('class', 'w-100')
-            document.getElementById('mapWrap').appendChild(map1)
-            map1.value = new Map({
-                target: 'map1',
-                layers: defaultLayers,
-                view: defaultView,
-                overlays: [
-                    compassBox.value,
-                ],
-                controls: [],
-            })
-        }
 
-        // 地圖旋轉事件
-        function mapRotate() {
-            defaultView.on('change:rotation', evt => {
-                const rotation = map1.value.getView().getRotation();
-                const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
-                console.log(`地圖旋轉角度為 ${rotationDegrees}`);
+                      // https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/RIVERPOLY_(1)/FeatureServer/0
+            const url = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
 
-                //  轉動遮照
-                const newMask = document.getElementById('compass');
-                newMask.style.transform = `rotate(${rotationDegrees}rad)`;
+            const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
+            // 'https://services-eu1.arcgis.com/NPIbx47lsIiu2pqz/ArcGIS/rest/services/' +
+            // 'Neptune_Coastline_Campaign_Open_Data_Land_Use_2014/FeatureServer/';
+            const layer = '0';
+
+            const fillColors = {
+                'Lost To Sea Since 1965': [0, 0, 0, 1],
+                'Urban/Built-up': [104, 104, 104, 1],
+                'Shacks': [115, 76, 0, 1],
+                'Industry': [230, 0, 0, 1],
+                'Wasteland': [230, 0, 0, 1],
+                'Caravans': [0, 112, 255, 0.5],
+                'Defence': [230, 152, 0, 0.5],
+                'Transport': [230, 152, 0, 1],
+                'Open Countryside': [255, 255, 115, 1],
+                'Woodland': [38, 115, 0, 1],
+                'Managed Recreation/Sport': [85, 255, 0, 1],
+                'Amenity Water': [0, 112, 255, 1],
+                'Inland Water': [0, 38, 115, 1],
+            };
+
+            const style = new Style({
+            fill: new Fill(),
+            stroke: new Stroke({
+                color: [0, 0, 0, 1],
+                width: 0.5,
+            }),
             });
-        }
 
-        function addPoint(targetLng, targetLat) {
-            const marker = new Vector({
-                source: new VectorSource({
-                    features: [
-                        new Feature({
-                            geometry: new Point([targetLng, targetLat]),
-                            name: 'Null Island',
-                            population: 4000,
-                            rainfall: 500,
-                        })
-                    ]
+            const vectorSource = new VectorSource({
+                format: new EsriJSON(),
+                url: function (extent, resolution, projection) {
+                    // ArcGIS Server only wants the numeric portion of the projection ID.
+                    const srid = projection
+                    .getCode()
+                    .split(/:(?=\d+$)/)
+                    .pop();
+
+                    const url =
+                    serviceUrl +
+                    layer +
+                    '/query/?f=json&' +
+                    'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
+                    encodeURIComponent(
+                        '{"xmin":' +
+                        extent[0] +
+                        ',"ymin":' +
+                        extent[1] +
+                        ',"xmax":' +
+                        extent[2] +
+                        ',"ymax":' +
+                        extent[3] +
+                        ',"spatialReference":{"wkid":' +
+                        srid +
+                        '}}'
+                    ) +
+                    '&geometryType=esriGeometryEnvelope&inSR=' +
+                    srid +
+                    '&outFields=*' +
+                    '&outSR=' +
+                    srid;
+
+                    return url;
+                },
+                strategy: tileStrategy(
+                    createXYZ({
+                    tileSize: 512,
+                    })
+                ),
+            });
+
+            const vector = new VectorLayer({
+                source: vectorSource,
+                style: function (feature) {
+                    const classify = feature.get('LU_2014');
+                    const color = fillColors[classify] || [0, 0, 0, 0];
+                    style.getFill().setColor(color);
+                    return style;
+                },
+                opacity: 0.7,
+            });
+
+            const raster = new TileLayer({
+                source: new XYZ({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/' + 'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
                 }),
-                style: new Style({
-                    image: new Icon({
-                        anchor: [0.5, 100],
-                        anchorXUnits: 'fraction',
-                        anchorYUnits: 'pixels',
-                        // 圖片連結需修改
-                        src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-                    }),
-                })
-            })
-            map1.value.addLayer(marker);
-        }
+            });
 
-        function mapControl(action) {
-            let View = map1.value.getView()
-            switch (action) {
-                case 'In':
-                    View.animate({
-                        zoom: View.getZoom() + 1,
-                    })
-                    break;
-                case 'Out':
-                    View.animate({
-                        zoom: View.getZoom() - 1,
-                    })
-                    break;
-                case 'toNorth':
-                    View.animate({
-                        rotation: 0,
-                    })
-                    break;
-                case 'fullScreen':
-                    let target = map1
-                    if (target.requestFullscreen) {
-                        target.requestFullscreen()
-                    } else if (target.msRequestFullscreen) {
-                        target.msRequestFullscreen()
-                    } else if (target.mozRequestFullScreen) {
-                        target.mozRequestFullScreen()
-                    } else if (target.webkitRequestFullscreen) {
-                        target.webkitRequestFullscreen()
-                    }
-                    break;
-            }
-        }
+            map = new Map({
+                layers: [raster, vector],
+                target: document.getElementById('map'),
+                view: new View({
+                    center: fromLonLat([1.72, 52.4]),
+                    zoom: 14,
+                }),
+            });
 
-        function layerControl(action, value) {
-            let target = props.targetNum == 1 ? map1 : map2
-            let targetView = target.value.getView()
-            let targetLayers = target.value.getLayers()
-            let layerData
-            switch (action) {
-                case 'moveTo':
-                    if (value) {
-                        const { xAxis, yAxis } = value
-                        targetView.animate({
-                            center: [xAxis, yAxis],
-                            zoom: 10,
-                            duration: 100,
-                        });
-                    } else {
-                        navigator.geolocation.getCurrentPosition(function (pos) {
-                            targetView.animate({
-                                center: [pos.coords.longitude, pos.coords.latitude],
-                                zoom: 17,
-                                duration: 100,
-                            });
-                            addPoint(pos.coords.longitude, pos.coords.latitude)
-                        })
-                    }
-                    break;
-                case 'mapMode':
-                    let layersName = value.layersName
-                    if (value.checked) {
-                        // 預設寫好設定檔案
-                        let newLayer = new TileLayer({
-                            // name 要針對每個圖層寫死
-                            name: 'america',
-                            className: 'america',
-                            preload: Infinity,
-                            source: new TileArcGISRest({
-                                url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
-                            }),
-                        })
-                        targetLayers.extend([newLayer])
-                    } else {
-                        var layers = targetLayers.getArray();
-                        layers.forEach(node => {
-                            if(node.get('name') == layersName){
-                                target.value.removeLayer(node);
-                            }
-                        })
-                    }
-                    layerData = {
-                        name: 'america',
-                        uid: value
-                    }
-                    emit('onChangeLayerList', layerData)
-                    break;
-                case 'changeMapCount':
-                    if (value === 2 && !document.getElementById('map2')) {
-                        addMapCount()
-                    }
-                    if (value === 1 && document.getElementById('map2')) {
-                        document.getElementById('map2').remove()
-                    }
-                    break;
-                case 'changeDimensionMap':
-                    target.innerHTML = ''
-                    if(value === '3D'){
-                        const layer = new Tile({
-                            name: "OSM",
-                            preload: Infinity,
-                            source: new OSM()
-                        })
-                        target.value = new PerspectiveMap({
-                            target: target,
-                            layers: [layer],
-                            view: targetView,
-                            overlays: [
-                                compassBox.value,
-                            ],
-                            controls: [],
-                        })
-                    } else {
-                        const layer = new TileLayer({
-                            preload: Infinity,
-                            name: 'defaultLayer',
-                            source: new OSM()
-                        })
-                        target.value = new Map({
-                            target: target,
-                            layers: [layer],
-                            view: targetView,
-                            overlays: [
-                                compassBox.value,
-                            ],
-                            controls: [],
-                        })
-                    }
-                    // name uid mapTarge
-                    layerData = {
-                        name: 'DimensionMap',
-                        uid: value
-                    }
-                    emit('onChangeLayerList', layerData)
-                    break;
-            }
-        }
-
-        function addMapCount() {
-            const map2 = document.createElement('div')
-            map2.setAttribute('id', 'map2')
-            map2.setAttribute('class', 'w-100')
-            document.getElementById('mapWrap').appendChild(map2)
-
-            const center2 = Object.values(map1.value.getView().getCenter())
-            const zoom2 = map1.value.getView().getZoom()
-            const proj2 = map1.value.getView().getProjection()
-            map2.value = new Map({
-                target: 'map2',
-                layers: [
-                    new TileLayer({
-                        preload: Infinity,
-                        name: 'defaultLayer',
-                        source: new OSM()
-                    })
-                ],
-                view: defaultView,
-                controls: [],
-            })
-        }
-
-        function addLayers() {
-            // test
-            const layer = new TileLayer({
-                preload: Infinity,
-                name: 'defaultLayer',
-                source: new OSM()
-            })
-            map1.value.getLayers().extend([layer]);
         }
         function showLayers() {
-            console.log(map1.value.getLayers().getArray())
+            console.log(map.getLayers().getArray())
+        }
+        function removeLayers() {
+            map.getLayers().getArray().splice(1, 1)
+        }
+        function move() {
+            // let target = props.targetNum == 1 ? map1 : map2
+            // let targetView = target.value.getView()
+            // let targetLayers = target.value.getLayers()
+            map.getView().animate({
+                center: fromLonLat(state.defaultCenter),
+                // center: [120.975402, 24.785897],
+                zoom: 10,
+                duration: 100,
+            });
         }
 
         onMounted(() => {
             initMap()
-            nextTick(() => {
-                const rotation = map1.value.getView().getRotation();
-                const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
-                console.log(`地圖旋轉角度為 ${rotationDegrees}`);
-
-                // bug
-                const newMask = document.getElementById('compass');
-                newMask.style.transform = `rotate(${rotationDegrees}rad)`;
-                mapRotate()
-            })
         })
-
         return {
             state,
-            props,
-            mapControl,
-            layerControl,
+            showLayers,
+            removeLayers,
+            move
         }
     }
 }
 </script>
 
 <template>
-    <div ref="mapCom">
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
-        <div ref="compassBox" class="compass" id="compass" @click="mapControl('toNorth')">
-            <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
-        </div>
-    </div>
+    <BUtton @click="showLayers">123</BUtton>
+    <BUtton @click="removeLayers">remove</BUtton>
+    <BUtton @click="move">move</BUtton>
+    <div tabindex="2" id="map" class="map__x"></div>
 </template>
-
-<style lang="sass" scoped>
-.mapWrap
-    justify-content: space-between
-    height: 100vh
-
-.mapWrap div
-    width: 100%
-
-// bug
-.compass
-    position: absolute
-    right: 0
-    bottom: 0
-    width: 100px
-    height: 100px
-    img
-        transform: rotateZ(-90deg)
-        width: 100%
-        height: 100%
+<style lang="scss" scoped>
+.map__x {
+    width: 100%;
+    height: 600vh;
+    border: 1px solid #eee;
+}
 </style>
