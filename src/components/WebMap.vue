@@ -39,8 +39,8 @@ export default {
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
+            // targetMap: props.targetNum == 1 ? map1 : map2
         })
-        const compassBox = ref(null)
 
         const defaultLayers = [
             new TileLayer({
@@ -58,12 +58,6 @@ export default {
             rotation: 1
         });
 
-        compassBox.value = new Overlay({
-            element: compassBox.value,
-            positioning: 'center-center',
-            stopEvent: false,
-            rotation: 0
-        })
 
         // 初始化地圖
         function initMap() {
@@ -75,24 +69,8 @@ export default {
                 target: 'map1',
                 layers: defaultLayers,
                 view: defaultView,
-                overlays: [
-                    compassBox.value,
-                ],
                 controls: [],
             })
-        }
-
-        // 地圖旋轉事件
-        function mapRotate() {
-            defaultView.on('change:rotation', evt => {
-                const rotation = map1.value.getView().getRotation();
-                const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
-                console.log(`地圖旋轉角度為 ${rotationDegrees}`);
-
-                //  轉動遮照
-                const newMask = document.getElementById('compass');
-                newMask.style.transform = `rotate(${rotationDegrees}rad)`;
-            });
         }
 
         function addPoint(targetLng, targetLat) {
@@ -157,8 +135,6 @@ export default {
             let target = props.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
             let targetLayers = target.value.getLayers()
-            let layerData
-            // let a = [ 1.748904, 52.469845]
             switch (action) {
                 case 'moveTo':
                     if (value) {
@@ -202,11 +178,6 @@ export default {
                             }
                         })
                     }
-                    layerData = {
-                        name: 'america',
-                        uid: value
-                    }
-                    emit('onChangeLayerList', layerData)
                     break;
                 case 'changeMapCount':
                     if (value === 2 && !document.getElementById('map2')) {
@@ -228,9 +199,6 @@ export default {
                             target: target,
                             layers: [layer],
                             view: targetView,
-                            overlays: [
-                                compassBox.value,
-                            ],
                             controls: [],
                         })
                     } else {
@@ -243,18 +211,9 @@ export default {
                             target: target,
                             layers: [layer],
                             view: targetView,
-                            overlays: [
-                                compassBox.value,
-                            ],
                             controls: [],
                         })
                     }
-                    // name uid mapTarge
-                    layerData = {
-                        name: 'DimensionMap',
-                        uid: value
-                    }
-                    emit('onChangeLayerList', layerData)
                     break;
             }
         }
@@ -297,16 +256,6 @@ export default {
 
         onMounted(() => {
             initMap()
-            nextTick(() => {
-                const rotation = map1.value.getView().getRotation();
-                const rotationDegrees = Math.floor(rotation * 180 / Math.PI);
-                console.log(`地圖旋轉角度為 ${rotationDegrees}`);
-
-                // bug
-                const newMask = document.getElementById('compass');
-                newMask.style.transform = `rotate(${rotationDegrees}rad)`;
-                mapRotate()
-            })
         })
 
         return {
@@ -314,6 +263,7 @@ export default {
             props,
             mapControl,
             layerControl,
+            showLayers
         }
     }
 }
@@ -322,9 +272,6 @@ export default {
 <template>
     <div ref="mapCom">
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
-        <div ref="compassBox" class="compass" id="compass" @click="mapControl('toNorth')">
-            <img src="https://cdn.pixabay.com/photo/2012/04/02/15/57/right-24825_1280.png" alt="Compass">
-        </div>
     </div>
 </template>
 
@@ -335,16 +282,4 @@ export default {
 
 .mapWrap div
     width: 100%
-
-// bug
-.compass
-    position: absolute
-    right: 0
-    bottom: 0
-    width: 100px
-    height: 100px
-    img
-        transform: rotateZ(-90deg)
-        width: 100%
-        height: 100%
 </style>

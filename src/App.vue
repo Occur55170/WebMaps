@@ -2,13 +2,6 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance  } from 'vue'
 import $ from 'jquery'
 
-// import WebMap from './components/WebMap.vue'
-// import Wes from './components/Wes.vue'
-// import LayoutTool from './components/LayoutTool.vue'
-// import SearchBar from './components/SearchBar.vue'
-
-// import opp from './components/opp.vue'
-// import threeDimensionMap from './components/threeDimensionMap.vue'
 
 import createSwitch, { deleteSwitch } from 'switch-button'
 
@@ -29,7 +22,7 @@ export default {
                         url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
                     }),
                 }
-            ]
+            ],
         })
 
         function mapControl(action, value) {
@@ -44,8 +37,8 @@ export default {
                 if (value == 2 && !(document.getElementById('switchControl'))) {
                     const switchControl = document.createElement('button')
                     switchControl.setAttribute('id', 'switchControl')
-                    switchControl.setAttribute('class', 'order-0')
-                    document.getElementById('asideTool').appendChild(switchControl)
+                    switchControl.setAttribute('class', 'switchControl position-fixed start-50 translate-middle-x')
+                    document.body.appendChild(switchControl)
                     const switchBtn = createSwitch(switchControl, {
                         text: ['左', '右'],
                         onChange: (checked) => {
@@ -67,17 +60,22 @@ export default {
                 state.mapStatus.push(layerData)
             }
         }
+        function showMapStatus() {
+            proxy.$refs.mapCom.showLayers()
+        }
         return {
             state,
             mapControl,
             layerControl,
             onChangeLayerList,
+            showMapStatus
         }
     }
 }
 </script>
 
 <template>
+    <div class="position-fixed" style="z-index: 999;" @click="showMapStatus">123</div>
     <SearchBar class="SearchBar"
         :mapStatus="state.mapStatus"
         @onMoveTo="layerControl('moveTo', { xAxis: 121.00507828593254, yAxis: 24.754325687885284 })"
@@ -85,28 +83,32 @@ export default {
         @onChangeMapCount="(value) => layerControl('changeMapCount', value)"
         @onChangeDimensionMap="(value) => layerControl('changeDimensionMap', value)"
     />
-    <div class="asideTool position-absolute top-50 end-0 translate-middle-y" id="asideTool"
-    :class="{
-        // 'top-50 end-0 translate-middle-y': asideToolPosition,
-        // 'd-flex flex-nowrap top-0 start-50 translate-middle-x align-items-center': !asideToolPosition,
-    }">
-        <div class="asideTool-btn order-1" @click="mapControl('fullScreen')">全螢幕</div>
-        <div class="asideTool-btn order-1" @click="layerControl('moveTo')">定位</div>
-        <div class="asideTool-btn order-1" @click="mapControl('In')">放大</div>
-        <div class="asideTool-btn order-1" @click="mapControl('Out')">縮小</div>
+    <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
+        <div class="asideTool-btn order-1 mb-0" @click="mapControl('In')">
+            <img src="./assets/img/icon/zoomIn.svg" alt="zoomIn">
+        </div>
+        <div class="asideTool-btn order-1 mb-2" @click="mapControl('Out')">
+            <img src="./assets/img/icon/zoomOut.svg" alt="zoomOut">
+        </div>
+        <div class="asideTool-btn order-1 mb-2" @click="mapControl('toNorth')">
+            <img src="./assets/img/icon/compass.svg" alt="compass">
+        </div>
+        <div class="asideTool-btn order-1 mb-2" @click="layerControl('moveTo')">
+            <!-- location缺圖 -->
+            <img src="./assets/img/icon/zoom.svg" alt="location">
+        </div>
+        <div class="asideTool-btn order-1 mb-2" @click="mapControl('fullScreen')">
+            <img src="./assets/img/icon/zoom.svg" alt="zoom">
+        </div>
     </div>
     <div class="main">
-        <!-- <p>地圖一狀態: {{ state.mapStatus }} 地圖二狀態:</p> -->
         <div v-if="state.isMapType === '2D'">
-            <Wes ref="mapCom"
+            <!-- <Wes ref="mapCom"
                 :targetNum="state.targetNum" :layerList="state.layerList"
-                @onChangeLayerList="(layerData)=>{onChangeLayerList(layerData)}"
-            />
-            <!-- @onChangeLayerList="({name, uid, action})=>{onChangeLayerList({name, uid, action})}" -->
-            <!-- <WebMap ref="mapCom"
-                :targetNum="state.targetNum" :layerList="state.layerList"
-                @onChangeLayerList="(layerData)=>{onChangeLayerList(layerData)}"
             /> -->
+            <WebMap ref="mapCom"
+                :targetNum="state.targetNum" :layerList="state.layerList"
+            />
         </div>
         <div v-if="state.isMapType === '3D'">
             <threeDimensionMap />
@@ -134,8 +136,6 @@ export default {
     top: 20px
     left: 20px
     z-index: 220
-
-
 .LayoutTool
     position: absolute
     top: 0
@@ -143,4 +143,8 @@ export default {
     z-index: 220
 .asideTool
     z-index: 220
+    left: 20px
+
+.switchControl
+    top: 10px
 </style>
