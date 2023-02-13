@@ -29,76 +29,30 @@ export default {
 
         function initMap() {
 
-                      // https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/RIVERPOLY_(1)/FeatureServer/0
-            const url = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
 
-            const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
-            // 'https://services-eu1.arcgis.com/NPIbx47lsIiu2pqz/ArcGIS/rest/services/' +
-            // 'Neptune_Coastline_Campaign_Open_Data_Land_Use_2014/FeatureServer/';
             const layer = '0';
 
-            const fillColors = {
-                'Lost To Sea Since 1965': [0, 0, 0, 1],
-                'Urban/Built-up': [104, 104, 104, 1],
-                'Shacks': [115, 76, 0, 1],
-                'Industry': [230, 0, 0, 1],
-                'Wasteland': [230, 0, 0, 1],
-                'Caravans': [0, 112, 255, 0.5],
-                'Defence': [230, 152, 0, 0.5],
-                'Transport': [230, 152, 0, 1],
-                'Open Countryside': [255, 255, 115, 1],
-                'Woodland': [38, 115, 0, 1],
-                'Managed Recreation/Sport': [85, 255, 0, 1],
-                'Amenity Water': [0, 112, 255, 1],
-                'Inland Water': [0, 38, 115, 1],
-            };
-
+            const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
             const style = new Style({
-            fill: new Fill(),
-            stroke: new Stroke({
-                color: [0, 0, 0, 1],
-                width: 0.5,
-            }),
+                fill: new Fill(),
+                stroke: new Stroke({
+                    color: [0, 0, 0, 1],
+                    width: 0.5,
+                }),
             });
 
             const vectorSource = new VectorSource({
                 format: new EsriJSON(),
                 url: function (extent, resolution, projection) {
-                    // ArcGIS Server only wants the numeric portion of the projection ID.
-                    const srid = projection
-                    .getCode()
-                    .split(/:(?=\d+$)/)
-                    .pop();
-
-                    const url =
-                    serviceUrl +
-                    layer +
-                    '/query/?f=json&' +
-                    'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
-                    encodeURIComponent(
-                        '{"xmin":' +
-                        extent[0] +
-                        ',"ymin":' +
-                        extent[1] +
-                        ',"xmax":' +
-                        extent[2] +
-                        ',"ymax":' +
-                        extent[3] +
-                        ',"spatialReference":{"wkid":' +
-                        srid +
-                        '}}'
-                    ) +
-                    '&geometryType=esriGeometryEnvelope&inSR=' +
-                    srid +
-                    '&outFields=*' +
-                    '&outSR=' +
-                    srid;
-
+                    const srid = projection.getCode().split(/:(?=\d+$)/).pop();
+                    const url = serviceUrl + '/query/?f=json&' + 'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
+                    encodeURIComponent(`{"xmin":${ extent[0] },"ymin":${ extent[1] },"xmax":${ extent[2] },"ymax":${ extent[3] },"spatialReference":{"wkid":${ srid }}}`) +
+                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
                     return url;
                 },
                 strategy: tileStrategy(
                     createXYZ({
-                    tileSize: 512,
+                        tileSize: 512,
                     })
                 ),
             });
@@ -107,7 +61,7 @@ export default {
                 source: vectorSource,
                 style: function (feature) {
                     const classify = feature.get('LU_2014');
-                    const color = fillColors[classify] || [0, 0, 0, 0];
+                    const color = [0, 0, 0, 0];
                     style.getFill().setColor(color);
                     return style;
                 },

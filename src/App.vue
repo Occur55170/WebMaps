@@ -78,10 +78,6 @@ export default {
 </script>
 
 <template>
-    <!-- 121.00507828593254 -->
-    <!-- 24.754325687885284 -->
-    <!-- 121.00974363189721 -->
-    <!-- 24.758991033849956 -->
     <SearchBar class="SearchBar"
         :mapStatus="state.mapStatus"
         @onMoveTo="layerControl('moveTo', { xAxis: 121.00507828593254, yAxis: 24.754325687885284 })"
