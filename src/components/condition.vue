@@ -14,8 +14,9 @@ export default {
 
 <template>
   <div>
+    conditionconditioncondition
   </div>
 </template>
 
-<style>
+<style lang="sass">
 </style>

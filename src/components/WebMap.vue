@@ -30,10 +30,6 @@ export default {
             type: Number,
             default: 1
         },
-        layerList: {
-            type: Array,
-            default: []
-        }
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -63,7 +59,7 @@ export default {
         function initMap() {
             const map1 = document.createElement('div')
             map1.setAttribute('id', 'map1')
-            map1.setAttribute('class', 'w-100')
+            map1.setAttribute('class', 'map1 w-100')
             document.getElementById('mapWrap').appendChild(map1)
             map1.value = new Map({
                 target: 'map1',
@@ -221,7 +217,7 @@ export default {
         function addMapCount() {
             const map2 = document.createElement('div')
             map2.setAttribute('id', 'map2')
-            map2.setAttribute('class', 'w-100')
+            map2.setAttribute('class', 'map2 w-100')
             document.getElementById('mapWrap').appendChild(map2)
 
             const center2 = Object.values(map1.value.getView().getCenter())
