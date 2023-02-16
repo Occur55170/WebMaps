@@ -2,10 +2,6 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance  } from 'vue'
 import $ from 'jquery'
 
-
-//
-import { TileArcGISRest } from 'ol/source.js'
-
 export default {
     setup(props, { emit }) {
         const { proxy } = getCurrentInstance();
@@ -19,28 +15,16 @@ export default {
             switchControl: false,
             dimensionMapStatus: '2D',
             targetNum: 1,
-            mapStatus: [],
         })
 
         function toolSwitch(target) {
-            state.selectFeature = target
-        }
-        function onChangeDimensionMap(value) {
-            state.dimensionMapStatus = value
-            layerControl('changeDimensionMap', value)
-        }
-        function onChangeMapCount(value) {
-            layerControl('changeMapCount', value)
-        }
-        function onMoveTo() {
-            layerControl('moveTo', { xAxis: -98.144457,  yAxis: 26.178938 })
-        }
-        function onExampleChange(e) {
-            let value = {
-                checked: e.target.checked,
-                layersName: 'america',
-            }
-            layerControl('mapMode', value)
+            Object.keys(state.toolSwitch).forEach(node=>{
+                if(node === target){
+                    state.toolSwitch[target] = true
+                } else {
+                    state.toolSwitch[node] = false
+                }
+            })
         }
         function mapControl(action, value) {
             proxy.$refs.mapCom.mapControl(action, value)
@@ -59,30 +43,24 @@ export default {
             }
             proxy.$refs.mapCom.layerControl(action, value)
         }
-        function onChangeLayerList(layerData) {
-            const { name } = layerData
-            let target = state.mapStatus.findIndex(node=>node.name == name && node.targetNum == state.targetNum)
-            if(target !== -1){
-                layerData.targetNum = state.targetNum
-                state.mapStatus[target] = layerData
-            } else {
-                layerData.targetNum = state.targetNum
-                state.mapStatus.push(layerData)
-            }
+
+        let map1LayerStatus;
+        function getMapLayerStatus(){
+            map1LayerStatus = proxy.$refs.mapCom.showLayers()
+            // let a = proxy.$refs.mapCom.showLayers()
+            console.log(map1LayerStatus)
         }
         function showMapStatus() {
-            proxy.$refs.mapCom.showLayers()
+            let a = proxy.$refs.mapCom.showLayers()
+            console.log(a)
         }
         return {
             state,
+            map1LayerStatus,
             toolSwitch,
-            onChangeDimensionMap,
-            onChangeMapCount,
-            onMoveTo,
-            onExampleChange,
             mapControl,
             layerControl,
-            onChangeLayerList,
+            getMapLayerStatus,
             showMapStatus
         }
     }
@@ -94,29 +72,34 @@ export default {
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white">
-                    <!-- <img :src="`./assets/img/icon/${state.dimensionMapStatus == '2D' ? 'twoDimensional.svg' : 'threeDimensional.svg' }`" alt=""> -->
-                    <img src="./assets/img/icon/twoDimensional.svg" v-if="state.dimensionMapStatus == '2D'" @click.prevent="toolSwitch('threeDimensionalBtn'), onChangeDimensionMap('3D')">
-                    <img src="./assets/img/icon/threeDimensional.svg" v-else @click.prevent="toolSwitch('threeDimensionalBtn'), onChangeDimensionMap('2D')">
+                    <img src="./assets/img/icon/twoDimensional.svg"
+                    v-if="state.dimensionMapStatus == '2D'"
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), layerControl('changeDimensionMap', '3D')">
+                    <img src="./assets/img/icon/threeDimensional.svg"
+                    v-else
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), layerControl('changeDimensionMap', '2D')">
                 </a>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('layerConditionBtn')">
+                <a href="" class="MapFeatureBtn text-white"
+                @click.prevent="toolSwitch('layerConditionBtn'), getMapLayerStatus()">
                     <img src="./assets/img/icon/baseLayer.svg" alt="">
                 </a>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
+                <a href="" class="MapFeatureBtn text-white"
+                @click.prevent="toolSwitch('splitWindowBtn')">
                     <img src="./assets/img/icon/singleWindow.svg" alt="">
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0"
-                    v-if="state.selectFeature == 'splitWindowBtn'">
+                    v-if="state.toolSwitch.splitWindowBtn">
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeMapCount(1)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="layerControl('changeMapCount', 1)">
                             <img src="./assets/img/icon/singleWindow.svg" alt="">
                         </a>
                     </li>
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onChangeMapCount(2)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="layerControl('changeMapCount', 2)">
                             <img src="./assets/img/icon/doubleWindows.svg" alt="">
                         </a>
                     </li>
@@ -135,7 +118,6 @@ export default {
             <img src="./assets/img/icon/compass.svg" alt="compass">
         </a>
         <a href="" class="asideTool-btn order-1 mb-2" @click.prevent="layerControl('moveTo')">
-            <!-- location缺圖 -->
             <img src="./assets/img/icon/location.svg" alt="location">
         </a>
         <a href="" class="asideTool-btn order-1 mb-2" @click.prevent="mapControl('fullScreen')">
@@ -155,8 +137,6 @@ export default {
         :class="{'active': state.targetNum === 2}"
         @click="()=>{
             state.targetNum = 2
-            // $(`.map2`).addClass('currentMap')
-            // $(`.map1`).removeClass('currentMap')
         }">右</div>
     </div>
     <div class="main">
@@ -166,6 +146,9 @@ export default {
             /> -->
             <WebMap ref="mapCom"
                 :targetNum="state.targetNum" :layerList="state.layerList"
+                @addMapLayersStatus=""
+                @delMapLayersStatus=""
+                @getMapLayersStatus=""
             />
         </div>
         <div v-else>
@@ -173,14 +156,17 @@ export default {
         </div>
     </div>
     <div class="condition bg-white position-absolute end-0 bottom-0 mt-2"
-        v-if="state.selectFeature == 'layerConditionBtn'">
+        v-if="state.toolSwitch.layerConditionBtn">
         <div class="p-3">
-            <p>地圖一狀態 {{ state.hasLayers }}</p>
+            <p>地圖狀態 {{ state.targetNum }} : {{ map1LayerStatus }}</p>
             <p>1.點擊
-            <div class="text-blue" @click="onMoveTo">前往示範案例</div>
+            <div class="text-blue" @click.prevent="layerControl('moveTo', { xAxis: -98.144457,  yAxis: 26.178938 })">前往示範案例</div>
             </p>
             <div>
-                <input type="checkbox" name="example" id="example" @change="onExampleChange">
+                <input type="checkbox" name="example" id="example" @change="(e)=>{layerControl('mapMode', {
+                    checked: e.target.checked,
+                    layersName: 'america',
+                })}">
                 <label for="example">2.開啟圖層</label>
             </div>
             <p class="">圖層選項</p>
@@ -193,7 +179,7 @@ export default {
                 </ul>
             </div>
         </div>
-        <condition></condition>
+        <condition />
     </div>
     <div class="mapSourceOption">
         <mapSourceOption />

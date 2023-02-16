@@ -247,6 +247,7 @@ export default {
             map1.value.getLayers().extend([layer]);
         }
         function showLayers() {
+            return map1.value.getLayers().getArray()
             console.log(map1.value.getLayers().getArray())
         }
 
