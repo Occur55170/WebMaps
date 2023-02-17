@@ -23,6 +23,9 @@ import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import 'ol/ol.css' // ol提供的css样式
 
+// export const getMapLayers =  function(value = 1){
+//     return document.getElementById(`map${value}`) || ''
+// }
 
 export default {
     props: {
@@ -35,7 +38,6 @@ export default {
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
-            // targetMap: props.targetNum == 1 ? map1 : map2
         })
 
         const defaultLayers = [
@@ -246,9 +248,19 @@ export default {
             })
             map1.value.getLayers().extend([layer]);
         }
-        function showLayers() {
-            return map1.value.getLayers().getArray()
+        function getMapLayers() {
+            // console.log(map1.value.getLayers().getArray())
+            // let a = map1.value.getLayers().getArray()
+            // a.forEach(node=>{
+            //     // state.sss = node
+            //     // console.log(node)
+            //     Object.entries(node).forEach(element=>{
+            //         console.log(element[1])
+            //         // state.sss[element[0]] = element[1]
+            //     })
+            // })
             console.log(map1.value.getLayers().getArray())
+            return map1.value.getLayers().getArray()
         }
 
         onMounted(() => {
@@ -260,7 +272,7 @@ export default {
             props,
             mapControl,
             layerControl,
-            showLayers
+            getMapLayers
         }
     }
 }

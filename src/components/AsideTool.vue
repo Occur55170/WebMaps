@@ -39,9 +39,22 @@ export default {
 </script>
 
 <template>
-    <div class="aside">
-        <div class="a" @click="zoomIn">放大</div>
-        <div class="a" @click="zoomOut">縮小</div>
+    <div>
+        <a href="" class="asideTool-btn order-1 mb-0" @click.prevent="mapControl('In')">
+            <img src="./assets/img/icon/zoomIn.svg" alt="zoomIn">
+        </a>
+        <a href="" class="asideTool-btn order-1 mb-2" @click.prevent="mapControl('Out')">
+            <img src="./assets/img/icon/zoomOut.svg" alt="zoomOut">
+        </a>
+        <a href="" class="asideTool-btn order-1 mb-2" @click.prevent="mapControl('toNorth')">
+            <img src="./assets/img/icon/compass.svg" alt="compass">
+        </a>
+        <a href="" class="asideTool-btn order-1 mb-2" @click.prevent="layerControl('moveTo')">
+            <img src="./assets/img/icon/location.svg" alt="location">
+        </a>
+        <a href="" class="asideTool-btn order-1 mb-2" @click.prevent="mapControl('fullScreen')">
+            <img src="./assets/img/icon/zoom.svg" alt="zoom">
+        </a>
     </div>
 </template>
 
