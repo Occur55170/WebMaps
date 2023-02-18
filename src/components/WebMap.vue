@@ -23,21 +23,22 @@ import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import 'ol/ol.css' // ol提供的css样式
 
-// export const getMapLayers =  function(value = 1){
-//     return document.getElementById(`map${value}`) || ''
-// }
-
 export default {
-    props: {
-        targetNum: {
-            type: Number,
-            default: 1
-        },
-    },
+    props: {},
     setup(props, { emit }) {
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
+            targetNum: 1,
+            conditionWrap: false,
+            // mapLayerStatus: computed(()=>{
+            //     let a = map1? map1 : ''
+            //     if(a){
+            //         return map1.value.getLayers()
+            //     } else {
+            //         return false
+            //     }
+            // })
         })
 
         const defaultLayers = [
@@ -55,7 +56,6 @@ export default {
             // 測試用
             rotation: 1
         });
-
 
         // 初始化地圖
         function initMap() {
@@ -96,7 +96,7 @@ export default {
             map1.value.addLayer(marker);
         }
 
-        function mapControl(action) {
+        function mapControl({action, value}) {
             let View = map1.value.getView()
             switch (action) {
                 case 'In':
@@ -114,6 +114,26 @@ export default {
                         rotation: 0,
                     })
                     break;
+                case 'moveTo':
+                    if (value) {
+                        const { xAxis, yAxis } = value
+                        View.animate({
+                            center: [xAxis, yAxis],
+                            // center: [ 1.748904, 52.469845],
+                            zoom: 10,
+                            duration: 100,
+                        });
+                    } else {
+                        navigator.geolocation.getCurrentPosition(function (pos) {
+                            View.animate({
+                                center: [pos.coords.longitude, pos.coords.latitude],
+                                zoom: 17,
+                                duration: 100,
+                            });
+                            addPoint(pos.coords.longitude, pos.coords.latitude)
+                        })
+                    }
+                    break;
                 case 'fullScreen':
                     let target = map1
                     if (target.requestFullscreen) {
@@ -129,8 +149,8 @@ export default {
             }
         }
 
-        function layerControl(action, value) {
-            let target = props.targetNum == 1 ? map1 : map2
+        function layerControl({action, value}) {
+            let target = state.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
             let targetLayers = target.value.getLayers()
             switch (action) {
@@ -239,28 +259,23 @@ export default {
             })
         }
 
-        function addLayers() {
-            // test
-            const layer = new TileLayer({
-                preload: Infinity,
-                name: 'defaultLayer',
-                source: new OSM()
-            })
-            map1.value.getLayers().extend([layer]);
-        }
         function getMapLayers() {
-            // console.log(map1.value.getLayers().getArray())
             // let a = map1.value.getLayers().getArray()
             // a.forEach(node=>{
             //     // state.sss = node
-            //     // console.log(node)
             //     Object.entries(node).forEach(element=>{
-            //         console.log(element[1])
             //         // state.sss[element[0]] = element[1]
             //     })
             // })
-            console.log(map1.value.getLayers().getArray())
             return map1.value.getLayers().getArray()
+        }
+
+        function changeTarget(value){
+            state.targetNum = value
+        }
+
+        function conditionWrap(){
+            state.conditionWrap = !state.conditionWrap
         }
 
         onMounted(() => {
@@ -272,7 +287,9 @@ export default {
             props,
             mapControl,
             layerControl,
-            getMapLayers
+            getMapLayers,
+            changeTarget,
+            conditionWrap
         }
     }
 }
@@ -280,7 +297,25 @@ export default {
 
 <template>
     <div ref="mapCom">
+        <div class="SearchBar position-absolute top-0 start-0">
+            <!-- {{ state.mapLayerStatus }} -->
+            <SearchBar
+            @onLayerControl="({action, value})=>{layerControl({action, value})}"
+            @onChangeTarget="(value)=>{changeTarget(value)}"
+            @openConditionWrap="conditionWrap"
+            />
+        </div>
+        <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
+            <asideTool
+            @onMapControl="(value)=>{mapControl(value)}"  />
+        </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
+        <div class="condition bg-white position-absolute end-0 bottom-0 mt-2" v-if="state.conditionWrap">
+            <condition
+            @onMapControl="({action, value})=>{mapControl({action, value})}"
+            @onLayerControl="({action, value})=>{layerControl({action, value})}"
+            />
+        </div>
     </div>
 </template>
 
