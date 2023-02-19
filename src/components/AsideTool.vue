@@ -11,7 +11,7 @@ export default {
     setup(props, { emit }){
 
         function onMapControl(action) {
-            emit('onMapControl', action)
+            emit('onMapControl', {action})
         }
 
         return {

@@ -51,83 +51,6 @@ export default {
             // })
         ];
 
-        // 20230213
-        function Layout(){
-
-            const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
-            const layer = '0';
-
-            const fillColors = {
-                'Lost To Sea Since 1965': [0, 0, 0, 1],
-                'Urban/Built-up': [104, 104, 104, 1],
-                'Shacks': [115, 76, 0, 1],
-                'Industry': [230, 0, 0, 1],
-                'Wasteland': [230, 0, 0, 1],
-                'Caravans': [0, 112, 255, 0.5],
-                'Defence': [230, 152, 0, 0.5],
-                'Transport': [230, 152, 0, 1],
-                'Open Countryside': [255, 255, 115, 1],
-                'Woodland': [38, 115, 0, 1],
-                'Managed Recreation/Sport': [85, 255, 0, 1],
-                'Amenity Water': [0, 112, 255, 1],
-                'Inland Water': [0, 38, 115, 1],
-            };
-
-            const style = new Style({
-                fill: new Fill(),
-                stroke: new Stroke({
-                    color: [0, 0, 0, 1],
-                    width: 0.5,
-                }),
-            });
-
-            const vectorSource = new VectorSource({
-                format: new EsriJSON(),
-                url: function (extent, resolution, projection) {
-                    // ArcGIS Server only wants the numeric portion of the projection ID.
-                    const srid = projection.getCode().split(/:(?=\d+$)/).pop();
-
-                    const url = serviceUrl + layer +'/query/?f=json&' +'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
-                    encodeURIComponent(`{"xmin":${ extent[0] },"ymin":${ extent[1] },"xmax":${ extent[2] },"ymax":${ extent[3] },"spatialReference":{"wkid":${ srid }}}`) +
-                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
-
-                    return url;
-                },
-                strategy: tileStrategy(
-                    createXYZ({
-                        tileSize: 512,
-                    })
-                ),
-            });
-
-            const vector = new VectorLayer({
-                source: vectorSource,
-                style: function (feature) {
-                    const classify = feature.get('LU_2014');
-                    const color = fillColors[classify] || [0, 0, 0, 0];
-                    style.getFill().setColor(color);
-                    return style;
-                },
-                opacity: 0.7,
-            });
-
-            const raster = new TileLayer({
-                source: new XYZ({
-                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/' + 'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-                }),
-            });
-
-            map = new Map({
-                layers: [raster, vector],
-                target: document.getElementById('map'),
-                view: new View({
-                    center: fromLonLat([1.72, 52.4]),
-                    zoom: 14,
-                }),
-            });
-
-        }
-
         const defaultView = new View({
             projection: 'EPSG:4326', // 投影座標系
             center: state.defaultCenter,
@@ -181,24 +104,6 @@ export default {
         function closePopup() {
             overlay.value.setPosition(undefined) // setPosition 传入undefined會隐藏彈跳視窗元素
             currentCoordinate.value = '' // 把彈跳視窗内容清空
-        }
-
-        // 地圖旋轉事件
-        function mapRotate() {
-            // map.value.on('rotate', evt => { // 绑定一個點擊事件
-            //     const coordinate = evt.coordinate // 獲取座標
-            //     currentCoordinate.value = coordinate // 保存座標点
-            //     overlay.value.setPosition(coordinate) // 設置覆蓋物出现的位置
-            // })
-            console.log('rotate,gogo ')
-            map.value.on('rotate', evt => {
-                // 獲取地圖目前的旋轉程度
-                var rotation = map.getView().getRotation();
-                console.log(rotation)
-
-                // 轉動遮照
-                shadowLayer.getSource().rotate(rotation);
-            });
         }
 
         function addPoint(targetLng, targetLat) {

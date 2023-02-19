@@ -1,6 +1,12 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 export default {
+    props: {
+        currentLayerNames: {
+            type: Array,
+            default: []
+        }
+    },
     setup(props, { emit }) {
         const state = reactive({
             toolSwitch: {
@@ -14,7 +20,7 @@ export default {
         })
 
         function toolSwitch(target, value) {
-            if(target === 'threeDimensionalBtn') {state.dimensionMapStatus = value}
+            if (target === 'threeDimensionalBtn') { state.dimensionMapStatus = value }
             Object.keys(state.toolSwitch).forEach(node => {
                 if (node === target) {
                     state.toolSwitch[target] = true
@@ -36,19 +42,20 @@ export default {
                 }
             }
             // proxy.$refs.mapCom.layerControl(action, value)
-            emit('onLayerControl', {action, value})
+            emit('onLayerControl', { action, value })
         }
 
-        function openConditionWrap () {
+        function openConditionWrap() {
             emit('openConditionWrap')
         }
 
-        function onChangeTarget (value) {
+        function onChangeTarget(value) {
             state.targetNum = value
             emit('onChangeTarget', value)
         }
 
         return {
+            props,
             state,
             toolSwitch,
             onLayerControl,
@@ -63,12 +70,17 @@ export default {
     <div>
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white">
-                    <img src="../assets/img/icon/twoDimensional.svg" v-if="state.dimensionMapStatus == '2D'"
-                        @click.prevent="toolSwitch('threeDimensionalBtn', '3D'), onLayerControl('changeDimensionMap', '3D')">
-                    <img src="../assets/img/icon/threeDimensional.svg" v-else
-                        @click.prevent="toolSwitch('threeDimensionalBtn', '2D'), onLayerControl('changeDimensionMap', '2D')">
-                </a>
+                <div class="MapFeatureBtn text-white">
+                    <!-- <a href="" v-if="state.dimensionMapStatus == '2D'" -->
+                    <a href="" v-if="!props.currentLayerNames.includes('OSM')"
+                    @click.prevent="toolSwitch('threeDimensionalBtn', '3D'), onLayerControl('changeDimensionMap', '3D')">
+                        <img src="../assets/img/icon/twoDimensional.svg">
+                    </a>
+                    <a href="" v-else
+                    @click.prevent="toolSwitch('threeDimensionalBtn', '2D'), onLayerControl('changeDimensionMap', '2D')">
+                        <img src="../assets/img/icon/threeDimensional.svg">
+                    </a>
+                </div>
             </li>
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white"
