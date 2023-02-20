@@ -372,7 +372,6 @@ export default {
 // needFix
 .redBackground
     background: red
-
 // needFix
 .currentMap
     position: relative
