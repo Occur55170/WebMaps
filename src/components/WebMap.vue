@@ -95,7 +95,6 @@ export default {
         }
 
         function mapControl({action, value}) {
-            console.log({action, value})
             let View = map1.value.getView()
             switch (action) {
                 case 'In':
@@ -154,15 +153,12 @@ export default {
             let targetLayers = target.value.getLayers()
             switch (action) {
                 case 'mapMode':
-                    console.log({action, value})
-                    let layersName = value.layersName
                     if (value.checked) {
-                        // 預設寫好設定檔案
-                        let newLayer
+                        // 預設寫好設定檔案  name要針對每個圖層寫死
+                        let newTileLayer
                         switch (value.layerName) {
                             case 'america':
-                                newLayer = new TileLayer({
-                                    // name 要針對每個圖層寫死
+                                newTileLayer = new TileLayer({
                                     name: 'america',
                                     className: 'america',
                                     preload: Infinity,
@@ -170,18 +166,19 @@ export default {
                                         url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
                                     }),
                                 })
-                                targetLayers.extend([newLayer])
+                                targetLayers.extend([newTileLayer])
                                 break;
                             case 'EsriJSON':
-                                EsriJSON()
+                                let newVectorLayer = EsriMap()
+                                target.value.addLayer(newVectorLayer)
                                 break;
                         }
-                        // targetLayers.addLayer([newLayer])
                     } else {
                         // 刪除圖層事件 需要重寫
                         let layersAry = targetLayers.getArray();
                         layersAry.forEach(element => {
-                            if(element.get('name') === value.layerName){
+                            console.log(element.get('name'), value.layerName)
+                            if(element.get('name') == value.layerName){
                                 target.value.removeLayer(element);
                             }
                         });
@@ -227,6 +224,45 @@ export default {
             getCurrentLayerNames()
         }
 
+        function EsriMap() {
+            const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
+            const style = new Style({
+                fill: new Fill(),
+                stroke: new Stroke({
+                    color: [0, 0, 0, 1],
+                    width: 0.5,
+                }),
+            });
+
+            const newVectorSource = new VectorSource({
+                format: new EsriJSON(),
+                url: function (extent, resolution, projection) {
+                    const srid = projection.getCode().split(/:(?=\d+$)/).pop();
+                    const url = serviceUrl + '/query/?f=json&' + 'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
+                    encodeURIComponent(`{"xmin":${ extent[0] },"ymin":${ extent[1] },"xmax":${ extent[2] },"ymax":${ extent[3] },"spatialReference":{"wkid":${ srid }}}`) +
+                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
+                    return url;
+                },
+                strategy: tileStrategy(
+                    createXYZ({
+                        tileSize: 512,
+                    })
+                ),
+            });
+
+            return new VectorLayer({
+                name: 'EsriJSON',
+                source: newVectorSource,
+                style: function (feature) {
+                    const classify = feature.get('LU_2014');
+                    const color = [0, 0, 0, 0];
+                    style.getFill().setColor(color);
+                    return style;
+                },
+                opacity: 0.7,
+            });
+        }
+
         function addMapCount() {
             const map2 = document.createElement('div')
             map2.setAttribute('id', 'map2')
@@ -248,46 +284,12 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-        }
 
-        function EsriJSON() {
-            const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
-            const style = new Style({
-                fill: new Fill(),
-                stroke: new Stroke({
-                    color: [0, 0, 0, 1],
-                    width: 0.5,
-                }),
-            });
-
-            const vectorSource = new VectorSource({
-                format: new EsriJSON(),
-                url: function (extent, resolution, projection) {
-                    const srid = projection.getCode().split(/:(?=\d+$)/).pop();
-                    const url = serviceUrl + '/query/?f=json&' + 'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
-                    encodeURIComponent(`{"xmin":${ extent[0] },"ymin":${ extent[1] },"xmax":${ extent[2] },"ymax":${ extent[3] },"spatialReference":{"wkid":${ srid }}}`) +
-                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
-                    return url;
-                },
-                strategy: tileStrategy(
-                    createXYZ({
-                        tileSize: 512,
-                    })
-                ),
-            });
-
-            const newVector = new VectorLayer({
-                source: vectorSource,
-                style: function (feature) {
-                    const classify = feature.get('LU_2014');
-                    const color = [0, 0, 0, 0];
-                    style.getFill().setColor(color);
-                    return style;
-                },
-                opacity: 0.7,
-            });
-            // let target = state.targetNum == 1 ? map1 : map2
-            map1.value.addLayer(newVector)
+            // needFix
+            nextTick(()=>{
+                $('.mapWrap').addClass('redBackground')
+                $(`#map1`).addClass('currentMap')
+            })
         }
 
         function getCurrentLayerNames() {
@@ -297,6 +299,9 @@ export default {
         }
 
         function changeTarget(value){
+            // needFix
+            $('.currentMap').removeClass('currentMap')
+            $(`#map${value}`).addClass('currentMap')
             state.targetNum = value
             getCurrentLayerNames()
         }
@@ -307,7 +312,6 @@ export default {
 
         function showLayers() {
             let target = state.targetNum == 1 ? map1 : map2
-            console.log(target.value.getLayers().getArray())
         }
         onMounted(() => {
             initMap()
@@ -322,7 +326,6 @@ export default {
             changeTarget,
             conditionWrap,
             showLayers,
-            EsriJSON
         }
     }
 }
@@ -330,35 +333,61 @@ export default {
 
 <template>
     <div ref="mapCom">
-        <div class="SearchBar position-absolute top-0 start-0">
+        <div class="SearchBar position-absolute">
             <SearchBar
             :currentLayerNames="state.currentLayerNames"
             @onLayerControl="({action, value})=>{layerControl({action, value})}"
             @onChangeTarget="(value)=>{changeTarget(value)}"
-            @openConditionWrap="conditionWrap"
+            @conditionWrap="(value)=>{conditionWrap(value)}"
             />
-        <Button @click="showLayers">show</Button>
-        <Button @click="EsriJSON">add</Button>
+        <!-- <Button @click="showLayers">show</Button> -->
+        <!-- <Button @click="addLayers">add</Button> -->
         </div>
         <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
             <asideTool @onMapControl="({action, value})=>{mapControl({action, value})}"  />
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
-        <div class="condition bg-white position-absolute end-0 bottom-0 mt-2" v-if="state.conditionWrap">
-            <condition
-            :currentLayerNames="state.currentLayerNames"
-            @onMapControl="({action, value})=>{mapControl({action, value})}"
-            @onLayerControl="({action, value})=>{layerControl({action, value})}"
-            />
+        <div class="condition position-absolute">
+            <p class="rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.conditionWrap">圖層選項</p>
+            <div v-if="state.conditionWrap">
+                <condition
+                :currentLayerNames="state.currentLayerNames"
+                @onMapControl="({action, value})=>{mapControl({action, value})}"
+                @onLayerControl="({action, value})=>{layerControl({action, value})}"
+                @conditionWrap="(value)=>{conditionWrap(value)}"
+                />
+            </div>
         </div>
     </div>
 </template>
 
-<style lang="sass" scoped>
+<style lang="sass" >
 .mapWrap
     justify-content: space-between
     height: 100vh
 
 .mapWrap div
     width: 100%
+
+// needFix
+.redBackground
+    background: red
+
+// needFix
+.currentMap
+    position: relative
+    clip-path: polygon(20px 20px,calc(100% - 20px) 20px, calc(100% - 20px) calc(100% - 20px), 20px calc(100% - 20px))
+
+.asideTool
+    z-index: 220
+    left: 20px
+.SearchBar
+    position: absolute
+    top: 20px
+    left: 20px
+    z-index: 220
+.condition
+    width: 440px
+    right: 18px
+    bottom: 27px
 </style>

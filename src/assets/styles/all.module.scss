@@ -1,11 +1,10 @@
 @import './_variables.scss';
-// $blue: #3385ff;
 
-// a.btn-black-deep:
 
-// asideTool 按鈕樣式
-.asideTool-btn {
-    // margin: 0 20px;
-    // padding: 20px;
-    font-size: 20px;
+// needFix
+.bg-steel{
+    background: $blue-steel
+}
+.bg-light{
+    background: $blue-light
 }

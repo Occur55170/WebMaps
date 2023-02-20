@@ -33,9 +33,6 @@ export default {
                 preload: Infinity,
                 name: 'defaultLayer',
                 source: new OSM()
-            //     source: new XYZ({
-            //         url: 'https://server.arcgisonline.com/ArcGIS/rest/services/' + 'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-            //     }),
             })
 
             const compass = ref(null) // 覆蓋物實例

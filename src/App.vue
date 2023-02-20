@@ -18,8 +18,8 @@ export default {
 <template>
     <div class="main">
         <div v-if="true">
-            <Wes ref="mapCom" />
-            <!-- <WebMap ref="mapCom" /> -->
+            <!-- <Wes ref="mapCom" /> -->
+            <WebMap ref="mapCom" />
         </div>
         <div v-else>
             <threeDimensionMap />
@@ -53,12 +53,5 @@ export default {
     left: 0
     z-index: 220
 
-.asideTool
-    z-index: 220
-    left: 20px
-.SearchBar
-    position: absolute
-    top: 20px
-    left: 20px
-    z-index: 220
+
 </style>

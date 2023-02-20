@@ -1,5 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import $ from 'jquery'
+
 export default {
     props: {
         currentLayerNames: {
@@ -34,19 +36,16 @@ export default {
                 if (value == 1 && document.getElementById('switchControl')) {
                     state.targetNum = 1
                     state.switchControl = false
-                    // $('.currentMap').removeClass('currentMap')
                 }
                 if (value == 2 && !(document.getElementById('switchControl'))) {
                     state.switchControl = true
-                    // $('.map1').addClass('currentMap')
                 }
             }
-            // proxy.$refs.mapCom.layerControl(action, value)
             emit('onLayerControl', { action, value })
         }
 
-        function openConditionWrap() {
-            emit('openConditionWrap')
+        function conditionWrap() {
+            emit('conditionWrap', true)
         }
 
         function onChangeTarget(value) {
@@ -59,7 +58,7 @@ export default {
             state,
             toolSwitch,
             onLayerControl,
-            openConditionWrap,
+            conditionWrap,
             onChangeTarget
         }
     }
@@ -84,7 +83,7 @@ export default {
             </li>
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white"
-                    @click.prevent="toolSwitch('layerConditionBtn'), openConditionWrap()">
+                    @click.prevent="toolSwitch('layerConditionBtn'), conditionWrap()">
                     <img src="../assets/img/icon/baseLayer.svg" alt="">
                 </a>
             </li>
@@ -111,8 +110,6 @@ export default {
             v-if="state.switchControl" style="z-index: 99;padding: 5px;">
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
                 onChangeTarget(1)
-                // $(`.map1`).addClass('currentMap')
-                // $(`.map2`).removeClass('currentMap')
             }">左</div>
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
                 onChangeTarget(2)
@@ -150,16 +147,4 @@ export default {
     .active
         background: #247BA0
 
-// 當前選取地圖樣式
-.currentMap
-    position: relative
-    // &::after
-    //     content: ''
-    //     position: absolute
-    //     top: 0
-    //     left: 0
-    //     width: 100%
-    //     height: 100%
-    //     border: 5px solid red
-    //     box-sizing: border-box
 </style>
