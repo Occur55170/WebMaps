@@ -321,7 +321,6 @@ export default {
             changeTarget,
             conditionWrap,
             changLayerVisible,
-
             // console.log test
             showLayers,
             changeLayers,
@@ -339,8 +338,8 @@ export default {
             @onChangeTarget="(value)=>{changeTarget(value)}"
             @conditionWrap="(value)=>{conditionWrap(value)}"
             />
-        <!-- <button @click="showLayers">show</button>
-        <button @click="changeLayers">add</button> -->
+            <button @click="showLayers">show</button>
+            <button @click="changeLayers">add</button>
         </div>
         <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
             <asideTool @onMapControl="({action, value})=>{mapControl({action, value})}"  />
@@ -367,7 +366,7 @@ export default {
             </div>
 
             <!-- fix!! -->
-            <!-- <div>
+            <div>
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.layerSelect"
                 @click="state.layerSelect = true">
                     已選擇的圖層
@@ -383,7 +382,7 @@ export default {
                     }"
                     />
                 </div>
-            </div> -->
+            </div>
         </div>
     </div>
 </template>

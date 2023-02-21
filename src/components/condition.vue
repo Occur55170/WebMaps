@@ -80,7 +80,7 @@ export default {
         <div class="py-3 px-4 content">
             <div v-if="state.currentConditionPage === 'coreLayer'">
                 <div class="mb-2 landBoundary">
-                    <!-- <p>地圖狀態:{{ state.currentLayerNames }}</p> -->
+                    <p>地圖狀態:{{ state.currentLayerNames }}</p>
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-0 text-decoration-none" @click="open('landBoundary')">
                         <img src="../assets/img/icon/landBoundary.svg" alt="">
                         行政及土地區界
@@ -88,14 +88,9 @@ export default {
                     </div>
                     <div class="wrap">
                         <div>
-                            <p>
-                                <button class="text-blue"
-                                    @click.prevent="onMapControl('moveTo', { xAxis: -98.144457, yAxis: 26.178938 })">前往示範案例(測試一)
-                                </button>
-                            </p>
-                            <!-- <div class="text-blue"
-                                @click.prevent="onMapControl('moveTo', { xAxis: -98.144457, yAxis: 26.178938 })">前往示範案例(測試一)
-                            </div> -->
+                            <div class="text-blue"
+                                @click.prevent="onMapControl('moveTo', { xAxis: -98.144457, yAxis: 26.178938 })">go前往示範案例(測試一)
+                            </div>
                             <!-- needFix -->
                             <input type="checkbox" name="example1" id="example1"
                             :checked="state.currentLayerNames.includes('america')"
