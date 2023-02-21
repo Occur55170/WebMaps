@@ -4,17 +4,22 @@ import $ from 'jquery'
 
 export default {
     props: {
-        currentLayerNames: {
+        onClose: {
+            type: Function,
+            default: ()=>{}
+        },
+        currentLayers: {
             type: Array,
             default: []
-        }
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
-            test: computed(() => {
-                return props.currentLayerNames
-            }),
-            currentConditionPage: 'coreLayer'
+            currentConditionPage: 'coreLayer',
+            currentLayerNames: computed(()=>{
+                // needFix
+                return props.currentLayers.map(node=>node.name)
+            })
         })
 
         function onMapControl(action, value) {
@@ -23,9 +28,6 @@ export default {
 
         function onLayerControl(action, value, layerName) {
             emit('onLayerControl', { action, value, layerName })
-        }
-        function conditionWrap(){
-            emit('conditionWrap', false)
         }
         function open (value){
             // needFix
@@ -43,7 +45,6 @@ export default {
             state,
             onMapControl,
             onLayerControl,
-            conditionWrap,
             open
         }
     }
@@ -54,7 +55,7 @@ export default {
     <div class="rounded-4 bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
             <p class="mb-0">圖層選項</p>
-            <a href="" class="closeBtn position-absolute col-auto" @click.prevent="conditionWrap()">
+            <a href="" class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
                 <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z"/></svg>
             </a>
         </div>
@@ -79,7 +80,7 @@ export default {
         <div class="py-3 px-4 content">
             <div v-if="state.currentConditionPage === 'coreLayer'">
                 <div class="mb-2 landBoundary">
-                    <p>地圖狀態:{{ props.currentLayerNames }}</p>
+                    <!-- <p>地圖狀態:{{ state.currentLayerNames }}</p> -->
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-0 text-decoration-none" @click="open('landBoundary')">
                         <img src="../assets/img/icon/landBoundary.svg" alt="">
                         行政及土地區界
@@ -87,11 +88,17 @@ export default {
                     </div>
                     <div class="wrap">
                         <div>
-                            <div class="text-blue"
+                            <p>
+                                <button class="text-blue"
+                                    @click.prevent="onMapControl('moveTo', { xAxis: -98.144457, yAxis: 26.178938 })">前往示範案例(測試一)
+                                </button>
+                            </p>
+                            <!-- <div class="text-blue"
                                 @click.prevent="onMapControl('moveTo', { xAxis: -98.144457, yAxis: 26.178938 })">前往示範案例(測試一)
-                            </div>
+                            </div> -->
+                            <!-- needFix -->
                             <input type="checkbox" name="example1" id="example1"
-                            :checked="props.currentLayerNames.includes('america')"
+                            :checked="state.currentLayerNames.includes('america')"
                             @change="(e) => {
                                 onLayerControl('mapMode', {
                                     checked: e.target.checked,
@@ -101,8 +108,9 @@ export default {
                             <label for="example1">開啟局部(測試一)</label>
                         </div>
                         <div>
+                            <!-- needFix -->
                             <input type="checkbox" name="example2" id="example2"
-                            :checked="props.currentLayerNames.includes('EsriJSON')"
+                            :checked="state.currentLayerNames.includes('EsriJSON')"
                             @change="(e) => {
                                 onLayerControl('mapMode', {
                                     checked: e.target.checked,
@@ -158,8 +166,7 @@ export default {
 @import '../assets/styles/all.module.scss'
 .closeBtn
     right:10px
-    img
-        background: $blue-steel
+    svg
         width: 20px
         height: 20px
 .LayerType

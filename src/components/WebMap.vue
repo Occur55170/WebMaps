@@ -37,7 +37,10 @@ export default {
             defaultCenterZoom: 17,
             targetNum: 1,
             conditionWrap: false,
+            layerSelect: true,
             currentLayerNames: [],
+            // fix!!
+            currentLayers: [],
 
         })
         const mapLayers = mapLayerList
@@ -46,7 +49,8 @@ export default {
             new TileLayer({
                 preload: Infinity,
                 name: 'defaultLayer',
-                source: new OSM()
+                source: new OSM(),
+                enable: true
             }),
         ];
 
@@ -55,7 +59,7 @@ export default {
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
             // 測試用
-            rotation: 10
+            rotation: 6
         });
 
         // 初始化地圖
@@ -180,7 +184,6 @@ export default {
                         // 刪除圖層事件 需要重寫
                         let layersAry = targetLayers.getArray();
                         layersAry.forEach(element => {
-                            console.log(element.get('name'), value.layerName)
                             if(element.get('name') == value.layerName){
                                 target.value.removeLayer(element);
                             }
@@ -191,8 +194,15 @@ export default {
                     if (value === 2 && !document.getElementById('map2')) {
                         addMapCount()
                     }
-                    if (value === 1 && document.getElementById('map2')) {
-                        document.getElementById('map2').remove()
+                    if (value === 1) {
+                        if(document.getElementById('map2')){
+                            document.getElementById('map2').remove()
+                        }
+                        // needFix
+                        if($('div').hasClass('currentMap')){
+                            $('.currentMap').removeClass('.currentMap')
+                            $('.redBackground').removeClass('redBackground')
+                        }
                     }
                     break;
                 case 'changeDimensionMap':
@@ -233,9 +243,6 @@ export default {
             map2.setAttribute('class', 'map2 w-100')
             document.getElementById('mapWrap').appendChild(map2)
 
-            const center2 = Object.values(map1.value.getView().getCenter())
-            const zoom2 = map1.value.getView().getZoom()
-            const proj2 = map1.value.getView().getProjection()
             map2.value = new Map({
                 target: 'map2',
                 layers: [
@@ -251,15 +258,22 @@ export default {
 
             // needFix
             nextTick(()=>{
-                $('.mapWrap').addClass('redBackground')
                 $(`#map1`).addClass('currentMap')
+                $('.mapWrap').addClass('redBackground')
             })
         }
 
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? map1 : map2
-            const layers = target.value.getLayers().getArray();
-            state.currentLayerNames = layers.map(layer => layer.get('name'));
+            const layers = target.value.getLayers().getArray()
+            state.currentLayerNames = layers.map(layer => layer.get('name'))
+            // fix!!
+            state.currentLayers = layers.map(layer => {
+                return {
+                    name: layer.get('name'),
+                    visible: layer.getVisible(),
+                }
+            })
         }
 
         function changeTarget(value){
@@ -274,11 +288,28 @@ export default {
             state.conditionWrap = !state.conditionWrap
         }
 
+        function changLayerVisible(node){
+            console.log(node)
+
+        }
+
         function showLayers() {
             let target = state.targetNum == 1 ? map1 : map2
+            console.log(target.value.getLayers().getArray()[0])
+            console.log(target.value.getLayers().getArray()[0].getVisible())
         }
+        function changeLayers() {
+            let target = state.targetNum == 1 ? map1 : map2
+            let currentVisible = target.value.getLayers().getArray()[0].getVisible()
+            console.log('cha', currentVisible)
+            target.value.getLayers().getArray()[0].setVisible(!currentVisible)
+        }
+
         onMounted(() => {
             initMap()
+            nextTick(()=>{
+                getCurrentLayerNames()
+            })
         })
 
         return {
@@ -289,7 +320,11 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
+            changLayerVisible,
+
+            // console.log test
             showLayers,
+            changeLayers,
         }
     }
 }
@@ -304,23 +339,51 @@ export default {
             @onChangeTarget="(value)=>{changeTarget(value)}"
             @conditionWrap="(value)=>{conditionWrap(value)}"
             />
-        <!-- <Button @click="showLayers">show</Button> -->
-        <!-- <Button @click="addLayers">add</Button> -->
+        <!-- <button @click="showLayers">show</button>
+        <button @click="changeLayers">add</button> -->
         </div>
         <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
             <asideTool @onMapControl="({action, value})=>{mapControl({action, value})}"  />
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
         <div class="condition position-absolute">
-            <p class="rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.conditionWrap">圖層選項</p>
-            <div v-if="state.conditionWrap">
-                <condition
-                :currentLayerNames="state.currentLayerNames"
-                @onMapControl="({action, value})=>{mapControl({action, value})}"
-                @onLayerControl="({action, value})=>{layerControl({action, value})}"
-                @conditionWrap="(value)=>{conditionWrap(value)}"
-                />
+
+            <div class="mb-2">
+                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.conditionWrap"
+                @click="state.conditionWrap = true">
+                    圖層選項
+                </button>
+                <div class="mb-4" v-if="state.conditionWrap">
+                    <condition
+                    :currentLayerNames="state.currentLayerNames"
+                    :currentLayers="state.currentLayers"
+                    :onClose="()=>{
+                        state.conditionWrap = false
+                    }"
+                    @onMapControl="({action, value})=>{mapControl({action, value})}"
+                    @onLayerControl="({action, value})=>{layerControl({action, value})}"
+                    />
+                </div>
             </div>
+
+            <!-- fix!! -->
+            <!-- <div>
+                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.layerSelect"
+                @click="state.layerSelect = true">
+                    已選擇的圖層
+                </button>
+                <div v-if="state.layerSelect">
+                    <layerSelect
+                    :currentLayers="state.currentLayers"
+                    :onChangLayerVisible="(node)=>{
+                        changLayerVisible(node)
+                    }"
+                    :onClose="()=>{
+                        state.layerSelect = false
+                    }"
+                    />
+                </div>
+            </div> -->
         </div>
     </div>
 </template>
@@ -339,11 +402,11 @@ export default {
 // needFix
 .currentMap
     position: relative
-    clip-path: polygon(20px 20px,calc(100% - 20px) 20px, calc(100% - 20px) calc(100% - 20px), 20px calc(100% - 20px))
+    clip-path: polygon(5px 5px,calc(100% - 5px) 5px, calc(100% - 5px) calc(100% - 5px), 5px calc(100% - 5px))
 
 .asideTool
     z-index: 220
-    left: 20px
+    left: 5px
 .SearchBar
     position: absolute
     top: 20px
@@ -351,6 +414,10 @@ export default {
     z-index: 220
 .condition
     width: 440px
-    right: 18px
-    bottom: 27px
+    right: 1%
+    bottom: 5%
+// .layerSelect
+//     width: 440px
+//     right: 1%
+//     bottom: 3%
 </style>

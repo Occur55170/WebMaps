@@ -45,7 +45,7 @@ export default {
         }
 
         function conditionWrap() {
-            emit('conditionWrap', true)
+            emit('conditionWrap')
         }
 
         function onChangeTarget(value) {

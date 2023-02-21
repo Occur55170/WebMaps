@@ -73,7 +73,6 @@ export default {
             console.log(map.getLayers().getArray())
         }
         function addLayers() {
-            console.log('1')
             const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
             const style = new Style({
                 fill: new Fill(),
@@ -129,9 +128,9 @@ export default {
 </script>
 
 <template>
-    <Button @click="showLayers">show</Button>
-    <Button @click="addLayers">add</Button>
-    <Button @click="removeLayers">remove</Button>
+    <button @click="showLayers">show</button>
+    <button @click="addLayers">add</button>
+    <button @click="removeLayers">remove</button>
     <div tabindex="2" id="map" class="map__x"></div>
     <!-- 彈跳視窗容器 -->
     <div class="popup" ref="popupCom">
