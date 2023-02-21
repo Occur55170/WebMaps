@@ -36,6 +36,7 @@ export default {
                 if (value == 1 && document.getElementById('switchControl')) {
                     state.targetNum = 1
                     state.switchControl = false
+                    emit('onLayerControl', { action, value })
                 }
                 if (value == 2 && !(document.getElementById('switchControl'))) {
                     state.switchControl = true

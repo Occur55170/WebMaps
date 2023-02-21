@@ -195,6 +195,7 @@ export default {
                         addMapCount()
                     }
                     if (value === 1) {
+                        state.targetNum= 1
                         if(document.getElementById('map2')){
                             document.getElementById('map2').remove()
                         }
