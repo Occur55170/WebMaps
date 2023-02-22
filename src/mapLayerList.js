@@ -26,7 +26,7 @@ import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 import 'ol/ol.css' // ol提供的css样式
 
 export default {
-    EsriJSON: function() {
+    EsriJSON: ()=>{
         const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
         const style = new Style({
             fill: new Fill(),
@@ -63,5 +63,16 @@ export default {
             },
             opacity: 0.7,
         });
+    },
+    america: ()=>{
+        return new TileLayer({
+            name: 'america',
+            className: 'america',
+            preload: Infinity,
+            source: new TileArcGISRest({
+                url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
+            }),
+        })
     }
+
 }
