@@ -1,6 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
+import { Layer } from 'ol/layer'
 
 export default {
     props: {
@@ -12,6 +13,10 @@ export default {
             type: Function,
             default: ()=>{}
         },
+        onDeleteLayer: {
+            type: Function,
+            default: ()=>{}
+        },
         currentLayers: {
             type: Array,
             default: []
@@ -19,17 +24,34 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
+            currentLayers:computed(()=>{
+                    return props.currentLayers.map((node)=>{
+                        return {
+                        ...node,
+                            'lock': true
+                        }
+                    })
+                })
         })
 
-        function deleteLayer(){
-            // layerName
+        function deleteAllLayer(){
             console.log('1')
         }
+
+        function onChangeOrderLayer(){
+            // if(.lock){
+                // onChangeOrderLayer()
+            // }
+        }
+
+        onMounted(()=>{
+        })
 
         return {
             props,
             state,
-            deleteLayer
+            deleteAllLayer,
+            onChangeOrderLayer
         }
     }
 }
@@ -46,30 +68,44 @@ export default {
         <hr class="my-0">
         <div class="py-3 px-4 content">
             <p class="text-end">
-                <a href="" @click.prevent="deleteLayer()">全部刪除</a>
+                <a href="" @click.prevent="deleteAllLayer()">全部刪除</a>
             </p>
-            {{ props.currentLayers }}
+            {{ state.currentLayers }}
             <ul class="list-unstyled">
                 <li class="d-flex justify-content-between"
-                v-for="(node, nodeIndex) in props.currentLayers">
+                v-for="(node, nodeIndex) in state.currentLayers">
                     <div>
-                        <!-- props. -->
-                        <input type="checkbox" name="" id="" :checked="node.visible" @change="props.onChangLayerVisible(node)">
+                        {{ node.lock }}
                         {{ node.name }}
                     </div>
                     <div class="tool">
-                        <a href="">
+                        <button @click="props.onChangeOrderLayer({
+                            action: 'changeOrderLayer',
+                            value: 'up'
+                        })">
                             <img src="../assets/img/icon/arrow_up.svg" alt="">
-                        </a>
-                        <a href="">
+                        </button>
+                        <button @click="props.onChangeOrderLayer({
+                            action: 'changeOrderLayer',
+                            value: 'down'
+                        })">
                             <img src="../assets/img/icon/arrow_down.svg" alt="">
-                        </a>
-                        <a href="">
+                        </button>
+                        <button @click="()=>{
+                            // next
+                            // state.currentLayers = nodeIndex
+                        }">
                             <img src="../assets/img/icon/lockOpen.svg" alt="">
-                        </a>
-                        <a href="">
+                        </button>
+                        <button @click="props.onDeleteLayer({
+                            action: 'mapMode',
+                            value: {
+                                checked: false,
+                                layerName: node.name
+                            }
+                        })">
                             <img src="../assets/img/icon/delete.svg" alt="">
-                        </a>
+                        </button>
                     </div>
                 </li>
             </ul>

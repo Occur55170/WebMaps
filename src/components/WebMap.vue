@@ -177,6 +177,7 @@ export default {
                         // 刪除圖層事件 需要重寫
                         let layersAry = targetLayers.getArray();
                         layersAry.forEach(element => {
+                            console.log(element.get('name'), value)
                             if(element.get('name') == value.layerName){
                                 target.value.removeLayer(element);
                             }
@@ -188,14 +189,14 @@ export default {
                         addMapCount()
                     }
                     if (value === 1) {
+                        // needFix
+                        if($('div').hasClass('currentMap')){
+                            $('.currentMap').removeClass('currentMap')
+                            $('#mapWrap').removeClass('redBackground')
+                        }
                         state.targetNum= 1
                         if(document.getElementById('map2')){
                             document.getElementById('map2').remove()
-                        }
-                        // needFix
-                        if($('div').hasClass('currentMap')){
-                            $('.currentMap').removeClass('.currentMap')
-                            $('.redBackground').removeClass('redBackground')
                         }
                     }
                     break;
@@ -348,7 +349,6 @@ export default {
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
                     <condition
-                    :currentLayerNames="state.currentLayerNames"
                     :currentLayers="state.currentLayers"
                     :onClose="()=>{
                         state.conditionWrap = false
@@ -367,12 +367,20 @@ export default {
                 </button>
                 <div v-if="state.layerSelect">
                     <layerSelect
-                    :currentLayers="state.currentLayers"
                     :onChangLayerVisible="(node)=>{
                         changLayerVisible(node)
                     }"
+                    :currentLayers="state.currentLayers"
                     :onClose="()=>{
                         state.layerSelect = false
+                    }"
+                    :onChangeOrderLayer="()=>{
+                    }"
+                    :onLockLayer="()=>{
+
+                    }"
+                    :onDeleteLayer="({action, value})=>{
+                        layerControl({action, value})
                     }"
                     />
                 </div>

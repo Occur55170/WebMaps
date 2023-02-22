@@ -16,6 +16,10 @@ export default {
     setup(props, { emit }) {
         const state = reactive({
             currentConditionPage: 'coreLayer',
+            currentLayers: computed(()=>{
+                // needFix
+                return props.currentLayers.map(node=>node)
+            }),
             currentLayerNames: computed(()=>{
                 // needFix
                 return props.currentLayers.map(node=>node.name)
@@ -93,7 +97,7 @@ export default {
                             </div>
                             <!-- needFix -->
                             <input type="checkbox" name="example1" id="example1"
-                            :checked="state.currentLayerNames.includes('america')"
+                            :checked="props.currentLayers.some(node=>node.name === 'america')"
                             @change="(e) => {
                                 onLayerControl('mapMode', {
                                     checked: e.target.checked,
@@ -103,9 +107,8 @@ export default {
                             <label for="example1">開啟局部(測試一)</label>
                         </div>
                         <div>
-                            <!-- needFix -->
                             <input type="checkbox" name="example2" id="example2"
-                            :checked="state.currentLayerNames.includes('EsriJSON')"
+                            :checked="props.currentLayers.some(node=>node.name === 'EsriJSON')"
                             @change="(e) => {
                                 onLayerControl('mapMode', {
                                     checked: e.target.checked,
