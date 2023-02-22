@@ -165,14 +165,7 @@ export default {
                         let newTileLayer
                         switch (value.layerName) {
                             case 'america':
-                                newTileLayer = new TileLayer({
-                                    name: 'america',
-                                    className: 'america',
-                                    preload: Infinity,
-                                    source: new TileArcGISRest({
-                                        url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
-                                    }),
-                                })
+                                let newTileLayer = mapLayers[value.layerName]()
                                 targetLayers.extend([newTileLayer])
                                 break;
                             case 'EsriJSON':
