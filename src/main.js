@@ -4,7 +4,7 @@ import App from './App.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import "bootstrap"
 
-import componentRegister from './componentRegister'
+import componentRegister from './config/componentRegister'
 
 import './assets/styles/all.module.scss'
 

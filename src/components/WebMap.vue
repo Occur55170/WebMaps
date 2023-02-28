@@ -11,7 +11,7 @@ import { TileArcGISRest } from 'ol/source.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
-import { Fill, Stroke, Style } from 'ol/style.js';
+import { Icon, Fill, Stroke, Style } from 'ol/style.js';
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
 import { Image as ImageLayer } from 'ol/layer.js'
@@ -27,7 +27,8 @@ import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 
 import 'ol/ol.css' // ol提供的css样式
 
-import mapLayerList from '../mapLayerList'
+import mapLayerList from '../config/mapLayerList'
+import baseMapList from '../config/baseMapList'
 
 export default {
     props: {},
@@ -43,7 +44,9 @@ export default {
             currentLayers: [],
 
         })
+
         const mapLayers = mapLayerList
+        const baseMaps = baseMapList
 
         const defaultLayers = [
             new TileLayer({
@@ -155,11 +158,12 @@ export default {
         }
 
         function layerControl({action, value}) {
+            console.log(action, value)
             let target = state.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
             let targetLayers = target.value.getLayers()
             switch (action) {
-                case 'mapMode':
+                case 'layerMode':
                     if (value.checked) {
                         // 預設寫好設定檔案  name要針對每個圖層寫死
                         let newTileLayer
@@ -183,6 +187,9 @@ export default {
                             }
                         });
                     }
+                    break;
+                case 'baseMap':
+                    let a = baseMaps.sss(value)
                     break;
                 case 'changeMapCount':
                     if (value === 2 && !document.getElementById('map2')) {
@@ -261,12 +268,13 @@ export default {
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? map1 : map2
             const layers = target.value.getLayers().getArray()
-            state.currentLayerNames = layers.map(layer => layer.get('name'))
             // fix!!
+            state.currentLayerNames = layers.map(layer => layer.get('name'))
             state.currentLayers = layers.map(layer => {
                 return {
                     name: layer.get('name'),
                     visible: layer.getVisible(),
+                    lock: true
                 }
             })
         }
@@ -289,9 +297,15 @@ export default {
         }
 
         function showLayers() {
-            let target = state.targetNum == 1 ? map1 : map2
-            console.log(target.value.getLayers().getArray()[0])
-            console.log(target.value.getLayers().getArray()[0].getVisible())
+            // let target = state.targetNum == 1 ? map1 : map2
+            // console.log(target.value.getLayers().getArray()[0])
+            // console.log(target.value.getLayers().getArray()[0].getVisible())
+            console.log('123')
+            let obj = {
+                action: 'baseMap',
+                value: 0
+            }
+            layerControl(obj)
         }
         function changeLayers() {
             let target = state.targetNum == 1 ? map1 : map2
@@ -376,8 +390,8 @@ export default {
                     }"
                     :onChangeOrderLayer="()=>{
                     }"
-                    :onLockLayer="()=>{
-
+                    :onLockLayer="(nodeIndex)=>{
+                        state.currentLayers[nodeIndex].lock = !state.currentLayers[nodeIndex].lock
                     }"
                     :onDeleteLayer="({action, value})=>{
                         layerControl({action, value})

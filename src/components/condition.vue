@@ -99,7 +99,7 @@ export default {
                             <input type="checkbox" name="example1" id="example1"
                             :checked="props.currentLayers.some(node=>node.name === 'america')"
                             @change="(e) => {
-                                onLayerControl('mapMode', {
+                                onLayerControl('layerMode', {
                                     checked: e.target.checked,
                                     layerName: 'america',
                                 })
@@ -110,7 +110,7 @@ export default {
                             <input type="checkbox" name="example2" id="example2"
                             :checked="props.currentLayers.some(node=>node.name === 'EsriJSON')"
                             @change="(e) => {
-                                onLayerControl('mapMode', {
+                                onLayerControl('layerMode', {
                                     checked: e.target.checked,
                                     layerName: 'EsriJSON',
                                 })
