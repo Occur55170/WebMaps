@@ -117,6 +117,28 @@ export default {
                             }">
                             <label for="example2">台灣河道(測試二)</label>
                         </div>
+                        <div>
+                            <input type="checkbox" name="example2" id="example2"
+                            :checked="props.currentLayers.some(node=>node.name === 'roads')"
+                            @change="(e) => {
+                                onLayerControl('layerMode', {
+                                    checked: e.target.checked,
+                                    layerName: 'roads',
+                                })
+                            }">
+                            <label for="example2">roads</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" name="example2" id="example2"
+                            :checked="props.currentLayers.some(node=>node.name === 'imagery')"
+                            @change="(e) => {
+                                onLayerControl('layerMode', {
+                                    checked: e.target.checked,
+                                    layerName: 'imagery',
+                                })
+                            }">
+                            <label for="example2">imagery</label>
+                        </div>
                     </div>
                 </div>
                 <div class="mb-2 landMark">

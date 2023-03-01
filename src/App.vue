@@ -25,9 +25,6 @@ export default {
             <threeDimensionMap />
         </div>
     </div>
-    <div class="mapSourceOption">
-        <mapSourceOption />
-    </div>
 </template>
 
 <style lang="sass">
@@ -42,10 +39,6 @@ export default {
     left: 0
     height: 100%
     width: 100%
-.mapSourceOption
-    position: fixed
-    top: 0
-    right: 0
 
 .LayoutTool
     position: absolute

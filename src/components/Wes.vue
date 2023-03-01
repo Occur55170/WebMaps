@@ -24,16 +24,33 @@ const map = ref(null) // 绑定地图实例的变量
 export default {
     setup(props, { emit }) {
         const state = reactive({
-            defaultCenter: [120.971580, 24.804015], //lng, lat
+            defaultCenter: [120.991580, 24.804015], //lng, lat
         })
 
         let map;
         function initMap() {
+            const key = 'Gu2rcfenfMEKjKXgPF6H';
             const raster = new TileLayer({
                 preload: Infinity,
                 name: 'defaultLayer',
                 source: new OSM()
             })
+            const roads = new TileLayer({
+                preload: Infinity,
+                source: new XYZ({
+                    url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=' + key,
+                    tileSize: 512,
+                    maxZoom: 22,
+                }),
+            });
+
+            const imagery = new TileLayer({
+                preload: Infinity,
+                source: new XYZ({
+                    url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=' + key,
+                    maxZoom: 20,
+                }),
+            });
 
             const compass = ref(null) // 覆蓋物實例
             compass.value = new Overlay({
@@ -43,16 +60,16 @@ export default {
             });
 
             map = new Map({
-                layers: [raster],
+                layers: [roads],
                 target: document.getElementById('map'),
-                overlays: [
-                    compass.value,
-                ],
                 view: new View({
                     center: fromLonLat(state.defaultCenter),
                     zoom: 15,
                     duration: 100,
                 }),
+                overlays: [
+                    compass.value,
+                ],
             });
 
         }
@@ -73,6 +90,25 @@ export default {
             console.log(map.getLayers().getArray())
         }
         function addLayers() {
+            const roads = new TileLayer({
+                source: new XYZ({
+                    attributions: attributions,
+                    url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=' + key,
+                    tileSize: 512,
+                    maxZoom: 22,
+                }),
+            });
+
+            const imagery = new TileLayer({
+                source: new XYZ({
+                    attributions: attributions,
+                    url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=' + key,
+                    maxZoom: 20,
+                }),
+            });
+            map.addLayer(vector)
+        }
+        function addLay() {
             const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
             const style = new Style({
                 fill: new Fill(),
@@ -132,13 +168,6 @@ export default {
     <button @click="addLayers">add</button>
     <button @click="removeLayers">remove</button>
     <div tabindex="2" id="map" class="map__x"></div>
-    <!-- 彈跳視窗容器 -->
-    <div class="popup" ref="popupCom">
-        <!-- 關閉按钮 -->
-        <span class="icon-close" @click="closePopup">✖</span>
-        <!-- 彈跳視窗内容（展示座標信息） -->
-        <div class="content">{{ currentCoordinate }}</div>
-    </div>
 </template>
 <style lang="sass" scoped>
 .map__x

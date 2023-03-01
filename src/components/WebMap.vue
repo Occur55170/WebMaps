@@ -33,6 +33,8 @@ import baseMapList from '../config/baseMapList'
 export default {
     props: {},
     setup(props, { emit }) {
+        const mapLayers = mapLayerList
+        const baseMaps = baseMapList
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
@@ -42,11 +44,10 @@ export default {
             currentLayerNames: [],
             // fix!!
             currentLayers: [],
-
+            baseMaps:Object.keys(baseMaps).map(node=>node),
         })
-
-        const mapLayers = mapLayerList
-        const baseMaps = baseMapList
+        console.log('mapLayers', mapLayers)
+        console.log('baseMaps', baseMaps)
 
         const defaultLayers = [
             new TileLayer({
@@ -169,19 +170,27 @@ export default {
                         let newTileLayer
                         switch (value.layerName) {
                             case 'america':
-                                let newTileLayer = mapLayers[value.layerName]()
+                                newTileLayer = mapLayers[value.layerName]()
                                 targetLayers.extend([newTileLayer])
                                 break;
                             case 'EsriJSON':
-                                let aac = mapLayers[value.layerName]()
-                                target.value.addLayer(aac)
+                                newTileLayer = mapLayers[value.layerName]()
+                                target.value.addLayer(newTileLayer)
+                                break;
+                            case 'roads':
+                                newTileLayer = mapLayers[value.layerName]()
+                                targetLayers.extend([newTileLayer])
+                                break;
+                            case 'imagery':
+                                newTileLayer = mapLayers[value.layerName]()
+                                targetLayers.extend([newTileLayer])
                                 break;
                         }
                     } else {
                         // 刪除圖層事件 需要重寫
                         let layersAry = targetLayers.getArray();
                         layersAry.forEach(element => {
-                            console.log(element.get('name'), value)
+                            console.log(element)
                             if(element.get('name') == value.layerName){
                                 target.value.removeLayer(element);
                             }
@@ -189,7 +198,17 @@ export default {
                     }
                     break;
                 case 'baseMap':
-                    let a = baseMaps.sss(value)
+                    // 新增底圖
+                    let newTileLayer = baseMaps[value.layerName]()
+                    targetLayers.extend([newTileLayer])
+
+                    // 刪除其餘底圖
+                    let layersAry = targetLayers.getArray();
+                    layersAry.forEach(element => {
+                        if(element.get('name') !== value.layerName){
+                            target.value.removeLayer(element);
+                        }
+                    });
                     break;
                 case 'changeMapCount':
                     if (value === 2 && !document.getElementById('map2')) {
@@ -297,15 +316,9 @@ export default {
         }
 
         function showLayers() {
-            // let target = state.targetNum == 1 ? map1 : map2
-            // console.log(target.value.getLayers().getArray()[0])
-            // console.log(target.value.getLayers().getArray()[0].getVisible())
-            console.log('123')
-            let obj = {
-                action: 'baseMap',
-                value: 0
-            }
-            layerControl(obj)
+            let target = state.targetNum == 1 ? map1 : map2
+            console.log(target.value.getLayers().getArray())
+            console.log(target.value.getLayers().getArray()[0].getVisible())
         }
         function changeLayers() {
             let target = state.targetNum == 1 ? map1 : map2
@@ -330,6 +343,7 @@ export default {
             changeTarget,
             conditionWrap,
             changLayerVisible,
+
             // console.log test
             showLayers,
             changeLayers,
@@ -347,8 +361,11 @@ export default {
             @onChangeTarget="(value)=>{changeTarget(value)}"
             @conditionWrap="(value)=>{conditionWrap(value)}"
             />
-            <button @click="showLayers">show</button>
-            <button @click="changeLayers">add</button>
+        </div>
+        <div class="mapSourceOption">
+            <mapSourceOption
+            :baseMaps="state.baseMaps"
+            @onChangeBaseMaps="({action, value})=>{layerControl({action, value})}" />
         </div>
         <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
             <asideTool @onMapControl="({action, value})=>{mapControl({action, value})}"  />
@@ -435,4 +452,10 @@ export default {
 //     width: 440px
 //     right: 1%
 //     bottom: 3%
+
+.mapSourceOption
+    position: fixed
+    top: 0
+    right: 0
+    z-index: 220
 </style>
