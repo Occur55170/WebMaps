@@ -44,4 +44,12 @@ export default {
     </div>
 </template>
 
-<style></style>
+<style lang="sass" scoped>
+select
+    border: 0
+    box-shadow: 0px 4px 4px #999
+    border-radius: 5px
+    padding: 8px 20px
+    option
+        padding: 8px 20px
+</style>

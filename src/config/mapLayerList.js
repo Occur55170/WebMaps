@@ -63,6 +63,44 @@ export default {
             opacity: 0.7,
         });
     },
+    BsriJSON: () => {
+        const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
+        const style = new Style({
+            fill: new Fill(),
+            stroke: new Stroke({
+                color: [0, 0, 0, 1],
+                width: 0.5,
+            }),
+        });
+
+        const newVectorSource = new VectorSource({
+            format: new EsriJSON(),
+            url: function (extent, resolution, projection) {
+                const srid = projection.getCode().split(/:(?=\d+$)/).pop();
+                const url = serviceUrl + '/query/?f=json&' + 'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
+                    encodeURIComponent(`{"xmin":${extent[0]},"ymin":${extent[1]},"xmax":${extent[2]},"ymax":${extent[3]},"spatialReference":{"wkid":${srid}}}`) +
+                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
+                return url;
+            },
+            strategy: tileStrategy(
+                createXYZ({
+                    tileSize: 512,
+                })
+            ),
+        });
+
+        return new VectorLayer({
+            name: 'EsriJSON',
+            source: newVectorSource,
+            style: function (feature) {
+                const classify = feature.get('LU_2014');
+                const color = [0, 0, 0, 0];
+                style.getFill().setColor(color);
+                return style;
+            },
+            opacity: 0.7,
+        });
+    },
     america: () => {
         return new TileLayer({
             name: 'america',

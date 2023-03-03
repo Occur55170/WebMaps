@@ -44,6 +44,7 @@ export default {
             currentLayerNames: [],
             // fix!!
             currentLayers: [],
+            mapLayers:Object.keys(mapLayers).map(node=>node),
             baseMaps:Object.keys(baseMaps).map(node=>node),
         })
         console.log('mapLayers', mapLayers)
@@ -312,7 +313,6 @@ export default {
 
         function changLayerVisible(node){
             console.log(node)
-
         }
 
         function showLayers() {
@@ -325,6 +325,38 @@ export default {
             let currentVisible = target.value.getLayers().getArray()[0].getVisible()
             console.log('cha', currentVisible)
             target.value.getLayers().getArray()[0].setVisible(!currentVisible)
+        }
+
+        function onChangeOrderLayer(val) {
+            let target = state.targetNum == 1 ? map1 : map2
+            let targetLayers = target.value.getLayers()
+            // target.value.getLayers().getArray()[2].setZIndex(0)
+            // target.value.getLayers().getArray()[1].setZIndex(1)
+            // target.value.getLayers().getArray()[0].setZIndex(2)
+            console.log(val.action, val.key, val.value)
+            if (val.value === 'up') {
+                    let layersAry = targetLayers.getArray()
+                    let layerName = targetLayers.getArray()[val.key].get('name')
+                    let newTileLayer = mapLayers[layerName]()
+                    console.log(newTileLayer)
+                    // target.value.addLayer(newTileLayer)
+                    layersAry.splice(val.key, 1)
+                    layersAry.insertAt(1, newTileLayer)
+
+                    console.log(targetLayers.getArray())
+                    // layersAry.forEach(element => {
+                    //     if(element.get('name') !== value.layerName){
+                    //         target.value.removeLayer(element);
+                    //     }
+                    // });
+                // target.value.getLayers().getArray()[val.key]
+                // splice
+
+            }
+            if (val.value === 'down') {
+
+            }
+
         }
 
         onMounted(() => {
@@ -342,7 +374,9 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
+
             changLayerVisible,
+            onChangeOrderLayer,
 
             // console.log test
             showLayers,
@@ -380,6 +414,7 @@ export default {
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
                     <condition
+                    :mapLayers="state.mapLayers"
                     :currentLayers="state.currentLayers"
                     :onClose="()=>{
                         state.conditionWrap = false
@@ -390,7 +425,6 @@ export default {
                 </div>
             </div>
 
-            <!-- fix!! -->
             <div>
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.layerSelect"
                 @click="state.layerSelect = true">
@@ -398,14 +432,15 @@ export default {
                 </button>
                 <div v-if="state.layerSelect">
                     <layerSelect
+                    :onClose="()=>{
+                        state.layerSelect = false
+                    }"
                     :onChangLayerVisible="(node)=>{
                         changLayerVisible(node)
                     }"
                     :currentLayers="state.currentLayers"
-                    :onClose="()=>{
-                        state.layerSelect = false
-                    }"
-                    :onChangeOrderLayer="()=>{
+                    :onChangeOrderLayer="(val)=>{
+                        onChangeOrderLayer(val)
                     }"
                     :onLockLayer="(nodeIndex)=>{
                         state.currentLayers[nodeIndex].lock = !state.currentLayers[nodeIndex].lock
@@ -448,14 +483,10 @@ export default {
     width: 440px
     right: 1%
     bottom: 5%
-// .layerSelect
-//     width: 440px
-//     right: 1%
-//     bottom: 3%
 
 .mapSourceOption
     position: fixed
-    top: 0
-    right: 0
+    top: 20px
+    right: 20px
     z-index: 220
 </style>

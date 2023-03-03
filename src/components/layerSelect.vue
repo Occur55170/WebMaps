@@ -21,6 +21,10 @@ export default {
             type: Function,
             default: ()=>{}
         },
+        onChangeOrderLayer: {
+            type: Function,
+            default: ()=>{}
+        },
         currentLayers: {
             type: Array,
             default: []
@@ -35,21 +39,6 @@ export default {
             console.log('1')
         }
 
-        function onChangeOrderLayer(){
-            // if(.lock){
-                // onChangeOrderLayer()
-            // }
-        }
-
-        // function addLock() {
-        //     state.currentLayers = props.currentLayers.map((node)=>{
-        //         return {
-        //         ...node,
-        //             'lock': true
-        //         }
-        //     })
-        // }
-
         onMounted(()=>{
         })
 
@@ -57,7 +46,6 @@ export default {
             props,
             state,
             deleteAllLayer,
-            onChangeOrderLayer
         }
     }
 }
@@ -77,8 +65,9 @@ export default {
                 <a href="" @click.prevent="deleteAllLayer()">全部刪除</a>
             </p>
             {{ props.currentLayers }}
-            <ul class="list-unstyled">
-                <li class="d-flex justify-content-between"
+            <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
+                <li class="d-flex justify-content-between align-items-center"
+                style="border-bottom: 1px solid #D9D9D9"
                 v-for="(node, nodeIndex) in props.currentLayers">
                     <div>
                         {{ node.name }}
@@ -87,8 +76,10 @@ export default {
                         <div class="btn"
                         @click="props.onChangeOrderLayer({
                             action: 'changeOrderLayer',
-                            value: 'up'
-                        })">
+                            value: 'up',
+                            key: nodeIndex
+                        })"
+                        >
                             <svg viewBox="0 0 25 24" fill="currentColor">
                                 <path d="M9.49991 19.84H15.4999V11.84H20.3399L12.4999 4.00003L4.65991 11.84H9.49991V19.84Z" fill="#808080" />
                             </svg>
@@ -96,8 +87,10 @@ export default {
                         <div class="btn"
                         @click="props.onChangeOrderLayer({
                             action: 'changeOrderLayer',
-                            value: 'down'
-                        })">
+                            value: 'down',
+                            key: nodeIndex
+                        })"
+                        >
                             <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M9.49991 4H15.4999V12H20.3399L12.4999 19.84L4.65991 12H9.49991V4Z" fill="#808080"/>
                             </svg>
@@ -158,6 +151,7 @@ export default {
 .tool
     .btn
         cursor: pointer
+        padding: 5px 10px
     .lockUp
         color: #808080
     .unlock

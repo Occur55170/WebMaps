@@ -8,6 +8,10 @@ export default {
             type: Function,
             default: ()=>{}
         },
+        mapLayers: {
+            type: Array,
+            default: []
+        },
         currentLayers: {
             type: Array,
             default: []
@@ -84,7 +88,7 @@ export default {
         <div class="py-3 px-4 content">
             <div v-if="state.currentConditionPage === 'coreLayer'">
                 <div class="mb-2 landBoundary">
-                    <p>地圖狀態:{{ state.currentLayerNames }}</p>
+                    <!-- <p>地圖狀態:{{ state.currentLayerNames }}</p> -->
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-0 text-decoration-none" @click="open('landBoundary')">
                         <img src="../assets/img/icon/landBoundary.svg" alt="">
                         行政及土地區界
@@ -117,27 +121,16 @@ export default {
                             }">
                             <label for="example2">台灣河道(測試二)</label>
                         </div>
-                        <div>
+                        <div v-for="(item, index) in props.mapLayers">
                             <input type="checkbox" name="example2" id="example2"
-                            :checked="props.currentLayers.some(node=>node.name === 'roads')"
+                            :checked="props.currentLayers.some(node=>node.name === item)"
                             @change="(e) => {
                                 onLayerControl('layerMode', {
                                     checked: e.target.checked,
-                                    layerName: 'roads',
+                                    layerName: item,
                                 })
                             }">
-                            <label for="example2">roads</label>
-                        </div>
-                        <div>
-                            <input type="checkbox" name="example2" id="example2"
-                            :checked="props.currentLayers.some(node=>node.name === 'imagery')"
-                            @change="(e) => {
-                                onLayerControl('layerMode', {
-                                    checked: e.target.checked,
-                                    layerName: 'imagery',
-                                })
-                            }">
-                            <label for="example2">imagery</label>
+                            <label :for="`example${index}`">{{ item }}</label>
                         </div>
                     </div>
                 </div>
