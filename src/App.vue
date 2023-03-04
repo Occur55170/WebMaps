@@ -17,13 +17,16 @@ export default {
 
 <template>
     <div class="main">
-        <div v-if="true">
-            <!-- <Wes ref="mapCom" /> -->
+        <WebMap ref="mapCom" />
+        <!-- <div v-if="true">
+            <Wes ref="mapCom" />
             <WebMap ref="mapCom" />
         </div>
         <div v-else>
             <threeDimensionMap />
-        </div>
+        </div> -->
+
+        <!-- <threeDimensionMap /> -->
     </div>
 </template>
 

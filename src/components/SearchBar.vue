@@ -4,7 +4,7 @@ import $ from 'jquery'
 
 export default {
     props: {
-        currentLayerNames: {
+        currentLayers: {
             type: Array,
             default: []
         }
@@ -71,8 +71,7 @@ export default {
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4 position-relative">
                 <div class="MapFeatureBtn text-white">
-                    <!-- <a href="" v-if="state.dimensionMapStatus == '2D'" -->
-                    <a href="" v-if="!props.currentLayerNames.includes('OSM')"
+                    <a href="" v-if="props.currentLayers.findIndex(node=>node.name === 'OSM') == -1"
                     @click.prevent="toolSwitch('threeDimensionalBtn', '3D'), onLayerControl('changeDimensionMap', '3D')">
                         <img src="../assets/img/icon/twoDimensional.svg">
                     </a>
@@ -107,8 +106,8 @@ export default {
             </li>
         </ul>
 
-        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x" id="switchControl"
-            v-if="state.switchControl" style="z-index: 99;padding: 5px;">
+        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl"
+            v-if="state.switchControl" style="z-index: 99;">
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
                 onChangeTarget(1)
             }">左</div>

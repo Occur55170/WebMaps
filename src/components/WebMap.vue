@@ -11,7 +11,7 @@ import { TileArcGISRest } from 'ol/source.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js';
+import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
 import { Image as ImageLayer } from 'ol/layer.js'
@@ -19,6 +19,7 @@ import ImageWMS from 'ol/source/ImageWMS'
 import { FullScreen, defaults as defaultControls } from 'ol/control.js'
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
+import 'ol-ext/dist/ol-ext.css'
 
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
@@ -41,14 +42,11 @@ export default {
             targetNum: 1,
             conditionWrap: false,
             layerSelect: true,
-            currentLayerNames: [],
             // fix!!
             currentLayers: [],
             mapLayers:Object.keys(mapLayers).map(node=>node),
             baseMaps:Object.keys(baseMaps).map(node=>node),
         })
-        console.log('mapLayers', mapLayers)
-        console.log('baseMaps', baseMaps)
 
         const defaultLayers = [
             new TileLayer({
@@ -57,15 +55,13 @@ export default {
                 source: new OSM(),
                 enable: true
             }),
-        ];
+        ]
 
         const defaultView = new View({
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
-            // 測試用
-            rotation: 6
-        });
+        })
 
         // 初始化地圖
         function initMap() {
@@ -129,7 +125,6 @@ export default {
                         const { xAxis, yAxis } = value
                         View.animate({
                             center: [xAxis, yAxis],
-                            // center: [ 1.748904, 52.469845],
                             zoom: 10,
                             duration: 100,
                         });
@@ -160,43 +155,56 @@ export default {
         }
 
         function layerControl({action, value}) {
-            console.log(action, value)
             let target = state.targetNum == 1 ? map1 : map2
             let targetView = target.value.getView()
             let targetLayers = target.value.getLayers()
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // 預設寫好設定檔案  name要針對每個圖層寫死
                         let newTileLayer
-                        switch (value.layerName) {
-                            case 'america':
-                                newTileLayer = mapLayers[value.layerName]()
-                                targetLayers.extend([newTileLayer])
-                                break;
-                            case 'EsriJSON':
-                                newTileLayer = mapLayers[value.layerName]()
-                                target.value.addLayer(newTileLayer)
-                                break;
-                            case 'roads':
-                                newTileLayer = mapLayers[value.layerName]()
-                                targetLayers.extend([newTileLayer])
-                                break;
-                            case 'imagery':
-                                newTileLayer = mapLayers[value.layerName]()
-                                targetLayers.extend([newTileLayer])
-                                break;
-                        }
+                        newTileLayer = mapLayers[value.layerName]()
+                        target.value.addLayer(newTileLayer)
                     } else {
-                        // 刪除圖層事件 需要重寫
+                        // !needfix
                         let layersAry = targetLayers.getArray();
                         layersAry.forEach(element => {
-                            console.log(element)
                             if(element.get('name') == value.layerName){
                                 target.value.removeLayer(element);
                             }
                         });
                     }
+                    break;
+                case 'changeOrder':
+                    if (!state.currentLayers[value.key].lock || value.key === 0) { return }
+                    let layerName = targetLayers.getArray()[value.key].get('name')
+                    let nowTileLayer = mapLayers[layerName]()
+                    if (value.movement === 'up') {
+                        if (value.key+1 == targetLayers.getArray().length) { return }
+
+                        targetLayers.getArray().forEach(element => {
+                            if(element.get('name') == layerName){
+                                target.value.removeLayer(element);
+                            }
+                        })
+                        targetLayers.insertAt(value.key+1, nowTileLayer)
+                    }
+                    if (value.movement === 'down') {
+                        if (value.key-1 == 0) { return }
+
+                        targetLayers.getArray().forEach(element => {
+                            if(element.get('name') == layerName){
+                                target.value.removeLayer(element);
+                            }
+                        })
+                        targetLayers.insertAt(value.key-1, nowTileLayer)
+                    }
+                    getCurrentLayerNames()
+
+                    break;
+                case 'changeLayerVisible':
+                    if (!state.currentLayers[value.key].lock) { return }
+                    let a = !(targetLayers.getArray()[value.key].getVisible())
+                    targetLayers.getArray()[value.key].setVisible(a)
                     break;
                 case 'baseMap':
                     // 新增底圖
@@ -288,8 +296,6 @@ export default {
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? map1 : map2
             const layers = target.value.getLayers().getArray()
-            // fix!!
-            state.currentLayerNames = layers.map(layer => layer.get('name'))
             state.currentLayers = layers.map(layer => {
                 return {
                     name: layer.get('name'),
@@ -311,54 +317,6 @@ export default {
             state.conditionWrap = !state.conditionWrap
         }
 
-        function changLayerVisible(node){
-            console.log(node)
-        }
-
-        function showLayers() {
-            let target = state.targetNum == 1 ? map1 : map2
-            console.log(target.value.getLayers().getArray())
-            console.log(target.value.getLayers().getArray()[0].getVisible())
-        }
-        function changeLayers() {
-            let target = state.targetNum == 1 ? map1 : map2
-            let currentVisible = target.value.getLayers().getArray()[0].getVisible()
-            console.log('cha', currentVisible)
-            target.value.getLayers().getArray()[0].setVisible(!currentVisible)
-        }
-
-        function onChangeOrderLayer(val) {
-            let target = state.targetNum == 1 ? map1 : map2
-            let targetLayers = target.value.getLayers()
-            // target.value.getLayers().getArray()[2].setZIndex(0)
-            // target.value.getLayers().getArray()[1].setZIndex(1)
-            // target.value.getLayers().getArray()[0].setZIndex(2)
-            console.log(val.action, val.key, val.value)
-            if (val.value === 'up') {
-                    let layersAry = targetLayers.getArray()
-                    let layerName = targetLayers.getArray()[val.key].get('name')
-                    let newTileLayer = mapLayers[layerName]()
-                    console.log(newTileLayer)
-                    // target.value.addLayer(newTileLayer)
-                    layersAry.splice(val.key, 1)
-                    layersAry.insertAt(1, newTileLayer)
-
-                    console.log(targetLayers.getArray())
-                    // layersAry.forEach(element => {
-                    //     if(element.get('name') !== value.layerName){
-                    //         target.value.removeLayer(element);
-                    //     }
-                    // });
-                // target.value.getLayers().getArray()[val.key]
-                // splice
-
-            }
-            if (val.value === 'down') {
-
-            }
-
-        }
-
         onMounted(() => {
             initMap()
             nextTick(()=>{
@@ -374,13 +332,6 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
-
-            changLayerVisible,
-            onChangeOrderLayer,
-
-            // console.log test
-            showLayers,
-            changeLayers,
         }
     }
 }
@@ -390,7 +341,7 @@ export default {
     <div ref="mapCom">
         <div class="SearchBar position-absolute">
             <SearchBar
-            :currentLayerNames="state.currentLayerNames"
+            :currentLayers="state.currentLayers"
             @onLayerControl="({action, value})=>{layerControl({action, value})}"
             @onChangeTarget="(value)=>{changeTarget(value)}"
             @conditionWrap="(value)=>{conditionWrap(value)}"
@@ -435,12 +386,12 @@ export default {
                     :onClose="()=>{
                         state.layerSelect = false
                     }"
-                    :onChangLayerVisible="(node)=>{
-                        changLayerVisible(node)
+                    :onChangLayerVisible="(action)=>{
+                        layerControl(action)
                     }"
                     :currentLayers="state.currentLayers"
-                    :onChangeOrderLayer="(val)=>{
-                        onChangeOrderLayer(val)
+                    :onChangeOrderLayer="({action, value})=>{
+                        layerControl({action, value})
                     }"
                     :onLockLayer="(nodeIndex)=>{
                         state.currentLayers[nodeIndex].lock = !state.currentLayers[nodeIndex].lock
@@ -460,8 +411,9 @@ export default {
     justify-content: space-between
     height: 100vh
 
-.mapWrap div
-    width: 100%
+.mapWrap .ol-viewport
+    height: 100vh
+    width: 100vw
 
 // needFix
 .redBackground

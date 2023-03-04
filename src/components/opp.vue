@@ -11,10 +11,10 @@ import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Style } from 'ol/style.js'
 import { Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import {FullScreen, defaults as defaultControls} from 'ol/control.js';
+import {FullScreen, defaults as defaultControls} from 'ol/control.js'
 
-import ImageLayer from 'ol/layer/Image';
-import ImageWMS from 'ol/source/ImageWMS';
+import ImageLayer from 'ol/layer/Image'
+import ImageWMS from 'ol/source/ImageWMS'
 
 import 'ol/ol.css' // ol提供的css样式（必须引入）
 import riverpoly from '../assets/img/riverpoly.jpg'
@@ -40,16 +40,7 @@ export default {
                 name: 'defaultLayer',
                 source: new OSM() // 圖層數據
             }),
-            // new ImageLayer({
-            //     source: new ImageWMS({
-            //         url: 'http://demo.boundlessgeo.com/geoserver/wms',
-            //         params: {'LAYERS': 'topp:states'},
-            //         serverType: 'geoserver',
-            //         ratio: 1,
-            //         projection: 'EPSG:4326'
-            //     })
-            // })
-        ];
+        ]
 
         const defaultView = new View({
             projection: 'EPSG:4326', // 投影座標系
@@ -57,7 +48,7 @@ export default {
             zoom: state.defaultCenterZoom,
             // 測試用
             rotation:1
-        });
+        })
 
         // 初始化地圖
         function initMap() {
@@ -74,7 +65,7 @@ export default {
                 element: compass.value,
                 positioning: 'center-center',
                 stopEvent: false
-            });
+            })
 
             map.value = new Map({
                 target: mapCom.value,

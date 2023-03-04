@@ -2,9 +2,9 @@
 import OSM from 'ol/source/OSM'
 import Map from 'ol/Map';
 import View from 'ol/View';
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import XYZ from 'ol/source/XYZ';
-import PerspectiveMap from "ol-ext/map/PerspectiveMap";
+import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js
+import XYZ from 'ol/source/XYZ'
+import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -36,8 +36,6 @@ export default {
                 center: [-245406, 5986536]
             }),
         });
-
-        // this.map.setPerspective(10);
     },
 };
 

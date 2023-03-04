@@ -13,7 +13,7 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
-            selectMap: ''
+            selectMap: props.baseMaps[0]
         })
         function onChangeBaseMaps(name){
             let action = 'baseMap'
@@ -38,7 +38,6 @@ export default {
         @change="(e) => {
             onChangeBaseMaps()
         }">
-            <option disabled>請選擇底圖</option>
             <option :value="node" v-for="(node, node_i) in props.baseMaps">{{ node }}</option>
         </select>
     </div>
