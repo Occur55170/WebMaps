@@ -46,6 +46,7 @@ export default {
             currentLayers: [],
             mapLayers:Object.keys(mapLayers).map(node=>node),
             baseMaps:Object.keys(baseMaps).map(node=>node),
+            selectLock: false
         })
 
         const defaultLayers = [
@@ -165,17 +166,29 @@ export default {
                         newTileLayer = mapLayers[value.layerName]()
                         target.value.addLayer(newTileLayer)
                     } else {
-                        // !needfix
-                        let layersAry = targetLayers.getArray();
+                        let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
                             if(element.get('name') == value.layerName){
                                 target.value.removeLayer(element);
                             }
-                        });
+                        })
+                    }
+                    break;
+                case 'selectLayerMode':
+                    if (state.selectLock) { return }
+                    if (value.layerName === 'all') {
+                        targetLayers.clear()
+                    } else {
+                        let layersAry = targetLayers.getArray()
+                        layersAry.forEach(element => {
+                            if(element.get('name') == value.layerName){
+                                target.value.removeLayer(element);
+                            }
+                        })
                     }
                     break;
                 case 'changeOrder':
-                    if (!state.currentLayers[value.key].lock || value.key === 0) { return }
+                    if (state.selectLock || value.key === 0) { return }
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
                     if (value.movement === 'up') {
@@ -202,7 +215,7 @@ export default {
 
                     break;
                 case 'changeLayerVisible':
-                    if (!state.currentLayers[value.key].lock) { return }
+                    if (state.selectLock) { return }
                     let a = !(targetLayers.getArray()[value.key].getVisible())
                     targetLayers.getArray()[value.key].setVisible(a)
                     break;
@@ -300,7 +313,6 @@ export default {
                 return {
                     name: layer.get('name'),
                     visible: layer.getVisible(),
-                    lock: true
                 }
             })
         }
@@ -383,6 +395,7 @@ export default {
                 </button>
                 <div v-if="state.layerSelect">
                     <layerSelect
+                    :selectLock="state.selectLock"
                     :onClose="()=>{
                         state.layerSelect = false
                     }"
@@ -393,8 +406,8 @@ export default {
                     :onChangeOrderLayer="({action, value})=>{
                         layerControl({action, value})
                     }"
-                    :onLockLayer="(nodeIndex)=>{
-                        state.currentLayers[nodeIndex].lock = !state.currentLayers[nodeIndex].lock
+                    :onLockLayer="()=>{
+                        state.selectLock = !state.selectLock
                     }"
                     :onDeleteLayer="({action, value})=>{
                         layerControl({action, value})

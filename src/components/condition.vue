@@ -100,7 +100,7 @@ export default {
                             </div>
                         </div>
                         <div v-for="(item, index) in props.mapLayers">
-                            <input type="checkbox" name="example2" id="example2"
+                            <input type="checkbox" :name="`example${index}`" :id="`example${index}`"
                             :checked="props.currentLayers.some(node=>node.name === item)"
                             @change="(e) => {
                                 onLayerControl('layerMode', {
