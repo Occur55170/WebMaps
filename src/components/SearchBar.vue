@@ -7,6 +7,10 @@ export default {
         currentLayers: {
             type: Array,
             default: []
+        },
+        mapCount: {
+            type: Number,
+            default: 0
         }
     },
     setup(props, { emit }) {
@@ -18,7 +22,6 @@ export default {
             },
             targetNum: 1,
             dimensionMapStatus: '2D',
-            switchControl: false,
         })
 
         function toolSwitch(target, value) {
@@ -33,7 +36,7 @@ export default {
         }
         function onLayerControl(action, value) {
             if (action === 'changeMapCount') {
-                state.switchControl = (value == 1) ? false : true
+                state.toolSwitch['splitWindowBtn'] = false
             }
             emit('onLayerControl', { action, value })
         }
@@ -82,7 +85,8 @@ export default {
             </li>
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
-                    <img src="../assets/img/icon/singleWindow.svg" alt="">
+                    <img src="../assets/img/icon/singleWindow.svg" alt="" v-if="props.mapCount === 1">
+                    <img src="../assets/img/icon/doubleWindows.svg" alt="" v-if="props.mapCount === 2">
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindowBtn">
                     <li class="mt-2">

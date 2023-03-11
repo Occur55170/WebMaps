@@ -70,14 +70,11 @@ export default {
                     鎖定圖層
                 </a>
                 <a href="" class="d-flex align-items-center text-decoration-none"
+                :class="{'disabled':props.currentLayers.length <= 1}"
                 @click.prevent="()=>{
-                    // 新增alert
-                    props.onDeleteLayer({
-                        action: 'selectLayerMode',
-                        value: {
-                            layerName: 'all'
-                        }
-                    })
+                    if (props.currentLayers.length > 0) {
+                        props.onDeleteLayer()
+                    }
                 }">
                     <svg viewBox="0 0 25 24" fill="currentColor">
                         <path d="M7.5 21C6.95 21 6.47933 20.8043 6.088 20.413C5.696 20.021 5.5 19.55 5.5 19V6H4.5V4H9.5V3H15.5V4H20.5V6H19.5V19C19.5 19.55 19.3043 20.021 18.913 20.413C18.521 20.8043 18.05 21 17.5 21H7.5ZM9.5 17H11.5V8H9.5V17ZM13.5 17H15.5V8H13.5V17Z" />
@@ -85,7 +82,6 @@ export default {
                     全部刪除
                 </a>
             </div>
-            <!-- {{ props.currentLayers }} -->
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
                 <li class="d-flex justify-content-between align-items-center border-bottom py-2"
                 v-for="(node, nodeIndex) in props.currentLayers">

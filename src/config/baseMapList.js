@@ -29,14 +29,19 @@ var configBaseMap = [
     },
 ]
 export default {
-    sourceFun: (val) => {
+    sourceFun: (val, itemKey, itemValue) => {
         let mapSource = configBaseMap.find(node=> node.name == val)
-        return new TileLayer({
+        //needfix
+        let vector = {
             preload: Infinity,
             name: mapSource.name,
             label: mapSource.label,
             source: mapSource.urls,
-        })
+        }
+        if(itemKey) {
+            vector[itemKey] = itemValue
+        }
+        return new TileLayer(vector)
     },
     sourceData: ()=> {
         return configBaseMap.map(node=>{

@@ -48,6 +48,13 @@ export default {
     top: 0
     left: 0
     z-index: 220
-
+.lightWrap
+    z-index: 999
+    position: fixed
+    top: 0
+    left: 0
+    background: rgb(0, 0, 0, 0.1)
+    .lightbox
+        background: #fff
 
 </style>

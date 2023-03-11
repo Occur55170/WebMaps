@@ -125,8 +125,17 @@ export default {
                 maxZoom: 20,
             }),
         })
-    }
+    },
+    // DimensionMap: (obj)=>{
+    //     return new PerspectiveMap({
+    //         layers: [baseMapList.sourceFun('default')],
+    //         target: state.targetNum == 1 ? 'map1' : 'map2',
+    //         view: defaultView,
+    //         controls: [],
+    //     })
+    // }
 }
+
 
 // [230, 0, 0, 1] 紅色
 // [104, 104, 104, 1] 灰色
