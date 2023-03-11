@@ -33,14 +33,7 @@ export default {
         }
         function onLayerControl(action, value) {
             if (action === 'changeMapCount') {
-                if (value == 1 && document.getElementById('switchControl')) {
-                    state.targetNum = 1
-                    state.switchControl = false
-                    emit('onLayerControl', { action, value })
-                }
-                if (value == 2 && !(document.getElementById('switchControl'))) {
-                    state.switchControl = true
-                }
+                state.switchControl = (value == 1) ? false : true
             }
             emit('onLayerControl', { action, value })
         }
@@ -106,8 +99,7 @@ export default {
             </li>
         </ul>
 
-        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl"
-            v-if="state.switchControl" style="z-index: 99;">
+        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
                 onChangeTarget(1)
             }">左</div>

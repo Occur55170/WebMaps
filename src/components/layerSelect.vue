@@ -71,6 +71,7 @@ export default {
                 </a>
                 <a href="" class="d-flex align-items-center text-decoration-none"
                 @click.prevent="()=>{
+                    // 新增alert
                     props.onDeleteLayer({
                         action: 'selectLayerMode',
                         value: {

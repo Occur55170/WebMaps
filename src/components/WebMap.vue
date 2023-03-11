@@ -36,27 +36,27 @@ export default {
     setup(props, { emit }) {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
+        console.log(baseMapList.sourceData())
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenterZoom: 17,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: true,
-            // fix!!
             currentLayers: [],
             mapLayers:Object.keys(mapLayers).map(node=>node),
-            baseMaps:Object.keys(baseMaps).map(node=>node),
-            selectLock: false
-        })
+            baseMapsOptions: computed(()=>baseMapList.sourceData()),
+            selectLock: false,
 
-        const defaultLayers = [
-            new TileLayer({
-                preload: Infinity,
-                name: 'defaultLayer',
-                source: new OSM(),
-                enable: true
+            mainMap: computed(()=>{
+                if (state.map1?.getTarget() == null) {return 'map2'}
+                return 'map1'
             }),
-        ]
+            map1LayerStatus: [],
+            map2LayerStatus: ['roads'],
+            map1: null,
+            map2: null,
+        })
 
         const defaultView = new View({
             projection: 'EPSG:4326',
@@ -66,13 +66,9 @@ export default {
 
         // 初始化地圖
         function initMap() {
-            const map1 = document.createElement('div')
-            map1.setAttribute('id', 'map1')
-            map1.setAttribute('class', 'map1 w-100')
-            document.getElementById('mapWrap').appendChild(map1)
-            map1.value = new Map({
+            state.map1 = new Map({
                 target: 'map1',
-                layers: defaultLayers,
+                layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
             })
@@ -100,11 +96,14 @@ export default {
                     }),
                 })
             })
-            map1.value.addLayer(marker);
+
+            // needfix
+            let target = state.targetNum==1 ? 'map1' : 'map2'
+            state[target].addLayer(marker)
         }
 
         function mapControl({action, value}) {
-            let View = map1.value.getView()
+            let View = state[state.mainMap].getView()
             switch (action) {
                 case 'In':
                     View.animate({
@@ -141,7 +140,7 @@ export default {
                     }
                     break;
                 case 'fullScreen':
-                    let target = map1
+                    let target = document.getElementById(`map${state.targetNum}`)
                     if (target.requestFullscreen) {
                         target.requestFullscreen()
                     } else if (target.msRequestFullscreen) {
@@ -156,33 +155,43 @@ export default {
         }
 
         function layerControl({action, value}) {
-            let target = state.targetNum == 1 ? map1 : map2
-            let targetView = target.value.getView()
-            let targetLayers = target.value.getLayers()
+            let target = state.targetNum ==1 ? state.map1 : state.map2
+            let targetView = target?.getView()
+            let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        let newTileLayer
-                        newTileLayer = mapLayers[value.layerName]()
-                        target.value.addLayer(newTileLayer)
+                        let newTileLayer = mapLayers[value.layerName]()
+                        target.addLayer(newTileLayer)
+                        onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
                             if(element.get('name') == value.layerName){
-                                target.value.removeLayer(element);
+                                target.removeLayer(element)
                             }
                         })
+                        onMapLayerStatus('delete', target.getTarget(), value.layerName)
                     }
                     break;
                 case 'selectLayerMode':
                     if (state.selectLock) { return }
                     if (value.layerName === 'all') {
-                        targetLayers.clear()
+                        let layersToRemove = []
+                        let layersAry = targetLayers.getArray()
+                        layersAry.forEach(element => {
+                            if(element.get('name') !== 'default'){
+                                layersToRemove.push(element)
+                            }
+                        })
+                        layersToRemove.forEach(function(node) {
+                            target.removeLayer(node)
+                        })
                     } else {
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
                             if(element.get('name') == value.layerName){
-                                target.value.removeLayer(element);
+                                target.removeLayer(element);
                             }
                         })
                     }
@@ -196,7 +205,7 @@ export default {
 
                         targetLayers.getArray().forEach(element => {
                             if(element.get('name') == layerName){
-                                target.value.removeLayer(element);
+                                target.removeLayer(element);
                             }
                         })
                         targetLayers.insertAt(value.key+1, nowTileLayer)
@@ -206,7 +215,7 @@ export default {
 
                         targetLayers.getArray().forEach(element => {
                             if(element.get('name') == layerName){
-                                target.value.removeLayer(element);
+                                target.removeLayer(element);
                             }
                         })
                         targetLayers.insertAt(value.key-1, nowTileLayer)
@@ -221,45 +230,42 @@ export default {
                     break;
                 case 'baseMap':
                     // 新增底圖
-                    let newTileLayer = baseMaps[value.layerName]()
+                    let newTileLayer = baseMaps.sourceFun(value.layerName)
                     targetLayers.extend([newTileLayer])
 
                     // 刪除其餘底圖
                     let layersAry = targetLayers.getArray();
                     layersAry.forEach(element => {
                         if(element.get('name') !== value.layerName){
-                            target.value.removeLayer(element);
+                            target.removeLayer(element);
                         }
                     });
                     break;
                 case 'changeMapCount':
-                    if (value === 2 && !document.getElementById('map2')) {
-                        addMapCount()
+                    let actionToMap
+                    if (value === 2) {
+                        actionToMap = state.mainMap === 'map1' ? 'map2' : 'map1'
+                        state[actionToMap] = new Map({
+                            target: actionToMap,
+                            layers: [
+                                baseMapList.sourceFun('default'),
+                                ...state[`${actionToMap}LayerStatus`].map(node=>mapLayerList[node]())
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
                     }
                     if (value === 1) {
-                        // needFix
-                        if($('div').hasClass('currentMap')){
-                            $('.currentMap').removeClass('currentMap')
-                            $('#mapWrap').removeClass('redBackground')
-                        }
-                        state.targetNum= 1
-                        if(document.getElementById('map2')){
-                            document.getElementById('map2').remove()
-                        }
+                        actionToMap = state.targetNum !==1 ? 'map1' : 'map2'
+                        state[actionToMap] = null
                     }
                     break;
                 case 'changeDimensionMap':
-                    target.innerHTML = ''
                     if(value === '3D'){
-                        const layer = new Tile({
-                            name: 'OSM',
-                            preload: Infinity,
-                            source: new OSM()
-                        })
-                        target.value = new PerspectiveMap({
-                            target: target,
-                            layers: [layer],
-                            view: targetView,
+                        target = new PerspectiveMap({
+                            target: state.targetNum == 1 ? 'map1' : 'map2',
+                            layers: [baseMapList.sourceFun('default')],
+                            view: defaultView,
                             controls: [],
                         })
                     } else {
@@ -268,7 +274,7 @@ export default {
                             name: 'defaultLayer',
                             source: new OSM()
                         })
-                        target.value = new Map({
+                        target = new Map({
                             target: target,
                             layers: [layer],
                             view: targetView,
@@ -280,35 +286,34 @@ export default {
             getCurrentLayerNames()
         }
 
-        function addMapCount() {
-            const map2 = document.createElement('div')
-            map2.setAttribute('id', 'map2')
-            map2.setAttribute('class', 'map2 w-100')
-            document.getElementById('mapWrap').appendChild(map2)
+        function changeTarget(value){
+            state.targetNum = value
+            if (!state[`map${value}`]) {
 
-            map2.value = new Map({
-                target: 'map2',
-                layers: [
-                    new TileLayer({
-                        preload: Infinity,
-                        name: 'defaultLayer',
-                        source: new OSM()
-                    })
-                ],
-                view: defaultView,
-                controls: [],
-            })
-
-            // needFix
+                // fix!!!!!
+                layerControl({action: 'changeMapCount',value: 1})
+                state.map2 = new Map({
+                    target: `map${value}`,
+                    layers: [
+                        baseMapList.sourceFun('default'),
+                        ...state[`map${value}LayerStatus`].map(node=>mapLayerList[node]())
+                    ],
+                    view: defaultView,
+                    controls: [],
+                })
+            }
             nextTick(()=>{
-                $(`#map1`).addClass('currentMap')
-                $('.mapWrap').addClass('redBackground')
+                getCurrentLayerNames()
             })
         }
 
         function getCurrentLayerNames() {
-            let target = state.targetNum == 1 ? map1 : map2
-            const layers = target.value.getLayers().getArray()
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            console.log(state.map1)
+            console.log(state.map2)
+            console.log(3)
+            const layers = target.getLayers().getArray()
+            console.log(4)
             state.currentLayers = layers.map(layer => {
                 return {
                     name: layer.get('name'),
@@ -317,16 +322,18 @@ export default {
             })
         }
 
-        function changeTarget(value){
-            // needFix
-            $('.currentMap').removeClass('currentMap')
-            $(`#map${value}`).addClass('currentMap')
-            state.targetNum = value
-            getCurrentLayerNames()
-        }
-
         function conditionWrap(){
             state.conditionWrap = !state.conditionWrap
+        }
+
+        function onMapLayerStatus (action, target, name) {
+            if (action === 'add') {
+                state[`${target}LayerStatus`].push(name)
+            } else if (action === 'delete') {
+                let a = state[`${target}LayerStatus`].findIndex(node=>node === name)
+                state[`${target}LayerStatus`].splice(a ,1)
+            } else {
+            }
         }
 
         onMounted(() => {
@@ -335,6 +342,11 @@ export default {
                 getCurrentLayerNames()
             })
         })
+        // function tset() {
+        //     let ssss = baseMapList.sourceFun('roads')
+        //     console.log('ssss', ssss)
+        //     state.map1.addLayer(ssss)
+        // }
 
         return {
             state,
@@ -344,6 +356,8 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
+            onMapLayerStatus,
+            // tset,
         }
     }
 }
@@ -351,6 +365,7 @@ export default {
 
 <template>
     <div ref="mapCom">
+        <!-- <div @click="tset()">00</div> -->
         <div class="SearchBar position-absolute">
             <SearchBar
             :currentLayers="state.currentLayers"
@@ -361,15 +376,17 @@ export default {
         </div>
         <div class="mapSourceOption">
             <mapSourceOption
-            :baseMaps="state.baseMaps"
+            :baseMapsOptions="state.baseMapsOptions"
             @onChangeBaseMaps="({action, value})=>{layerControl({action, value})}" />
         </div>
         <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
             <asideTool @onMapControl="({action, value})=>{mapControl({action, value})}"  />
         </div>
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap"></div>
+        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
+            <div id="map1" :class="{'w-100': state.map1?.getTarget() == 'map1'}"></div>
+            <div id="map2" :class="{'w-100': state.map2?.getTarget() == 'map2'}"></div>
+        </div>
         <div class="condition position-absolute">
-
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold" v-if="!state.conditionWrap"
                 @click="state.conditionWrap = true">
@@ -428,13 +445,6 @@ export default {
     height: 100vh
     width: 100vw
 
-// needFix
-.redBackground
-    background: red
-// needFix
-.currentMap
-    position: relative
-    clip-path: polygon(5px 5px,calc(100% - 5px) 5px, calc(100% - 5px) calc(100% - 5px), 5px calc(100% - 5px))
 
 .asideTool
     z-index: 220

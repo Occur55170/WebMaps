@@ -2,7 +2,7 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 export default {
     props: {
-        baseMaps: {
+        baseMapsOptions: {
             type: Array,
             default: []
         },
@@ -13,7 +13,7 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
-            selectMap: props.baseMaps[0]
+            selectMap: props.baseMapsOptions[0]
         })
         function onChangeBaseMaps(name){
             let action = 'baseMap'
@@ -38,7 +38,7 @@ export default {
         @change="(e) => {
             onChangeBaseMaps()
         }">
-            <option :value="node" v-for="(node, node_i) in props.baseMaps">{{ node }}</option>
+            <option :value="node.name" v-for="(node, node_i) in props.baseMapsOptions">{{ node.label }}</option>
         </select>
     </div>
 </template>

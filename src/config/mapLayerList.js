@@ -7,15 +7,11 @@ import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 import { TileArcGISRest } from 'ol/source.js'
 
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
-import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Fill, Stroke, Style } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
-import { Image as ImageLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS'
-import { FullScreen, defaults as defaultControls } from 'ol/control.js'
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
+import OSM from 'ol/source/OSM'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import EsriJSON from 'ol/format/EsriJSON.js'

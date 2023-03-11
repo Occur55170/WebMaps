@@ -17,10 +17,10 @@ export default {
 
 <template>
     <div class="main">
-        <WebMap ref="mapCom" />
+        <!-- <WebMap /> -->
+        <Wes />
         <!-- <div v-if="true">
-            <Wes ref="mapCom" />
-            <WebMap ref="mapCom" />
+            <WebMap />
         </div>
         <div v-else>
             <threeDimensionMap />
