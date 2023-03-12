@@ -18,15 +18,9 @@ export default {
 <template>
     <div class="main">
         <!-- <WebMap /> -->
-        <Wes />
-        <!-- <div v-if="true">
-            <WebMap />
-        </div>
-        <div v-else>
-            <threeDimensionMap />
-        </div> -->
+        <!-- <Wes /> -->
 
-        <!-- <threeDimensionMap /> -->
+        <threeDimensionMap />
     </div>
 </template>
 

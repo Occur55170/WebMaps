@@ -2,14 +2,10 @@
 
 
 // needFix
-.bg-steel{
-    background: $blue-steel
-}
-.bg-light{
-    background: $blue-light
-}
+.bg-steel{background: $blue-steel}
+.bg-light{background: $blue-light}
 
 .disabled {
     pointer-events: none;
     opacity: 0.5;
-  }
+}

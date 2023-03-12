@@ -47,12 +47,8 @@ export default {
             baseMapsOptions: computed(() => baseMapList.sourceData()),
             selectLock: false,
 
-            mainMap: computed(() => {
-                if (state.map1?.getTarget() == null) { return 'map2' }
-                return 'map1'
-            }),
             map1LayerStatus: [],
-            map2LayerStatus: ['roads'],
+            map2LayerStatus: [],
             map1: null,
             map2: null,
             mapCount: 1,
@@ -98,13 +94,13 @@ export default {
                 })
             })
 
-            // needfix
             let target = state.targetNum == 1 ? 'map1' : 'map2'
             state[target].addLayer(marker)
         }
 
         function mapControl({ action, value }) {
-            let View = state[state.mainMap].getView()
+            let mainMap = state.map1?.getTarget() == null ? 'map2' : 'map1'
+            let View = state[mainMap].getView()
             switch (action) {
                 case 'In':
                     View.animate({
@@ -384,6 +380,7 @@ export default {
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needfix -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+            <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
         </div>
         <div class="condition position-absolute">
@@ -421,7 +418,14 @@ export default {
                     :onLockLayer="() => {
                         state.selectLock = !state.selectLock
                     }"
-                    :onDeleteLayer="() => {
+                    :onDeleteLayer="({ action, value }) => {
+                        if (value.layerName == 'all') {
+                            state.deleteLightbox = true
+                        } else {
+                            layerControl({ action, value })
+                        }
+                    }"
+                    :onDeleteLayerAll="() => {
                         state.deleteLightbox = true
                     }"
                     />
@@ -450,7 +454,8 @@ export default {
     </div>
 </template>
 
-<style lang="sass" >
+<style lang="sass">
+@import '../assets/styles/all.module.scss'
 .mapWrap
     justify-content: space-between
     height: 100vh
@@ -478,4 +483,8 @@ export default {
     top: 20px
     right: 20px
     z-index: 220
+
+.middleLine
+    width: 5px
+    background: $blue-steel
 </style>

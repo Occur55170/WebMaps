@@ -73,7 +73,12 @@ export default {
                 :class="{'disabled':props.currentLayers.length <= 1}"
                 @click.prevent="()=>{
                     if (props.currentLayers.length > 0) {
-                        props.onDeleteLayer()
+                        props.onDeleteLayer({
+                            action: 'selectLayerMode',
+                            value: {
+                                layerName: 'all'
+                            }
+                        })
                     }
                 }">
                     <svg viewBox="0 0 25 24" fill="currentColor">
