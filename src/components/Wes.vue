@@ -23,7 +23,7 @@ import 'ol-ext/dist/ol-ext.css'
 
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
-// import { fromLonLat } from 'ol/proj.js'
+import { fromLonLat } from 'ol/proj.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 
 import 'ol/ol.css' // ol提供的css样式
@@ -37,7 +37,8 @@ export default {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            defaultCenter: [120.971859, 24.801583], //lng, lat
+            // defaultCenter: [120.971859, 24.801583], //lng, lat
+            defaultCenter: [1.697726, 52.398551], //lng, lat
             defaultCenterZoom: 17,
             targetNum: 1,
             conditionWrap: false,
@@ -65,7 +66,8 @@ export default {
         function initMap() {
             state.map1 = new Map({
                 target: 'map1',
-                layers: [baseMapList.sourceFun('default')],
+                layers: mapLayers['example'](),
+                // layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
             })
@@ -348,6 +350,11 @@ export default {
                 getCurrentLayerNames()
             })
         })
+        function ddClick (){
+            // let newTileLayer = mapLayers['example']()
+            // state.map1.extends[newTileLayer]
+            // onMapLayerStatus('add', target.getTarget(), value.layerName)
+        }
 
         return {
             state,
@@ -358,6 +365,7 @@ export default {
             changeTarget,
             conditionWrap,
             onMapLayerStatus,
+            ddClick
         }
     }
 }
@@ -365,6 +373,9 @@ export default {
 
 <template>
     <div>
+        <div @click="ddClick()">
+            ddd
+        </div>
         <div class="SearchBar position-absolute">
             <SearchBar :currentLayers="state.currentLayers" :mapCount="state.mapCount"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
