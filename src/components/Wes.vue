@@ -67,7 +67,6 @@ export default {
             state.map1 = new Map({
                 target: 'map1',
                 layers: mapLayers['example'](),
-                // layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
             })
