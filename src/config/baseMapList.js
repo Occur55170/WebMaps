@@ -41,7 +41,7 @@ export default {
         if(itemKey) {
             vector[itemKey] = itemValue
         }
-        return new TileLayer(vector)
+        return [new TileLayer(vector)]
     },
     sourceData: ()=> {
         return configBaseMap.map(node=>{

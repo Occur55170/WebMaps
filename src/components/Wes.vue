@@ -26,6 +26,10 @@ import { createXYZ } from 'ol/tilegrid.js'
 import { fromLonLat } from 'ol/proj.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 
+import GeoJSON from 'ol/format/GeoJSON.js';
+
+// import { Polygon, Circle } from 'ol/geom.js'
+
 import 'ol/ol.css' // ol提供的css样式
 
 import mapLayerList from '../config/mapLayerList'
@@ -37,8 +41,8 @@ export default {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            // defaultCenter: [120.971859, 24.801583], //lng, lat
-            defaultCenter: [1.697726, 52.398551], //lng, lat
+            defaultCenter: [120.971859, 24.801583], //lng, lat
+            // defaultCenter: [34.259559, 108.925394], //lng, lat
             defaultCenterZoom: 17,
             targetNum: 1,
             conditionWrap: false,
@@ -64,12 +68,185 @@ export default {
 
         // 初始化地圖
         function initMap() {
+            const highlightStyle = new Style({
+                fill: new Fill({
+                    color: '#EEE',
+                }),
+                stroke: new Stroke({
+                    color: '#3399CC',
+                    width: 2,
+                }),
+            });
+            // let obj = {
+            //     type: "Feature",
+            //     id: "01",
+            //     properties: {
+            //         name: "Alabama",
+            //         density: 94.65
+            //     },
+            //     geometry: {
+            //         type: "Polygon",
+            //         coordinates: [
+            //             [
+            //                 -87.359296,
+            //                 35.00118
+            //             ],
+            //             [
+            //                 -85.606675,
+            //                 34.984749
+            //             ],
+            //             [
+            //                 -85.431413,
+            //                 34.124869
+            //             ],
+            //             [
+            //                 -85.184951,
+            //                 32.859696
+            //             ],
+            //             [
+            //                 -85.069935,
+            //                 32.580372
+            //             ],
+            //             [
+            //                 -84.960397,
+            //                 32.421541
+            //             ],
+            //             [
+            //                 -85.004212,
+            //                 32.322956
+            //             ],
+            //             [
+            //                 -84.889196,
+            //                 32.262709
+            //             ],
+            //             [
+            //                 -85.058981,
+            //                 32.13674
+            //             ],
+            //             [
+            //                 -85.053504,
+            //                 32.01077
+            //             ],
+            //             [
+            //                 -85.141136,
+            //                 31.840985
+            //             ],
+            //             [
+            //                 -85.042551,
+            //                 31.539753
+            //             ],
+            //             [
+            //                 -85.113751,
+            //                 31.27686
+            //             ],
+            //             [
+            //                 -85.004212,
+            //                 31.003013
+            //             ],
+            //             [
+            //                 -85.497137,
+            //                 30.997536
+            //             ],
+            //             [
+            //                 -87.600282,
+            //                 30.997536
+            //             ],
+            //             [
+            //                 -87.633143,
+            //                 30.86609
+            //             ],
+            //             [
+            //                 -87.408589,
+            //                 30.674397
+            //             ],
+            //             [
+            //                 -87.446927,
+            //                 30.510088
+            //             ],
+            //             [
+            //                 -87.37025,
+            //                 30.427934
+            //             ],
+            //             [
+            //                 -87.518128,
+            //                 30.280057
+            //             ],
+            //             [
+            //                 -87.655051,
+            //                 30.247195
+            //             ],
+            //             [
+            //                 -87.90699,
+            //                 30.411504
+            //             ],
+            //             [
+            //                 -87.934375,
+            //                 30.657966
+            //             ],
+            //             [
+            //                 -88.011052,
+            //                 30.685351
+            //             ],
+            //             [
+            //                 -88.10416,
+            //                 30.499135
+            //             ],
+            //             [
+            //                 -88.137022,
+            //                 30.318396
+            //             ],
+            //             [
+            //                 -88.394438,
+            //                 30.367688
+            //             ],
+            //             [
+            //                 -88.471115,
+            //                 31.895754
+            //             ],
+            //             [
+            //                 -88.241084,
+            //                 33.796253
+            //             ],
+            //             [
+            //                 -88.098683,
+            //                 34.891641
+            //             ],
+            //             [
+            //                 -88.202745,
+            //                 34.995703
+            //             ],
+            //             [
+            //                 -87.359296,
+            //                 35.00118
+            //             ]
+            //         ]
+            //     }
+            // }
+            const vector = new VectorLayer({
+                source: new VectorSource({
+                    url: 'https://openlayers.org/data/vector/us-states.json',
+                    format: new GeoJSON(),
+                }),
+            });
+
             state.map1 = new Map({
+                layers: [...baseMapList.sourceFun('default'), vector],
                 target: 'map1',
-                layers: mapLayers['example'](),
                 view: defaultView,
-                controls: [],
+                view: new View({
+                    center: fromLonLat([-100, 38.5]),
+                    zoom: 4,
+                    multiWorld: true,
+                }),
             })
+
+
+            // state.map1 = new Map({
+            //     target: 'map1',
+            //     layers: [...baseMapList.sourceFun('default')],
+            //     view: defaultView,
+            //     controls: [],
+            // })
         }
 
         function addPoint(targetLng, targetLat) {
@@ -349,11 +526,6 @@ export default {
                 getCurrentLayerNames()
             })
         })
-        function ddClick (){
-            // let newTileLayer = mapLayers['example']()
-            // state.map1.extends[newTileLayer]
-            // onMapLayerStatus('add', target.getTarget(), value.layerName)
-        }
 
         return {
             state,
@@ -364,7 +536,6 @@ export default {
             changeTarget,
             conditionWrap,
             onMapLayerStatus,
-            ddClick
         }
     }
 }
@@ -372,9 +543,6 @@ export default {
 
 <template>
     <div>
-        <div @click="ddClick()">
-            ddd
-        </div>
         <div class="SearchBar position-absolute">
             <SearchBar :currentLayers="state.currentLayers" :mapCount="state.mapCount"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
@@ -389,7 +557,7 @@ export default {
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needfix -->
-            <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+            <div id="map1" style="width: 100vw;" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
         </div>
@@ -413,32 +581,23 @@ export default {
                     已選擇的圖層
                 </button>
                 <div v-if="state.layerSelect">
-                    <layerSelect
-                    :selectLock="state.selectLock"
-                    :onClose="() => {
+                    <layerSelect :selectLock="state.selectLock" :onClose="() => {
                         state.layerSelect = false
-                    }"
-                    :onChangLayerVisible="(action) => {
-                        layerControl(action)
-                    }"
-                    :currentLayers="state.currentLayers"
-                    :onChangeOrderLayer="({ action, value }) => {
-                        layerControl({ action, value })
-                    }"
-                    :onLockLayer="() => {
-                        state.selectLock = !state.selectLock
-                    }"
-                    :onDeleteLayer="({ action, value }) => {
-                        if (value.layerName == 'all') {
-                            state.deleteLightbox = true
-                        } else {
-                            layerControl({ action, value })
-                        }
-                    }"
-                    :onDeleteLayerAll="() => {
-                        state.deleteLightbox = true
-                    }"
-                    />
+                    }" :onChangLayerVisible="(action) => {
+    layerControl(action)
+}" :currentLayers="state.currentLayers" :onChangeOrderLayer="({ action, value }) => {
+    layerControl({ action, value })
+}" :onLockLayer="() => {
+    state.selectLock = !state.selectLock
+}" :onDeleteLayer="({ action, value }) => {
+    if (value.layerName == 'all') {
+        state.deleteLightbox = true
+    } else {
+        layerControl({ action, value })
+    }
+}" :onDeleteLayerAll="() => {
+    state.deleteLightbox = true
+}" />
                 </div>
             </div>
         </div>
@@ -446,7 +605,7 @@ export default {
             <div class="lightbox p-4 rounded">
                 <p>是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
-                    <button @click="()=>{
+                    <button @click="() => {
                         layerControl({
                             action: 'selectLayerMode',
                             value: {
@@ -455,7 +614,7 @@ export default {
                         })
                         state.deleteLightbox = false
                     }">是</button>
-                    <button @click="()=>{
+                    <button @click="() => {
                         state.deleteLightbox = false
                     }">否</button>
                 </div>
