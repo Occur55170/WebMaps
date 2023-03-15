@@ -22,6 +22,17 @@ export default {
 
     mounted() {
         // 配置地圖
+        // const view = new View({
+        //     projection: 'EPSG:4326',
+        //     zoom: 19,
+        //     center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]
+        //     // enableRotation: true,
+        //     // enableZoom: true,
+        //     // enablePan: true,
+        //     // enableTilt: true,
+        //     // enableRoll: true,
+        //     // enableZoomMax: 22,
+        // });
         const view = new View({
             projection: 'EPSG:4326',
             zoom: 19,
