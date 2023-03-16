@@ -11,27 +11,19 @@ import { TileArcGISRest } from 'ol/source.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
+import {Fill, Stroke, Style, Text, Circle as CircleStyle} from 'ol/style.js';
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
-import { Image as ImageLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS'
-import { FullScreen, defaults as defaultControls } from 'ol/control.js'
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import 'ol-ext/dist/ol-ext.css'
 
-import EsriJSON from 'ol/format/EsriJSON.js'
-import { createXYZ } from 'ol/tilegrid.js'
-import { fromLonLat } from 'ol/proj.js'
-import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 
 import GeoJSON from 'ol/format/GeoJSON.js';
 
-// import { Polygon, Circle } from 'ol/geom.js'
 
 import 'ol/ol.css' // ol提供的css样式
 
+// 自定義function
 import mapLayerList from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
 
@@ -41,9 +33,9 @@ export default {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            defaultCenter: [120.971859, 24.801583], //lng, lat
-            // defaultCenter: [34.259559, 108.925394], //lng, lat
-            defaultCenterZoom: 17,
+            // defaultCenter: [120.971859, 24.801583], //lng, lat
+            defaultCenter: [0, 0], //lng, lat
+            defaultCenterZoom: 2,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: true,
@@ -68,185 +60,46 @@ export default {
 
         // 初始化地圖
         function initMap() {
-            const highlightStyle = new Style({
+            state.map1 = new Map({
+                target: 'map1',
+                layers: [...baseMapList.sourceFun('default')],
+                view: defaultView,
+                controls: [],
+            })
+
+            const labelStyle = new Style({
+                text: new Text({
+                    font: '12px Calibri,sans-serif',
+                    overflow: true,
+                    fill: new Fill({
+                        color: '#000',
+                    }),
+                    stroke: new Stroke({
+                        color: '#fff',
+                        width: 3,
+                    }),
+                }),
+            })
+            const countryStyle = new Style({
                 fill: new Fill({
-                    color: '#EEE',
+                    color: 'rgba(255, 255, 255, 0.6)',
                 }),
                 stroke: new Stroke({
-                    color: '#3399CC',
-                    width: 2,
+                    color: '#319FD3',
+                    width: 1,
                 }),
-            });
-            // let obj = {
-            //     type: "Feature",
-            //     id: "01",
-            //     properties: {
-            //         name: "Alabama",
-            //         density: 94.65
-            //     },
-            //     geometry: {
-            //         type: "Polygon",
-            //         coordinates: [
-            //             [
-            //                 -87.359296,
-            //                 35.00118
-            //             ],
-            //             [
-            //                 -85.606675,
-            //                 34.984749
-            //             ],
-            //             [
-            //                 -85.431413,
-            //                 34.124869
-            //             ],
-            //             [
-            //                 -85.184951,
-            //                 32.859696
-            //             ],
-            //             [
-            //                 -85.069935,
-            //                 32.580372
-            //             ],
-            //             [
-            //                 -84.960397,
-            //                 32.421541
-            //             ],
-            //             [
-            //                 -85.004212,
-            //                 32.322956
-            //             ],
-            //             [
-            //                 -84.889196,
-            //                 32.262709
-            //             ],
-            //             [
-            //                 -85.058981,
-            //                 32.13674
-            //             ],
-            //             [
-            //                 -85.053504,
-            //                 32.01077
-            //             ],
-            //             [
-            //                 -85.141136,
-            //                 31.840985
-            //             ],
-            //             [
-            //                 -85.042551,
-            //                 31.539753
-            //             ],
-            //             [
-            //                 -85.113751,
-            //                 31.27686
-            //             ],
-            //             [
-            //                 -85.004212,
-            //                 31.003013
-            //             ],
-            //             [
-            //                 -85.497137,
-            //                 30.997536
-            //             ],
-            //             [
-            //                 -87.600282,
-            //                 30.997536
-            //             ],
-            //             [
-            //                 -87.633143,
-            //                 30.86609
-            //             ],
-            //             [
-            //                 -87.408589,
-            //                 30.674397
-            //             ],
-            //             [
-            //                 -87.446927,
-            //                 30.510088
-            //             ],
-            //             [
-            //                 -87.37025,
-            //                 30.427934
-            //             ],
-            //             [
-            //                 -87.518128,
-            //                 30.280057
-            //             ],
-            //             [
-            //                 -87.655051,
-            //                 30.247195
-            //             ],
-            //             [
-            //                 -87.90699,
-            //                 30.411504
-            //             ],
-            //             [
-            //                 -87.934375,
-            //                 30.657966
-            //             ],
-            //             [
-            //                 -88.011052,
-            //                 30.685351
-            //             ],
-            //             [
-            //                 -88.10416,
-            //                 30.499135
-            //             ],
-            //             [
-            //                 -88.137022,
-            //                 30.318396
-            //             ],
-            //             [
-            //                 -88.394438,
-            //                 30.367688
-            //             ],
-            //             [
-            //                 -88.471115,
-            //                 31.895754
-            //             ],
-            //             [
-            //                 -88.241084,
-            //                 33.796253
-            //             ],
-            //             [
-            //                 -88.098683,
-            //                 34.891641
-            //             ],
-            //             [
-            //                 -88.202745,
-            //                 34.995703
-            //             ],
-            //             [
-            //                 -87.359296,
-            //                 35.00118
-            //             ]
-            //         ]
-            //     }
-            // }
-            const vector = new VectorLayer({
+            })
+            const style = [countryStyle, labelStyle];
+
+            const vectorLayer = new VectorLayer({
+                // background: 'white',
                 source: new VectorSource({
                     url: 'https://openlayers.org/data/vector/us-states.json',
                     format: new GeoJSON(),
-                }),
-            });
-
-            state.map1 = new Map({
-                layers: [...baseMapList.sourceFun('default'), vector],
-                target: 'map1',
-                view: defaultView,
-                view: new View({
-                    center: fromLonLat([-100, 38.5]),
-                    zoom: 4,
-                    multiWorld: true,
-                }),
+                })
             })
 
-
-            // state.map1 = new Map({
-            //     target: 'map1',
-            //     layers: [...baseMapList.sourceFun('default')],
-            //     view: defaultView,
-            //     controls: [],
-            // })
+            state.map1.addLayer(vectorLayer)  // 把图层添加到地图
         }
 
         function addPoint(targetLng, targetLat) {
