@@ -20,7 +20,7 @@ export default {
         <!-- <WebMap /> -->
         <Wes />
 
-        <threeDimensionMap />
+        <!-- <threeDimensionMap /> -->
     </div>
 </template>
 

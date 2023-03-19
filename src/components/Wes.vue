@@ -34,8 +34,8 @@ export default {
         const baseMaps = baseMapList
         const state = reactive({
             // defaultCenter: [120.971859, 24.801583], //lng, lat
-            defaultCenter: [0, 0], //lng, lat
-            defaultCenterZoom: 2,
+            defaultCenter: [120.971859, 24.801583], //lng, lat
+            defaultCenterZoom: 4,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: true,
@@ -62,11 +62,23 @@ export default {
         function initMap() {
             state.map1 = new Map({
                 target: 'map1',
-                layers: [...baseMapList.sourceFun('default')],
+                layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
             })
 
+            // const vectorLayer = new VectorLayer({
+            //     source: new VectorSource({
+            //         format: new GeoJSON(),
+            //         url: 'https://od.moi.gov.tw/api/v1/rest/datastore/301000100G-000886-003',
+            //     }),
+            //     style: new Style({
+            //         stroke: new Stroke({
+            //             color: [230, 0, 0, 1],
+            //             width: 2,
+            //         }),
+            //     }),
+            // })
             const labelStyle = new Style({
                 text: new Text({
                     font: '12px Calibri,sans-serif',
@@ -96,7 +108,13 @@ export default {
                 source: new VectorSource({
                     url: 'https://openlayers.org/data/vector/us-states.json',
                     format: new GeoJSON(),
-                })
+                }),
+                style: function (feature) {
+                    const label = feature.get('name').split(' ').join('\n');
+                    labelStyle.getText().setText(label);
+                    return style;
+                },
+                declutter: true,
             })
 
             state.map1.addLayer(vectorLayer)  // 把图层添加到地图
