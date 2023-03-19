@@ -11,19 +11,23 @@ import { TileArcGISRest } from 'ol/source.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
-import {Fill, Stroke, Style, Text, Circle as CircleStyle} from 'ol/style.js';
+import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 
+import { Image as ImageLayer } from 'ol/layer.js'
+import ImageWMS from 'ol/source/ImageWMS'
+import { FullScreen, defaults as defaultControls } from 'ol/control.js'
+import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import 'ol-ext/dist/ol-ext.css'
 
-
-import GeoJSON from 'ol/format/GeoJSON.js';
-
+import EsriJSON from 'ol/format/EsriJSON.js'
+import { createXYZ } from 'ol/tilegrid.js'
+// import { fromLonLat } from 'ol/proj.js'
+import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 
 import 'ol/ol.css' // ol提供的css样式
 
-// 自定義function
 import mapLayerList from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
 
@@ -33,9 +37,8 @@ export default {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            // defaultCenter: [120.971859, 24.801583], //lng, lat
             defaultCenter: [120.971859, 24.801583], //lng, lat
-            defaultCenterZoom: 4,
+            defaultCenterZoom: 17,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: true,
@@ -49,7 +52,15 @@ export default {
             map1: null,
             map2: null,
             mapCount: 1,
-            deleteLightbox: false
+            deleteLightbox: false,
+            dimensionMap: {
+                map1: '2D',
+                map2: '2D'
+            },
+            toSearchDimensionStatus: computed(()=>{
+                let target = state.targetNum == 1 ? 'map1' : 'map2'
+                return state.dimensionMap[target] === '2D'
+            })
         })
 
         const defaultView = new View({
@@ -118,6 +129,13 @@ export default {
             })
 
             state.map1.addLayer(vectorLayer)  // 把图层添加到地图
+
+            // state.map1 = new Map({
+            //     target: 'map1',
+            //     layers: [baseMapList.sourceFun('default')],
+            //     view: defaultView,
+            //     controls: [],
+            // })
         }
 
         function addPoint(targetLng, targetLat) {
@@ -202,7 +220,6 @@ export default {
 
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            let targetView = target?.getView()
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
@@ -280,12 +297,12 @@ export default {
                     targetLayers.extend([newTileLayer])
 
                     // 刪除其餘底圖
-                    let layersAry = targetLayers.getArray();
+                    let layersAry = targetLayers.getArray()
                     layersAry.forEach(element => {
                         if (element.get('name') !== value.layerName) {
-                            target.removeLayer(element);
+                            target.removeLayer(element)
                         }
-                    });
+                    })
                     break;
                 case 'changeMapCount':
                     let actionToMap = state.targetNum !== 1 ? 'map1' : 'map2'
@@ -310,26 +327,21 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
+                    let ta = state.targetNum == 1 ? 'map1' : 'map2'
+                    state.dimensionMap[ta] = value
                     if (value === '3D') {
+                        // baseMap {checked: true, layerName: 'three'}
                         target = new PerspectiveMap({
                             target: state.targetNum == 1 ? 'map1' : 'map2',
+                            name: 'three',
                             layers: [baseMapList.sourceFun('default', 'name', 'three')],
                             view: defaultView,
                             controls: [],
                         })
-                        // let newTileLayer = baseMapList.sourceFun('default')
-                        // layerControl({
-                        //     action: "changeOrder",
-                        //     value: {movement: 'up', key: 1}
-                        // })
+                        state[`${ta}LayerStatus`].push('3D')
                     } else {
-                        // fixed !!!
-                        target = new Map({
-                            target: target,
-                            layers: [baseMapList.sourceFun('default')],
-                            view: targetView,
-                            controls: [],
-                        })
+                        $(`#${ta} .ol-perspective-map`).remove()
+                        state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node=>node !== '3D')
                     }
                     break;
             }
@@ -338,24 +350,48 @@ export default {
 
         function changeTarget(value) {
             state.targetNum = value
-            let actionToMap = state.targetNum !== 1 ? 'map1' : 'map2'
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {
+                // 是目標地圖的產出且為空
                 if (!state[`map${value}`]) {
-                    state[`map${value}`] = new Map({
-                        target: `map${value}`,
-                        layers: [
-                            baseMapList.sourceFun('default'),
-                            ...state[`map${value}LayerStatus`].map(node => mapLayerList[node]())
-                        ],
-                        view: defaultView,
-                        controls: [],
-                    })
+
+                    if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
+
+                        state[`map${value}`] = new Map({
+                            target: `map${value}`,
+                            layers: [
+                                baseMapList.sourceFun('default'),
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
+
+                        let ta = state.targetNum == 1 ? 'map1' : 'map2'
+                        state.dimensionMap[ta] = '3D'
+                        target = new PerspectiveMap({
+                            target: state.targetNum == 1 ? 'map1' : 'map2',
+                            name: 'three',
+                            layers: [baseMapList.sourceFun('default', 'name', 'three')],
+                            view: defaultView,
+                            controls: [],
+                        })
+                    } else {
+                        state[`map${value}`] = new Map({
+                            target: `map${value}`,
+                            layers: [
+                                baseMapList.sourceFun('default'),
+                                ...state[`map${value}LayerStatus`].map(node => mapLayerList[node]())
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
+                    }
                 }
-                if (state[actionToMap]) {
-                    layerControl({ action: 'changeMapCount', value: 1 })
-                    state[actionToMap] = null
-                    // 清空dom元素
-                    const element = document.getElementById(actionToMap)
+                // 不是目標地圖的刪除
+                if (state[delToMap]) {
+                    state[delToMap] = null
+                    const element = document.getElementById(delToMap)
                     while (element.firstChild) {
                         element.removeChild(element.firstChild)
                     }
@@ -368,8 +404,8 @@ export default {
 
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            const layers = target.getLayers().getArray()
-            state.currentLayers = layers.map(layer => {
+            const layers = target?.getLayers()?.getArray()
+            state.currentLayers = layers?.map(layer => {
                 return {
                     name: layer.get('name'),
                     visible: layer.getVisible(),
@@ -390,6 +426,7 @@ export default {
             } else {
             }
         }
+
 
         onMounted(() => {
             initMap()
@@ -415,9 +452,13 @@ export default {
 <template>
     <div>
         <div class="SearchBar position-absolute">
-            <SearchBar :currentLayers="state.currentLayers" :mapCount="state.mapCount"
+            <SearchBar
+                :dimensionMapStatus="state.toSearchDimensionStatus"
+                :currentLayers="state.currentLayers"
+                :mapCount="state.mapCount"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                @onChangeTarget="(value) => { changeTarget(value) }"
+                @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
         <div class="mapSourceOption">
             <mapSourceOption :baseMapsOptions="state.baseMapsOptions"
@@ -428,7 +469,7 @@ export default {
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needfix -->
-            <div id="map1" style="width: 100vw;" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+            <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
         </div>
@@ -452,23 +493,32 @@ export default {
                     已選擇的圖層
                 </button>
                 <div v-if="state.layerSelect">
-                    <layerSelect :selectLock="state.selectLock" :onClose="() => {
+                    <layerSelect
+                    :selectLock="state.selectLock"
+                    :currentLayers="state.currentLayers"
+                    :onClose="() => {
                         state.layerSelect = false
-                    }" :onChangLayerVisible="(action) => {
-    layerControl(action)
-}" :currentLayers="state.currentLayers" :onChangeOrderLayer="({ action, value }) => {
-    layerControl({ action, value })
-}" :onLockLayer="() => {
-    state.selectLock = !state.selectLock
-}" :onDeleteLayer="({ action, value }) => {
-    if (value.layerName == 'all') {
-        state.deleteLightbox = true
-    } else {
-        layerControl({ action, value })
-    }
-}" :onDeleteLayerAll="() => {
-    state.deleteLightbox = true
-}" />
+                    }"
+                    :onChangLayerVisible="(action) => {
+                        layerControl(action)
+                    }"
+                    :onChangeOrderLayer="({ action, value }) => {
+                        layerControl({ action, value })
+                    }"
+                    :onLockLayer="() => {
+                        state.selectLock = !state.selectLock
+                    }"
+                    :onDeleteLayer="({ action, value }) => {
+                        if (value.layerName == 'all') {
+                            state.deleteLightbox = true
+                        } else {
+                            layerControl({ action, value })
+                        }
+                    }"
+                    :onDeleteLayerAll="() => {
+                        state.deleteLightbox = true
+                    }"
+                    />
                 </div>
             </div>
         </div>
@@ -476,7 +526,7 @@ export default {
             <div class="lightbox p-4 rounded">
                 <p>是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
-                    <button @click="() => {
+                    <button @click="()=>{
                         layerControl({
                             action: 'selectLayerMode',
                             value: {
@@ -485,7 +535,7 @@ export default {
                         })
                         state.deleteLightbox = false
                     }">是</button>
-                    <button @click="() => {
+                    <button @click="()=>{
                         state.deleteLightbox = false
                     }">否</button>
                 </div>

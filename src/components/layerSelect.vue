@@ -126,7 +126,8 @@ export default {
                             props.onChangLayerVisible({
                                 action: 'changeLayerVisible',
                                 value: {
-                                    key: nodeIndex
+                                    key: nodeIndex,
+                                    specialLayer: node.name === '3D'
                                 }
                             })
                         }">

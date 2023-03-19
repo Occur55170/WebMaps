@@ -53,13 +53,20 @@ export default {
             map2: null,
             mapCount: 1,
             deleteLightbox: false,
+            // need fix:因3D圖層無法透過getLayers抓到，因此另外宣告一組變數用來存取當前狀態
             dimensionMap: {
-                map1: '2D',
-                map2: '2D'
+                map1:{
+                    name:'2D',
+                    visible: true
+                },
+                map2: {
+                    name:'2D',
+                    visible: true
+                },
             },
             toSearchDimensionStatus: computed(()=>{
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
-                return state.dimensionMap[target] === '2D'
+                return state.dimensionMap[target].name === '2D'
             })
         })
 
@@ -229,8 +236,12 @@ export default {
                     break;
                 case 'changeLayerVisible':
                     if (state.selectLock) { return }
-                    let a = !(targetLayers.getArray()[value.key].getVisible())
-                    targetLayers.getArray()[value.key].setVisible(a)
+                    if (value?.specialLayer) {
+
+                    } else {
+                        let a = !(targetLayers.getArray()[value.key].getVisible())
+                        targetLayers.getArray()[value.key].setVisible(a)
+                    }
                     break;
                 case 'baseMap':
                     // 新增底圖
@@ -246,22 +257,46 @@ export default {
                     })
                     break;
                 case 'changeMapCount':
-                    let actionToMap = state.targetNum !== 1 ? 'map1' : 'map2'
+                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
+                    if (state.mapCount === value) {return}
                     state.mapCount = value
                     if (value === 2) {
-                        state[actionToMap] = new Map({
-                            target: actionToMap,
-                            layers: [
-                                baseMapList.sourceFun('default'),
-                                ...state[`${actionToMap}LayerStatus`].map(node => mapLayerList[node]())
-                            ],
-                            view: defaultView,
-                            controls: [],
-                        })
+                        if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
+                            state[otherMap] = new Map({
+                                target: otherMap,
+                                layers: [
+                                    baseMapList.sourceFun('default'),
+                                    ...state[`${otherMap}LayerStatus`].filter(node => {
+                                        if (node !== '3D') {
+                                            return mapLayerList[node]()
+                                        }
+                                    })
+                                ],
+                                view: defaultView,
+                                controls: [],
+                            })
+                            state[otherMap] = new PerspectiveMap({
+                                target: otherMap,
+                                name: 'three',
+                                layers: [baseMapList.sourceFun('default')],
+                                view: defaultView,
+                                controls: [],
+                            })
+                        } else {
+                            state[otherMap] = new Map({
+                                target: otherMap,
+                                layers: [
+                                    baseMapList.sourceFun('default'),
+                                    ...state[`${otherMap}LayerStatus`].map(node => mapLayerList[node]())
+                                ],
+                                view: defaultView,
+                                controls: [],
+                            })
+                        }
                     }
                     if (value === 1) {
-                        state[actionToMap] = null
-                        const element = document.getElementById(actionToMap)
+                        state[otherMap] = null
+                        const element = document.getElementById(otherMap)
                         while (element.firstChild) {
                             element.removeChild(element.firstChild)
                         }
@@ -269,7 +304,7 @@ export default {
                     break;
                 case 'changeDimensionMap':
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
-                    state.dimensionMap[ta] = value
+                    state.dimensionMap[ta].name = value
                     if (value === '3D') {
                         // baseMap {checked: true, layerName: 'three'}
                         target = new PerspectiveMap({
@@ -309,7 +344,7 @@ export default {
                         })
 
                         let ta = state.targetNum == 1 ? 'map1' : 'map2'
-                        state.dimensionMap[ta] = '3D'
+                        state.dimensionMap[ta].name = '3D'
                         target = new PerspectiveMap({
                             target: state.targetNum == 1 ? 'map1' : 'map2',
                             name: 'three',
@@ -352,6 +387,12 @@ export default {
                     visible: layer.getVisible(),
                 }
             })
+            if (state.dimensionMap[`${ state.targetNum == 1 ? 'map1' : 'map2' }`].name === '3D') {
+                state.currentLayers.push({
+                    name: '3D',
+                    visible: true,
+                })
+            }
         }
 
         function conditionWrap() {
@@ -410,9 +451,9 @@ export default {
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needfix -->
-            <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+            <div id="map1" :class="{ 'w-100': state.map1 !== null }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
+            <div id="map2" :class="{ 'w-100': state.map2 !== null }"></div>
         </div>
         <div class="condition position-absolute">
             <div class="mb-2">
@@ -463,6 +504,7 @@ export default {
                 </div>
             </div>
         </div>
+
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
             <div class="lightbox p-4 rounded">
                 <p>是否要刪除全部圖層</p>
