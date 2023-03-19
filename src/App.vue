@@ -17,8 +17,8 @@ export default {
 
 <template>
     <div class="main">
-        <!-- <WebMap /> -->
-        <Wes />
+        <WebMap />
+        <!-- <Wes /> -->
 
         <!-- <threeDimensionMap /> -->
     </div>

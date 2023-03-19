@@ -38,7 +38,7 @@ export default {
             label: mapSource.label,
             source: mapSource.urls,
         }
-        if(itemKey) {
+        if(itemValue) {
             vector[itemKey] = itemValue
         }
         return new TileLayer(vector)

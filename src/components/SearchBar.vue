@@ -10,7 +10,11 @@ export default {
         },
         mapCount: {
             type: Number,
-            default: 0
+            default: 1
+        },
+        dimensionMapStatus: {
+            type: Boolean,
+            default: false
         }
     },
     setup(props, { emit }) {
@@ -21,14 +25,17 @@ export default {
                 splitWindowBtn: false,
             },
             targetNum: 1,
-            dimensionMapStatus: '2D',
         })
 
         function toolSwitch(target, value) {
-            if (target === 'threeDimensionalBtn') { state.dimensionMapStatus = value }
+            // 其他全部關掉
             Object.keys(state.toolSwitch).forEach(node => {
                 if (node === target) {
-                    state.toolSwitch[target] = true
+                    if(state.toolSwitch[target]) {
+                        state.toolSwitch[target] = false
+                    } else {
+                        state.toolSwitch[target] = true
+                    }
                 } else {
                     state.toolSwitch[node] = false
                 }
@@ -67,12 +74,12 @@ export default {
         <ul class="list-unstyled d-flex align-items-center flex-nowrap">
             <li class="me-4 position-relative">
                 <div class="MapFeatureBtn text-white">
-                    <a href="" v-if="props.currentLayers.findIndex(node=>node.name === 'OSM') == -1"
-                    @click.prevent="toolSwitch('threeDimensionalBtn', '3D'), onLayerControl('changeDimensionMap', '3D')">
+                    <a href="" v-if="props.dimensionMapStatus"
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
                         <img src="../assets/img/icon/twoDimensional.svg">
                     </a>
                     <a href="" v-else
-                    @click.prevent="toolSwitch('threeDimensionalBtn', '2D'), onLayerControl('changeDimensionMap', '2D')">
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
                         <img src="../assets/img/icon/threeDimensional.svg">
                     </a>
                 </div>

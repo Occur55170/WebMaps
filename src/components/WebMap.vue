@@ -52,7 +52,15 @@ export default {
             map1: null,
             map2: null,
             mapCount: 1,
-            deleteLightbox: false
+            deleteLightbox: false,
+            dimensionMap: {
+                map1: '2D',
+                map2: '2D'
+            },
+            toSearchDimensionStatus: computed(()=>{
+                let target = state.targetNum == 1 ? 'map1' : 'map2'
+                return state.dimensionMap[target] === '2D'
+            })
         })
 
         const defaultView = new View({
@@ -153,7 +161,6 @@ export default {
 
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            let targetView = target?.getView()
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
@@ -231,12 +238,12 @@ export default {
                     targetLayers.extend([newTileLayer])
 
                     // 刪除其餘底圖
-                    let layersAry = targetLayers.getArray();
+                    let layersAry = targetLayers.getArray()
                     layersAry.forEach(element => {
                         if (element.get('name') !== value.layerName) {
-                            target.removeLayer(element);
+                            target.removeLayer(element)
                         }
-                    });
+                    })
                     break;
                 case 'changeMapCount':
                     let actionToMap = state.targetNum !== 1 ? 'map1' : 'map2'
@@ -261,26 +268,21 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
+                    let ta = state.targetNum == 1 ? 'map1' : 'map2'
+                    state.dimensionMap[ta] = value
                     if (value === '3D') {
+                        // baseMap {checked: true, layerName: 'three'}
                         target = new PerspectiveMap({
                             target: state.targetNum == 1 ? 'map1' : 'map2',
+                            name: 'three',
                             layers: [baseMapList.sourceFun('default', 'name', 'three')],
                             view: defaultView,
                             controls: [],
                         })
-                        // let newTileLayer = baseMapList.sourceFun('default')
-                        // layerControl({
-                        //     action: "changeOrder",
-                        //     value: {movement: 'up', key: 1}
-                        // })
+                        state[`${ta}LayerStatus`].push('3D')
                     } else {
-                        // fixed !!!
-                        target = new Map({
-                            target: target,
-                            layers: [baseMapList.sourceFun('default')],
-                            view: targetView,
-                            controls: [],
-                        })
+                        $(`#${ta} .ol-perspective-map`).remove()
+                        state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node=>node !== '3D')
                     }
                     break;
             }
@@ -289,24 +291,48 @@ export default {
 
         function changeTarget(value) {
             state.targetNum = value
-            let actionToMap = state.targetNum !== 1 ? 'map1' : 'map2'
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {
+                // 是目標地圖的產出且為空
                 if (!state[`map${value}`]) {
-                    state[`map${value}`] = new Map({
-                        target: `map${value}`,
-                        layers: [
-                            baseMapList.sourceFun('default'),
-                            ...state[`map${value}LayerStatus`].map(node => mapLayerList[node]())
-                        ],
-                        view: defaultView,
-                        controls: [],
-                    })
+
+                    if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
+
+                        state[`map${value}`] = new Map({
+                            target: `map${value}`,
+                            layers: [
+                                baseMapList.sourceFun('default'),
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
+
+                        let ta = state.targetNum == 1 ? 'map1' : 'map2'
+                        state.dimensionMap[ta] = '3D'
+                        target = new PerspectiveMap({
+                            target: state.targetNum == 1 ? 'map1' : 'map2',
+                            name: 'three',
+                            layers: [baseMapList.sourceFun('default', 'name', 'three')],
+                            view: defaultView,
+                            controls: [],
+                        })
+                    } else {
+                        state[`map${value}`] = new Map({
+                            target: `map${value}`,
+                            layers: [
+                                baseMapList.sourceFun('default'),
+                                ...state[`map${value}LayerStatus`].map(node => mapLayerList[node]())
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
+                    }
                 }
-                if (state[actionToMap]) {
-                    layerControl({ action: 'changeMapCount', value: 1 })
-                    state[actionToMap] = null
-                    // 清空dom元素
-                    const element = document.getElementById(actionToMap)
+                // 不是目標地圖的刪除
+                if (state[delToMap]) {
+                    state[delToMap] = null
+                    const element = document.getElementById(delToMap)
                     while (element.firstChild) {
                         element.removeChild(element.firstChild)
                     }
@@ -319,8 +345,8 @@ export default {
 
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            const layers = target.getLayers().getArray()
-            state.currentLayers = layers.map(layer => {
+            const layers = target?.getLayers()?.getArray()
+            state.currentLayers = layers?.map(layer => {
                 return {
                     name: layer.get('name'),
                     visible: layer.getVisible(),
@@ -341,6 +367,7 @@ export default {
             } else {
             }
         }
+
 
         onMounted(() => {
             initMap()
@@ -366,9 +393,13 @@ export default {
 <template>
     <div>
         <div class="SearchBar position-absolute">
-            <SearchBar :currentLayers="state.currentLayers" :mapCount="state.mapCount"
+            <SearchBar
+                :dimensionMapStatus="state.toSearchDimensionStatus"
+                :currentLayers="state.currentLayers"
+                :mapCount="state.mapCount"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                @onChangeTarget="(value) => { changeTarget(value) }"
+                @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
         <div class="mapSourceOption">
             <mapSourceOption :baseMapsOptions="state.baseMapsOptions"
@@ -405,13 +436,13 @@ export default {
                 <div v-if="state.layerSelect">
                     <layerSelect
                     :selectLock="state.selectLock"
+                    :currentLayers="state.currentLayers"
                     :onClose="() => {
                         state.layerSelect = false
                     }"
                     :onChangLayerVisible="(action) => {
                         layerControl(action)
                     }"
-                    :currentLayers="state.currentLayers"
                     :onChangeOrderLayer="({ action, value }) => {
                         layerControl({ action, value })
                     }"
