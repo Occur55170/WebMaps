@@ -4,6 +4,7 @@ import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
 import OSM from 'ol/source/OSM'
+import TileWMS from 'ol/source/TileWMS'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
 import { TileArcGISRest } from 'ol/source.js'
@@ -13,18 +14,14 @@ import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import TileGrid from 'ol/layer/Tile.js';
 
-import { Image as ImageLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS'
-import { FullScreen, defaults as defaultControls } from 'ol/control.js'
-import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import 'ol-ext/dist/ol-ext.css'
 
-import EsriJSON from 'ol/format/EsriJSON.js'
-import { createXYZ } from 'ol/tilegrid.js'
-// import { fromLonLat } from 'ol/proj.js'
-import { tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { Circle } from 'ol/geom.js';
+import Projection from 'ol/proj/Projection.js';
+import GeoJSON from 'ol/format/GeoJSON.js';
 
 import 'ol/ol.css' // ol提供的css样式
 
@@ -38,7 +35,7 @@ export default {
         const baseMaps = baseMapList
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
-            defaultCenterZoom: 17,
+            defaultCenterZoom: 8,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: true,
@@ -79,8 +76,9 @@ export default {
             })
 
             const circleFeature = new Feature({
-                geometry: new Circle([12127398.797692968, 4063894.123105166], 50),
+                geometry: new Circle([120.971859, 24.801583], 0.05),
             });
+
             circleFeature.setStyle(
                 new Style({
                     renderer(coordinates, state) {
@@ -120,63 +118,46 @@ export default {
                     features: [circleFeature],
                 }),
             })
-            state.map1.addLayer(raster)  // 把图层添加到地图
+            state.map1.addLayer(raster)
 
-            // 先畫一個圈 點選跳視窗
-            // 再畫一個不規則圖形
+            const areaLineStyle = new Style({
+                stroke: new Stroke({
+                    width: 5,
+                    color: '#0f9ce2'
+                })
+            })
+            const areaLineLayer = new Vector({
+                title: "区域线图层",
+                source: new VectorSource({
+                    format: new GeoJSON(),
+                    url: 'src/assets/tiantai.json',
+                }),
+                style: areaLineStyle
+            })
+            state.map1.addLayer(areaLineLayer)
 
-
-            // const vectorLayer = new VectorLayer({
-            //     source: new VectorSource({
-            //         format: new GeoJSON(),
-            //         url: 'https://od.moi.gov.tw/api/v1/rest/datastore/301000100G-000886-003',
-            //     }),
-            //     style: new Style({
-            //         stroke: new Stroke({
-            //             color: [230, 0, 0, 1],
-            //             width: 2,
-            //         }),
-            //     }),
-            // })
-            // const labelStyle = new Style({
-            //     text: new Text({
-            //         font: '12px Calibri,sans-serif',
-            //         overflow: true,
-            //         fill: new Fill({
-            //             color: '#000',
-            //         }),
-            //         stroke: new Stroke({
-            //             color: '#fff',
-            //             width: 3,
-            //         }),
-            //     }),
-            // })
-            // const countryStyle = new Style({
-            //     fill: new Fill({
-            //         color: 'rgba(255, 255, 255, 0.6)',
-            //     }),
-            //     stroke: new Stroke({
-            //         color: '#319FD3',
-            //         width: 1,
-            //     }),
-            // })
-            // const style = [countryStyle, labelStyle];
-
-            // const vectorLayer = new VectorLayer({
-            //     // background: 'white',
-            //     source: new VectorSource({
-            //         url: 'https://openlayers.org/data/vector/us-states.json',
-            //         format: new GeoJSON(),
-            //     }),
-            //     style: function (feature) {
-            //         const label = feature.get('name').split(' ').join('\n');
-            //         labelStyle.getText().setText(label);
-            //         return style;
-            //     },
-            //     declutter: true,
-            // })
-
-            // state.map1.addLayer(vectorLayer)  // 把图层添加到地图
+            // 點擊事件
+            state.map1.on('click', function(evt) {
+                console.log(evt.pixel)
+                var feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+                    //you can add a condition on layer to restrict the listener
+                    return feature;
+                })
+                console.log(feature)
+                // const coordinate = evt.coordinate // 获取坐标
+                // currentCoordinate.value = coordinate // 保存坐标点
+                // overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
+                // var feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+                //     //you can add a condition on layer to restrict the listener
+                //     return feature;
+                // })
+                if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {
+                    alert('click');
+                }
+                // if (feature) {
+                //     //here you can add you code to display the coordinates or whatever you want to do
+                // }
+            })
         }
 
         function addPoint(targetLng, targetLat) {
@@ -582,6 +563,7 @@ export default {
                 </div>
             </div>
         </div>
+        <!-- <div>地圖簡介</div> -->
     </div>
 </template>
 

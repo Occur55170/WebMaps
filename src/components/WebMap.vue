@@ -237,6 +237,7 @@ export default {
                 case 'changeLayerVisible':
                     if (state.selectLock) { return }
                     if (value?.specialLayer) {
+                        // fix !!! 3D visible
 
                     } else {
                         let a = !(targetLayers.getArray()[value.key].getVisible())

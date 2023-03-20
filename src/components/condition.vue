@@ -96,6 +96,11 @@ export default {
                     <div class="wrap">
                         <div>
                             <div class="text-blue"
+                                @click.prevent="onMapControl('moveTo', { xAxis: -87.359296, yAxis: 35.00118 })">go前往區域範例
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-blue"
                                 @click.prevent="onMapControl('moveTo', { xAxis: -98.144457, yAxis: 26.178938 })">go前往示範案例(america)
                             </div>
                         </div>
