@@ -78,6 +78,54 @@ export default {
                 controls: [],
             })
 
+            const circleFeature = new Feature({
+                geometry: new Circle([12127398.797692968, 4063894.123105166], 50),
+            });
+            circleFeature.setStyle(
+                new Style({
+                    renderer(coordinates, state) {
+                        const [[x, y], [x1, y1]] = coordinates;
+                        const ctx = state.context;
+                        const dx = x1 - x;
+                        const dy = y1 - y;
+                        const radius = Math.sqrt(dx * dx + dy * dy);
+
+                        const innerRadius = 0;
+                        const outerRadius = radius * 1.4;
+
+                        const gradient = ctx.createRadialGradient(
+                            x,
+                            y,
+                            innerRadius,
+                            x,
+                            y,
+                            outerRadius
+                        );
+                        gradient.addColorStop(0, 'rgba(255,0,0,0)');
+                        gradient.addColorStop(0.6, 'rgba(255,0,0,0.2)');
+                        gradient.addColorStop(1, 'rgba(255,0,0,0.8)');
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+                        ctx.fillStyle = gradient;
+                        ctx.fill();
+
+                        ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+                        ctx.strokeStyle = 'rgba(255,0,0,1)';
+                        ctx.stroke();
+                    },
+                })
+            )
+            const raster = new VectorLayer({
+                source: new VectorSource({
+                    features: [circleFeature],
+                }),
+            })
+            state.map1.addLayer(raster)  // 把图层添加到地图
+
+            // 先畫一個圈 點選跳視窗
+            // 再畫一個不規則圖形
+
+
             // const vectorLayer = new VectorLayer({
             //     source: new VectorSource({
             //         format: new GeoJSON(),
@@ -90,52 +138,45 @@ export default {
             //         }),
             //     }),
             // })
-            const labelStyle = new Style({
-                text: new Text({
-                    font: '12px Calibri,sans-serif',
-                    overflow: true,
-                    fill: new Fill({
-                        color: '#000',
-                    }),
-                    stroke: new Stroke({
-                        color: '#fff',
-                        width: 3,
-                    }),
-                }),
-            })
-            const countryStyle = new Style({
-                fill: new Fill({
-                    color: 'rgba(255, 255, 255, 0.6)',
-                }),
-                stroke: new Stroke({
-                    color: '#319FD3',
-                    width: 1,
-                }),
-            })
-            const style = [countryStyle, labelStyle];
-
-            const vectorLayer = new VectorLayer({
-                // background: 'white',
-                source: new VectorSource({
-                    url: 'https://openlayers.org/data/vector/us-states.json',
-                    format: new GeoJSON(),
-                }),
-                style: function (feature) {
-                    const label = feature.get('name').split(' ').join('\n');
-                    labelStyle.getText().setText(label);
-                    return style;
-                },
-                declutter: true,
-            })
-
-            state.map1.addLayer(vectorLayer)  // 把图层添加到地图
-
-            // state.map1 = new Map({
-            //     target: 'map1',
-            //     layers: [baseMapList.sourceFun('default')],
-            //     view: defaultView,
-            //     controls: [],
+            // const labelStyle = new Style({
+            //     text: new Text({
+            //         font: '12px Calibri,sans-serif',
+            //         overflow: true,
+            //         fill: new Fill({
+            //             color: '#000',
+            //         }),
+            //         stroke: new Stroke({
+            //             color: '#fff',
+            //             width: 3,
+            //         }),
+            //     }),
             // })
+            // const countryStyle = new Style({
+            //     fill: new Fill({
+            //         color: 'rgba(255, 255, 255, 0.6)',
+            //     }),
+            //     stroke: new Stroke({
+            //         color: '#319FD3',
+            //         width: 1,
+            //     }),
+            // })
+            // const style = [countryStyle, labelStyle];
+
+            // const vectorLayer = new VectorLayer({
+            //     // background: 'white',
+            //     source: new VectorSource({
+            //         url: 'https://openlayers.org/data/vector/us-states.json',
+            //         format: new GeoJSON(),
+            //     }),
+            //     style: function (feature) {
+            //         const label = feature.get('name').split(' ').join('\n');
+            //         labelStyle.getText().setText(label);
+            //         return style;
+            //     },
+            //     declutter: true,
+            // })
+
+            // state.map1.addLayer(vectorLayer)  // 把图层添加到地图
         }
 
         function addPoint(targetLng, targetLat) {
