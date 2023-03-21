@@ -3,7 +3,6 @@ import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import OSM from 'ol/source/OSM'
 const key = 'Gu2rcfenfMEKjKXgPF6H'
 
-var layers = [new TileLayer(), new OSM()];
 var configBaseMap = [
     {
         name: "default",

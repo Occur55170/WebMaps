@@ -19,7 +19,7 @@ import TileGrid from 'ol/layer/Tile.js';
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import 'ol-ext/dist/ol-ext.css'
 
-import { Circle } from 'ol/geom.js';
+import { Circle, Polygon } from 'ol/geom.js';
 import Projection from 'ol/proj/Projection.js';
 import GeoJSON from 'ol/format/GeoJSON.js';
 
@@ -35,10 +35,10 @@ export default {
         const baseMaps = baseMapList
         const state = reactive({
             defaultCenter: [120.971859, 24.801583], //lng, lat
-            defaultCenterZoom: 8,
+            defaultCenterZoom: 14,
             targetNum: 1,
             conditionWrap: false,
-            layerSelect: true,
+            layerSelect: false,
             currentLayers: [],
             mapLayers: Object.keys(mapLayers).map(node => node),
             baseMapsOptions: computed(() => baseMapList.sourceData()),
@@ -57,7 +57,8 @@ export default {
             toSearchDimensionStatus: computed(()=>{
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
-            })
+            }),
+            areaDataId: ''
         })
 
         const defaultView = new View({
@@ -75,88 +76,87 @@ export default {
                 controls: [],
             })
 
+            // load area
             const circleFeature = new Feature({
-                geometry: new Circle([120.971859, 24.801583], 0.05),
-            });
+                name: 'circleName',
+                title: 'circleName',
+                geometry: new Circle([120.9984423386347, 24.791781619336316], 0.005),
+            })
 
-            circleFeature.setStyle(
-                new Style({
-                    renderer(coordinates, state) {
-                        const [[x, y], [x1, y1]] = coordinates;
-                        const ctx = state.context;
-                        const dx = x1 - x;
-                        const dy = y1 - y;
-                        const radius = Math.sqrt(dx * dx + dy * dy);
-
-                        const innerRadius = 0;
-                        const outerRadius = radius * 1.4;
-
-                        const gradient = ctx.createRadialGradient(
-                            x,
-                            y,
-                            innerRadius,
-                            x,
-                            y,
-                            outerRadius
-                        );
-                        gradient.addColorStop(0, 'rgba(255,0,0,0)');
-                        gradient.addColorStop(0.6, 'rgba(255,0,0,0.2)');
-                        gradient.addColorStop(1, 'rgba(255,0,0,0.8)');
-                        ctx.beginPath();
-                        ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
-                        ctx.fillStyle = gradient;
-                        ctx.fill();
-
-                        ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
-                        ctx.strokeStyle = 'rgba(255,0,0,1)';
-                        ctx.stroke();
-                    },
-                })
-            )
+            const circleStyle = new Style({
+                renderer(coordinates, state) {
+                    const [[x, y], [x1, y1]] = coordinates;
+                    const ctx = state.context;
+                    const dx = x1 - x;
+                    const dy = y1 - y;
+                    const radius = Math.sqrt(dx * dx + dy * dy);
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+                    ctx.fillStyle = 'rgba(255,0,0)';
+                    ctx.fill();
+                },
+            })
             const raster = new VectorLayer({
                 source: new VectorSource({
                     features: [circleFeature],
                 }),
+                style: circleStyle
             })
             state.map1.addLayer(raster)
 
-            const areaLineStyle = new Style({
-                stroke: new Stroke({
-                    width: 5,
-                    color: '#0f9ce2'
-                })
+            var coordinates = [
+                [120.971859, 24.801583],
+                [120.970000, 24.809583],
+                [120.985000, 24.808583],
+                [120.990000, 24.806583],
+                [120.971859, 24.801583]
+            ]
+
+            const areaLineFeature = new Feature({
+                name: 'areaLineLayer',
+                title: 'areaLineLayer',
+                geometry: new Polygon([coordinates]),
             })
-            const areaLineLayer = new Vector({
-                title: "区域线图层",
-                source: new VectorSource({
-                    format: new GeoJSON(),
-                    url: 'src/assets/tiantai.json',
+            const areaLineStyle = new Style({
+                fill: new Fill({
+                    color: '#0f9ce2'
                 }),
+            })
+
+            const areaLineLayer = new Vector({
+                name: 'line',
+                title: 'line',
+                source: new VectorSource({
+                    features: [areaLineFeature],
+                }),
+                // source: new VectorSource({
+                //     format: new GeoJSON(),
+                //     url: 'src/assets/tiantai.json',
+                // }),
                 style: areaLineStyle
             })
             state.map1.addLayer(areaLineLayer)
 
             // 點擊事件
             state.map1.on('click', function(evt) {
-                console.log(evt.pixel)
                 var feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    //you can add a condition on layer to restrict the listener
                     return feature;
                 })
-                console.log(feature)
+                // if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {}
+                if (feature) {
+                    if (!($('body .areaData').hasClass('hidden'))) {
+                        $('body .areaData').addClass('hidden')
+                    }
+                    state.areaDataId = feature.get('name')
+
+                    nextTick(()=>{
+                        $('body .areaData').removeClass('hidden')
+                    })
+                }
+
                 // const coordinate = evt.coordinate // 获取坐标
                 // currentCoordinate.value = coordinate // 保存坐标点
                 // overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
-                // var feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                //     //you can add a condition on layer to restrict the listener
-                //     return feature;
-                // })
-                if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {
-                    alert('click');
-                }
-                // if (feature) {
-                //     //here you can add you code to display the coordinates or whatever you want to do
-                // }
             })
         }
 
@@ -502,10 +502,14 @@ export default {
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
-                    <condition :mapLayers="state.mapLayers" :currentLayers="state.currentLayers" :onClose="() => {
+                    <condition
+                    :mapLayers="state.mapLayers"
+                    :currentLayers="state.currentLayers"
+                    :onClose="() => {
                         state.conditionWrap = false
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -545,7 +549,7 @@ export default {
             </div>
         </div>
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
-            <div class="lightbox p-4 rounded">
+            <div class="p-4 rounded">
                 <p>是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
                     <button @click="()=>{
@@ -563,7 +567,13 @@ export default {
                 </div>
             </div>
         </div>
-        <!-- <div>地圖簡介</div> -->
+        <!-- !!!fixed -->
+        <div class="areaData position-fixed hidden"
+        :style="{
+            'right': state.areaDataId === 'circleName' ? '0' : '60%'
+        }">
+            <areaData :id="state.areaDataId" />
+        </div>
     </div>
 </template>
 
@@ -600,4 +610,8 @@ export default {
 .middleLine
     width: 5px
     background: $blue-steel
+.areaData
+    width: 450px
+    top: 40%
+    right: 0%
 </style>
