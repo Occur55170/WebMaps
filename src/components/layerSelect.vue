@@ -87,6 +87,7 @@ export default {
                     全部刪除
                 </a>
             </div>
+            {{ props.currentLayers }}
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
                 <li class="d-flex justify-content-between align-items-center border-bottom py-2"
                 v-for="(node, nodeIndex) in props.currentLayers">
@@ -95,7 +96,7 @@ export default {
                     </div>
                     <div class="tool">
                         <a href=""
-                        v-if="nodeIndex !== 0"
+                        v-if="nodeIndex !== 0 && !(node?.specialLayer)"
                         @click.prevent="props.onChangeOrderLayer({
                             action: 'changeOrder',
                             value: {
@@ -108,7 +109,7 @@ export default {
                             </svg>
                         </a>
                         <a href=""
-                        v-if="nodeIndex !== 0"
+                        v-if="nodeIndex !== 0 && !(node?.specialLayer)"
                         @click.prevent="props.onChangeOrderLayer({
                             action: 'changeOrder',
                             value: {
@@ -121,13 +122,15 @@ export default {
                             </svg>
                         </a>
                         <a href=""
-                        :class="{'Invisible': !node.visible}"
+                        :class="{
+                            'Invisible': !node.visible
+                        }"
                         @click.prevent="()=>{
                             props.onChangLayerVisible({
                                 action: 'changeLayerVisible',
                                 value: {
                                     key: nodeIndex,
-                                    specialLayer: node.name === '3D'
+                                    specialLayer: node?.specialLayer
                                 }
                             })
                         }">

@@ -209,17 +209,35 @@ export default {
                     break;
                 case 'changeOrder':
                     if (state.selectLock || value.key === 0) { return }
+                    // let threeLayer = state.currentLayers.find(node=>node?.specialLayer)
+                    // let threeLayerIndex = state.currentLayers.findIndex(node=>node?.specialLayer)
+
+                    // // 避開3D圖層做排序
+                    // if(state.currentLayers[value.key]?.specialLayer) {
+
+                    //     return
+                    // }
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
                     if (value.movement === 'up') {
                         if (value.key + 1 == targetLayers.getArray().length) { return }
+                        // if (value.key + 1 > state.currentLayers.length) { return }
 
-                        targetLayers.getArray().forEach(element => {
-                            if (element.get('name') == layerName) {
-                                target.removeLayer(element);
-                            }
-                        })
-                        targetLayers.insertAt(value.key + 1, nowTileLayer)
+                        // 實際排序
+                        // if (value.key + 1 < targetLayers.getArray().length) {
+                            targetLayers.getArray().forEach(element => {
+                                if (element.get('name') == layerName) {
+                                    target.removeLayer(element);
+                                }
+                            })
+                            targetLayers.insertAt(value.key + 1, nowTileLayer)
+                        // }
+
+                        // 明面排序
+                        // if(threeLayerIndex !== -1 && threeLayerIndex === value.key + 1) {
+                        //     state.currentLayers.splice(threeLayerIndex, 1)
+                        //     state.currentLayers.splice(value.key ,0, JSON.parse(JSON.stringify(threeLayer)))
+                        // }
                     }
                     if (value.movement === 'down') {
                         if (value.key - 1 == 0) { return }
@@ -231,14 +249,18 @@ export default {
                         })
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
-                    getCurrentLayerNames()
 
                     break;
                 case 'changeLayerVisible':
                     if (state.selectLock) { return }
                     if (value?.specialLayer) {
-                        // fix !!! 3D visible
-
+                        if($('.ol-perspective-map').hasClass('hidden')) {
+                            $('.ol-perspective-map').removeClass('hidden')
+                            state.currentLayers[value.key].visible = true
+                        } else {
+                            $('.ol-perspective-map').addClass('hidden')
+                            state.currentLayers[value.key].visible = false
+                        }
                     } else {
                         let a = !(targetLayers.getArray()[value.key].getVisible())
                         targetLayers.getArray()[value.key].setVisible(a)
@@ -304,10 +326,10 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
+                    // need fix
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta].name = value
                     if (value === '3D') {
-                        // baseMap {checked: true, layerName: 'three'}
                         target = new PerspectiveMap({
                             target: state.targetNum == 1 ? 'map1' : 'map2',
                             name: 'three',
@@ -382,17 +404,31 @@ export default {
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
+            const threeD = state.currentLayers.find(node=> node?.specialLayer)
+            const threeDIndex = threeD ? state.currentLayers.findIndex(node=> node?.specialLayer) : state.currentLayers.length + 1
+
+            // 重整layers
             state.currentLayers = layers?.map(layer => {
                 return {
                     name: layer.get('name'),
                     visible: layer.getVisible(),
                 }
             })
+            // 因getLayers抓去不到3D的圖層，從 state.dimensionMap 判斷當前狀態並將可視狀態分為第一次or很多次
             if (state.dimensionMap[`${ state.targetNum == 1 ? 'map1' : 'map2' }`].name === '3D') {
                 state.currentLayers.push({
                     name: '3D',
-                    visible: true,
+                    visible: threeD ? threeD.visible : true,
+                    specialLayer: true
                 })
+                // let obj = {
+                //     name: '3D',
+                //     visible: threeD ? threeD.visible : true,
+                //     specialLayer: true
+                // }
+
+                // console.log(threeDIndex)
+                // state.currentLayers.splice(threeDIndex, 0, obj)
             }
         }
 
@@ -482,8 +518,8 @@ export default {
                     :onClose="() => {
                         state.layerSelect = false
                     }"
-                    :onChangLayerVisible="(action) => {
-                        layerControl(action)
+                    :onChangLayerVisible="({ action, value }) => {
+                        layerControl({ action, value })
                     }"
                     :onChangeOrderLayer="({ action, value }) => {
                         layerControl({ action, value })

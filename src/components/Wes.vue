@@ -104,7 +104,7 @@ export default {
             })
             state.map1.addLayer(raster)
 
-            var coordinates = [
+            const coordinates = [
                 [120.971859, 24.801583],
                 [120.970000, 24.809583],
                 [120.985000, 24.808583],
