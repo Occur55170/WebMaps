@@ -2,13 +2,13 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
-import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
+import { Map, View, Feature } from 'ol'
 import OSM from 'ol/source/OSM'
-import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
+import Overlay from 'ol/Overlay'
 
 import { TileArcGISRest } from 'ol/source.js'
 
-import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
+import XYZ from 'ol/source/XYZ'
 import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
@@ -23,10 +23,9 @@ import 'ol-ext/dist/ol-ext.css'
 
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
-// import { fromLonLat } from 'ol/proj.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
 
-import 'ol/ol.css' // ol提供的css样式
+import 'ol/ol.css'
 
 import mapLayerList from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
@@ -47,11 +46,11 @@ export default {
             baseMapsOptions: computed(() => baseMapList.sourceData()),
             selectLock: false,
 
-            map1LayerStatus: [],
-            map2LayerStatus: [],
+            mapCount: 1,
             map1: null,
             map2: null,
-            mapCount: 1,
+            map1LayerStatus: [],
+            map2LayerStatus: [],
             deleteLightbox: false,
             // need fix:因3D圖層無法透過getLayers抓到，因此另外宣告一組變數用來存取當前狀態
             dimensionMap: {
@@ -76,7 +75,6 @@ export default {
             zoom: state.defaultCenterZoom,
         })
 
-        // 初始化地圖
         function initMap() {
             state.map1 = new Map({
                 target: 'map1',
@@ -199,45 +197,38 @@ export default {
                             target.removeLayer(node)
                         })
                     } else {
-                        let layersAry = targetLayers.getArray()
-                        layersAry.forEach(element => {
-                            if (element.get('name') == value.layerName) {
-                                target.removeLayer(element);
-                            }
-                        })
+                        if (value?.specialLayer) {
+                            let taStr = state.targetNum == 1 ? 'map1' : 'map2'
+                            $(`#${taStr} .ol-perspective-map`).remove()
+                            state[`${taStr}Temp`] = null
+                            state[`${taStr}LayerStatus`] = state[`${taStr}LayerStatus`].filter(node=>node !== '3D')
+                            state.dimensionMap[taStr].name = '2D'
+                        } else {
+                            let layersAry = targetLayers.getArray()
+                            layersAry.forEach(element => {
+                                if (element.get('name') == value.layerName) {
+                                    target.removeLayer(element)
+                                }
+                            })
+                        }
                     }
                     break;
                 case 'changeOrder':
                     if (state.selectLock || value.key === 0) { return }
-                    // let threeLayer = state.currentLayers.find(node=>node?.specialLayer)
-                    // let threeLayerIndex = state.currentLayers.findIndex(node=>node?.specialLayer)
-
-                    // // 避開3D圖層做排序
+                    // 避開3D圖層做排序
                     // if(state.currentLayers[value.key]?.specialLayer) {
-
                     //     return
                     // }
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
                     if (value.movement === 'up') {
                         if (value.key + 1 == targetLayers.getArray().length) { return }
-                        // if (value.key + 1 > state.currentLayers.length) { return }
-
-                        // 實際排序
-                        // if (value.key + 1 < targetLayers.getArray().length) {
-                            targetLayers.getArray().forEach(element => {
-                                if (element.get('name') == layerName) {
-                                    target.removeLayer(element);
-                                }
-                            })
-                            targetLayers.insertAt(value.key + 1, nowTileLayer)
-                        // }
-
-                        // 明面排序
-                        // if(threeLayerIndex !== -1 && threeLayerIndex === value.key + 1) {
-                        //     state.currentLayers.splice(threeLayerIndex, 1)
-                        //     state.currentLayers.splice(value.key ,0, JSON.parse(JSON.stringify(threeLayer)))
-                        // }
+                        targetLayers.getArray().forEach(element => {
+                            if (element.get('name') == layerName) {
+                                target.removeLayer(element);
+                            }
+                        })
+                        targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
                         if (value.key - 1 == 0) { return }
@@ -267,11 +258,9 @@ export default {
                     }
                     break;
                 case 'baseMap':
-                    // 新增底圖
                     let newTileLayer = baseMaps.sourceFun(value.layerName)
                     targetLayers.extend([newTileLayer])
 
-                    // 刪除其餘底圖
                     let layersAry = targetLayers.getArray()
                     layersAry.forEach(element => {
                         if (element.get('name') !== value.layerName) {
@@ -280,28 +269,25 @@ export default {
                     })
                     break;
                 case 'changeMapCount':
-                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
                     if (state.mapCount === value) {return}
+                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
                     state.mapCount = value
                     if (value === 2) {
-                        if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
+                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1 ) {
+                            let otherLayers = state[`${otherMap}LayerStatus`].filter(node=> node !== '3D')
                             state[otherMap] = new Map({
                                 target: otherMap,
                                 layers: [
                                     baseMapList.sourceFun('default'),
-                                    ...state[`${otherMap}LayerStatus`].filter(node => {
-                                        if (node !== '3D') {
-                                            return mapLayerList[node]()
-                                        }
-                                    })
+                                    ...otherLayers.map(node => mapLayerList[node]())
                                 ],
                                 view: defaultView,
                                 controls: [],
                             })
-                            state[otherMap] = new PerspectiveMap({
+                            state[`${otherMap}Temp`] = new PerspectiveMap({
                                 target: otherMap,
                                 name: 'three',
-                                layers: [baseMapList.sourceFun('default')],
+                                layers: [baseMapList.sourceFun('default', 'name', 'three')],
                                 view: defaultView,
                                 controls: [],
                             })
@@ -349,18 +335,20 @@ export default {
 
         function changeTarget(value) {
             state.targetNum = value
-            let target = state.targetNum == 1 ? state.map1 : state.map2
+            let target = state[`map${value}`]
             let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {
-                // 是目標地圖的產出且為空
+                // 目標地圖為空
                 if (!state[`map${value}`]) {
 
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
+                        let otherLayers = state[`map${value}LayerStatus`].filter(node=> node !== '3D')
 
                         state[`map${value}`] = new Map({
                             target: `map${value}`,
                             layers: [
                                 baseMapList.sourceFun('default'),
+                                ...otherLayers.map(node => mapLayerList[node]())
                             ],
                             view: defaultView,
                             controls: [],
@@ -368,7 +356,7 @@ export default {
 
                         let ta = state.targetNum == 1 ? 'map1' : 'map2'
                         state.dimensionMap[ta].name = '3D'
-                        target = new PerspectiveMap({
+                        state[`map${value}Temp`] = new PerspectiveMap({
                             target: state.targetNum == 1 ? 'map1' : 'map2',
                             name: 'three',
                             layers: [baseMapList.sourceFun('default', 'name', 'three')],
@@ -387,7 +375,7 @@ export default {
                         })
                     }
                 }
-                // 不是目標地圖的刪除
+                // 非目標地圖的刪除
                 if (state[delToMap]) {
                     state[delToMap] = null
                     const element = document.getElementById(delToMap)
@@ -405,7 +393,7 @@ export default {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
             const threeD = state.currentLayers.find(node=> node?.specialLayer)
-            const threeDIndex = threeD ? state.currentLayers.findIndex(node=> node?.specialLayer) : state.currentLayers.length + 1
+            // const threeDIndex = threeD ? state.currentLayers.findIndex(node=> node?.specialLayer) : state.currentLayers.length + 1
 
             // 重整layers
             state.currentLayers = layers?.map(layer => {
@@ -414,6 +402,7 @@ export default {
                     visible: layer.getVisible(),
                 }
             })
+
             // 因getLayers抓去不到3D的圖層，從 state.dimensionMap 判斷當前狀態並將可視狀態分為第一次or很多次
             if (state.dimensionMap[`${ state.targetNum == 1 ? 'map1' : 'map2' }`].name === '3D') {
                 state.currentLayers.push({
@@ -426,8 +415,6 @@ export default {
                 //     visible: threeD ? threeD.visible : true,
                 //     specialLayer: true
                 // }
-
-                // console.log(threeDIndex)
                 // state.currentLayers.splice(threeDIndex, 0, obj)
             }
         }

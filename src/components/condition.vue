@@ -20,14 +20,6 @@ export default {
     setup(props, { emit }) {
         const state = reactive({
             currentConditionPage: 'coreLayer',
-            currentLayers: computed(()=>{
-                // needFix
-                return props.currentLayers.map(node=>node)
-            }),
-            currentLayerNames: computed(()=>{
-                // needFix
-                return props.currentLayers.map(node=>node.name)
-            })
         })
 
         function onMapControl(action, value) {

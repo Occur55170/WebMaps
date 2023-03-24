@@ -142,7 +142,8 @@ export default {
                         @click.prevent="props.onDeleteLayer({
                             action: 'selectLayerMode',
                             value: {
-                                layerName: node.name
+                                layerName: node.name,
+                                specialLayer: node?.specialLayer
                             }
                         })">
                             <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
