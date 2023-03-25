@@ -126,11 +126,46 @@ export default {
             }),
         })
     },
-    example: () => {
-        const serviceUrl =
+    drawLayers: (coordData) => {
+        if(!(coordData)) {return}
+        let coordinates
+        if(coordData.isArray()) {
+            coordinates = coordData
+
+            const areaLineFeature = new Feature({
+                name: 'areaLineLayer',
+                title: 'areaLineLayer',
+                geometry: new Polygon([coordinates]),
+            })
+            const areaLineStyle = new Style({
+                fill: new Fill({
+                    color: '#0f9ce2'
+                }),
+            })
+
+            const areaLineLayer = new Vector({
+                name: 'line',
+                title: 'line',
+                source: new VectorSource({
+                    features: [areaLineFeature],
+                }),
+                // source: new VectorSource({
+                //     format: new GeoJSON(),
+                //     url: 'src/assets/tiantai.json',
+                // }),
+                style: areaLineStyle
+            })
+        } else {
+
+        }
+
+
             'https://services-eu1.arcgis.com/NPIbx47lsIiu2pqz/ArcGIS/rest/services/' +
             'Neptune_Coastline_Campaign_Open_Data_Land_Use_2014/FeatureServer/';
-        const layer = '0';
+
+
+        const serviceUrl = coordData
+        const layer = '0'
         const fillColors = {
             'Lost To Sea Since 1965': [0, 0, 0, 1],
             'Urban/Built-up': [104, 104, 104, 1],
@@ -195,10 +230,6 @@ export default {
                     tileSize: 512,
                 })
             ),
-            attributions:
-                'University of Leicester (commissioned by the ' +
-                '<a href="https://www.arcgis.com/home/item.html?id=' +
-                'd5f05b1dc3dd4d76906c421bc1727805">National Trust</a>)',
         })
 
         const vector = new VectorLayer({
@@ -223,57 +254,6 @@ export default {
         })
         return [raster, vector]
     },
-    // example2: () => {
-
-    //     const circleFeature = new Feature({
-    //         geometry: new Circle([12127398.797692968, 4063894.123105166], 50),
-    //     });
-    //     circleFeature.setStyle(
-    //         new Style({
-    //             renderer(coordinates, state) {
-    //                 const [[x, y], [x1, y1]] = coordinates;
-    //                 const ctx = state.context;
-    //                 const dx = x1 - x;
-    //                 const dy = y1 - y;
-    //                 const radius = Math.sqrt(dx * dx + dy * dy);
-
-    //                 const innerRadius = 0;
-    //                 const outerRadius = radius * 1.4;
-
-    //                 const gradient = ctx.createRadialGradient(
-    //                     x,
-    //                     y,
-    //                     innerRadius,
-    //                     x,
-    //                     y,
-    //                     outerRadius
-    //                 );
-    //                 gradient.addColorStop(0, 'rgba(255,0,0,0)');
-    //                 gradient.addColorStop(0.6, 'rgba(255,0,0,0.2)');
-    //                 gradient.addColorStop(1, 'rgba(255,0,0,0.8)');
-    //                 ctx.beginPath();
-    //                 ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
-    //                 ctx.fillStyle = gradient;
-    //                 ctx.fill();
-
-    //                 ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
-    //                 ctx.strokeStyle = 'rgba(255,0,0,1)';
-    //                 ctx.stroke();
-    //             },
-    //         })
-    //     )
-    //     const vector = new TileLayer({
-    //         source: new OSM(),
-    //         visible: true,
-    //     })
-    //     const raster = new VectorLayer({
-    //         source: new VectorSource({
-    //             features: [circleFeature],
-    //         }),
-    //     })
-    //     return [vector, raster]
-
-    // },
     // DimensionMap: (obj)=>{
     //     return new PerspectiveMap({
     //         layers: [baseMapList.sourceFun('default')],

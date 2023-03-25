@@ -90,8 +90,10 @@ export default {
             {{ props.currentLayers }}
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
                 <li class="d-flex justify-content-between align-items-center border-bottom py-2"
-                v-for="(node, nodeIndex) in props.currentLayers">
+                v-for="(node, nodeIndex) in props.currentLayers" v-if="node?.name !== 'default'">
                     <div>
+                        <!-- !!! fix -->
+                        {{ node?.name !== 'default' }}
                         {{ node.name }}
                     </div>
                     <div class="tool">

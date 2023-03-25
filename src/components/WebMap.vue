@@ -215,10 +215,6 @@ export default {
                     break;
                 case 'changeOrder':
                     if (state.selectLock || value.key === 0) { return }
-                    // 避開3D圖層做排序
-                    // if(state.currentLayers[value.key]?.specialLayer) {
-                    //     return
-                    // }
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
                     if (value.movement === 'up') {
@@ -244,18 +240,8 @@ export default {
                     break;
                 case 'changeLayerVisible':
                     if (state.selectLock) { return }
-                    if (value?.specialLayer) {
-                        if($('.ol-perspective-map').hasClass('hidden')) {
-                            $('.ol-perspective-map').removeClass('hidden')
-                            state.currentLayers[value.key].visible = true
-                        } else {
-                            $('.ol-perspective-map').addClass('hidden')
-                            state.currentLayers[value.key].visible = false
-                        }
-                    } else {
-                        let a = !(targetLayers.getArray()[value.key].getVisible())
-                        targetLayers.getArray()[value.key].setVisible(a)
-                    }
+                    let a = !(targetLayers.getArray()[value.key].getVisible())
+                    targetLayers.getArray()[value.key].setVisible(a)
                     break;
                 case 'baseMap':
                     let newTileLayer = baseMaps.sourceFun(value.layerName)
@@ -392,9 +378,6 @@ export default {
         function getCurrentLayerNames() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
-            const threeD = state.currentLayers.find(node=> node?.specialLayer)
-            // const threeDIndex = threeD ? state.currentLayers.findIndex(node=> node?.specialLayer) : state.currentLayers.length + 1
-
             // 重整layers
             state.currentLayers = layers?.map(layer => {
                 return {
@@ -402,21 +385,6 @@ export default {
                     visible: layer.getVisible(),
                 }
             })
-
-            // 因getLayers抓去不到3D的圖層，從 state.dimensionMap 判斷當前狀態並將可視狀態分為第一次or很多次
-            if (state.dimensionMap[`${ state.targetNum == 1 ? 'map1' : 'map2' }`].name === '3D') {
-                state.currentLayers.push({
-                    name: '3D',
-                    visible: threeD ? threeD.visible : true,
-                    specialLayer: true
-                })
-                // let obj = {
-                //     name: '3D',
-                //     visible: threeD ? threeD.visible : true,
-                //     specialLayer: true
-                // }
-                // state.currentLayers.splice(threeDIndex, 0, obj)
-            }
         }
 
         function conditionWrap() {

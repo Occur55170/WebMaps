@@ -129,18 +129,15 @@ export default {
                 source: new VectorSource({
                     features: [areaLineFeature],
                 }),
-                // source: new VectorSource({
-                //     format: new GeoJSON(),
-                //     url: 'src/assets/tiantai.json',
-                // }),
                 style: areaLineStyle
             })
             state.map1.addLayer(areaLineLayer)
 
             // 點擊事件
             state.map1.on('click', function(evt) {
-                var feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    return feature;
+                let feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+                    console.log(evt)
+                    return feature
                 })
                 // if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {}
                 if (feature) {
@@ -179,6 +176,7 @@ export default {
                         anchorYUnits: 'pixels',
                         // 圖片連結需修改
                         src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
+                        // url: 'src/assets/tiantai.json',
                     }),
                 })
             })
