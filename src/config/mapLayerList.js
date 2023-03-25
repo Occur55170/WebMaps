@@ -125,11 +125,21 @@ export default {
                 maxZoom: 20,
             }),
         })
-    },
-    drawLayers: (coordData) => {
-        if(!(coordData)) {return}
+    }
+    // DimensionMap: (obj)=>{
+    //     return new PerspectiveMap({
+    //         layers: [baseMapList.sourceFun('default')],
+    //         target: state.targetNum == 1 ? 'map1' : 'map2',
+    //         view: defaultView,
+    //         controls: [],
+    //     })
+    // }
+}
+
+export function drawLayers(coordData){
+        if (!(coordData)) { return }
         let coordinates
-        if(coordData.isArray()) {
+        if (coordData.isArray()) {
             coordinates = coordData
 
             const areaLineFeature = new Feature({
@@ -149,19 +159,11 @@ export default {
                 source: new VectorSource({
                     features: [areaLineFeature],
                 }),
-                // source: new VectorSource({
-                //     format: new GeoJSON(),
-                //     url: 'src/assets/tiantai.json',
-                // }),
                 style: areaLineStyle
             })
-        } else {
-
         }
-
-
-            'https://services-eu1.arcgis.com/NPIbx47lsIiu2pqz/ArcGIS/rest/services/' +
-            'Neptune_Coastline_Campaign_Open_Data_Land_Use_2014/FeatureServer/';
+        // 'https://services-eu1.arcgis.com/NPIbx47lsIiu2pqz/ArcGIS/rest/services/' +
+        // 'Neptune_Coastline_Campaign_Open_Data_Land_Use_2014/FeatureServer/';
 
 
         const serviceUrl = coordData
@@ -253,15 +255,6 @@ export default {
             }),
         })
         return [raster, vector]
-    },
-    // DimensionMap: (obj)=>{
-    //     return new PerspectiveMap({
-    //         layers: [baseMapList.sourceFun('default')],
-    //         target: state.targetNum == 1 ? 'map1' : 'map2',
-    //         view: defaultView,
-    //         controls: [],
-    //     })
-    // }
 }
 
 

@@ -58,7 +58,7 @@ export default {
         </div>
         <hr class="my-0">
         <div class="py-3 px-4 content">
-            <div class="allControl d-flex align-items-center justify-content-end mb-4">
+            <div class="allControl d-flex align-items-center justify-content-end mb-0">
                 <a href="" class="d-flex align-items-center text-decoration-none me-4"
                 :class="{'lockUp': props.selectLock, 'unlock': !props.selectLock}"
                 @click.prevent="()=>{
@@ -87,71 +87,66 @@ export default {
                     全部刪除
                 </a>
             </div>
-            {{ props.currentLayers }}
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
-                <li class="d-flex justify-content-between align-items-center border-bottom py-2"
-                v-for="(node, nodeIndex) in props.currentLayers" v-if="node?.name !== 'default'">
-                    <div>
-                        <!-- !!! fix -->
-                        {{ node?.name !== 'default' }}
-                        {{ node.name }}
-                    </div>
-                    <div class="tool">
-                        <a href=""
-                        v-if="nodeIndex !== 0 && !(node?.specialLayer)"
-                        @click.prevent="props.onChangeOrderLayer({
-                            action: 'changeOrder',
-                            value: {
-                                movement:'up',
-                                key: nodeIndex
-                            },
-                        })">
-                            <svg viewBox="0 0 25 24" fill="currentColor">
-                                <path d="M9.49991 19.84H15.4999V11.84H20.3399L12.4999 4.00003L4.65991 11.84H9.49991V19.84Z" fill="#808080" />
-                            </svg>
-                        </a>
-                        <a href=""
-                        v-if="nodeIndex !== 0 && !(node?.specialLayer)"
-                        @click.prevent="props.onChangeOrderLayer({
-                            action: 'changeOrder',
-                            value: {
-                                movement: 'down',
-                                key: nodeIndex
-                            }
-                        })">
-                            <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9.49991 4H15.4999V12H20.3399L12.4999 19.84L4.65991 12H9.49991V4Z" fill="#808080"/>
-                            </svg>
-                        </a>
-                        <a href=""
-                        :class="{
-                            'Invisible': !node.visible
-                        }"
-                        @click.prevent="()=>{
-                            props.onChangLayerVisible({
-                                action: 'changeLayerVisible',
+                <li v-for="(node, nodeIndex) in props.currentLayers">
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="nodeIndex !== 0">
+                        <div>
+                            {{ nodeIndex }}
+                            {{ node?.name }}
+                        </div>
+                        <div class="tool">
+                            <a href=""
+                            @click.prevent="props.onChangeOrderLayer({
+                                action: 'changeOrder',
                                 value: {
-                                    key: nodeIndex,
-                                    specialLayer: node?.specialLayer
+                                    movement:'up',
+                                    key: nodeIndex
+                                },
+                            })">
+                                <svg viewBox="0 0 25 24" fill="currentColor">
+                                    <path d="M9.49991 19.84H15.4999V11.84H20.3399L12.4999 4.00003L4.65991 11.84H9.49991V19.84Z" fill="#808080" />
+                                </svg>
+                            </a>
+                            <a href=""
+                            @click.prevent="props.onChangeOrderLayer({
+                                action: 'changeOrder',
+                                value: {
+                                    movement: 'down',
+                                    key: nodeIndex
                                 }
-                            })
-                        }">
-                            <svg viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.3333 10C11.8029 10 11.2942 10.2107 10.9191 10.5858C10.544 10.9609 10.3333 11.4696 10.3333 12C10.3333 12.5304 10.544 13.0391 10.9191 13.4142C11.2942 13.7893 11.8029 14 12.3333 14C12.8638 14 13.3725 13.7893 13.7475 13.4142C14.1226 13.0391 14.3333 12.5304 14.3333 12C14.3333 11.4696 14.1226 10.9609 13.7475 10.5858C13.3725 10.2107 12.8638 10 12.3333 10ZM12.3333 15.3333C11.4493 15.3333 10.6014 14.9821 9.97631 14.357C9.35119 13.7319 9 12.8841 9 12C9 11.1159 9.35119 10.2681 9.97631 9.64298C10.6014 9.01786 11.4493 8.66667 12.3333 8.66667C13.2174 8.66667 14.0652 9.01786 14.6904 9.64298C15.3155 10.2681 15.6667 11.1159 15.6667 12C15.6667 12.8841 15.3155 13.7319 14.6904 14.357C14.0652 14.9821 13.2174 15.3333 12.3333 15.3333ZM12.3333 7C9 7 6.15333 9.07333 5 12C6.15333 14.9267 9 17 12.3333 17C15.6667 17 18.5133 14.9267 19.6667 12C18.5133 9.07333 15.6667 7 12.3333 7Z" fill="#808080"/>
-                            </svg>
-                        </a>
-                        <a href=""
-                        @click.prevent="props.onDeleteLayer({
-                            action: 'selectLayerMode',
-                            value: {
-                                layerName: node.name,
-                                specialLayer: node?.specialLayer
-                            }
-                        })">
-                            <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M7.5 21C6.95 21 6.47933 20.8043 6.088 20.413C5.696 20.021 5.5 19.55 5.5 19V6H4.5V4H9.5V3H15.5V4H20.5V6H19.5V19C19.5 19.55 19.3043 20.021 18.913 20.413C18.521 20.8043 18.05 21 17.5 21H7.5ZM9.5 17H11.5V8H9.5V17ZM13.5 17H15.5V8H13.5V17Z" fill="#808080"/>
-                            </svg>
-                        </a>
+                            })">
+                                <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.49991 4H15.4999V12H20.3399L12.4999 19.84L4.65991 12H9.49991V4Z" fill="#808080"/>
+                                </svg>
+                            </a>
+                            <a href=""
+                            :class="{
+                                'Invisible': !node?.visible
+                            }"
+                            @click.prevent="()=>{
+                                props.onChangLayerVisible({
+                                    action: 'changeLayerVisible',
+                                    value: {
+                                        key: nodeIndex,
+                                    }
+                                })
+                            }">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.3333 10C11.8029 10 11.2942 10.2107 10.9191 10.5858C10.544 10.9609 10.3333 11.4696 10.3333 12C10.3333 12.5304 10.544 13.0391 10.9191 13.4142C11.2942 13.7893 11.8029 14 12.3333 14C12.8638 14 13.3725 13.7893 13.7475 13.4142C14.1226 13.0391 14.3333 12.5304 14.3333 12C14.3333 11.4696 14.1226 10.9609 13.7475 10.5858C13.3725 10.2107 12.8638 10 12.3333 10ZM12.3333 15.3333C11.4493 15.3333 10.6014 14.9821 9.97631 14.357C9.35119 13.7319 9 12.8841 9 12C9 11.1159 9.35119 10.2681 9.97631 9.64298C10.6014 9.01786 11.4493 8.66667 12.3333 8.66667C13.2174 8.66667 14.0652 9.01786 14.6904 9.64298C15.3155 10.2681 15.6667 11.1159 15.6667 12C15.6667 12.8841 15.3155 13.7319 14.6904 14.357C14.0652 14.9821 13.2174 15.3333 12.3333 15.3333ZM12.3333 7C9 7 6.15333 9.07333 5 12C6.15333 14.9267 9 17 12.3333 17C15.6667 17 18.5133 14.9267 19.6667 12C18.5133 9.07333 15.6667 7 12.3333 7Z" fill="#808080"/>
+                                </svg>
+                            </a>
+                            <a href=""
+                            @click.prevent="props.onDeleteLayer({
+                                action: 'selectLayerMode',
+                                value: {
+                                    layerName: node?.name,
+                                }
+                            })">
+                                <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M7.5 21C6.95 21 6.47933 20.8043 6.088 20.413C5.696 20.021 5.5 19.55 5.5 19V6H4.5V4H9.5V3H15.5V4H20.5V6H19.5V19C19.5 19.55 19.3043 20.021 18.913 20.413C18.521 20.8043 18.05 21 17.5 21H7.5ZM9.5 17H11.5V8H9.5V17ZM13.5 17H15.5V8H13.5V17Z" fill="#808080"/>
+                                </svg>
+                            </a>
+                        </div>
                     </div>
                 </li>
             </ul>

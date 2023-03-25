@@ -197,37 +197,31 @@ export default {
                             target.removeLayer(node)
                         })
                     } else {
-                        if (value?.specialLayer) {
-                            let taStr = state.targetNum == 1 ? 'map1' : 'map2'
-                            $(`#${taStr} .ol-perspective-map`).remove()
-                            state[`${taStr}Temp`] = null
-                            state[`${taStr}LayerStatus`] = state[`${taStr}LayerStatus`].filter(node=>node !== '3D')
-                            state.dimensionMap[taStr].name = '2D'
-                        } else {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
                                 if (element.get('name') == value.layerName) {
                                     target.removeLayer(element)
                                 }
                             })
-                        }
                     }
                     break;
                 case 'changeOrder':
-                    if (state.selectLock || value.key === 0) { return }
+                    if (state.selectLock) { return }
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
+                    console.log(value, layerName)
                     if (value.movement === 'up') {
-                        if (value.key + 1 == targetLayers.getArray().length) { return }
+                        if (value.key == targetLayers.getArray().length) { return }
                         targetLayers.getArray().forEach(element => {
-                            if (element.get('name') == layerName) {
-                                target.removeLayer(element);
+                            if (element.get('name') === layerName) {
+                            console.log(element.get('name'))
+                                target.removeLayer(element)
                             }
                         })
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
-                        if (value.key - 1 == 0) { return }
+                        if (value.key == 0) { return }
 
                         targetLayers.getArray().forEach(element => {
                             if (element.get('name') == layerName) {
