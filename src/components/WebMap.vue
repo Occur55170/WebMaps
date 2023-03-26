@@ -54,7 +54,7 @@ export default {
                 map1: '2D',
                 map2: '2D'
             },
-            toSearchDimensionStatus: computed(()=>{
+            toSearchDimensionStatus: computed(() => {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
@@ -67,8 +67,19 @@ export default {
             zoom: state.defaultCenterZoom,
         })
 
+        const overlay = ref(null);
+        const popupCom = ref(null) // 弹窗容器
+
         // 初始化地圖
         function initMap() {
+            overlay.value = new Overlay({
+                element: popupCom.value, // 弹窗标签，在html里
+                autoPan: true, // 如果弹窗在底图边缘时，底图会移动
+                autoPanAnimation: { // 底图移动动画
+                    duration: 250
+                }
+            })
+
             state.map1 = new Map({
                 target: 'map1',
                 layers: [baseMapList.sourceFun('default')],
@@ -104,6 +115,9 @@ export default {
             })
             state.map1.addLayer(raster)
 
+
+            state.map1.addOverlay(overlay.value)
+
             const coordinates = [
                 [120.971859, 24.801583],
                 [120.970000, 24.809583],
@@ -129,35 +143,29 @@ export default {
                 source: new VectorSource({
                     features: [areaLineFeature],
                 }),
-                // source: new VectorSource({
-                //     format: new GeoJSON(),
-                //     url: 'src/assets/tiantai.json',
-                // }),
                 style: areaLineStyle
             })
             state.map1.addLayer(areaLineLayer)
 
             // 點擊事件
-            state.map1.on('click', function(evt) {
-                var feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    return feature;
+            state.map1.on('click', function (evt) {
+                const feature =state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                    return feature
                 })
-                // if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {}
-                if (feature) {
-                    if (!($('body .areaData').hasClass('hidden'))) {
-                        $('body .areaData').addClass('hidden')
-                    }
-                    state.areaDataId = feature.get('name')
 
-                    nextTick(()=>{
-                        $('body .areaData').removeClass('hidden')
-                    })
+                if (feature) {
+                    const coordinate = evt.coordinate
+                    state.areaDataId = feature.get('name')
+                    overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
+                } else {
+                    // 如果没有要素与单击位置相交，则隐藏 Overlay
+                    overlay.value.setPosition(undefined)
                 }
 
-                // const coordinate = evt.coordinate // 获取坐标
-                // currentCoordinate.value = coordinate // 保存坐标点
-                // overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
+                overlay.value.setPosition(undefined);
             })
+
+            // 關閉地圖細節事件
         }
 
         function addPoint(targetLng, targetLat) {
@@ -363,7 +371,7 @@ export default {
                         state[`${ta}LayerStatus`].push('3D')
                     } else {
                         $(`#${ta} .ol-perspective-map`).remove()
-                        state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node=>node !== '3D')
+                        state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
                     }
                     break;
             }
@@ -378,7 +386,7 @@ export default {
                 // 是目標地圖的產出且為空
                 if (!state[`map${value}`]) {
 
-                    if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
+                    if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
 
                         state[`map${value}`] = new Map({
                             target: `map${value}`,
@@ -449,6 +457,10 @@ export default {
             }
         }
 
+        function closeMapData() {
+            overlay.value.setPosition(undefined)
+        }
+
 
         onMounted(() => {
             initMap()
@@ -460,12 +472,15 @@ export default {
         return {
             state,
             props,
+            popupCom,
+            overlay,
             mapControl,
             layerControl,
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
             onMapLayerStatus,
+            closeMapData
         }
     }
 }
@@ -473,14 +488,11 @@ export default {
 
 <template>
     <div>
+
         <div class="SearchBar position-absolute">
-            <SearchBar
-                :dimensionMapStatus="state.toSearchDimensionStatus"
-                :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount"
-                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }"
-                @conditionWrap="(value) => { conditionWrap(value) }" />
+            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
+                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
         <div class="mapSourceOption">
             <mapSourceOption :baseMapsOptions="state.baseMapsOptions"
@@ -503,10 +515,12 @@ export default {
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
                     <condition
-                    :mapLayers="state.mapLayers"
-                    :currentLayers="state.currentLayers"
-                    :onClose="() => {
-                        state.conditionWrap = false
+                    v-bind="{
+                        mapLayers: state.mapLayers,
+                        currentLayers: state.currentLayers,
+                        onClose: () => {
+                            state.conditionWrap = false
+                        }
                     }"
                     @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
                     @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
@@ -520,31 +534,32 @@ export default {
                 </button>
                 <div v-if="state.layerSelect">
                     <layerSelect
-                    :selectLock="state.selectLock"
-                    :currentLayers="state.currentLayers"
-                    :onClose="() => {
-                        state.layerSelect = false
-                    }"
-                    :onChangLayerVisible="(action) => {
-                        layerControl(action)
-                    }"
-                    :onChangeOrderLayer="({ action, value }) => {
-                        layerControl({ action, value })
-                    }"
-                    :onLockLayer="() => {
-                        state.selectLock = !state.selectLock
-                    }"
-                    :onDeleteLayer="({ action, value }) => {
-                        if (value.layerName == 'all') {
-                            state.deleteLightbox = true
-                        } else {
+                    v-bind="{
+                        selectLock: state.selectLock,
+                        currentLayers: state.currentLayers,
+                        onClose:() => {
+                            state.layerSelect = false
+                        },
+                        onChangLayerVisible:(action) => {
+                            layerControl(action)
+                        },
+                        onChangeOrderLayer:({ action, value }) => {
                             layerControl({ action, value })
+                        },
+                        onLockLayer:() => {
+                            state.selectLock = !state.selectLock
+                        },
+                        onDeleteLayer:({ action, value }) => {
+                            if (value.layerName == 'all') {
+                                state.deleteLightbox = true
+                            } else {
+                                layerControl({ action, value })
+                            }
+                        },
+                        onDeleteLayerAll:() => {
+                            state.deleteLightbox = true
                         }
-                    }"
-                    :onDeleteLayerAll="() => {
-                        state.deleteLightbox = true
-                    }"
-                    />
+                    }" />
                 </div>
             </div>
         </div>
@@ -552,7 +567,7 @@ export default {
             <div class="p-4 rounded">
                 <p>是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
-                    <button @click="()=>{
+                    <button @click="() => {
                         layerControl({
                             action: 'selectLayerMode',
                             value: {
@@ -561,18 +576,16 @@ export default {
                         })
                         state.deleteLightbox = false
                     }">是</button>
-                    <button @click="()=>{
+                    <button @click="() => {
                         state.deleteLightbox = false
                     }">否</button>
                 </div>
             </div>
         </div>
-        <!-- !!!fixed -->
-        <div class="areaData position-fixed hidden"
-        :style="{
-            'right': state.areaDataId === 'circleName' ? '0' : '60%'
-        }">
-            <areaData :id="state.areaDataId" />
+
+        <!-- 弹窗容器 -->
+        <div ref="popupCom" class="areaData">
+            <areaData :id="state.areaDataId" @closeMapData="closeMapData" />
         </div>
     </div>
 </template>
@@ -610,8 +623,15 @@ export default {
 .middleLine
     width: 5px
     background: $blue-steel
+
+
 .areaData
     width: 450px
-    top: 40%
-    right: 0%
+    background: #fff
+    position: absolute
+    bottom: 100%
+    right: 0
+    box-sizing: border-box
+    padding: 10px
+
 </style>

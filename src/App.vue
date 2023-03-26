@@ -2,7 +2,6 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
-
 export default {
     setup(props, { emit }) {
         const { proxy } = getCurrentInstance();
@@ -17,8 +16,8 @@ export default {
 
 <template>
     <div class="main">
-        <!-- <WebMap /> -->
-        <Wes />
+        <WebMap />
+        <!-- <Wes /> -->
 
         <!-- <threeDimensionMap /> -->
     </div>
@@ -26,7 +25,6 @@ export default {
 
 <style lang="sass">
 @import './assets/styles/all.module.scss'
-
 .mapContent
     height: 100vh
     width: 100vw

@@ -31,7 +31,7 @@ export default {
 </script>
 
 <template>
-    <div class="lightbox bg-white rounded py-2">
+    <div class="bg-white rounded py-2">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
             <p>詳細資訊</p>
             <a href="" class="position-absolute col-auto end-0" style="top: 10px;" @click.prevent="closeLightBox()">
