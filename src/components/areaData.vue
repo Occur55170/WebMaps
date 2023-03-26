@@ -8,7 +8,7 @@ export default {
             Type: String,
             default: 0
         },
-        onClose: {
+        closeMapData: {
             Type: Function,
             default: ()=>{}
         }
@@ -16,14 +16,10 @@ export default {
     setup(props, { emit }){
         const state = reactive({})
 
-        function closeLightBox() {
-            $('body .areaData').addClass('hidden')
-        }
 
         return {
             props,
             state,
-            closeLightBox
         }
     }
 }
@@ -31,12 +27,13 @@ export default {
 </script>
 
 <template>
-    <div class="lightbox bg-white rounded py-2">
+    <div class="bg-white rounded py-2">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
             <p>詳細資訊</p>
-            <a href="" class="position-absolute col-auto end-0" style="top: 10px;" @click.prevent="closeLightBox()">
+            <!-- needfix:尚未加入關閉地圖資訊按鈕事件 -->
+            <!-- <a href="" class="position-absolute col-auto end-0" style="top: 10px;" >
                 <svg width="32" height="32" viewBox="0 0 24 24"><path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z"/></svg>
-            </a>
+            </a> -->
         </div>
         <img src="../assets/example-AddressData.jpg" class="w-100" alt="">
         <div class="row mx-0 align-items-center p-2 position-relative">

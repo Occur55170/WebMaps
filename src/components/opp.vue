@@ -97,63 +97,6 @@ export default {
             currentCoordinate.value = '' // 把彈跳視窗内容清空
         }
 
-        function addPoint(targetLng, targetLat) {
-            const marker = new Vector({
-                source: new VectorSource({
-                    features: [
-                        new Feature({
-                            geometry: new Point([targetLng, targetLat]),
-                            name: 'Null Island',
-                            population: 4000,
-                            rainfall: 500,
-                        })
-                    ]
-                }),
-                style: new Style({
-                    image: new Icon({
-                        anchor: [0.5, 100],
-                        anchorXUnits: 'fraction',
-                        anchorYUnits: 'pixels',
-                        // 圖片連結需修改
-                        src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-                    }),
-                })
-            })
-            map.value.addLayer(marker);
-        }
-
-        // 移動到當前位置
-        function moveCurrentPosition() {
-            navigator.geolocation.getCurrentPosition(function (pos) {
-                defaultView.animate({
-                    center: [pos.coords.longitude, pos.coords.latitude],
-                    zoom: 17,
-                    duration: 100,
-                });
-                addPoint(pos.coords.longitude, pos.coords.latitude)
-            })
-        }
-
-        function zoomIn() {
-            let zoom = defaultView.getZoom()
-            defaultView.animate({
-                zoom: zoom + 1,
-            })
-        }
-
-        function zoomOut() {
-            let zoom = defaultView.getZoom()
-            defaultView.animate({
-                zoom: zoom - 1,
-            })
-        }
-
-        function toNorth() {
-            defaultView.animate({
-                rotation: 0,
-            })
-        }
-
         onMounted(() => {
             initMap()
             nextTick(()=>{
