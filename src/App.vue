@@ -16,10 +16,10 @@ export default {
 
 <template>
     <div class="main">
-        <WebMap />
+        <!-- <WebMap /> -->
         <!-- <Wes /> -->
 
-        <!-- <threeDimensionMap /> -->
+        <threeDimensionMap />
     </div>
 </template>
 

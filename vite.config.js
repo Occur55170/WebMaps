@@ -20,13 +20,13 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     return {
         plugins: [
             vue(),
+            Icons(),
+            cesium(),
             Components({
                 resolvers: IconsResolver({
                     prefix: 'icon'
                 }),
             }),
-            Icons(),
-            cesium(),
             // 'vite-plugin-sass',
             {
               includePaths: ['./src/styles']

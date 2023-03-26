@@ -1,86 +1,36 @@
-<script>
-import OSM from 'ol/source/OSM'
-import Map from 'ol/Map';
-import View from 'ol/View';
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import XYZ from 'ol/source/XYZ'
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
+<script setup>
 
-import 'ol-ext/dist/ol-ext.css'
-// import Rotate from 'ol-ext/control/Rotate'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
+import $ from 'jquery'
 
-// import Rotate from 'ol-ext/control'
+// import * as Cesium from 'cesium';
+// import OLCesium from 'olcs/OLCesium.js';
+import { Viewer } from 'cesium'
 
-export default {
-    name: 'Map',
-    data() {
-        return {
-            map: null,
-        };
-    },
+onMounted(() => {
+    // 在元素加载完之后再执行地图初始化
+    // initMap()
 
 
-    mounted() {
-        // 配置地圖
-        // const view = new View({
-        //     projection: 'EPSG:4326',
-        //     zoom: 19,
-        //     center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]
-        //     // enableRotation: true,
-        //     // enableZoom: true,
-        //     // enablePan: true,
-        //     // enableTilt: true,
-        //     // enableRoll: true,
-        //     // enableZoomMax: 22,
-        // });
-        const view = new View({
-            projection: 'EPSG:4326',
-            zoom: 19,
-            center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]
-        });
-        const layer = new Tile({
-            name: "OSM",
-            preload: Infinity,
-            source: new OSM()
-        });
-
-        this.map = new PerspectiveMap({
-            target: 'threeDimensionMap',
-            layers: [layer],
-            view: new View({
-                zoom: 19,
-                center: [-245406, 5986536]
-            }),
-        })
-    // const rotateControl = new Rotate({
-    //     autoHide: false, // 取消自動隱藏控制項
-    //     className: 'rotate', // 指定 CSS 類名
-    //     duration: 250, // 旋轉動畫的持續時間(毫秒)
-    //     label: '\u21C5', // 控制項標籤
-    //     tipLabel: 'Reset North', // 按鈕提示
-    //     threshold: 0.05, // 旋轉阈值(視角縮放因子)
-    //     autoActivate: true, // 自動啟用控制項
-    //     drag: true, //啟用拖動觸發
-    //     onDrag: () => {
-    //         //拖動時更新地圖的旋轉角度
-    //         const rotation = rotateControl.getAngle();
-    //         map.getView().setRotation(rotation);
-    //     },
-    // })
-
-    // map.addControl(rotateControl)
-    },
-};
-
+    // const viewer = new Viewer('cesiumContainer')
+    const viewer = new Viewer('cesiumContainer', {
+        animation: false, // 动画小组件
+        baseLayerPicker: false, // 底图组件，选择三维数字地球的底图（imagery and terrain）。
+        fullscreenButton: false, // 全屏组件
+        geocoder: false, // 地理编码（搜索）组件
+        homeButton: false, // 首页，点击之后将视图跳转到默认视角
+        infoBox: false, // 信息框
+        sceneModePicker: false, // 场景模式，切换2D、3D 和 Columbus View (CV) 模式。
+        selectionIndicator: false, // 是否显示选取指示器组件
+        timeline: false, // 时间轴
+        navigationHelpButton: false, // 帮助提示，如何操作数字地球。
+        scene3DOnly: true,
+        clock: new Cesium.Clock(),
+        navigationInstructionsInitiallyVisible: false,
+        vrButton: false, // VR模式
+    })
+})
 </script>
 <template>
-    <!-- 地圖容器 -->
-    <div id="threeDimensionMap" class="threeDimensionMap"></div>
+    <div id="cesiumContainer" class="cesiumContainer"></div>
 </template>
-
-<style lang="sass" scoped>
-.threeDimensionMap
-    height: 100vh
-    width: 100vw
-
-</style>
