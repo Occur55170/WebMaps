@@ -3,8 +3,8 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
-// import * as Cesium from 'cesium';
 // import OLCesium from 'olcs/OLCesium.js';
+import * as Cesium from 'cesium'
 import { Viewer } from 'cesium'
 
 onMounted(() => {
@@ -29,6 +29,14 @@ onMounted(() => {
         navigationInstructionsInitiallyVisible: false,
         vrButton: false, // VR模式
     })
+    const  boundingSphere = new Cesium.BoundingSphere(Cesium.Cartesian3.fromDegrees(120.971859,24.801583,14),200);
+    viewer.camera.flyToBoundingSphere(boundingSphere,{
+        duration: 0
+    })
+
+
+    // defaultCenter: [120.971859, 24.801583], //lng, lat
+    // defaultCenterZoom: 14,
 })
 </script>
 <template>
