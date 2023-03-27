@@ -1,5 +1,4 @@
 <script setup>
-
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
@@ -23,17 +22,15 @@ onMounted(() => {
             }),
         ],
         view: new View({
-            center: [13466500, 2851500],
-            zoom: 17
+            projection: 'EPSG:4326',
+            center: [120.971859, 24.801583],
+            zoom: 14
         })
     })
     const ol3d = new OLCesium({
         map: olmap,
     })
     ol3d.setEnabled(true);
-
-    console.log(olmap.getView())
-
 
 })
 </script>
