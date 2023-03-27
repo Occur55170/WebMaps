@@ -61,7 +61,8 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            areaDataId: ''
+            areaDataId: '',
+            test: false
         })
 
         const defaultView = new View({
@@ -89,6 +90,7 @@ export default {
                 view: defaultView,
                 controls: [],
             })
+            console.log(state.map1.getView())
 
             // needfix:圖層加入mapList.js中
             // loadingDrawLayer()
@@ -517,7 +519,7 @@ export default {
 
 <template>
     <div>
-
+        <div @click="state.test = !state.test">123</div>
         <div class="SearchBar position-absolute">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
@@ -530,7 +532,7 @@ export default {
         <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
             <asideTool @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
         </div>
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
+        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap" v-if="!state.test">
             <!-- needfix -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
@@ -615,6 +617,11 @@ export default {
         <!-- 弹窗容器 -->
         <div ref="popupCom" class="areaData">
             <areaData :id="state.areaDataId" />
+        </div>
+
+        <!-- 3D -->
+        <div v-if="state.test">
+            <threeDimensionMap />
         </div>
     </div>
 </template>
