@@ -17,6 +17,9 @@ import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { Circle, Polygon } from 'ol/geom.js'
+import Projection from 'ol/proj/Projection.js'
+import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
 
@@ -125,136 +128,67 @@ export default {
                 maxZoom: 20,
             }),
         })
+    },
+    DimensionMap: (obj)=>{
+        const circleFeature = new Feature({
+            name: 'circleName',
+            title: 'circleName',
+            geometry: new Circle([120.9984423386347, 24.791781619336316], 0.005),
+        })
+
+        const circleStyle = new Style({
+            renderer(coordinates, state) {
+                const [[x, y], [x1, y1]] = coordinates;
+                const ctx = state.context;
+                const dx = x1 - x;
+                const dy = y1 - y;
+                const radius = Math.sqrt(dx * dx + dy * dy);
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
+                ctx.fillStyle = 'rgba(255,0,0)';
+                ctx.fill();
+            },
+        })
+        const raster = new VectorLayer({
+            source: new VectorSource({
+                features: [circleFeature],
+            }),
+            style: circleStyle
+        })
+
+        const coordinates = [
+            [120.971859, 24.801583],
+            [120.970000, 24.809583],
+            [120.985000, 24.808583],
+            [120.990000, 24.806583],
+            [120.971859, 24.801583]
+        ]
+
+        const areaLineFeature = new Feature({
+            name: 'areaLineLayer',
+            title: 'areaLineLayer',
+            geometry: new Polygon([coordinates]),
+        })
+        const areaLineStyle = new Style({
+            fill: new Fill({
+                color: '#0f9ce2'
+            }),
+        })
+
+        const areaLineLayer = new Vector({
+            name: 'line',
+            title: 'line',
+            source: new VectorSource({
+                features: [areaLineFeature],
+            }),
+            style: areaLineStyle
+        })
+
+
+        // fix!!!整合成一個圖層
+        return [raster, areaLineLayer]
+        // 關閉地圖細節事件
     }
-    // DimensionMap: (obj)=>{
-    //     return new PerspectiveMap({
-    //         layers: [baseMapList.sourceFun('default')],
-    //         target: state.targetNum == 1 ? 'map1' : 'map2',
-    //         view: defaultView,
-    //         controls: [],
-    //     })
-    // }
-}
-
-export function drawLayers(coordData){
-        if (!(coordData)) { return }
-        let coordinates
-        if (coordData.isArray()) {
-            coordinates = coordData
-
-            const areaLineFeature = new Feature({
-                name: 'areaLineLayer',
-                title: 'areaLineLayer',
-                geometry: new Polygon([coordinates]),
-            })
-            const areaLineStyle = new Style({
-                fill: new Fill({
-                    color: '#0f9ce2'
-                }),
-            })
-
-            const areaLineLayer = new Vector({
-                name: 'line',
-                title: 'line',
-                source: new VectorSource({
-                    features: [areaLineFeature],
-                }),
-                style: areaLineStyle
-            })
-        }
-        // 'https://services-eu1.arcgis.com/NPIbx47lsIiu2pqz/ArcGIS/rest/services/' +
-        // 'Neptune_Coastline_Campaign_Open_Data_Land_Use_2014/FeatureServer/';
-
-
-        const serviceUrl = coordData
-        const layer = '0'
-        const fillColors = {
-            'Lost To Sea Since 1965': [0, 0, 0, 1],
-            'Urban/Built-up': [104, 104, 104, 1],
-            'Shacks': [115, 76, 0, 1],
-            'Industry': [230, 0, 0, 1],
-            'Wasteland': [230, 0, 0, 1],
-            'Caravans': [0, 112, 255, 0.5],
-            'Defence': [230, 152, 0, 0.5],
-            'Transport': [230, 152, 0, 1],
-            'Open Countryside': [255, 255, 115, 1],
-            'Woodland': [38, 115, 0, 1],
-            'Managed Recreation/Sport': [85, 255, 0, 1],
-            'Amenity Water': [0, 112, 255, 1],
-            'Inland Water': [0, 38, 115, 1],
-        }
-
-        const style = new Style({
-            fill: new Fill(),
-            stroke: new Stroke({
-                color: [0, 0, 0, 1],
-                width: 0.5,
-            }),
-        })
-
-        const vectorSource = new VectorSource({
-            format: new EsriJSON(),
-            url: function (extent, resolution, projection) {
-                // ArcGIS Server only wants the numeric portion of the projection ID.
-                const srid = projection
-                    .getCode()
-                    .split(/:(?=\d+$)/)
-                    .pop();
-
-                const url =
-                    serviceUrl +
-                    layer +
-                    '/query/?f=json&' +
-                    'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
-                    encodeURIComponent(
-                        '{"xmin":' +
-                        extent[0] +
-                        ',"ymin":' +
-                        extent[1] +
-                        ',"xmax":' +
-                        extent[2] +
-                        ',"ymax":' +
-                        extent[3] +
-                        ',"spatialReference":{"wkid":' +
-                        srid +
-                        '}}'
-                    ) +
-                    '&geometryType=esriGeometryEnvelope&inSR=' +
-                    srid +
-                    '&outFields=*' +
-                    '&outSR=' +
-                    srid;
-
-                return url;
-            },
-            strategy: tileStrategy(
-                createXYZ({
-                    tileSize: 512,
-                })
-            ),
-        })
-
-        const vector = new VectorLayer({
-            name: 'vector',
-            source: vectorSource,
-            style: function (feature) {
-                const classify = feature.get('LU_2014');
-                const color = fillColors[classify] || [0, 0, 0, 0];
-                style.getFill().setColor(color);
-                return style;
-            },
-            opacity: 0.7,
-        });
-
-        const raster = new TileLayer({
-            name: 'raster',
-            source: new XYZ({
-                url:
-                    'https://server.arcgisonline.com/ArcGIS/rest/services/' +
-                    'World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
-            }),
-        })
-        return [raster, vector]
 }
 
 

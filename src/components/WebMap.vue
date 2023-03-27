@@ -22,9 +22,9 @@ import 'ol-ext/dist/ol-ext.css'
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
-import { Circle, Polygon } from 'ol/geom.js';
-import Projection from 'ol/proj/Projection.js';
-import GeoJSON from 'ol/format/GeoJSON.js';
+import { Circle, Polygon } from 'ol/geom.js'
+import Projection from 'ol/proj/Projection.js'
+import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css'
 
@@ -76,9 +76,9 @@ export default {
         // 初始化地圖
         function initMap() {
             overlay.value = new Overlay({
-                element: popupCom.value, // 弹窗标签，在html里
-                autoPan: true, // 如果弹窗在底图边缘时，底图会移动
-                autoPanAnimation: { // 底图移动动画
+                element: popupCom.value,
+                autoPan: true,
+                autoPanAnimation: {
                     duration: 250
                 }
             })
@@ -122,8 +122,6 @@ export default {
             })
             state.map1.addLayer(raster)
 
-
-            state.map1.addOverlay(overlay.value)
 
             const coordinates = [
                 [120.971859, 24.801583],
@@ -171,7 +169,9 @@ export default {
 
             })
 
+            state.map1.addOverlay(overlay.value)
             // 關閉地圖細節事件
+
         }
 
         function addPoint(targetLng, targetLat) {
@@ -261,7 +261,32 @@ export default {
                 case 'layerMode':
                     if (value.checked) {
                         let newTileLayer = mapLayers[value.layerName]()
-                        target.addLayer(newTileLayer)
+                        if (Array.isArray(newTileLayer)) {
+                            // fix!!!
+                            newTileLayer.forEach(node=>{
+                                target.addLayer(node)
+                            })
+                            // 點擊事件
+                            target.on('click', function (evt) {
+                                const feature =target.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                                    return feature
+                                })
+
+                                if (feature) {
+                                    const coordinate = evt.coordinate
+                                    state.areaDataId = feature.get('name')
+                                    overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
+                                } else {
+                                    // 如果没有要素与单击位置相交，则隐藏 Overlay
+                                    overlay.value.setPosition(undefined)
+                                }
+
+                            })
+
+                            target.addOverlay(overlay.value)
+                        } else {
+                            target.addLayer(newTileLayer)
+                        }
                         onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
