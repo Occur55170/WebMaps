@@ -1,86 +1,46 @@
-<script>
+<script setup>
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
+import $ from 'jquery'
+
+import 'ol/ol.css'
+import Map from 'ol/Map'
 import OSM from 'ol/source/OSM'
-import Map from 'ol/Map';
-import View from 'ol/View';
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import XYZ from 'ol/source/XYZ'
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
-
-import 'ol-ext/dist/ol-ext.css'
-// import Rotate from 'ol-ext/control/Rotate'
-
-// import Rotate from 'ol-ext/control'
-
-export default {
-    name: 'Map',
-    data() {
-        return {
-            map: null,
-        };
-    },
+import TileLayer from 'ol/layer/Tile'
+import View from 'ol/View'
 
 
-    mounted() {
-        // 配置地圖
-        // const view = new View({
-        //     projection: 'EPSG:4326',
-        //     zoom: 19,
-        //     center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]
-        //     // enableRotation: true,
-        //     // enableZoom: true,
-        //     // enablePan: true,
-        //     // enableTilt: true,
-        //     // enableRoll: true,
-        //     // enableZoomMax: 22,
-        // });
-        const view = new View({
-            projection: 'EPSG:4326',
-            zoom: 19,
-            center: [-245406, 5986536]// [-245575, 5986863], //[-244777, 5989809]
-        });
-        const layer = new Tile({
-            name: "OSM",
-            preload: Infinity,
-            source: new OSM()
-        });
-
-        this.map = new PerspectiveMap({
-            target: 'threeDimensionMap',
-            layers: [layer],
-            view: new View({
-                zoom: 19,
-                center: [-245406, 5986536]
+import OLCesium from 'olcs/OLCesium.js';
+onMounted(() => {
+    // 在元素加载完之后再执行地图初始化
+    // initMap()
+    var olmap = new Map({
+        name: 'default',
+        target: 'cesiumContainer',
+        layers: [
+            new TileLayer({
+                source: new OSM(),
             }),
+        ],
+        view: new View({
+            projection: 'EPSG:4326',
+            center: [120.971859, 24.801583],
+            zoom: 14
         })
-    // const rotateControl = new Rotate({
-    //     autoHide: false, // 取消自動隱藏控制項
-    //     className: 'rotate', // 指定 CSS 類名
-    //     duration: 250, // 旋轉動畫的持續時間(毫秒)
-    //     label: '\u21C5', // 控制項標籤
-    //     tipLabel: 'Reset North', // 按鈕提示
-    //     threshold: 0.05, // 旋轉阈值(視角縮放因子)
-    //     autoActivate: true, // 自動啟用控制項
-    //     drag: true, //啟用拖動觸發
-    //     onDrag: () => {
-    //         //拖動時更新地圖的旋轉角度
-    //         const rotation = rotateControl.getAngle();
-    //         map.getView().setRotation(rotation);
-    //     },
-    // })
+    })
+    const ol3d = new OLCesium({
+        map: olmap,
+    })
+    ol3d.setEnabled(true);
 
-    // map.addControl(rotateControl)
-    },
-};
-
+})
 </script>
 <template>
-    <!-- 地圖容器 -->
-    <div id="threeDimensionMap" class="threeDimensionMap"></div>
+    <div id="cesiumContainer" class="cesiumContainer"></div>
 </template>
 
-<style lang="sass" scoped>
-.threeDimensionMap
-    height: 100vh
-    width: 100vw
-
+<style>
+.cesiumContainer {
+    width: 100%;
+    height: 100vh;
+}
 </style>

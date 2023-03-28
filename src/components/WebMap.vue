@@ -26,6 +26,7 @@ import { Circle, Polygon } from 'ol/geom.js'
 import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
+import OLCesium from 'olcs/OLCesium.js';
 import 'ol/ol.css'
 
 import mapLayerList from '../config/mapLayerList'
@@ -53,6 +54,7 @@ export default {
             map1LayerStatus: [],
             map2LayerStatus: [],
             deleteLightbox: false,
+            // 目前地圖狀態為2D or 3D
             dimensionMap: {
                 map1: '2D',
                 map2: '2D'
@@ -61,7 +63,8 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            areaDataId: ''
+            areaDataId: '',
+            ol3d: null,
         })
 
         const defaultView = new View({
@@ -70,8 +73,9 @@ export default {
             zoom: state.defaultCenterZoom,
         })
 
-        const overlay = ref(null);
+        const overlay = ref(null)
         const popupCom = ref(null) // 弹窗容器
+        let ol3d = null
 
         // 初始化地圖
         function initMap() {
@@ -325,7 +329,6 @@ export default {
 
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
-                    console.log(value, layerName)
                     if (value.movement === 'up') {
                         if (value.key == targetLayers.getArray().length) { return }
                         targetLayers.getArray().forEach(element => {
@@ -380,13 +383,10 @@ export default {
                                 view: defaultView,
                                 controls: [],
                             })
-                            state[`${otherMap}Temp`] = new PerspectiveMap({
-                                target: otherMap,
-                                name: 'three',
-                                layers: [baseMapList.sourceFun('default', 'name', 'three')],
-                                view: defaultView,
-                                controls: [],
+                            ol3d = new OLCesium({
+                                map: state[otherMap],
                             })
+                            ol3d.setEnabled(true)
                         } else {
                             state[otherMap] = new Map({
                                 target: otherMap,
@@ -400,8 +400,8 @@ export default {
                         }
                     }
                     if (value === 1) {
-                        state[actionToMap] = null
-                        const element = document.getElementById(actionToMap)
+                        state[otherMap] = null
+                        const element = document.getElementById(otherMap)
                         while (element.firstChild) {
                             element.removeChild(element.firstChild)
                         }
@@ -411,17 +411,13 @@ export default {
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta] = value
                     if (value === '3D') {
-                        // baseMap {checked: true, layerName: 'three'}
-                        target = new PerspectiveMap({
-                            target: state.targetNum == 1 ? 'map1' : 'map2',
-                            name: 'three',
-                            layers: [baseMapList.sourceFun('default', 'name', 'three')],
-                            view: defaultView,
-                            controls: [],
+                        ol3d = new OLCesium({
+                            map: target,
                         })
+                        ol3d.setEnabled(true)
                         state[`${ta}LayerStatus`].push('3D')
                     } else {
-                        $(`#${ta} .ol-perspective-map`).remove()
+                        ol3d.setEnabled(false)
                         state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
                     }
                     break;
@@ -431,16 +427,12 @@ export default {
 
         function changeTarget(value) {
             state.targetNum = value
-            let target = state[`map${value}`]
             let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
-
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
                         let otherLayers = state[`map${value}LayerStatus`].filter(node=> node !== '3D')
-                    // if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
-
                         state[`map${value}`] = new Map({
                             target: `map${value}`,
                             layers: [
@@ -450,16 +442,10 @@ export default {
                             view: defaultView,
                             controls: [],
                         })
-
-                        let ta = state.targetNum == 1 ? 'map1' : 'map2'
-                        state.dimensionMap[ta].name = '3D'
-                        state[`map${value}Temp`] = new PerspectiveMap({
-                            target: state.targetNum == 1 ? 'map1' : 'map2',
-                            name: 'three',
-                            layers: [baseMapList.sourceFun('default', 'name', 'three')],
-                            view: defaultView,
-                            controls: [],
+                        ol3d = new OLCesium({
+                            map: state[`map${value}`],
                         })
+                        ol3d.setEnabled(true)
                     } else {
                         state[`map${value}`] = new Map({
                             target: `map${value}`,
@@ -542,7 +528,6 @@ export default {
 
 <template>
     <div>
-
         <div class="SearchBar position-absolute">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"

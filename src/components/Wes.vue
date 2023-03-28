@@ -136,7 +136,6 @@ export default {
             // 點擊事件
             state.map1.on('click', function(evt) {
                 let feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
-                    console.log(evt)
                     return feature
                 })
                 // if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {}

@@ -19,7 +19,6 @@ export default {
         <WebMap />
         <!-- <Wes /> -->
 
-        <!-- <threeDimensionMap /> -->
     </div>
 </template>
 

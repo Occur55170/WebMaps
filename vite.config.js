@@ -16,17 +16,16 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
     // 根據當前工作目錄中的 `mode` 加載 .env 文件
     // 設置第三個參數為 '' 來加載所有環境變量，而不管是否有 `VITE_` 前綴。
     const env = loadEnv(mode, process.cwd())
-    console.log(env.VITE_BASE); //輸出VITE_BASE的環境變數
     return {
         plugins: [
             vue(),
+            Icons(),
+            cesium(),
             Components({
                 resolvers: IconsResolver({
                     prefix: 'icon'
                 }),
             }),
-            Icons(),
-            cesium(),
             // 'vite-plugin-sass',
             {
               includePaths: ['./src/styles']
