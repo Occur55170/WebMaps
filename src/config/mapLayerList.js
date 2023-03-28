@@ -2,7 +2,6 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
-import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
 import { TileArcGISRest } from 'ol/source.js'
 
