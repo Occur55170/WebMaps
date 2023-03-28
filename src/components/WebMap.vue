@@ -182,7 +182,6 @@ export default {
                 case 'layerMode':
                     if (value.checked) {
                         let newTileLayer = mapLayers[value.layerName]()
-                            console.log('123')
                         if (Array.isArray(newTileLayer)) {
                             newTileLayer.forEach(node=>{
                                 target.addLayer(node)
@@ -216,7 +215,6 @@ export default {
                         // fix!!
                         layersAry.forEach(element => {
                             if (element.get('name') == value.layerName) {
-                                console.log(element.get('name'))
                                 target.removeLayer(element)
                             }
                         })
@@ -526,7 +524,7 @@ export default {
             </div>
         </div>
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
-            <div class="p-4 rounded">
+            <div class="p-4 rounded bg-white">
                 <p>是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
                     <button @click="() => {
