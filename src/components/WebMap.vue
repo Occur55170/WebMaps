@@ -93,89 +93,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-
-            // needfix:圖層加入mapList.js中
-            // loadingDrawLayer()
-        }
-        function loadingDrawLayer(){
-            // load area
-            const circleFeature = new Feature({
-                name: 'circleName',
-                title: 'circleName',
-                geometry: new Circle([120.9984423386347, 24.791781619336316], 0.005),
-            })
-
-            const circleStyle = new Style({
-                renderer(coordinates, state) {
-                    const [[x, y], [x1, y1]] = coordinates;
-                    const ctx = state.context;
-                    const dx = x1 - x;
-                    const dy = y1 - y;
-                    const radius = Math.sqrt(dx * dx + dy * dy);
-                    ctx.beginPath();
-                    ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
-                    ctx.fillStyle = 'rgba(255,0,0)';
-                    ctx.fill();
-                },
-            })
-            const raster = new VectorLayer({
-                source: new VectorSource({
-                    features: [circleFeature],
-                }),
-                style: circleStyle
-            })
-            state.map1.addLayer(raster)
-
-
-            const coordinates = [
-                [120.971859, 24.801583],
-                [120.970000, 24.809583],
-                [120.985000, 24.808583],
-                [120.990000, 24.806583],
-                [120.971859, 24.801583]
-            ]
-
-            const areaLineFeature = new Feature({
-                name: 'areaLineLayer',
-                title: 'areaLineLayer',
-                geometry: new Polygon([coordinates]),
-            })
-            const areaLineStyle = new Style({
-                fill: new Fill({
-                    color: '#0f9ce2'
-                }),
-            })
-
-            const areaLineLayer = new Vector({
-                name: 'line',
-                title: 'line',
-                source: new VectorSource({
-                    features: [areaLineFeature],
-                }),
-                style: areaLineStyle
-            })
-            state.map1.addLayer(areaLineLayer)
-
-            // 點擊事件
-            state.map1.on('click', function (evt) {
-                const feature =state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                    return feature
-                })
-
-                if (feature) {
-                    const coordinate = evt.coordinate
-                    state.areaDataId = feature.get('name')
-                    overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
-                } else {
-                    // 如果没有要素与单击位置相交，则隐藏 Overlay
-                    overlay.value.setPosition(undefined)
-                }
-
-            })
-
-            state.map1.addOverlay(overlay.value)
-            // 關閉地圖細節事件
-
         }
 
         function addPoint(targetLng, targetLat) {
@@ -265,8 +182,8 @@ export default {
                 case 'layerMode':
                     if (value.checked) {
                         let newTileLayer = mapLayers[value.layerName]()
+                            console.log('123')
                         if (Array.isArray(newTileLayer)) {
-                            // fix!!!
                             newTileLayer.forEach(node=>{
                                 target.addLayer(node)
                             })
@@ -279,14 +196,12 @@ export default {
                                 if (feature) {
                                     const coordinate = evt.coordinate
                                     state.areaDataId = feature.get('name')
-                                    overlay.value.setPosition(coordinate) // 设置覆盖物出现的位置
+                                    overlay.value.setPosition(coordinate)
                                 } else {
-                                    // 如果没有要素与单击位置相交，则隐藏 Overlay
                                     overlay.value.setPosition(undefined)
                                 }
 
                             })
-
                             target.addOverlay(overlay.value)
                         } else {
                             target.addLayer(newTileLayer)
@@ -294,8 +209,14 @@ export default {
                         onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
+
+                        // while (element.get('name') == value.layerName) {
+                        //     target.removeLayer(element)
+                        // }
+                        // fix!!
                         layersAry.forEach(element => {
                             if (element.get('name') == value.layerName) {
+                                console.log(element.get('name'))
                                 target.removeLayer(element)
                             }
                         })
@@ -503,6 +424,8 @@ export default {
 
 
         onMounted(() => {
+
+
             initMap()
             nextTick(() => {
                 getCurrentLayerNames()

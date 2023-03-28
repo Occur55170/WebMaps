@@ -138,7 +138,6 @@ export default {
                 let feature = state.map1.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
                     return feature
                 })
-                // if (state.map1.forEachFeatureAtPixel(evt.pixel,(feature)=>{feature === marker})) {}
                 if (feature) {
                     if (!($('body .areaData').hasClass('hidden'))) {
                         $('body .areaData').addClass('hidden')

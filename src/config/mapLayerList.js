@@ -22,6 +22,26 @@ import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
 
+// need fix
+let obj = $.ajax({
+    url: 'https://api.edtest.site/layers',
+    method: 'GET',
+    dataType: '',
+    success:function(res){
+        console.log('res', res)
+        return res.map(node=>{
+            console.log('res', node)
+            return node
+        })
+    },
+    error:function(err){
+        console.log('err', err)
+        return err
+    },
+});
+console.log('obj', obj)
+
+
 export default {
     america: () => {
         return new TileLayer({
@@ -98,6 +118,7 @@ export default {
 
         return new VectorLayer({
             name: 'BsriJSON',
+            type: 'BsriJSON',
             source: newVectorSource,
             style: function (feature) {
                 const color = [0, 0, 0, 1];
@@ -111,6 +132,7 @@ export default {
         const key = 'Gu2rcfenfMEKjKXgPF6H'
         return new TileLayer({
             name: 'roads',
+            type: 'roads',
             source: new XYZ({
                 url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=' + key,
                 tileSize: 512,
@@ -122,16 +144,17 @@ export default {
         const key = 'Gu2rcfenfMEKjKXgPF6H'
         return new TileLayer({
             name: 'imagery',
+            type: 'imagery',
             source: new XYZ({
                 url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=' + key,
                 maxZoom: 20,
             }),
         })
     },
-    DimensionMap: (obj)=>{
+    DimensionMap: ()=>{
         const circleFeature = new Feature({
-            name: 'circleName',
-            title: 'circleName',
+            name: 'DimensionMap',
+            title: 'DimensionMap',
             geometry: new Circle([120.9984423386347, 24.791781619336316], 0.005),
         })
 
@@ -163,24 +186,22 @@ export default {
             [120.971859, 24.801583]
         ]
 
-        const areaLineFeature = new Feature({
-            name: 'areaLineLayer',
-            title: 'areaLineLayer',
-            geometry: new Polygon([coordinates]),
-        })
-        const areaLineStyle = new Style({
-            fill: new Fill({
-                color: '#0f9ce2'
-            }),
-        })
 
         const areaLineLayer = new Vector({
-            name: 'line',
-            title: 'line',
+            name: 'DimensionMap',
+            title: 'DimensionMap',
             source: new VectorSource({
-                features: [areaLineFeature],
+                features: [new Feature({
+                    name: 'areaLineLayer',
+                    title: 'areaLineLayer',
+                    geometry: new Polygon([coordinates]),
+                })],
             }),
-            style: areaLineStyle
+            style: new Style({
+                fill: new Fill({
+                    color: '#0f9ce2'
+                }),
+            })
         })
 
 
