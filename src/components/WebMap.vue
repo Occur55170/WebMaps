@@ -31,6 +31,7 @@ import 'ol/ol.css'
 
 import mapLayerList from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
+import { Label } from 'cesium'
 
 export default {
     props: {},
@@ -44,7 +45,17 @@ export default {
             conditionWrap: false,
             layerSelect: false,
             currentLayers: [],
-            mapLayers: Object.keys(mapLayers).map(node => node),
+            // mapLayers: Object.keys(mapLayers).map(node => node),
+            Layers: [],
+            mapLayers: computed(()=>{
+                return state.Layers.map((node,index)=>{
+                    return {
+                        label: node.group_title,
+                        value: node.value,
+                        layers: node.group_layers
+                    }
+                })
+            }),
             baseMapsOptions: computed(() => baseMapList.sourceData()),
             selectLock: false,
 
@@ -180,6 +191,8 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
+                    // need continue
+                    retrun
                     if (value.checked) {
                         let newTileLayer = mapLayers[value.layerName]()
                         if (Array.isArray(newTileLayer)) {
@@ -422,10 +435,21 @@ export default {
 
 
         onMounted(() => {
-
-
-            initMap()
+            $.ajax({
+                url : 'https://api.edtest.site/layers',
+                method : "GET"
+            }).done(res=>{
+                state.Layers = res.map((node, index) => {
+                    return {
+                        ...node,
+                        value: index
+                    }
+                })
+            }).fail(FailMethod=>{
+                console.log('Fail', FailMethod)
+            });
             nextTick(() => {
+                initMap()
                 getCurrentLayerNames()
             })
         })
@@ -483,7 +507,9 @@ export default {
                         }
                     }"
                     @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    />
+                    <!-- need continue -->
+                    <!-- @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" -->
                 </div>
             </div>
 

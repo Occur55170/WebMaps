@@ -21,26 +21,23 @@ import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
-
+// var LayerList =
 // need fix
-let obj = $.ajax({
-    url: 'https://api.edtest.site/layers',
-    method: 'GET',
-    dataType: '',
-    success:function(res){
-        console.log('res', res)
-        return res.map(node=>{
-            console.log('res', node)
-            return node
-        })
-    },
-    error:function(err){
-        console.log('err', err)
-        return err
-    },
-});
-console.log('obj', obj)
 
+// ;(async ()=>{
+//     await $.ajax({
+//         url: 'https://api.edtest.site/layers',
+//         method: 'GET',
+//         dataType: '',
+//         success:function(res){
+//             console.log('res')
+//             obj = res.map((node)=> node)
+//         },
+//         error:function(err){
+//             return err
+//         },
+//     });
+// })();
 
 export default {
     america: () => {
@@ -208,6 +205,37 @@ export default {
         // fix!!!整合成一個圖層
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
+    },
+
+
+    getLayers: async ()=>{
+        // let fetcher = new Promise((resolve, reject) => {
+        //     if (req.status == 200) {
+        //         resolve(JSON.parse(req.response));
+        //     } else {
+        //         reject(new Error(req))
+        //     }
+        // })
+        // fetcher.then();    // Promise 回傳正確
+        // fetcher.catch();   // Promise 回傳失敗
+        // fetcher.finally(); // 非同步執行完畢（無論是否正確完成）
+
+        // let obj
+        // var promise = $.ajax({
+        //     url : 'https://api.edtest.site/layers',
+        //     method : "GET"
+        // }).done(res=>{
+        //     console.log('Success', res)
+        //     return res?.map((node, index) => {
+        //         return {
+        //             ...node,
+        //             value: index
+        //         }
+        //     })
+        // }).fail(FailMethod=>{
+        //     console.log('Fail', FailMethod)
+        // });
+        return
     }
 }
 
