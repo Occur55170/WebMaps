@@ -71,7 +71,7 @@ export default {
 
 <template>
     <div>
-        <ul class="list-unstyled d-flex align-items-center flex-nowrap">
+        <ul class="list-unstyled d-flex align-items-center flex-nowrap w-full">
             <li class="me-4 position-relative">
                 <div class="MapFeatureBtn text-white">
                     <a href="" v-if="props.dimensionMapStatus"

@@ -10,19 +10,17 @@ import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 import { TileArcGISRest } from 'ol/source.js'
 
 import XYZ from 'ol/source/XYZ'
-import Point from 'ol/geom/Point'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import TileGrid from 'ol/layer/Tile.js';
 
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
-import 'ol-ext/dist/ol-ext.css'
 
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
-import { Circle, Polygon } from 'ol/geom.js'
+import { Circle, Polygon, Point } from 'ol/geom.js'
 import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
@@ -31,7 +29,8 @@ import 'ol/ol.css'
 
 import mapLayerList, { initLayers } from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
-import { Label } from 'cesium'
+
+import 'ol-ext/dist/ol-ext.css'
 
 export default {
     props: {},
@@ -45,14 +44,14 @@ export default {
             conditionWrap: false,
             layerSelect: false,
             currentLayers: [],
-            // mapLayers: Object.keys(mapLayers).map(node => node),
-            Layers: [],
+            layers: [],
             mapLayers: computed(()=>{
-                return state.Layers.map((node,index)=>{
+                return state.layers.map((node,index)=>{
                     return {
                         label: node.group_title,
                         value: node.value,
-                        layers: node.group_layers
+                        layers: node.group_layers,
+                        groupClass: node.group_class
                     }
                 })
             }),
@@ -193,9 +192,11 @@ export default {
                 case 'layerMode':
                     // need continue
                     // let selectLayer = layer_type
-                    console.log(1, value)
+                    // console.log(state.layers[value.nodeIndex].group_layers[value.subNodeValue].layer_type )
+                    // console.log(state.layers[value.nodeIndex].group_layers[value.subNodeValue]?.tiles_list[value.tileValue])
                     // return
                     if (value.checked) {
+                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
                         // let newTileLayer = mapLayers[value.layerName]()
                         // if (Array.isArray(newTileLayer)) {
                         //     newTileLayer.forEach(node=>{
@@ -220,9 +221,11 @@ export default {
                         // } else {
                         //     target.addLayer(newTileLayer)
                         // }
+
                         // { checked: true, subNodeValue: 1, tileValue: 0 }
-                        console.log(state.Layers[value.nodeIndex])
-                        onMapLayerStatus('add', target.getTarget(), value.layerName)
+
+                        target.addLayer(targetLayer)
+                        // onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
 
@@ -430,6 +433,7 @@ export default {
                 let a = state[`${target}LayerStatus`].findIndex(node => node === name)
                 state[`${target}LayerStatus`].splice(a, 1)
             } else {
+                /// fix!!
             }
         }
 
@@ -442,7 +446,8 @@ export default {
                 url : 'https://api.edtest.site/layers',
                 method : "GET"
             }).done(res=>{
-                state.Layers = res.map((node, index) => {
+                console.log(res)
+                state.layers = res.map((node, index) => {
                     return {
                         ...node,
                         value: index
@@ -477,6 +482,7 @@ export default {
 <template>
     <div>
         <div class="SearchBar position-absolute">
+            <img src="../assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                 @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
@@ -489,15 +495,15 @@ export default {
             <asideTool @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-            <!-- needfix -->
+            <!-- needFix -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
         </div>
         <div class="condition position-absolute">
             <div class="mb-2">
-                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold"
-                    v-if="!state.conditionWrap" @click="state.conditionWrap = true">
+                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
+                v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
@@ -517,7 +523,7 @@ export default {
             </div>
 
             <div>
-                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold"
+                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.layerSelect" @click="state.layerSelect = true">
                     已選擇的圖層
                 </button>
@@ -553,10 +559,11 @@ export default {
             </div>
         </div>
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
-            <div class="p-4 rounded bg-white">
-                <p>是否要刪除全部圖層</p>
+            <div class="p-4 rounded bg-white" style="width: 250px;">
+                <p class="text-center fw-bold">是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
-                    <button @click="() => {
+                    <button class="rounded px-3 py-1 bg-steel text-white border-0"
+                    @click="() => {
                         layerControl({
                             action: 'selectLayerMode',
                             value: {
@@ -564,10 +571,11 @@ export default {
                             }
                         })
                         state.deleteLightbox = false
-                    }">是</button>
-                    <button @click="() => {
+                    }">確定</button>
+                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0"
+                    @click="() => {
                         state.deleteLightbox = false
-                    }">否</button>
+                    }">取消</button>
                 </div>
             </div>
         </div>

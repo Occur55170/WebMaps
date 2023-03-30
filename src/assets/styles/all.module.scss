@@ -2,13 +2,48 @@
 
 
 // needFix
-.bg-steel{background: $blue-steel}
-.bg-light{background: $blue-light}
+.bg-steel {background: $blue-steel}
+.bg-light {background: $blue-light}
 
 .disabled {
     pointer-events: none;
     opacity: 0.5;
 }
-.hidden{
+.hidden {
     display: none !important;
+}
+
+.icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 99em;
+    margin-right: 5px;
+}
+.icon-topic-01 {
+    content: '';
+    background: $blue-steel;
+}
+.icon-topic-02 {
+    content: '';
+    background: $blue-light;
+}
+.icon-topic-03 {
+    content: '';
+    background: $grey;
+}
+.icon-topic-04 {
+    content: '';
+    background: $red;
+}
+.icon-topic-05 {
+    content: '';
+    background: $blue;
+}
+.icon-topic-06 {
+    content: '';
+    background: $black-deep;
+}
+.icon-topic-07 {
+    content: '';
+    background: $yellow-deep;
 }

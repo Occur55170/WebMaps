@@ -54,7 +54,7 @@ export default {
 <template>
     <div class="rounded-4 bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
-            <p class="mb-0">圖層選項</p>
+            <p class="mb-0 fs-5">圖層選項</p>
             <a href="" class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
                 <svg width="32" height="32" viewBox="0 0 24 24">
                     <path fill="currentColor"
@@ -65,8 +65,10 @@ export default {
         <div class="py-3 px-4 content">
             <div class="mb-2 landBoundary">
                 <div v-for="(node, nodeIndex) in props.mapLayers" class="mb-2">
-                    <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none" @click="openLayerList(nodeIndex)">
-                        <img src="../assets/img/icon/landBoundary.svg" alt="">
+                    <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
+                    @click="openLayerList(nodeIndex)">
+                        <div :class="node.groupClass"></div>
+                        <!-- <img src="../assets/img/icon/landBoundary.svg" alt=""> -->
                         <div>{{ node.label }}</div>
                         <svg viewBox="0 0 24 24" :class="{'openTitle': state.DropDown == nodeIndex}">
                             <path fill="currentColor" d="M8 5v14l11-7z" />
@@ -110,7 +112,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@import '../assets/styles/all.module.scss'
+// @import '../assets/styles/all.module.scss'
 .closeBtn
     right:10px
     svg

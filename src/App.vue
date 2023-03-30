@@ -23,7 +23,7 @@ export default {
 </template>
 
 <style lang="sass">
-@import './assets/styles/all.module.scss'
+// @import './assets/styles/all.module.scss'
 .mapContent
     height: 100vh
     width: 100vw

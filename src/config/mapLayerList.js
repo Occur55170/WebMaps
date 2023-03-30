@@ -7,7 +7,7 @@ import { TileArcGISRest } from 'ol/source.js'
 
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import VectorSource from 'ol/source/Vector.js'
-import { Fill, Stroke, Style } from 'ol/style.js'
+import { Fill, Stroke, Style, Icon } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import TileWMS from 'ol/source/TileWMS.js'
 
@@ -18,36 +18,36 @@ import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
-import { Circle, Polygon } from 'ol/geom.js'
+import { Circle, Polygon, Point } from 'ol/geom.js'
 import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
-// var LayerList =
+// var LayerList
 // need fix
 
 let obj
-;(async ()=>{
-    await $.ajax({
-        url: 'https://api.edtest.site/layers',
-        method: 'GET',
-        dataType: '',
-        success:function(res){
-            console.log('res')
-            obj = res.map((node)=> node)
-        },
-        error:function(err){
-            return err
-        },
-    });
-})();
+    ; (async () => {
+        await $.ajax({
+            url: 'https://api.edtest.site/layers',
+            method: 'GET',
+            dataType: '',
+            success: (res) => {
+                console.log('res')
+                obj = res.map((node) => node)
+            },
+            error: (err) => {
+                return err
+            },
+        });
+    })();
 export async function initLayers() {
     console.log('init GOGO')
     let obj
     $.ajax({
         url: 'https://api.edtest.site/layers',
         method: 'GET'
-    }).done(res=>{
+    }).done(res => {
         obj = res
     });
     return obj
@@ -161,7 +161,7 @@ export default {
             }),
         })
     },
-    DimensionMap: ()=>{
+    DimensionMap: () => {
         const circleFeature = new Feature({
             name: 'DimensionMap',
             title: 'DimensionMap',
@@ -219,34 +219,94 @@ export default {
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
     },
-    getLayers: async ()=>{
-        // let fetcher = new Promise((resolve, reject) => {
-        //     if (req.status == 200) {
-        //         resolve(JSON.parse(req.response));
-        //     } else {
-        //         reject(new Error(req))
-        //     }
-        // })
-        // fetcher.then();    // Promise 回傳正確
-        // fetcher.catch();   // Promise 回傳失敗
-        // fetcher.finally(); // 非同步執行完畢（無論是否正確完成）
+    getLayer: (layer) => {
+        let result
+        let layerType = layer.layer_type
+        let figureType = layer.figure_type
+        if (layerType === 'WMS') {
+            switch (figureType) {
+                case 'Point':
+                    const iconFeature = new Feature(new Point([120.971859, 24.801583]));
+                    iconFeature.set('style',
+                        new Style({
+                            image: new Icon({
+                                anchor: [0.5, 0.96],
+                                crossOrigin: 'anonymous',
+                                src: layer.icon,
+                            }),
+                        })
+                    );
 
-        // let obj
-        // var promise = $.ajax({
-        //     url : 'https://api.edtest.site/layers',
-        //     method : "GET"
-        // }).done(res=>{
-        //     console.log('Success', res)
-        //     return res?.map((node, index) => {
-        //         return {
-        //             ...node,
-        //             value: index
-        //         }
-        //     })
-        // }).fail(FailMethod=>{
-        //     console.log('Fail', FailMethod)
-        // });
-        return
+                    // img: undefined,
+                    // imgSize: img ? [img.width, img.height] : undefined,
+                    result = new VectorLayer({
+                        style: function (feature) {
+                            return feature.get('style');
+                        },
+                        source: new VectorSource({ features: [iconFeature] }),
+                    })
+                    if (layer.tiles_list) {}
+                    if (layer.prop_show_list) {}
+                    // figure_type:"Point"
+                    // help_btn_display:true
+                    // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
+                    // icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhklEQVQ4je3RsRHDIAyF4b/wPkntSpt4CfcSPUuwiSpq2ChFoMrlcpZT8hpRwHfvxMafsy1wgQAYoOPsQBozBAqgx2kA9OrSqstALQLqcxeOcxZUSk6UbBoF5bHLjyvXwI/06nBjh6lk016d2bS9wRQFDfBWXcdnTCzckPH4KxABL2WB9/MC3SYo1RHuhigAAAAASUVORK5CYII="
+                    // info_box:null
+                    // layer_type:"WMS"
+                    // maxzoom:18
+                    // minzoom:3
+                    // single_tiles:true
+                    // prop_show_list:null
+                    // tile_url:null
+                    // tiles_list:null
+                    // tiles_list_description:""
+                    // tiles_url:"https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES="
+                    // title:"近五年淹水調查位置(點)"
+                    break;
+                case 'Surface':
+                    const iconFeaturea = new Feature(new Point([0, 0]));
+                    iconFeaturea.set('style',
+                        new Style({
+                            image: new Icon({
+                                anchor: [0.5, 0.96],
+                                crossOrigin: 'anonymous',
+                                src:  layer.icon,
+                            }),
+                        })
+                    );
+
+                    result = new VectorLayer({
+                        style: function (feature) {
+                            return feature.get('style');
+                        },
+                        source: new VectorSource({ features: [iconFeaturea] }),
+                    })
+                    // title: "近五年淹水調查位置(面)",
+                    // icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASklEQVQ4jWNpaO1tYePkcmCgAvj1/dsBFjZOLgdT92hrahh4eudSBhZqGIQMRg0cNXDUwFEDRw2EGvjr+7cDp3cupYphv75/OwAADYMTcupBor8AAAAASUVORK5CYII=",
+                    // help_btn_display: true,
+                    // help_memo: "<p>資料來源:國家災害防救科技中心</p>
+                    // <p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>",
+                    // minzoom: 3,
+                    // maxzoom: 18,
+                    // layer_type: "WMS",
+                    // figure_type: "Suface",
+                    // single_tiles: true,
+                    // tiles_url: "https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=",
+                    // tiles_list_description: "",
+                    // info_box: null,
+                    // tile_url: null,
+                    // tiles_list: null,
+                    // prop_show_list: null
+                    break;
+                default:
+                    console.log(layerType)
+            }
+
+        }
+        if (layerType === 'GeoJson') {
+
+        }
+        return result
     }
 }
 
