@@ -27,7 +27,6 @@ export default {
         }
 
         function onLayerControl(action, value) {
-            console.log(action, value)
             emit('onLayerControl', { action, value })
         }
         function openLayerList(value) {
@@ -37,7 +36,10 @@ export default {
                 state.DropDown = null
             }
         }
-        window.console.log(props.mapLayers[0].layers[0])
+
+        onBeforeMount(()=>{
+
+        })
         return {
             props,
             state,
@@ -76,6 +78,7 @@ export default {
                             @change="(e) => {
                                 onLayerControl('layerMode', {
                                     checked: e.target.checked,
+                                    nodeIndex: nodeIndex,
                                     subNodeValue: subNodeIndex,
                                 })
                             }">
@@ -85,11 +88,16 @@ export default {
                             @change="(e) => {
                                 onLayerControl('layerMode', {
                                     checked: e.target.checked,
+                                    nodeIndex: nodeIndex,
                                     subNodeValue: subNodeIndex,
                                     tileValue: tileIndex,
                                 })
                             }">
                             {{ tile.title }}
+                            <!-- layer_type
+                                WMS
+                                Gen
+                            -->
                             <!-- group_title: "土石流、山崩", -->
                             <!-- {{ subNode?.info_box?.items_group }} -->
                             <!-- {{ subNode?.info_box }} -->

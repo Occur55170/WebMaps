@@ -9,6 +9,8 @@ import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import VectorSource from 'ol/source/Vector.js'
 import { Fill, Stroke, Style } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import TileWMS from 'ol/source/TileWMS.js'
+
 
 import OSM from 'ol/source/OSM'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
@@ -24,21 +26,32 @@ import 'ol/ol.css' // ol提供的css样式
 // var LayerList =
 // need fix
 
-// ;(async ()=>{
-//     await $.ajax({
-//         url: 'https://api.edtest.site/layers',
-//         method: 'GET',
-//         dataType: '',
-//         success:function(res){
-//             console.log('res')
-//             obj = res.map((node)=> node)
-//         },
-//         error:function(err){
-//             return err
-//         },
-//     });
-// })();
-
+let obj
+;(async ()=>{
+    await $.ajax({
+        url: 'https://api.edtest.site/layers',
+        method: 'GET',
+        dataType: '',
+        success:function(res){
+            console.log('res')
+            obj = res.map((node)=> node)
+        },
+        error:function(err){
+            return err
+        },
+    });
+})();
+export async function initLayers() {
+    console.log('init GOGO')
+    let obj
+    $.ajax({
+        url: 'https://api.edtest.site/layers',
+        method: 'GET'
+    }).done(res=>{
+        obj = res
+    });
+    return obj
+}
 export default {
     america: () => {
         return new TileLayer({
@@ -206,8 +219,6 @@ export default {
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
     },
-
-
     getLayers: async ()=>{
         // let fetcher = new Promise((resolve, reject) => {
         //     if (req.status == 200) {

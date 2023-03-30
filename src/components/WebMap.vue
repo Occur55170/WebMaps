@@ -29,7 +29,7 @@ import GeoJSON from 'ol/format/GeoJSON.js'
 import OLCesium from 'olcs/OLCesium.js';
 import 'ol/ol.css'
 
-import mapLayerList from '../config/mapLayerList'
+import mapLayerList, { initLayers } from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
 import { Label } from 'cesium'
 
@@ -192,32 +192,36 @@ export default {
             switch (action) {
                 case 'layerMode':
                     // need continue
-                    retrun
+                    // let selectLayer = layer_type
+                    console.log(1, value)
+                    // return
                     if (value.checked) {
-                        let newTileLayer = mapLayers[value.layerName]()
-                        if (Array.isArray(newTileLayer)) {
-                            newTileLayer.forEach(node=>{
-                                target.addLayer(node)
-                            })
-                            // 點擊事件
-                            target.on('click', function (evt) {
-                                const feature =target.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                                    return feature
-                                })
+                        // let newTileLayer = mapLayers[value.layerName]()
+                        // if (Array.isArray(newTileLayer)) {
+                        //     newTileLayer.forEach(node=>{
+                        //         target.addLayer(node)
+                        //     })
+                        //     // 點擊事件
+                        //     target.on('click', function (evt) {
+                        //         const feature =target.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                        //             return feature
+                        //         })
 
-                                if (feature) {
-                                    const coordinate = evt.coordinate
-                                    state.areaDataId = feature.get('name')
-                                    overlay.value.setPosition(coordinate)
-                                } else {
-                                    overlay.value.setPosition(undefined)
-                                }
+                        //         if (feature) {
+                        //             const coordinate = evt.coordinate
+                        //             state.areaDataId = feature.get('name')
+                        //             overlay.value.setPosition(coordinate)
+                        //         } else {
+                        //             overlay.value.setPosition(undefined)
+                        //         }
 
-                            })
-                            target.addOverlay(overlay.value)
-                        } else {
-                            target.addLayer(newTileLayer)
-                        }
+                        //     })
+                        //     target.addOverlay(overlay.value)
+                        // } else {
+                        //     target.addLayer(newTileLayer)
+                        // }
+                        // { checked: true, subNodeValue: 1, tileValue: 0 }
+                        console.log(state.Layers[value.nodeIndex])
                         onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
@@ -433,7 +437,6 @@ export default {
             overlay.value.setPosition(undefined)
         }
 
-
         onMounted(() => {
             $.ajax({
                 url : 'https://api.edtest.site/layers',
@@ -447,7 +450,7 @@ export default {
                 })
             }).fail(FailMethod=>{
                 console.log('Fail', FailMethod)
-            });
+            })
             nextTick(() => {
                 initMap()
                 getCurrentLayerNames()
@@ -507,9 +510,9 @@ export default {
                         }
                     }"
                     @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                     />
                     <!-- need continue -->
-                    <!-- @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" -->
                 </div>
             </div>
 
