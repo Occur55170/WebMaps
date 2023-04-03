@@ -3,7 +3,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol'
-import OSM from 'ol/source/OSM'
+import {ImageArcGISRest, OSM} from 'ol/source.js';
 import TileWMS from 'ol/source/TileWMS'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
@@ -12,7 +12,8 @@ import { TileArcGISRest } from 'ol/source.js'
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import ImageWMS from 'ol/source/ImageWMS.js';
 import TileGrid from 'ol/layer/Tile.js';
 
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
@@ -97,12 +98,23 @@ export default {
                 }
             })
 
+
             state.map1 = new Map({
                 target: 'map1',
                 layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
             })
+
+        }
+
+        function addTest () {
+            let value =  { checked: true, nodeIndex: 0, subNodeValue: 1 }
+            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
+            state.map1.addLayer(targetLayer)
+
+            onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
+            getCurrentLayerNames()
         }
 
         function addPoint(targetLng, targetLat) {
@@ -190,13 +202,14 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
-                    // need continue
                     // let selectLayer = layer_type
-                    // console.log(state.layers[value.nodeIndex].group_layers[value.subNodeValue].layer_type )
-                    // console.log(state.layers[value.nodeIndex].group_layers[value.subNodeValue]?.tiles_list[value.tileValue])
-                    // return
                     if (value.checked) {
+                        let value =  { checked: true, nodeIndex: 0, subNodeValue: 1 }
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
+                        target.addLayer(targetLayer)
+
+                        onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
+
                         // let newTileLayer = mapLayers[value.layerName]()
                         // if (Array.isArray(newTileLayer)) {
                         //     newTileLayer.forEach(node=>{
@@ -222,9 +235,6 @@ export default {
                         //     target.addLayer(newTileLayer)
                         // }
 
-                        // { checked: true, subNodeValue: 1, tileValue: 0 }
-
-                        target.addLayer(targetLayer)
                         // onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
@@ -458,11 +468,12 @@ export default {
             })
             nextTick(() => {
                 initMap()
-                getCurrentLayerNames()
+                // getCurrentLayerNames()
             })
         })
 
         return {
+            addTest,
             state,
             props,
             popupCom,
@@ -481,6 +492,7 @@ export default {
 
 <template>
     <div>
+        <div @click="addTest">123</div>
         <div class="SearchBar position-absolute">
             <img src="../assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"

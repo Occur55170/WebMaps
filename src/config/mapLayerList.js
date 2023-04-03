@@ -8,11 +8,11 @@ import { TileArcGISRest } from 'ol/source.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import VectorSource from 'ol/source/Vector.js'
 import { Fill, Stroke, Style, Icon } from 'ol/style.js'
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import TileWMS from 'ol/source/TileWMS.js'
+import ImageWMS from 'ol/source/ImageWMS.js'
 
-
-import OSM from 'ol/source/OSM'
+import { ImageArcGISRest, OSM } from 'ol/source.js'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import EsriJSON from 'ol/format/EsriJSON.js'
@@ -23,8 +23,11 @@ import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
-// var LayerList
-// need fix
+import { format } from 'ol/coordinate'
+import WMTS from 'ol/source/WMTS.js'
+import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
+import { get as getProjection, transformExtent } from 'ol/proj.js'
+import { getTopLeft, getWidth } from 'ol/extent.js'
 
 let obj
     ; (async () => {
@@ -226,8 +229,99 @@ export default {
         if (layerType === 'WMS') {
             switch (figureType) {
                 case 'Point':
-                    const iconFeature = new Feature(new Point([120.971859, 24.801583]));
-                    iconFeature.set('style',
+                    // 加入icon
+                    // const iconFeature = new Feature(new Point([120.971859, 24.801583]));
+                    // iconFeature.set('style',
+                    //     new Style({
+                    //         image: new Icon({
+                    //             anchor: [0.5, 0.96],
+                    //             crossOrigin: 'anonymous',
+                    //             src: layer.icon,
+                    //         }),
+                    //     })
+                    // )
+
+                    // img: undefined,
+                    // imgSize: img ? [img.width, img.height] : undefined,
+
+                    // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES="',
+                    // maxzoom: 18,
+                    // minzoom: 3,
+
+                    const wmsSource = new TileWMS({
+                        maxzoom:18,
+                        minzoom:3,
+                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                        params: {
+                            'REQUEST': 'GetMap',
+                            'SERVICE': 'WMS',
+                            'BGCOLOR': '0xFFFFFF',
+                            'TRANSPARENT': 'TRUE',
+                            'SRS': 'EPSG:3826',
+                            'LAYERS': '0',
+                            'VERSION': '1.1.1',
+                            'FORMAT': 'image/png',
+                            'BBOX':'4.713221,45.393568,4.779739,45.423938'
+                            // 'WIDTH': '256',
+                            // 'HEIGHT': '256'
+
+                        },
+                        crossOrigin: 'anonymous',
+                    });
+                    result = new TileLayer({
+                        source: wmsSource,
+                    });
+
+                    // const wmtsSource = new WMTS({
+                    //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
+                    //     request: 'GetMap',
+                    //     layer: '0',
+                    //     format: 'image/png',
+                    //     tileGrid: tileGrid,
+                    //     style: 'default',
+                    //     matrixSet: 'EPSG:3826',
+                    // });
+
+
+
+                    // success
+                    // 'USA/MapServer';
+                    // result = new ImageLayer({
+                    //     source: new ImageArcGISRest({
+                    //         ratio: 1,
+                    //         params: {},
+                    //         url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
+                    // 'USA/MapServer',
+                    //     }),
+                    // });
+
+                    // result = new ImageLayer({
+                    //     extent: [-13884991, 2870341, -7455066, 6338219],
+                    //     source: new ImageWMS({
+                    //       url: 'https://ahocevar.com/geoserver/wms',
+                    //       params: {'LAYERS': 'topp:states'},
+                    //       ratio: 1,
+                    //       serverType: 'geoserver',
+                    //     }),
+                    // })
+
+                    // const wmsSource = new TileWMS({
+                    //     url: 'https://ahocevar.com/geoserver/wms',
+                    //     params: {'LAYERS': 'ne:ne', 'TILED': true},
+                    //     serverType: 'geoserver',
+                    //     crossOrigin: 'anonymous',
+                    // });
+                    // result = new TileLayer({
+                    //     source: wmsSource,
+                    // });
+
+                    // help_btn_display:true
+                    // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
+                    // single_tiles:true
+                    break;
+                case 'Surface':
+                    const SurfaceFeaturea = new Feature(new Point([0, 0]));
+                    SurfaceFeaturea.set('style',
                         new Style({
                             image: new Icon({
                                 anchor: [0.5, 0.96],
@@ -237,49 +331,11 @@ export default {
                         })
                     );
 
-                    // img: undefined,
-                    // imgSize: img ? [img.width, img.height] : undefined,
                     result = new VectorLayer({
                         style: function (feature) {
                             return feature.get('style');
                         },
-                        source: new VectorSource({ features: [iconFeature] }),
-                    })
-                    if (layer.tiles_list) {}
-                    if (layer.prop_show_list) {}
-                    // figure_type:"Point"
-                    // help_btn_display:true
-                    // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
-                    // icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhklEQVQ4je3RsRHDIAyF4b/wPkntSpt4CfcSPUuwiSpq2ChFoMrlcpZT8hpRwHfvxMafsy1wgQAYoOPsQBozBAqgx2kA9OrSqstALQLqcxeOcxZUSk6UbBoF5bHLjyvXwI/06nBjh6lk016d2bS9wRQFDfBWXcdnTCzckPH4KxABL2WB9/MC3SYo1RHuhigAAAAASUVORK5CYII="
-                    // info_box:null
-                    // layer_type:"WMS"
-                    // maxzoom:18
-                    // minzoom:3
-                    // single_tiles:true
-                    // prop_show_list:null
-                    // tile_url:null
-                    // tiles_list:null
-                    // tiles_list_description:""
-                    // tiles_url:"https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES="
-                    // title:"近五年淹水調查位置(點)"
-                    break;
-                case 'Surface':
-                    const iconFeaturea = new Feature(new Point([0, 0]));
-                    iconFeaturea.set('style',
-                        new Style({
-                            image: new Icon({
-                                anchor: [0.5, 0.96],
-                                crossOrigin: 'anonymous',
-                                src:  layer.icon,
-                            }),
-                        })
-                    );
-
-                    result = new VectorLayer({
-                        style: function (feature) {
-                            return feature.get('style');
-                        },
-                        source: new VectorSource({ features: [iconFeaturea] }),
+                        source: new VectorSource({ features: [SurfaceFeaturea] }),
                     })
                     // title: "近五年淹水調查位置(面)",
                     // icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASklEQVQ4jWNpaO1tYePkcmCgAvj1/dsBFjZOLgdT92hrahh4eudSBhZqGIQMRg0cNXDUwFEDRw2EGvjr+7cDp3cupYphv75/OwAADYMTcupBor8AAAAASUVORK5CYII=",
@@ -299,7 +355,7 @@ export default {
                     // prop_show_list: null
                     break;
                 default:
-                    console.log(layerType)
+                    console.log(figureType)
             }
 
         }
