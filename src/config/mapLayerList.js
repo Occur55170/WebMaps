@@ -237,23 +237,34 @@ export default {
                     //             anchor: [0.5, 0.96],
                     //             crossOrigin: 'anonymous',
                     //             src: layer.icon,
+                    //             width: 300,
+                    //             height: 300,
                     //         }),
                     //     })
                     // )
-
                     // img: undefined,
                     // imgSize: img ? [img.width, img.height] : undefined,
 
-                    // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES="',
-                    // maxzoom: 18,
-                    // minzoom: 3,
+                    const style = new Style({
+                      image: new Point({
+                        radius: 5,
+                        fill: new Fill({
+                          color: 'orange',
+                        }),
+                      }),
+                      geometry: function (feature) {
+                        // return the coordinates of the first ring of the polygon
+                        const coordinates = feature.getGeometry().getCoordinates()[0];
+                        return new MultiPoint(coordinates);
+                      },
+                    })
+
 
                     const wmsSource = new TileWMS({
                         maxzoom:18,
                         minzoom:3,
-                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
                         params: {
-                            'REQUEST': 'GetMap',
                             'SERVICE': 'WMS',
                             'BGCOLOR': '0xFFFFFF',
                             'TRANSPARENT': 'TRUE',
@@ -261,59 +272,14 @@ export default {
                             'LAYERS': '0',
                             'VERSION': '1.1.1',
                             'FORMAT': 'image/png',
-                            'BBOX':'4.713221,45.393568,4.779739,45.423938'
-                            // 'WIDTH': '256',
-                            // 'HEIGHT': '256'
-
                         },
+                        // serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     });
                     result = new TileLayer({
                         source: wmsSource,
+                        // style: style,
                     });
-
-                    // const wmtsSource = new WMTS({
-                    //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
-                    //     request: 'GetMap',
-                    //     layer: '0',
-                    //     format: 'image/png',
-                    //     tileGrid: tileGrid,
-                    //     style: 'default',
-                    //     matrixSet: 'EPSG:3826',
-                    // });
-
-
-
-                    // success
-                    // 'USA/MapServer';
-                    // result = new ImageLayer({
-                    //     source: new ImageArcGISRest({
-                    //         ratio: 1,
-                    //         params: {},
-                    //         url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' +
-                    // 'USA/MapServer',
-                    //     }),
-                    // });
-
-                    // result = new ImageLayer({
-                    //     extent: [-13884991, 2870341, -7455066, 6338219],
-                    //     source: new ImageWMS({
-                    //       url: 'https://ahocevar.com/geoserver/wms',
-                    //       params: {'LAYERS': 'topp:states'},
-                    //       ratio: 1,
-                    //       serverType: 'geoserver',
-                    //     }),
-                    // })
-
-                    // const wmsSource = new TileWMS({
-                    //     url: 'https://ahocevar.com/geoserver/wms',
-                    //     params: {'LAYERS': 'ne:ne', 'TILED': true},
-                    //     serverType: 'geoserver',
-                    //     crossOrigin: 'anonymous',
-                    // });
-                    // result = new TileLayer({
-                    //     source: wmsSource,
-                    // });
 
                     // help_btn_display:true
                     // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
@@ -337,22 +303,37 @@ export default {
                         },
                         source: new VectorSource({ features: [SurfaceFeaturea] }),
                     })
+
+                    // result = new TileLayer({
+                    //     source: new TileWMS({
+                    //         maxzoom:18,
+                    //         minzoom:3,
+                    //         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                    //         params: {
+                    //             'SERVICE': 'Surface',
+                    //             'BGCOLOR': '0xFFFFFF',
+                    //             'TRANSPARENT': 'TRUE',
+                    //             'SRS': 'EPSG:3826',
+                    //             'LAYERS': '0',
+                    //             'VERSION': '1.1.1',
+                    //             'FORMAT': 'image/png',
+                    //             'WIDTH': '512',
+                    //             'HEIGHT': '512'
+                    //         },
+                    //         crossOrigin: 'anonymous',
+                    //     }),
+                    // })
+
                     // title: "近五年淹水調查位置(面)",
-                    // icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAASklEQVQ4jWNpaO1tYePkcmCgAvj1/dsBFjZOLgdT92hrahh4eudSBhZqGIQMRg0cNXDUwFEDRw2EGvjr+7cDp3cupYphv75/OwAADYMTcupBor8AAAAASUVORK5CYII=",
                     // help_btn_display: true,
                     // help_memo: "<p>資料來源:國家災害防救科技中心</p>
                     // <p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>",
                     // minzoom: 3,
                     // maxzoom: 18,
                     // layer_type: "WMS",
-                    // figure_type: "Suface",
+                    // figure_type: "Surface",
                     // single_tiles: true,
                     // tiles_url: "https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=",
-                    // tiles_list_description: "",
-                    // info_box: null,
-                    // tile_url: null,
-                    // tiles_list: null,
-                    // prop_show_list: null
                     break;
                 default:
                     console.log(figureType)
