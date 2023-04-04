@@ -116,6 +116,14 @@ export default {
             onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
             getCurrentLayerNames()
         }
+        function addTest2 () {
+            let value =  { checked: true, nodeIndex: 0, subNodeValue: 2 }
+            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
+            state.map1.addLayer(targetLayer)
+
+            onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
+            getCurrentLayerNames()
+        }
 
         function addPoint(targetLng, targetLat) {
             const marker = new Vector({
@@ -474,6 +482,7 @@ export default {
 
         return {
             addTest,
+            addTest2,
             state,
             props,
             popupCom,
@@ -492,7 +501,10 @@ export default {
 
 <template>
     <div>
-        <div @click="addTest">123</div>
+        <div class="d-flex w-full">
+            <div class="me-4" @click="addTest">123</div>
+            <div @click="addTest2">456</div>
+        </div>
         <div class="SearchBar position-absolute">
             <img src="../assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"

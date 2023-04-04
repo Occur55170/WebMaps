@@ -15,6 +15,7 @@ import ImageWMS from 'ol/source/ImageWMS.js'
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
+import WFS from 'ol/format/WFS.js'
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
 import { tile as tileStrategy } from 'ol/loadingstrategy.js'
@@ -24,8 +25,6 @@ import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
 import { format } from 'ol/coordinate'
-import WMTS from 'ol/source/WMTS.js'
-import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 
@@ -245,24 +244,43 @@ export default {
                     // img: undefined,
                     // imgSize: img ? [img.width, img.height] : undefined,
 
-                    const style = new Style({
-                      image: new Point({
-                        radius: 5,
-                        fill: new Fill({
-                          color: 'orange',
-                        }),
-                      }),
-                      geometry: function (feature) {
-                        // return the coordinates of the first ring of the polygon
-                        const coordinates = feature.getGeometry().getCoordinates()[0];
-                        return new MultiPoint(coordinates);
-                      },
+
+                    // const PointFeature = new Feature(new Point([120.971859, 24.801583]));
+                    // PointFeature.set('style',
+                    //     new Style({
+                    //         image: new Icon({
+                    //             anchor: [0.5, 0.96],
+                    //             crossOrigin: 'anonymous',
+                    //             src: 'https://pixlr.com/img/icon/premium-tick.svg',
+                    //             // layer.icon
+                    //         }),
+                    //     })
+                    // );
+
+                    // result = new VectorLayer({
+                    //     style: function (feature) {
+                    //         return feature.get('style');
+                    //     },
+                    //     source: new VectorSource({ features: [PointFeature] }),
+                    // })
+
+                    // testStyle
+                    const iconStyle = new Point({
+                        scale: 2, // 設置圖標放大為原來的兩倍
+                        anchor: [0.5, 0.96],
+                        crossOrigin: 'anonymous',
+                        src: 'https://pixlr.com/img/icon/premium-tick.svg',
+                        // src: layer.tiles_url,
                     })
+                    const pointStyle = new Style({
+                        image: iconStyle
+                    })
+                    // testStyle
 
 
                     const wmsSource = new TileWMS({
-                        maxzoom:18,
-                        minzoom:3,
+                        maxzoom: 18,
+                        minzoom: 3,
                         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
                         params: {
                             'SERVICE': 'WMS',
@@ -278,51 +296,32 @@ export default {
                     });
                     result = new TileLayer({
                         source: wmsSource,
-                        // style: style,
-                    });
+                        style: pointStyle
+                    })
 
                     // help_btn_display:true
                     // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
                     // single_tiles:true
                     break;
                 case 'Surface':
-                    const SurfaceFeaturea = new Feature(new Point([0, 0]));
-                    SurfaceFeaturea.set('style',
-                        new Style({
-                            image: new Icon({
-                                anchor: [0.5, 0.96],
-                                crossOrigin: 'anonymous',
-                                src: layer.icon,
-                            }),
-                        })
-                    );
-
-                    result = new VectorLayer({
-                        style: function (feature) {
-                            return feature.get('style');
-                        },
-                        source: new VectorSource({ features: [SurfaceFeaturea] }),
+                    result = new TileLayer({
+                        source: new TileWMS({
+                            maxzoom: 18,
+                            minzoom: 3,
+                            url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                            params: {
+                                'LAYERS': '0',
+                                'VERSION': '1.1.1',
+                                'FORMAT': 'image/png',
+                                'TRANSPARENT': true,
+                                'STYLES': '',
+                                'SRS': 'EPSG:3826',
+                                'BGCOLOR': '0xFFFFFF',
+                            },
+                            crossOrigin: 'anonymous',
+                        }),
                     })
 
-                    // result = new TileLayer({
-                    //     source: new TileWMS({
-                    //         maxzoom:18,
-                    //         minzoom:3,
-                    //         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                    //         params: {
-                    //             'SERVICE': 'Surface',
-                    //             'BGCOLOR': '0xFFFFFF',
-                    //             'TRANSPARENT': 'TRUE',
-                    //             'SRS': 'EPSG:3826',
-                    //             'LAYERS': '0',
-                    //             'VERSION': '1.1.1',
-                    //             'FORMAT': 'image/png',
-                    //             'WIDTH': '512',
-                    //             'HEIGHT': '512'
-                    //         },
-                    //         crossOrigin: 'anonymous',
-                    //     }),
-                    // })
 
                     // title: "近五年淹水調查位置(面)",
                     // help_btn_display: true,
