@@ -11,6 +11,9 @@ import { Fill, Stroke, Style, Icon } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import TileWMS from 'ol/source/TileWMS.js'
 import ImageWMS from 'ol/source/ImageWMS.js'
+import TileGrid from 'ol/tilegrid/TileGrid.js'
+import * as olTilegrid from 'ol/tilegrid'
+import * as olProj from 'ol/proj'
 
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import PerspectiveMap from "ol-ext/map/PerspectiveMap"
@@ -223,61 +226,143 @@ export default {
     },
     getLayer: (layer) => {
         let result
+        console.log(layer)
         let layerType = layer.layer_type
         let figureType = layer.figure_type
+        let single_tiles = layer.single_tiles
         if (layerType === 'WMS') {
             switch (figureType) {
                 case 'Point':
-                    // 加入icon
-                    // const iconFeature = new Feature(new Point([120.971859, 24.801583]));
-                    // iconFeature.set('style',
-                    //     new Style({
-                    //         image: new Icon({
-                    //             anchor: [0.5, 0.96],
-                    //             crossOrigin: 'anonymous',
-                    //             src: layer.icon,
-                    //             width: 300,
-                    //             height: 300,
-                    //         }),
-                    //     })
-                    // )
-                    // img: undefined,
-                    // imgSize: img ? [img.width, img.height] : undefined,
+                    // // img: undefined,
+                    // // imgSize: img ? [img.width, img.height] : undefined,
 
+                    // needFix: 樣式尚未套用
+                    const myStyle = new Style({
+                        image: new Icon({
+                            anchor: [0.5, 0.96],
+                            src: 'https://pixlr.com/img/icon/premium-tick.svg',
+                            crossOrigin: 'anonymous',
+                            scale: 2,
+                            // src: layer.tiles_url,
+                            // width: 300,
+                            // height: 300,
+                        }),
+                        stroke: new Stroke({
+                            color: '#319FD3',
+                            width: 1
+                        }),
+                        fill: new Fill({
+                            color: '#000000',
+                        }),
+                        text: new Text({
+                            font: '12px Calibri,sans-serif',
+                            fill: new Fill({
+                                color: '#ff0'
+                            }),
+                            stroke: new Stroke({
+                                color: '#09C',
+                                width: 3
+                            })
+                        })
+                    })
 
-                    // const PointFeature = new Feature(new Point([120.971859, 24.801583]));
-                    // PointFeature.set('style',
-                    //     new Style({
-                    //         image: new Icon({
-                    //             anchor: [0.5, 0.96],
-                    //             crossOrigin: 'anonymous',
-                    //             src: 'https://pixlr.com/img/icon/premium-tick.svg',
-                    //             // layer.icon
-                    //         }),
-                    //     })
-                    // );
+                    const wmsSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        // needFix!!
+                        // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
+                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
+                        params: {
+                            'SERVICE': 'WMS',
+                            'BGCOLOR': '0xFFFFFF',
+                            'TRANSPARENT': 'TRUE',
+                            'SRS': 'EPSG:3826',
+                            'LAYERS': '0',
+                            'VERSION': '1.1.1',
+                            'FORMAT': 'image/png',
+                        },
 
-                    // result = new VectorLayer({
-                    //     style: function (feature) {
-                    //         return feature.get('style');
-                    //     },
-                    //     source: new VectorSource({ features: [PointFeature] }),
-                    // })
-
-                    // testStyle
-                    const iconStyle = new Point({
-                        scale: 2, // 設置圖標放大為原來的兩倍
-                        anchor: [0.5, 0.96],
+                        // serverType: 'mapserver',
                         crossOrigin: 'anonymous',
-                        src: 'https://pixlr.com/img/icon/premium-tick.svg',
-                        // src: layer.tiles_url,
                     })
-                    const pointStyle = new Style({
-                        image: iconStyle
+                    result = new TileLayer({
+                        source: wmsSource,
+                        style: myStyle
                     })
-                    // testStyle
 
+                    // help_btn_display:true
+                    // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
+                    break;
+                case 'Surface':
+                    // const SurfaceSource = new TileWMS({
+                    //     maxzoom: 18,
+                    //     minzoom: 3,
+                    //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                    //     params: {
+                    //         'LAYERS': '0',
+                    //         'FORMAT': 'image/png',
+                    //         'VERSION': '1.1.1',
+                    //         'STYLES': 'default' // 這裡可以設置 Style
+                    //     },
+                    //     serverType: 'mapserver'
+                    // });
 
+                    const SurfaceSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                        params: {
+                            'REQUEST':'GetMap',
+                            'SERVICE':'WMS',
+                            'BGCOLOR':'0xFFFFFF',
+                            'TRANSPARENT':'TRUE',
+                            'SRS':'EPSG:3826',
+                            'LAYERS': '0',
+                            'VERSION':'1.1.1',
+                            'FORMAT':'image/png',
+                            'STYLES':''
+                        },
+                        serverType: 'mapserver',
+                        crossOrigin: 'anonymous',
+                    })
+                    result = new TileLayer({
+                        source: SurfaceSource
+                    })
+
+                    // help_btn_display: true,
+                    // help_memo: "<p>資料來源:國家災害防救科技中心</p>
+                    // <p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>",
+                    break;
+                default:
+                    console.log(figureType)
+            }
+        }
+        if (layerType === 'GeoJson') {
+            switch (figureType) {
+                case 'Line':
+                    console.log('Line')
+                    result = new VectorLayer({
+                        source: new VectorSource({
+                            url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
+                            format: new GeoJSON(),
+                            crossOrigin: 'anonymous',
+
+                            // url: 'https://openlayersbook.github.io/openlayers_book_samples/assets/data/countries.geojson',
+                            // format: new GeoJSON(),
+                        }),
+                    });
+
+                    // help_btn_display true
+                    // help_memo "<p>資料來源：農委會水土保持局</p>\n<p>111年土石流災害潛勢溪流總計為1,729條。</p>"
+                    // icon "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAOUlEQVQ4jWNhoDJgGTVw1MDBYuBKhqcNjAxM9pQY9J/h38FwBukG2rgwnEG6gaoGUhOMGjhqIBkAAHaXB0Oou38UAAAAAElFTkSuQmCC"
+                    // prop_show_list ['Debrisno']
+                    // tile_url null
+                    // tiles_list null
+                    // tiles_list_description ""
+                    // tiles_url "https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson"
+                    // title "土石流潛勢溪流"
+                    break;
+                case 'Point':
                     const wmsSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
@@ -293,54 +378,18 @@ export default {
                         },
                         // serverType: 'mapserver',
                         crossOrigin: 'anonymous',
-                    });
+                    })
                     result = new TileLayer({
                         source: wmsSource,
-                        style: pointStyle
+                        style: myStyle
                     })
 
                     // help_btn_display:true
                     // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
-                    // single_tiles:true
-                    break;
-                case 'Surface':
-                    result = new TileLayer({
-                        source: new TileWMS({
-                            maxzoom: 18,
-                            minzoom: 3,
-                            url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                            params: {
-                                'LAYERS': '0',
-                                'VERSION': '1.1.1',
-                                'FORMAT': 'image/png',
-                                'TRANSPARENT': true,
-                                'STYLES': '',
-                                'SRS': 'EPSG:3826',
-                                'BGCOLOR': '0xFFFFFF',
-                            },
-                            crossOrigin: 'anonymous',
-                        }),
-                    })
-
-
-                    // title: "近五年淹水調查位置(面)",
-                    // help_btn_display: true,
-                    // help_memo: "<p>資料來源:國家災害防救科技中心</p>
-                    // <p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>",
-                    // minzoom: 3,
-                    // maxzoom: 18,
-                    // layer_type: "WMS",
-                    // figure_type: "Surface",
-                    // single_tiles: true,
-                    // tiles_url: "https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=",
                     break;
                 default:
                     console.log(figureType)
             }
-
-        }
-        if (layerType === 'GeoJson') {
-
         }
         return result
     }

@@ -3,7 +3,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol'
-import {ImageArcGISRest, OSM} from 'ol/source.js';
+import { ImageArcGISRest, OSM } from 'ol/source.js';
 import TileWMS from 'ol/source/TileWMS'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
@@ -30,6 +30,7 @@ import 'ol/ol.css'
 
 import mapLayerList, { initLayers } from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
+import VectorImageLayer from 'ol/layer/VectorImage.js';
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -39,15 +40,16 @@ export default {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            defaultCenter: [120.971859, 24.801583], //lng, lat
+            // defaultCenter: [120.971859, 24.801583],
+            defaultCenter: [121.398333, 25.154365],
             defaultCenterZoom: 14,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: false,
             currentLayers: [],
             layers: [],
-            mapLayers: computed(()=>{
-                return state.layers.map((node,index)=>{
+            mapLayers: computed(() => {
+                return state.layers.map((node, index) => {
                     return {
                         label: node.group_title,
                         value: node.value,
@@ -97,8 +99,6 @@ export default {
                     duration: 250
                 }
             })
-
-
             state.map1 = new Map({
                 target: 'map1',
                 layers: [baseMapList.sourceFun('default')],
@@ -106,18 +106,107 @@ export default {
                 controls: [],
             })
 
+            const style = new Style({
+                fill: new Fill({
+                    color: '#ca8eff',
+                }),
+            });
+
+
+
+            const myStyle = new Style({
+                image: new Circle({
+                    radius: 5,
+                }),
+                fill: new Fill({
+                    color: 'rgba(255,255,255)',
+                }),
+                stroke: new Stroke({
+                    color: '[115, 76, 0, 1]',
+                    width: 5,
+                }),
+            })
+
+            // const SurfaceSource = new TileWMS({
+            //     maxzoom: 18,
+            //     minzoom: 3,
+            //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+            //     params: {
+            //         'LAYERS': '0',
+            //         'FORMAT': 'image/png',
+            //         'VERSION': '1.1.1',
+            //         'TRANSPARENT': 'TRUE',
+            //         'SRS': 'EPSG:3826',
+            //     },
+            //     serverType: 'mapserver'
+            // })
+            // const wmsLayer = new TileLayer({
+            //     source: SurfaceSource,
+            // })
+            // state.map1.addLayer(wmsLayer)
+
+            // const wmsLayer = new VectorImageLayer({
+            //     background: '#90ee90',
+            //     imageRatio: 2,
+            //     source: new VectorSource({
+            //         url: 'https://openlayers.org/data/vector/ecoregions.json',
+            //         format: new GeoJSON(),
+            //     }),
+            //     style: style
+            // })
+
         }
 
-        function addTest () {
-            let value =  { checked: true, nodeIndex: 0, subNodeValue: 1 }
-            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
-            state.map1.addLayer(targetLayer)
+        function addTest() {
+            // let value = { checked: true, nodeIndex: 0, subNodeValue: 1 }
+            // let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
+            // state.map1.addLayer(targetLayer)
 
-            onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
-            getCurrentLayerNames()
+            // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
+            // getCurrentLayerNames()
+            const SurfaceSource = new TileWMS({
+                maxzoom: 18,
+                minzoom: 3,
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
+                params: {},
+                serverType: 'mapserver',
+                crossOrigin: 'anonymous',
+                projection: 'EPSG:3826',
+                tileGrid: createXYZ(),
+                style: 'default',
+                visible: true
+            })
+            const wmsLayer = new TileLayer({
+                source: SurfaceSource,
+            })
+            state.map1.addLayer(wmsLayer)
         }
-        function addTest2 () {
-            let value =  { checked: true, nodeIndex: 0, subNodeValue: 2 }
+
+        function addTest2() {
+            const SurfaceSource = new TileWMS({
+                maxzoom: 18,
+                minzoom: 3,
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                params: {
+                    'REQUEST': 'GetMap',
+                    'SERVICE': 'WMS',
+                    'BGCOLOR': '0xFFFFFF',
+                    'TRANSPARENT': 'TRUE',
+                    'SRS': 'EPSG:3826',
+                    'LAYERS': '0',
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                },
+                serverType: 'mapserver'
+            })
+            const wmsLayer = new TileLayer({
+                source: SurfaceSource,
+            })
+            state.map1.addLayer(wmsLayer)
+        }
+
+        function addGeoJsonTest() {
+            let value = { checked: true, nodeIndex: 1, subNodeValue: 0 }
             let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
             state.map1.addLayer(targetLayer)
 
@@ -212,7 +301,7 @@ export default {
                 case 'layerMode':
                     // let selectLayer = layer_type
                     if (value.checked) {
-                        let value =  { checked: true, nodeIndex: 0, subNodeValue: 1 }
+                        let value = { checked: true, nodeIndex: 0, subNodeValue: 1 }
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
                         target.addLayer(targetLayer)
 
@@ -273,12 +362,12 @@ export default {
                             target.removeLayer(node)
                         })
                     } else {
-                            let layersAry = targetLayers.getArray()
-                            layersAry.forEach(element => {
-                                if (element.get('name') == value.layerName) {
-                                    target.removeLayer(element)
-                                }
-                            })
+                        let layersAry = targetLayers.getArray()
+                        layersAry.forEach(element => {
+                            if (element.get('name') == value.layerName) {
+                                target.removeLayer(element)
+                            }
+                        })
                     }
                     break;
                 case 'changeOrder':
@@ -325,12 +414,12 @@ export default {
                     })
                     break;
                 case 'changeMapCount':
-                    if (state.mapCount === value) {return}
+                    if (state.mapCount === value) { return }
                     let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
                     state.mapCount = value
                     if (value === 2) {
-                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1 ) {
-                            let otherLayers = state[`${otherMap}LayerStatus`].filter(node=> node !== '3D')
+                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
+                            let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
                             state[otherMap] = new Map({
                                 target: otherMap,
                                 layers: [
@@ -388,8 +477,8 @@ export default {
             if (state.mapCount === 1) {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
-                    if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1 ) {
-                        let otherLayers = state[`map${value}LayerStatus`].filter(node=> node !== '3D')
+                    if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
+                        let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
                         state[`map${value}`] = new Map({
                             target: `map${value}`,
                             layers: [
@@ -451,7 +540,7 @@ export default {
                 let a = state[`${target}LayerStatus`].findIndex(node => node === name)
                 state[`${target}LayerStatus`].splice(a, 1)
             } else {
-                /// fix!!
+                console.log('error')
             }
         }
 
@@ -461,9 +550,9 @@ export default {
 
         onMounted(() => {
             $.ajax({
-                url : 'https://api.edtest.site/layers',
-                method : "GET"
-            }).done(res=>{
+                url: 'https://api.edtest.site/layers',
+                method: "GET"
+            }).done(res => {
                 console.log(res)
                 state.layers = res.map((node, index) => {
                     return {
@@ -471,18 +560,19 @@ export default {
                         value: index
                     }
                 })
-            }).fail(FailMethod=>{
+            }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
             nextTick(() => {
                 initMap()
-                // getCurrentLayerNames()
+                getCurrentLayerNames()
             })
         })
 
         return {
             addTest,
             addTest2,
+            addGeoJsonTest,
             state,
             props,
             popupCom,
@@ -503,7 +593,8 @@ export default {
     <div>
         <div class="d-flex w-full">
             <div class="me-4" @click="addTest">123</div>
-            <div @click="addTest2">456</div>
+            <div class="me-4" @click="addTest2">456</div>
+            <div @click="addGeoJsonTest">789</div>
         </div>
         <div class="SearchBar position-absolute">
             <img src="../assets/logo.svg" alt="" class="mb-2">
@@ -527,21 +618,18 @@ export default {
         <div class="condition position-absolute">
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
-                v-if="!state.conditionWrap" @click="state.conditionWrap = true">
+                    v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
-                    <condition
-                    v-bind="{
+                    <condition v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
                             state.conditionWrap = false
                         }
-                    }"
-                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                    />
+                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                     <!-- need continue -->
                 </div>
             </div>
@@ -552,30 +640,29 @@ export default {
                     已選擇的圖層
                 </button>
                 <div v-if="state.layerSelect">
-                    <layerSelect
-                    v-bind="{
+                    <layerSelect v-bind="{
                         selectLock: state.selectLock,
                         currentLayers: state.currentLayers,
-                        onClose:() => {
+                        onClose: () => {
                             state.layerSelect = false
                         },
-                        onChangLayerVisible:(action) => {
+                        onChangLayerVisible: (action) => {
                             layerControl(action)
                         },
-                        onChangeOrderLayer:({ action, value }) => {
+                        onChangeOrderLayer: ({ action, value }) => {
                             layerControl({ action, value })
                         },
-                        onLockLayer:() => {
+                        onLockLayer: () => {
                             state.selectLock = !state.selectLock
                         },
-                        onDeleteLayer:({ action, value }) => {
+                        onDeleteLayer: ({ action, value }) => {
                             if (value.layerName == 'all') {
                                 state.deleteLightbox = true
                             } else {
                                 layerControl({ action, value })
                             }
                         },
-                        onDeleteLayerAll:() => {
+                        onDeleteLayerAll: () => {
                             state.deleteLightbox = true
                         }
                     }" />
@@ -586,8 +673,7 @@ export default {
             <div class="p-4 rounded bg-white" style="width: 250px;">
                 <p class="text-center fw-bold">是否要刪除全部圖層</p>
                 <div class=" d-flex justify-content-around">
-                    <button class="rounded px-3 py-1 bg-steel text-white border-0"
-                    @click="() => {
+                    <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
                         layerControl({
                             action: 'selectLayerMode',
                             value: {
@@ -596,8 +682,7 @@ export default {
                         })
                         state.deleteLightbox = false
                     }">確定</button>
-                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0"
-                    @click="() => {
+                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
                         state.deleteLightbox = false
                     }">取消</button>
                 </div>
