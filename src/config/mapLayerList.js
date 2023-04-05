@@ -220,7 +220,6 @@ export default {
         })
 
 
-        // fix!!!整合成一個圖層
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
     },
@@ -281,8 +280,7 @@ export default {
                             'VERSION': '1.1.1',
                             'FORMAT': 'image/png',
                         },
-
-                        // serverType: 'mapserver',
+                        serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     })
                     result = new TileLayer({
@@ -312,21 +310,19 @@ export default {
                         minzoom: 3,
                         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
                         params: {
-                            'REQUEST':'GetMap',
-                            'SERVICE':'WMS',
-                            'BGCOLOR':'0xFFFFFF',
-                            'TRANSPARENT':'TRUE',
-                            'SRS':'EPSG:3826',
+                            'REQUEST': 'GetMap',
+                            'SERVICE': 'WMS',
+                            'BGCOLOR': '0xFFFFFF',
+                            'TRANSPARENT': 'TRUE',
+                            'SRS': 'EPSG:3826',
                             'LAYERS': '0',
-                            'VERSION':'1.1.1',
-                            'FORMAT':'image/png',
-                            'STYLES':''
+                            'VERSION': '1.1.1',
+                            'FORMAT': 'image/png',
                         },
-                        serverType: 'mapserver',
-                        crossOrigin: 'anonymous',
+                        serverType: 'mapserver'
                     })
                     result = new TileLayer({
-                        source: SurfaceSource
+                        source: SurfaceSource,
                     })
 
                     // help_btn_display: true,

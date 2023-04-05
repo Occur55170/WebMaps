@@ -68,7 +68,6 @@ export default {
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
                     @click="openLayerList(nodeIndex)">
                         <div :class="node.groupClass"></div>
-                        <!-- <img src="../assets/img/icon/landBoundary.svg" alt=""> -->
                         <div>{{ node.label }}</div>
                         <svg viewBox="0 0 24 24" :class="{'openTitle': state.DropDown == nodeIndex}">
                             <path fill="currentColor" d="M8 5v14l11-7z" />
@@ -76,7 +75,7 @@ export default {
                     </div>
                     <div class="ms-3" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <!-- checked="{false}" -->
-                        <input type="radio"
+                        <input type="checkbox"
                             @change="(e) => {
                                 onLayerControl('layerMode', {
                                     checked: e.target.checked,
@@ -96,13 +95,6 @@ export default {
                                 })
                             }">
                             {{ tile.title }}
-                            <!-- layer_type
-                                WMS
-                                Gen
-                            -->
-                            <!-- group_title: "土石流、山崩", -->
-                            <!-- {{ subNode?.info_box?.items_group }} -->
-                            <!-- {{ subNode?.info_box }} -->
                         </div>
                     </div>
                 </div>

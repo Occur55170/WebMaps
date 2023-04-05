@@ -126,44 +126,9 @@ export default {
                     width: 5,
                 }),
             })
-
-            // const SurfaceSource = new TileWMS({
-            //     maxzoom: 18,
-            //     minzoom: 3,
-            //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-            //     params: {
-            //         'LAYERS': '0',
-            //         'FORMAT': 'image/png',
-            //         'VERSION': '1.1.1',
-            //         'TRANSPARENT': 'TRUE',
-            //         'SRS': 'EPSG:3826',
-            //     },
-            //     serverType: 'mapserver'
-            // })
-            // const wmsLayer = new TileLayer({
-            //     source: SurfaceSource,
-            // })
-            // state.map1.addLayer(wmsLayer)
-
-            // const wmsLayer = new VectorImageLayer({
-            //     background: '#90ee90',
-            //     imageRatio: 2,
-            //     source: new VectorSource({
-            //         url: 'https://openlayers.org/data/vector/ecoregions.json',
-            //         format: new GeoJSON(),
-            //     }),
-            //     style: style
-            // })
-
         }
 
         function addTest() {
-            // let value = { checked: true, nodeIndex: 0, subNodeValue: 1 }
-            // let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
-            // state.map1.addLayer(targetLayer)
-
-            // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
-            // getCurrentLayerNames()
             const SurfaceSource = new TileWMS({
                 maxzoom: 18,
                 minzoom: 3,
@@ -301,11 +266,11 @@ export default {
                 case 'layerMode':
                     // let selectLayer = layer_type
                     if (value.checked) {
-                        let value = { checked: true, nodeIndex: 0, subNodeValue: 1 }
+                        let fakeValue = { checked: true, nodeIndex: 0, subNodeValue: 1 }
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
                         target.addLayer(targetLayer)
 
-                        onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
+                        onMapLayerStatus('add', target.getTarget(), value.layerName)
 
                         // let newTileLayer = mapLayers[value.layerName]()
                         // if (Array.isArray(newTileLayer)) {
@@ -317,7 +282,6 @@ export default {
                         //         const feature =target.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                         //             return feature
                         //         })
-
                         //         if (feature) {
                         //             const coordinate = evt.coordinate
                         //             state.areaDataId = feature.get('name')
@@ -325,14 +289,13 @@ export default {
                         //         } else {
                         //             overlay.value.setPosition(undefined)
                         //         }
-
                         //     })
                         //     target.addOverlay(overlay.value)
                         // } else {
                         //     target.addLayer(newTileLayer)
                         // }
 
-                        // onMapLayerStatus('add', target.getTarget(), value.layerName)
+                        onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
 
