@@ -31,6 +31,7 @@ import 'ol/ol.css'
 import mapLayerList, { initLayers } from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
 import VectorImageLayer from 'ol/layer/VectorImage.js';
+import TileState from 'ol/TileState.js';
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -128,23 +129,31 @@ export default {
             })
         }
 
+        // xhr.setRequestHeader('Content-type','image/png');
+        function tileLoadFunction(tile, src) {
+            var client = new XMLHttpRequest();
+            client.open('GET', src);
+            // Uncomment to pass authentication header
+            //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
+            client.onload = function () {
+                client.setRequestHeader('Content-type','image/png');
+                tile.getImage().src = src;
+            };
+            client.send();
+        }
         function addTest() {
             const SurfaceSource = new TileWMS({
                 maxzoom: 18,
                 minzoom: 3,
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:4326&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
                 params: {},
-                serverType: 'mapserver',
-                crossOrigin: 'anonymous',
-                projection: 'EPSG:3826',
-                tileGrid: createXYZ(),
-                style: 'default',
-                visible: true
+                tileLoadFunction: tileLoadFunction,
             })
             const wmsLayer = new TileLayer({
                 source: SurfaceSource,
             })
             state.map1.addLayer(wmsLayer)
+            // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
         }
 
         function addTest2() {
@@ -153,14 +162,33 @@ export default {
                 minzoom: 3,
                 url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
                 params: {
+                    // 'REQUEST': 'GetMap',
+                    // 'SERVICE': 'WMS',
+                    // 'BGCOLOR': '0xFFFFFF',
+                    // 'TRANSPARENT': 'TRUE',
+                    // 'SRS': 'EPSG:3826',
+                    // 'LAYERS': '0',
+                    // 'VERSION': '1.1.1',
+                    // 'FORMAT': 'image/png',
+                    'NAME': '1234',
                     'REQUEST': 'GetMap',
                     'SERVICE': 'WMS',
                     'BGCOLOR': '0xFFFFFF',
                     'TRANSPARENT': 'TRUE',
-                    'SRS': 'EPSG:3826',
+                    'SRS': 'EPSG:4326',
                     'LAYERS': '0',
                     'VERSION': '1.1.1',
                     'FORMAT': 'image/png',
+                    'STYLES': '',
+                    'SERVICE': 'WMS',
+                    'VERSION': '1.3.0',
+                    'FORMAT': 'image/png',
+                    'TRANSPARENT': 'true',
+                    'WIDTH': '282',
+                    'HEIGHT': '282',
+                    'CRS': 'EPSG:4326',
+                    'MAP_RESOLUTION': '99.00000214576721',
+                    'BBOX': '25.17420682683587,121.42962476983666,25.192868210694556,121.44828615369535'
                 },
                 serverType: 'mapserver'
             })
@@ -168,6 +196,7 @@ export default {
                 source: SurfaceSource,
             })
             state.map1.addLayer(wmsLayer)
+            onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
         }
 
         function addGeoJsonTest() {
@@ -264,10 +293,8 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
-                    // let selectLayer = layer_type
                     if (value.checked) {
-                        let fakeValue = { checked: true, nodeIndex: 0, subNodeValue: 1 }
-                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
+                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue], value.tileValue)
                         target.addLayer(targetLayer)
 
                         onMapLayerStatus('add', target.getTarget(), value.layerName)
@@ -295,14 +322,13 @@ export default {
                         //     target.addLayer(newTileLayer)
                         // }
 
-                        onMapLayerStatus('add', target.getTarget(), value.layerName)
                     } else {
                         let layersAry = targetLayers.getArray()
 
                         // while (element.get('name') == value.layerName) {
                         //     target.removeLayer(element)
                         // }
-                        // fix!!
+                        // fix!!!!: value.layerName是空的
                         layersAry.forEach(element => {
                             if (element.get('name') == value.layerName) {
                                 target.removeLayer(element)
@@ -335,7 +361,7 @@ export default {
                     break;
                 case 'changeOrder':
                     if (state.selectLock) { return }
-
+                    // fix!!!!: layerName是空的
                     let layerName = targetLayers.getArray()[value.key].get('name')
                     let nowTileLayer = mapLayers[layerName]()
                     if (value.movement === 'up') {

@@ -36,8 +36,20 @@ export default {
                 state.DropDown = null
             }
         }
+        function LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, tileIndex) {
+            if (subNode.single_tiles || !(isNaN(tileIndex))) {
+                onLayerControl('layerMode', {
+                    checked: e.target.checked,
+                    nodeIndex: nodeIndex,
+                    subNodeValue: subNodeIndex,
+                    tileValue: String(tileIndex) || null,
+                })
+            } else {
+                console.log('還有子選項')
+            }
+        }
 
-        onBeforeMount(()=>{
+        onBeforeMount(() => {
 
         })
         return {
@@ -45,7 +57,8 @@ export default {
             state,
             onMapControl,
             onLayerControl,
-            openLayerList
+            openLayerList,
+            LayerCheckboxChange
         }
     }
 }
@@ -66,33 +79,22 @@ export default {
             <div class="mb-2 landBoundary">
                 <div v-for="(node, nodeIndex) in props.mapLayers" class="mb-2">
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
-                    @click="openLayerList(nodeIndex)">
+                        @click="openLayerList(nodeIndex)">
                         <div :class="node.groupClass"></div>
                         <div>{{ node.label }}</div>
-                        <svg viewBox="0 0 24 24" :class="{'openTitle': state.DropDown == nodeIndex}">
+                        <svg viewBox="0 0 24 24" :class="{ 'openTitle': state.DropDown == nodeIndex }">
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
                     <div class="ms-3" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <!-- checked="{false}" -->
-                        <input type="checkbox"
-                            @change="(e) => {
-                                onLayerControl('layerMode', {
-                                    checked: e.target.checked,
-                                    nodeIndex: nodeIndex,
-                                    subNodeValue: subNodeIndex,
-                                })
-                            }">
+                        <input type="checkbox" @change="(e) => {
+                            LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex)
+                        }">
                         {{ subNode.title }}
-                        <div  class="ms-3" v-for="(tile, tileIndex) in subNode?.tiles_list">
-                            <input type="checkbox"
-                            @change="(e) => {
-                                onLayerControl('layerMode', {
-                                    checked: e.target.checked,
-                                    nodeIndex: nodeIndex,
-                                    subNodeValue: subNodeIndex,
-                                    tileValue: tileIndex,
-                                })
+                        <div class="ms-3" v-for="(tile, tileIndex) in subNode?.tiles_list">
+                            <input type="checkbox" @change="(e) => {
+                                LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, tileIndex)
                             }">
                             {{ tile.title }}
                         </div>

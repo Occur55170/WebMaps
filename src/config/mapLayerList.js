@@ -47,7 +47,6 @@ let obj
         });
     })();
 export async function initLayers() {
-    console.log('init GOGO')
     let obj
     $.ajax({
         url: 'https://api.edtest.site/layers',
@@ -223,12 +222,10 @@ export default {
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
     },
-    getLayer: (layer) => {
+    getLayer: (layer, tileValue) => {
         let result
-        console.log(layer)
         let layerType = layer.layer_type
         let figureType = layer.figure_type
-        let single_tiles = layer.single_tiles
         if (layerType === 'WMS') {
             switch (figureType) {
                 case 'Point':
@@ -236,40 +233,38 @@ export default {
                     // // imgSize: img ? [img.width, img.height] : undefined,
 
                     // needFix: 樣式尚未套用
-                    const myStyle = new Style({
-                        image: new Icon({
-                            anchor: [0.5, 0.96],
-                            src: 'https://pixlr.com/img/icon/premium-tick.svg',
-                            crossOrigin: 'anonymous',
-                            scale: 2,
-                            // src: layer.tiles_url,
-                            // width: 300,
-                            // height: 300,
-                        }),
-                        stroke: new Stroke({
-                            color: '#319FD3',
-                            width: 1
-                        }),
-                        fill: new Fill({
-                            color: '#000000',
-                        }),
-                        text: new Text({
-                            font: '12px Calibri,sans-serif',
-                            fill: new Fill({
-                                color: '#ff0'
-                            }),
-                            stroke: new Stroke({
-                                color: '#09C',
-                                width: 3
-                            })
-                        })
-                    })
+                    // const myStyle = new Style({
+                    //     image: new Icon({
+                    //         anchor: [0.5, 0.96],
+                    //         src: 'https://pixlr.com/img/icon/premium-tick.svg',
+                    //         crossOrigin: 'anonymous',
+                    //         scale: 2,
+                    //         // src: layer.tiles_url,
+                    //         // width: 300,
+                    //         // height: 300,
+                    //     }),
+                    //     stroke: new Stroke({
+                    //         color: '#319FD3',
+                    //         width: 1
+                    //     }),
+                    //     fill: new Fill({
+                    //         color: '#000000',
+                    //     }),
+                    //     text: new Text({
+                    //         font: '12px Calibri,sans-serif',
+                    //         fill: new Fill({
+                    //             color: '#ff0'
+                    //         }),
+                    //         stroke: new Stroke({
+                    //             color: '#09C',
+                    //             width: 3
+                    //         })
+                    //     })
+                    // })
 
                     const wmsSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
-                        // needFix!!
-                        // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
                         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
                         params: {
                             'SERVICE': 'WMS',
@@ -285,40 +280,33 @@ export default {
                     })
                     result = new TileLayer({
                         source: wmsSource,
-                        style: myStyle
                     })
 
                     // help_btn_display:true
                     // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
                     break;
                 case 'Surface':
-                    // const SurfaceSource = new TileWMS({
-                    //     maxzoom: 18,
-                    //     minzoom: 3,
-                    //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                    //     params: {
-                    //         'LAYERS': '0',
-                    //         'FORMAT': 'image/png',
-                    //         'VERSION': '1.1.1',
-                    //         'STYLES': 'default' // 這裡可以設置 Style
-                    //     },
-                    //     serverType: 'mapserver'
-                    // });
-
+                    let request = []
+                    let sub = {}
+                    const url = !(tileValue) ? layer.tiles_url : layer.tiles_list[tileValue].tile_url
+                    if ( url ) {
+                        request = url.split("WMSServer?")
+                        request[1] = request[1].split('&')
+                        request[1].forEach(node=>{
+                            const subNode = node.split('=')
+                            sub[subNode[0]] = subNode[1]
+                        })
+                    }
+                        // https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentalFlood12H200/MapServer/WMSServer?
+                        // needFix!!
+                        // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
+                        // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                        // items_group
                     const SurfaceSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
-                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                        params: {
-                            'REQUEST': 'GetMap',
-                            'SERVICE': 'WMS',
-                            'BGCOLOR': '0xFFFFFF',
-                            'TRANSPARENT': 'TRUE',
-                            'SRS': 'EPSG:3826',
-                            'LAYERS': '0',
-                            'VERSION': '1.1.1',
-                            'FORMAT': 'image/png',
-                        },
+                        url: request[0] + 'WMSServer?',
+                        params: sub,
                         serverType: 'mapserver'
                     })
                     result = new TileLayer({
@@ -336,7 +324,6 @@ export default {
         if (layerType === 'GeoJson') {
             switch (figureType) {
                 case 'Line':
-                    console.log('Line')
                     result = new VectorLayer({
                         source: new VectorSource({
                             url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
@@ -377,7 +364,6 @@ export default {
                     })
                     result = new TileLayer({
                         source: wmsSource,
-                        style: myStyle
                     })
 
                     // help_btn_display:true
