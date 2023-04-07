@@ -107,13 +107,25 @@ export default {
                 controls: [],
             })
 
+        }
+
+        function tileLoadFunction(tile, src) {
+            var client = new XMLHttpRequest();
+            client.open('GET', src);
+            // Uncomment to pass authentication header
+            //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
+            client.onload = function () {
+                client.setRequestHeader('Content-type','image/png');
+                tile.getImage().src = src;
+            };
+            client.send();
+        }
+        function addTest() {
             const style = new Style({
                 fill: new Fill({
                     color: '#ca8eff',
                 }),
             });
-
-
 
             const myStyle = new Style({
                 image: new Circle({
@@ -127,21 +139,6 @@ export default {
                     width: 5,
                 }),
             })
-        }
-
-        // xhr.setRequestHeader('Content-type','image/png');
-        function tileLoadFunction(tile, src) {
-            var client = new XMLHttpRequest();
-            client.open('GET', src);
-            // Uncomment to pass authentication header
-            //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
-            client.onload = function () {
-                client.setRequestHeader('Content-type','image/png');
-                tile.getImage().src = src;
-            };
-            client.send();
-        }
-        function addTest() {
             const SurfaceSource = new TileWMS({
                 maxzoom: 18,
                 minzoom: 3,
@@ -162,14 +159,6 @@ export default {
                 minzoom: 3,
                 url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
                 params: {
-                    // 'REQUEST': 'GetMap',
-                    // 'SERVICE': 'WMS',
-                    // 'BGCOLOR': '0xFFFFFF',
-                    // 'TRANSPARENT': 'TRUE',
-                    // 'SRS': 'EPSG:3826',
-                    // 'LAYERS': '0',
-                    // 'VERSION': '1.1.1',
-                    // 'FORMAT': 'image/png',
                     'NAME': '1234',
                     'REQUEST': 'GetMap',
                     'SERVICE': 'WMS',
@@ -200,8 +189,8 @@ export default {
         }
 
         function addGeoJsonTest() {
-            let value = { checked: true, nodeIndex: 1, subNodeValue: 0 }
-            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue])
+            let value = { checked: true, nodeIndex: 1, subNodeIndex: 0 }
+            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
             state.map1.addLayer(targetLayer)
 
             onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
@@ -294,7 +283,7 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeValue], value.tileValue)
+                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
                         onMapLayerStatus('add', target.getTarget(), value.layerName)
@@ -324,13 +313,16 @@ export default {
 
                     } else {
                         let layersAry = targetLayers.getArray()
+                        console.log(value)
 
                         // while (element.get('name') == value.layerName) {
                         //     target.removeLayer(element)
                         // }
                         // fix!!!!: value.layerName是空的
                         layersAry.forEach(element => {
-                            if (element.get('name') == value.layerName) {
+                            console.log(element.get('id'))
+                            if (element.get('id') == value.id) {
+                                console.log('!!!')
                                 target.removeLayer(element)
                             }
                         })
@@ -513,6 +505,7 @@ export default {
             state.currentLayers = layers?.map(layer => {
                 return {
                     name: layer.get('name'),
+                    label: layer.get('label'),
                     visible: layer.getVisible(),
                 }
             })
@@ -705,7 +698,7 @@ export default {
     left: 20px
     z-index: 220
 .condition
-    width: 440px
+    width: 480px
     right: 1%
     bottom: 5%
 

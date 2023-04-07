@@ -222,15 +222,14 @@ export default {
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
     },
-    getLayer: (layer, tileValue) => {
-        let result
+    getLayer: (layer, nestedSubNodeIndex, id) => {
+        let result, layerSource
         let layerType = layer.layer_type
         let figureType = layer.figure_type
         if (layerType === 'WMS') {
             switch (figureType) {
                 case 'Point':
-                    // // img: undefined,
-                    // // imgSize: img ? [img.width, img.height] : undefined,
+                    // needFix:開關圖層 '近五年淹水調查位置(面)' 會出問題
 
                     // needFix: 樣式尚未套用
                     // const myStyle = new Style({
@@ -262,7 +261,7 @@ export default {
                     //     })
                     // })
 
-                    const wmsSource = new TileWMS({
+                    layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
                         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
@@ -278,9 +277,6 @@ export default {
                         serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     })
-                    result = new TileLayer({
-                        source: wmsSource,
-                    })
 
                     // help_btn_display:true
                     // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
@@ -288,7 +284,7 @@ export default {
                 case 'Surface':
                     let request = []
                     let sub = {}
-                    const url = !(tileValue) ? layer.tiles_url : layer.tiles_list[tileValue].tile_url
+                    const url = !(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
                     if ( url ) {
                         request = url.split("WMSServer?")
                         request[1] = request[1].split('&')
@@ -297,29 +293,27 @@ export default {
                             sub[subNode[0]] = subNode[1]
                         })
                     }
-                        // https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentalFlood12H200/MapServer/WMSServer?
                         // needFix!!
                         // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
                         // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
                         // items_group
-                    const SurfaceSource = new TileWMS({
+                        layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
                         url: request[0] + 'WMSServer?',
                         params: sub,
                         serverType: 'mapserver'
                     })
-                    result = new TileLayer({
-                        source: SurfaceSource,
-                    })
-
-                    // help_btn_display: true,
-                    // help_memo: "<p>資料來源:國家災害防救科技中心</p>
-                    // <p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>",
                     break;
                 default:
                     console.log(figureType)
             }
+            let tileTitle = isNaN(nestedSubNodeIndex) ? '' : `- ${ layer.tiles_list[nestedSubNodeIndex]?.title }`
+            result = new TileLayer({
+                id: id,
+                label: `${ layer.title } ${ tileTitle }`,
+                source: layerSource,
+            })
         }
         if (layerType === 'GeoJson') {
             switch (figureType) {

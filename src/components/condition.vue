@@ -36,29 +36,38 @@ export default {
                 state.DropDown = null
             }
         }
-        function LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, tileIndex) {
-            if (subNode.single_tiles || !(isNaN(tileIndex))) {
+        function LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, nestedSubNodeIndex) {
+            if (subNode.single_tiles || !(isNaN(nestedSubNodeIndex))) {
                 onLayerControl('layerMode', {
                     checked: e.target.checked,
                     nodeIndex: nodeIndex,
-                    subNodeValue: subNodeIndex,
-                    tileValue: String(tileIndex) || null,
+                    subNodeIndex: subNodeIndex,
+                    nestedSubNodeIndex: String(nestedSubNodeIndex) || null,
+                    id: generateLayerId(nodeIndex, subNodeIndex, nestedSubNodeIndex)
                 })
             } else {
                 console.log('還有子選項')
             }
         }
 
-        onBeforeMount(() => {
+        function generateLayerId(nodeIndex, subNodeIndex, nestedSubNodeIndex) {
+            return `node${nodeIndex}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+            // layeredIndex
+        }
 
-        })
+        // "主要的" 可以翻譯為 "primary"、"main" 或 "major"。
+
+        // "次要" 可以翻譯為 "secondary" 或 "minor"。
+
+        // "次要的次要" 可以翻譯為 "tertiary"。
         return {
             props,
             state,
             onMapControl,
             onLayerControl,
             openLayerList,
-            LayerCheckboxChange
+            LayerCheckboxChange,
+            generateLayerId
         }
     }
 }
@@ -92,11 +101,11 @@ export default {
                             LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex)
                         }">
                         {{ subNode.title }}
-                        <div class="ms-3" v-for="(tile, tileIndex) in subNode?.tiles_list">
+                        <div class="ms-3" v-for="(nestedSubNode, nestedSubNodeIndex) in subNode?.tiles_list">
                             <input type="checkbox" @change="(e) => {
-                                LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, tileIndex)
+                                LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, nestedSubNodeIndex)
                             }">
-                            {{ tile.title }}
+                            {{ nestedSubNode.title }}
                         </div>
                     </div>
                 </div>
