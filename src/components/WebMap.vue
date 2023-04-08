@@ -350,7 +350,6 @@ export default {
                         if (value.key == 0) { return }
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
-
                     break;
                 case 'changeLayerVisible':
                     if (state.selectLock) { return }
