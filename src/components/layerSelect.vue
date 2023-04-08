@@ -89,7 +89,6 @@ export default {
                 <li v-for="(node, nodeIndex) in props.currentLayers">
                     <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="nodeIndex !== 0 || true">
                         <div>
-                            {{ node.id }}
                             {{ node?.label }}
                         </div>
                         <div class="tool">

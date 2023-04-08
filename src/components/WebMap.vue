@@ -430,7 +430,7 @@ export default {
                         target: `map${value}`,
                         layers: [
                             baseMapList.sourceFun('default'),
-                            ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                            ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
                         ],
                         view: defaultView,
                         controls: [],
@@ -537,11 +537,6 @@ export default {
 
 <template>
     <div>
-        <div class="d-flex w-full">
-            <div class="me-4" @click="addTest">123</div>
-            {{ state.map1LayerStatus }}
-            {{ state.map2LayerStatus }}
-        </div>
         <div class="SearchBar position-absolute">
             <img src="../assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"

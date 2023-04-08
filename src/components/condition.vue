@@ -2,6 +2,13 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 
+import mapLayerList, { initLayers } from '../config/mapLayerList'
+import baseMapList from '../config/baseMapList'
+import VectorImageLayer from 'ol/layer/VectorImage.js';
+import TileState from 'ol/TileState.js';
+
+import 'ol-ext/dist/ol-ext.css'
+
 export default {
     props: {
         onClose: {
@@ -18,6 +25,7 @@ export default {
         },
     },
     setup(props, { emit }) {
+        const mapLayers = mapLayerList
         const state = reactive({
             DropDown: null,
         })
@@ -51,10 +59,10 @@ export default {
             }
         }
 
-
         return {
             props,
             state,
+            mapLayers,
             onMapControl,
             onLayerControl,
             openLayerList,
@@ -87,8 +95,9 @@ export default {
                         </svg>
                     </div>
                     <div class="ms-3" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
-                        <!-- checked="{false}" -->
-                        <input type="checkbox" @change="(e) => {
+                        <input type="checkbox"
+                        :checked="props.currentLayers.some(node=> node.id === subNode.id)"
+                        @change="(e) => {
                             LayerCheckboxChange(e, {
                                 nodeIndex: nodeIndex,
                                 subNode: subNode,
@@ -99,7 +108,9 @@ export default {
                         }">
                         {{ subNode.title }}
                         <div class="ms-3" v-for="(nestedSubNode, nestedSubNodeIndex) in subNode?.tiles_list">
-                            <input type="checkbox" @change="(e) => {
+                            <input type="checkbox"
+                            :checked="props.currentLayers.some(node=> node.id === nestedSubNode.id)"
+                            @change="(e) => {
                                 LayerCheckboxChange(e, {
                                     nodeIndex: nodeIndex,
                                     subNode: subNode,
