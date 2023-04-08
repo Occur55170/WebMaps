@@ -188,15 +188,6 @@ export default {
             onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
         }
 
-        function addGeoJsonTest() {
-            let value = { checked: true, nodeIndex: 1, subNodeIndex: 0 }
-            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
-            state.map1.addLayer(targetLayer)
-
-            onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
-            getCurrentLayerNames()
-        }
-
         function addPoint(targetLng, targetLat) {
             const marker = new Vector({
                 source: new VectorSource({
@@ -286,7 +277,7 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        onMapLayerStatus('add', target.getTarget(), value.layerName)
+                        onMapLayerStatus('add', target.getTarget(), value.id)
 
                         // let newTileLayer = mapLayers[value.layerName]()
                         // if (Array.isArray(newTileLayer)) {
@@ -313,20 +304,12 @@ export default {
 
                     } else {
                         let layersAry = targetLayers.getArray()
-                        console.log(value)
-
-                        // while (element.get('name') == value.layerName) {
-                        //     target.removeLayer(element)
-                        // }
-                        // fix!!!!: value.layerName是空的
                         layersAry.forEach(element => {
-                            console.log(element.get('id'))
                             if (element.get('id') == value.id) {
-                                console.log('!!!')
                                 target.removeLayer(element)
                             }
                         })
-                        onMapLayerStatus('delete', target.getTarget(), value.layerName)
+                        onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
                     break;
                 case 'selectLayerMode':
@@ -339,13 +322,14 @@ export default {
                                 layersToRemove.push(element)
                             }
                         })
-                        layersToRemove.forEach(function (node) {
+                        layersToRemove.forEach((node) => {
                             target.removeLayer(node)
                         })
                     } else {
+                        // needFix
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
-                            if (element.get('name') == value.layerName) {
+                            if (element.get('id') == value.id) {
                                 target.removeLayer(element)
                             }
                         })
@@ -353,35 +337,25 @@ export default {
                     break;
                 case 'changeOrder':
                     if (state.selectLock) { return }
-                    // fix!!!!: layerName是空的
-                    let layerName = targetLayers.getArray()[value.key].get('name')
-                    let nowTileLayer = mapLayers[layerName]()
+                    let layeredIndex = mapLayerList.getLayerIndex(value.id)
+                    let nowTileLayer = mapLayers.getLayer(state.layers[layeredIndex.nodeIndex].group_layers[layeredIndex.subNodeIndex], layeredIndex.nestedSubNodeIndex, value.id)
+                    value.checked = false
+                    layerControl({action: 'layerMode', value: value})
                     if (value.movement === 'up') {
                         if (value.key == targetLayers.getArray().length) { return }
-                        targetLayers.getArray().forEach(element => {
-                            if (element.get('name') === layerName) {
-                                target.removeLayer(element)
-                            }
-                        })
+                        value.checked = false
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
                         if (value.key == 0) { return }
-
-                        targetLayers.getArray().forEach(element => {
-                            if (element.get('name') == layerName) {
-                                target.removeLayer(element);
-                            }
-                        })
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
-                    getCurrentLayerNames()
 
                     break;
                 case 'changeLayerVisible':
                     if (state.selectLock) { return }
-                    let a = !(targetLayers.getArray()[value.key].getVisible())
-                    targetLayers.getArray()[value.key].setVisible(a)
+                    let visibleStatus = !(targetLayers.getArray()[value.key].getVisible())
+                    targetLayers.getArray()[value.key].setVisible(visibleStatus)
                     break;
                 case 'baseMap':
                     let newTileLayer = baseMaps.sourceFun(value.layerName)
@@ -398,32 +372,23 @@ export default {
                     if (state.mapCount === value) { return }
                     let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
                     state.mapCount = value
+                    let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
+                    let otherLayersData = otherLayers.map(item=> mapLayerList.getLayerIndex(item))
                     if (value === 2) {
+                        state[otherMap] = new Map({
+                            target: otherMap,
+                            layers: [
+                                baseMapList.sourceFun('default'),
+                                ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
                         if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
-                            let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
-                            state[otherMap] = new Map({
-                                target: otherMap,
-                                layers: [
-                                    baseMapList.sourceFun('default'),
-                                    ...otherLayers.map(node => mapLayerList[node]())
-                                ],
-                                view: defaultView,
-                                controls: [],
-                            })
                             ol3d = new OLCesium({
                                 map: state[otherMap],
                             })
                             ol3d.setEnabled(true)
-                        } else {
-                            state[otherMap] = new Map({
-                                target: otherMap,
-                                layers: [
-                                    baseMapList.sourceFun('default'),
-                                    ...state[`${otherMap}LayerStatus`].map(node => mapLayerList[node]())
-                                ],
-                                view: defaultView,
-                                controls: [],
-                            })
                         }
                     }
                     if (value === 1) {
@@ -458,32 +423,25 @@ export default {
             if (state.mapCount === 1) {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
+                    let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
+                    let otherLayersData = otherLayers.map(item=> mapLayerList.getLayerIndex(item))
+
+                    state[`map${value}`] = new Map({
+                        target: `map${value}`,
+                        layers: [
+                            baseMapList.sourceFun('default'),
+                            ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                        ],
+                        view: defaultView,
+                        controls: [],
+                    })
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
-                        let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
-                        state[`map${value}`] = new Map({
-                            target: `map${value}`,
-                            layers: [
-                                baseMapList.sourceFun('default'),
-                                ...otherLayers.map(node => mapLayerList[node]())
-                            ],
-                            view: defaultView,
-                            controls: [],
-                        })
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
                         })
                         ol3d.setEnabled(true)
-                    } else {
-                        state[`map${value}`] = new Map({
-                            target: `map${value}`,
-                            layers: [
-                                baseMapList.sourceFun('default'),
-                                ...state[`map${value}LayerStatus`].map(node => mapLayerList[node]())
-                            ],
-                            view: defaultView,
-                            controls: [],
-                        })
                     }
+
                 }
                 // 非目標地圖的刪除
                 if (state[delToMap]) {
@@ -504,8 +462,8 @@ export default {
             const layers = target?.getLayers()?.getArray()
             state.currentLayers = layers?.map(layer => {
                 return {
-                    name: layer.get('name'),
                     label: layer.get('label'),
+                    id: layer.get('id'),
                     visible: layer.getVisible(),
                 }
             })
@@ -515,11 +473,12 @@ export default {
             state.conditionWrap = !state.conditionWrap
         }
 
-        function onMapLayerStatus(action, target, name) {
+        // fix!!!
+        function onMapLayerStatus(action, target, id) {
             if (action === 'add') {
-                state[`${target}LayerStatus`].push(name)
+                state[`${target}LayerStatus`].push(id)
             } else if (action === 'delete') {
-                let a = state[`${target}LayerStatus`].findIndex(node => node === name)
+                let a = state[`${target}LayerStatus`].findIndex(node => node === id)
                 state[`${target}LayerStatus`].splice(a, 1)
             } else {
                 console.log('error')
@@ -535,26 +494,32 @@ export default {
                 url: 'https://api.edtest.site/layers',
                 method: "GET"
             }).done(res => {
-                console.log(res)
                 state.layers = res.map((node, index) => {
+                    node.group_layers.forEach((sub, subIndex) => {
+                        let subNodeIndex = undefined, nestedSubNodeIndex = undefined
+                        subNodeIndex = subIndex
+                        sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                        if (!(sub.single_tiles)) {
+                            sub.tiles_list.forEach((nestedSub, nestedSubIndex)=>{
+                                nestedSubNodeIndex = nestedSubIndex
+                                nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                            })
+                        }
+                    })
                     return {
                         ...node,
-                        value: index
+                        value: index,
                     }
                 })
-            }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
-            })
-            nextTick(() => {
                 initMap()
                 getCurrentLayerNames()
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
             })
         })
 
         return {
             addTest,
-            addTest2,
-            addGeoJsonTest,
             state,
             props,
             popupCom,
@@ -564,8 +529,7 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
-            onMapLayerStatus,
-            closeMapData
+            closeMapData,
         }
     }
 }
@@ -575,8 +539,8 @@ export default {
     <div>
         <div class="d-flex w-full">
             <div class="me-4" @click="addTest">123</div>
-            <div class="me-4" @click="addTest2">456</div>
-            <div @click="addGeoJsonTest">789</div>
+            {{ state.map1LayerStatus }}
+            {{ state.map2LayerStatus }}
         </div>
         <div class="SearchBar position-absolute">
             <img src="../assets/logo.svg" alt="" class="mb-2">
@@ -604,14 +568,16 @@ export default {
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
-                    <condition v-bind="{
+                    <condition
+                    v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
                             state.conditionWrap = false
                         }
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                     <!-- need continue -->
                 </div>
             </div>

@@ -36,9 +36,7 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
-            lock: false
         })
-
 
         return {
             props,
@@ -91,7 +89,7 @@ export default {
                 <li v-for="(node, nodeIndex) in props.currentLayers">
                     <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="nodeIndex !== 0 || true">
                         <div>
-                            <!-- {{ nodeIndex }} -->
+                            {{ node.id }}
                             {{ node?.label }}
                         </div>
                         <div class="tool">
@@ -100,6 +98,7 @@ export default {
                                 action: 'changeOrder',
                                 value: {
                                     movement:'up',
+                                    id: node.id,
                                     key: nodeIndex
                                 },
                             })">
@@ -112,6 +111,7 @@ export default {
                                 action: 'changeOrder',
                                 value: {
                                     movement: 'down',
+                                    id: node.id,
                                     key: nodeIndex
                                 }
                             })">
@@ -139,7 +139,7 @@ export default {
                             @click.prevent="props.onDeleteLayer({
                                 action: 'selectLayerMode',
                                 value: {
-                                    layerName: node?.name,
+                                    id: node?.id,
                                 }
                             })">
                                 <svg viewBox="0 0 25 24" fill="none" xmlns="http://www.w3.org/2000/svg">

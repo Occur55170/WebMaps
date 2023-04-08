@@ -38,7 +38,6 @@ let obj
             method: 'GET',
             dataType: '',
             success: (res) => {
-                console.log('res')
                 obj = res.map((node) => node)
             },
             error: (err) => {
@@ -284,7 +283,7 @@ export default {
                 case 'Surface':
                     let request = []
                     let sub = {}
-                    const url = !(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+                    const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
                     if ( url ) {
                         request = url.split("WMSServer?")
                         request[1] = request[1].split('&')
@@ -368,7 +367,24 @@ export default {
             }
         }
         return result
-    }
+    },
+    getLayerIndex: (layeredIndex) => {
+        let nodeIndex, subNodeIndex = undefined, nestedSubNodeIndex = undefined
+        layeredIndex.split('_').forEach((element, key)=>{
+            switch(key) {
+                case 0:
+                    nodeIndex = Number(element.split('node')[1])
+                    break;
+                case 1:
+                    subNodeIndex = Number(element.split('subNode')[1])
+                    break;
+                case 2:
+                    nestedSubNodeIndex = element.split('nestedSubNode')[1] !== 'undefined' ? Number(element.split('nestedSubNode')[1]) : 'undefined'
+                    break;
+            }
+        })
+        return {nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex}
+    },
 }
 
 

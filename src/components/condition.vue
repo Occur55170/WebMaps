@@ -36,30 +36,22 @@ export default {
                 state.DropDown = null
             }
         }
-        function LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, nestedSubNodeIndex) {
-            if (subNode.single_tiles || !(isNaN(nestedSubNodeIndex))) {
+        function LayerCheckboxChange(e, item) {
+            if (item.subNode.single_tiles || !(isNaN(item.nestedSubNodeIndex))) {
+                // itemId有問題
                 onLayerControl('layerMode', {
                     checked: e.target.checked,
-                    nodeIndex: nodeIndex,
-                    subNodeIndex: subNodeIndex,
-                    nestedSubNodeIndex: String(nestedSubNodeIndex) || null,
-                    id: generateLayerId(nodeIndex, subNodeIndex, nestedSubNodeIndex)
+                    nodeIndex: item.nodeIndex,
+                    subNodeIndex: item.subNodeIndex,
+                    nestedSubNodeIndex: item.nestedSubNodeIndex || undefined,
+                    id: item.id
                 })
             } else {
                 console.log('還有子選項')
             }
         }
 
-        function generateLayerId(nodeIndex, subNodeIndex, nestedSubNodeIndex) {
-            return `node${nodeIndex}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
-            // layeredIndex
-        }
 
-        // "主要的" 可以翻譯為 "primary"、"main" 或 "major"。
-
-        // "次要" 可以翻譯為 "secondary" 或 "minor"。
-
-        // "次要的次要" 可以翻譯為 "tertiary"。
         return {
             props,
             state,
@@ -67,7 +59,6 @@ export default {
             onLayerControl,
             openLayerList,
             LayerCheckboxChange,
-            generateLayerId
         }
     }
 }
@@ -98,12 +89,24 @@ export default {
                     <div class="ms-3" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <!-- checked="{false}" -->
                         <input type="checkbox" @change="(e) => {
-                            LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex)
+                            LayerCheckboxChange(e, {
+                                nodeIndex: nodeIndex,
+                                subNode: subNode,
+                                subNodeIndex: subNodeIndex,
+                                nestedSubNodeIndex: '',
+                                id: subNode.id
+                            })
                         }">
                         {{ subNode.title }}
                         <div class="ms-3" v-for="(nestedSubNode, nestedSubNodeIndex) in subNode?.tiles_list">
                             <input type="checkbox" @change="(e) => {
-                                LayerCheckboxChange(e, nodeIndex, subNode, subNodeIndex, nestedSubNodeIndex)
+                                LayerCheckboxChange(e, {
+                                    nodeIndex: nodeIndex,
+                                    subNode: subNode,
+                                    subNodeIndex: subNodeIndex,
+                                    nestedSubNodeIndex: nestedSubNodeIndex,
+                                    id: nestedSubNode.id
+                                })
                             }">
                             {{ nestedSubNode.title }}
                         </div>
