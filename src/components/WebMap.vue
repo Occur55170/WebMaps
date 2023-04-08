@@ -326,7 +326,6 @@ export default {
                             target.removeLayer(node)
                         })
                     } else {
-                        // needFix
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
                             if (element.get('id') == value.id) {
@@ -339,15 +338,17 @@ export default {
                     if (state.selectLock) { return }
                     let layeredIndex = mapLayerList.getLayerIndex(value.id)
                     let nowTileLayer = mapLayers.getLayer(state.layers[layeredIndex.nodeIndex].group_layers[layeredIndex.subNodeIndex], layeredIndex.nestedSubNodeIndex, value.id)
-                    value.checked = false
-                    layerControl({action: 'layerMode', value: value})
+
                     if (value.movement === 'up') {
                         if (value.key == targetLayers.getArray().length) { return }
                         value.checked = false
+                        layerControl({action: 'layerMode', value: value})
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
                         if (value.key == 0) { return }
+                        value.checked = false
+                        layerControl({action: 'layerMode', value: value})
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
                     break;
@@ -472,7 +473,6 @@ export default {
             state.conditionWrap = !state.conditionWrap
         }
 
-        // fix!!!
         function onMapLayerStatus(action, target, id) {
             if (action === 'add') {
                 state[`${target}LayerStatus`].push(id)
@@ -536,6 +536,9 @@ export default {
 
 <template>
     <div>
+        <!-- <div class="d-flex w-full">
+            <div class="me-4" @click="addTest">123</div>
+        </div> -->
         <div class="SearchBar position-absolute">
             <img src="../assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"

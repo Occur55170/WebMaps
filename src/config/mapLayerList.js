@@ -228,8 +228,6 @@ export default {
         if (layerType === 'WMS') {
             switch (figureType) {
                 case 'Point':
-                    // needFix:開關圖層 '近五年淹水調查位置(面)' 會出問題
-
                     // needFix: 樣式尚未套用
                     // const myStyle = new Style({
                     //     image: new Icon({
