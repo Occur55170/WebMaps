@@ -226,6 +226,8 @@ export default {
         let layerType = layer.layer_type
         let figureType = layer.figure_type
         if (layerType === 'WMS') {
+            let request = [], sub = {}
+            const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType) {
                 case 'Point':
                     // needFix: 樣式尚未套用
@@ -258,6 +260,14 @@ export default {
                     //     })
                     // })
 
+                    if ( url ) {
+                        request = url.split("WMSServer?")
+                        request[1] = request[1].split('&')
+                        request[1].forEach(node=>{
+                            const subNode = node.split('=')
+                            sub[subNode[0]] = subNode[1]
+                        })
+                    }
                     layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
@@ -274,14 +284,15 @@ export default {
                         serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     })
-
-                    // help_btn_display:true
-                    // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
+                    layerSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: request[0] + 'WMSServer?',
+                        params: sub,
+                        serverType: 'mapserver'
+                    })
                     break;
                 case 'Surface':
-                    let request = []
-                    let sub = {}
-                    const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
                     if ( url ) {
                         request = url.split("WMSServer?")
                         request[1] = request[1].split('&')
@@ -290,11 +301,12 @@ export default {
                             sub[subNode[0]] = subNode[1]
                         })
                     }
-                        // needFix!!
-                        // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
-                        // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                        // items_group
-                        layerSource = new TileWMS({
+                    // needFix!!
+                    // "https://dwgis.ncdr.nat.gov.tw/arcgis/services/ncdr/NCDR_Maps/MapServer/WmsServerhttps://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentialSeaZone/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&LAYERS=1&STYLES=&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826"
+                    // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
+                    // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
+                    // items_group
+                    layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
                         url: request[0] + 'WMSServer?',
@@ -302,8 +314,60 @@ export default {
                         serverType: 'mapserver'
                     })
                     break;
+                    case 'Line':
+                        // 活動斷層
+                        if ( url ) {
+                            request = url.split("WMSServer?")
+                            request[1] = request[1].split('&')
+                            request[1].forEach(node=>{
+                                const subNode = node.split('=')
+                                sub[subNode[0]] = subNode[1]
+                            })
+                        }
+                        layerSource = new TileWMS({
+                            maxzoom: 18,
+                            minzoom: 3,
+                            url: request[0] + 'WMSServer?',
+                            params: sub,
+                            serverType: 'mapserver'
+                        })
+                        // figure_type:"Line"
+                        // help_btn_display:true
+                        // help_memo:"<p>資料來源：中央地質調查所</p>\n<p>目前本網站所使用之斷層圖層為2021年版本，共36條活動斷層</p>"
+                        // icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAPklEQVQ4jWNhoDJgGTVw1MDBZOB/Bob/+BQyMjAw/mdg2M/AwOCAi09bF8JsIOBKR3x8FAOpBUYNHDWQDAAAYp0G15wEqdwAAAAASUVORK5CYII="
+                        // id:"node2_subNode1_nestedSubNodeundefined"
+                        // info_box:null
+                        // layer_type:"WMS"
+                        // maxzoom:18
+                        // minzoom:3
+                        // prop_show_list:null
+                        // single_tiles:true
+                        // tile_url:null
+                        // tiles_list:null
+                        // tiles_list_description:""
+                        // tiles_url:"https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022Faults/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&LAYERS=0&STYLES=&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826"
+                        // title:"活動斷層"
+                        // let request = []
+                        // let sub = {}
+                        // const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+                        // if ( url ) {
+                        //     request = url.split("WMSServer?")
+                        //     request[1] = request[1].split('&')
+                        //     request[1].forEach(node=>{
+                        //         const subNode = node.split('=')
+                        //         sub[subNode[0]] = subNode[1]
+                        //     })
+                        // }
+                        // layerSource = new TileWMS({
+                        //     maxzoom: 18,
+                        //     minzoom: 3,
+                        //     url: request[0] + 'WMSServer?',
+                        //     params: sub,
+                        //     serverType: 'mapserver'
+                        // })
+                        break;
                 default:
-                    console.log(figureType)
+                    console.log('otherWMSLayer', figureType)
             }
             let tileTitle = isNaN(nestedSubNodeIndex) ? '' : `- ${ layer.tiles_list[nestedSubNodeIndex]?.title }`
             result = new TileLayer({
@@ -313,6 +377,7 @@ export default {
             })
         }
         if (layerType === 'GeoJson') {
+            console.log('GeoJsonLayer', figureType)
             switch (figureType) {
                 case 'Line':
                     result = new VectorLayer({

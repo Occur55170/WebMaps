@@ -338,15 +338,14 @@ export default {
                     if (state.selectLock) { return }
                     let layeredIndex = mapLayerList.getLayerIndex(value.id)
                     let nowTileLayer = mapLayers.getLayer(state.layers[layeredIndex.nodeIndex].group_layers[layeredIndex.subNodeIndex], layeredIndex.nestedSubNodeIndex, value.id)
-
                     if (value.movement === 'up') {
-                        if (value.key == targetLayers.getArray().length) { return }
+                        if (value.key +1 == targetLayers.getArray().length) { return }
                         value.checked = false
                         layerControl({action: 'layerMode', value: value})
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
-                        if (value.key == 0) { return }
+                        if (value.key - 1 == 0) { return }
                         value.checked = false
                         layerControl({action: 'layerMode', value: value})
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
@@ -510,8 +509,11 @@ export default {
                         value: index,
                     }
                 })
-                initMap()
-                getCurrentLayerNames()
+                nextTick(()=>{
+                    console.log('res', state.layers)
+                    initMap()
+                    getCurrentLayerNames()
+                })
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })

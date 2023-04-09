@@ -51,7 +51,7 @@ export default {
                     checked: e.target.checked,
                     nodeIndex: item.nodeIndex,
                     subNodeIndex: item.subNodeIndex,
-                    nestedSubNodeIndex: item.nestedSubNodeIndex || undefined,
+                    nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
                     id: item.id
                 })
             } else {
