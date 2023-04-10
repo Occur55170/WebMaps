@@ -35,6 +35,8 @@ import TileState from 'ol/TileState.js';
 
 import 'ol-ext/dist/ol-ext.css'
 
+import { get as getProjection } from 'ol/proj';
+
 export default {
     props: {},
     setup(props, { emit }) {
@@ -107,6 +109,36 @@ export default {
                 controls: [],
             })
 
+            // 監聽地圖點擊事件
+            state.map1.on('click', function (evt) {
+            });
+
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            // 點擊事件
+            state.map1.on('click', function(evt, layer) {
+                console.log(state.targetNum)
+                const clickedFeature = state.map1.forEachFeatureAtPixel(evt.pixel, layer, {
+                    layerFilter: (layer) => {
+                        console.log(layer.get('id'))
+                        // return layer.getSource()
+                        return layer;
+                    },
+                });
+
+                console.log('succ', clickedFeature);
+                if (clickedFeature) {
+                    console.log('Click on the WMS layer');
+                    // do something
+                }
+
+                //     if (!($('body .areaData').hasClass('hidden'))) {
+                //         $('body .areaData').addClass('hidden')
+                //     }
+                //     state.areaDataId = feature.get('name')
+                //     nextTick(()=>{
+                //         $('body .areaData').removeClass('hidden')
+                //     })
+            })
         }
 
         function tileLoadFunction(tile, src) {
@@ -277,7 +309,28 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        onMapLayerStatus('add', target.getTarget(), value.id)
+                        // 點擊事件
+                        // forEachFeatureAtPixel
+                        // forEachLayerAtPixel
+                        // forEachFeatureAtPixel
+
+
+                        // target.on('click', (evt) => {
+                        //     const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                        //         console.log(feature, layer)
+                        //         return feature
+                        //     })
+                        //     console.log(feature)
+                        //     if (feature) {
+                        //         console.log('有feature')
+                        //         // const coordinate = evt.coordinate
+                        //         // state.areaDataId = feature.get('name')
+                        //         // overlay.value.setPosition(coordinate)
+                        //     } else {
+                        //         console.log('無')
+                        //         // overlay.value.setPosition(undefined)
+                        //     }
+                        // })
 
                         // let newTileLayer = mapLayers[value.layerName]()
                         // if (Array.isArray(newTileLayer)) {
@@ -302,6 +355,7 @@ export default {
                         //     target.addLayer(newTileLayer)
                         // }
 
+                        onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {

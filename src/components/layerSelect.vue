@@ -87,7 +87,7 @@ export default {
             </div>
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
                 <li v-for="(node, nodeIndex) in props.currentLayers">
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="node.id">
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="node.id || true">
                         <div>
                             {{ node?.label }}
                         </div>

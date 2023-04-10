@@ -4,7 +4,10 @@
 // needFix
 .bg-steel {background: $blue-steel}
 .bg-light {background: $blue-light}
-
+.bg-grey {background: $grey;}
+.bg-grey-light {background: $grey-light;}
+.bg-brown {background: $brown;}
+.text-brown {color: $brown;}
 .disabled {
     pointer-events: none;
     opacity: 0.5;

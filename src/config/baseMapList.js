@@ -8,6 +8,7 @@ var configBaseMap = [
         name: "default",
         label: '預設',
         urls: new OSM(),
+        crossOrigin: 'anonymous'
     },
     {
         name: 'roads',
@@ -16,6 +17,7 @@ var configBaseMap = [
             url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=' + key,
             tileSize: 512,
             maxZoom: 22,
+            crossOrigin: 'anonymous'
         }),
     },
     {
@@ -24,6 +26,7 @@ var configBaseMap = [
         urls: new XYZ({
             url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=' + key,
             maxZoom: 20,
+            crossOrigin: 'anonymous'
         }),
     },
 ]
@@ -35,6 +38,7 @@ export default {
             name: mapSource.name,
             label: mapSource.label,
             source: mapSource.urls,
+            crossOrigin: 'anonymous',
         }
         if(itemValue) {
             vector[itemKey] = itemValue

@@ -15,11 +15,12 @@ export default {
 </script>
 
 <template>
-    <div class="main">
+    <!-- <Wes /> -->
+    <!-- <div class="main">
         <WebMap />
-        <!-- <Wes /> -->
 
-    </div>
+    </div> -->
+        <mapDetails />
 </template>
 
 <style lang="sass">
