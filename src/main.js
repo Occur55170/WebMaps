@@ -10,7 +10,7 @@ import './assets/styles/all.module.scss'
 import router from '@/router/index.js'
 
 
-const app = createApp(App)
-app.use(router).use(componentRegister)
-
-app.mount('#app')
+createApp(App)
+.use(router)
+.use(componentRegister)
+.mount('#app')

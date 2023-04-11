@@ -6,7 +6,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
     {
         path: "/Map_Demo/",
-        name: "Home",
+        name: "index",
         component: () => import("@/view/WebMap.vue"),
     },
     {

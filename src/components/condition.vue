@@ -6,6 +6,7 @@ import mapLayerList, { initLayers } from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 import VectorImageLayer from 'ol/layer/VectorImage.js'
 import TileState from 'ol/TileState.js'
+import { useRouter } from 'vue-router'
 
 
 import 'ol-ext/dist/ol-ext.css'
@@ -27,6 +28,7 @@ export default {
     },
     setup(props, { emit }) {
         const mapLayers = mapLayerList
+        const router = useRouter()
         const state = reactive({
             DropDown: null,
             TilesListValue: 0
@@ -62,22 +64,16 @@ export default {
             }
         }
 
-        // fix!!! :router跳轉尚未綁定
-        function rou() {
-            const a = location.href || 'https://occur55170.github.io/Map_Demo/'
-            window.location.href = a + 'detail'
-        }
 
         return {
             props,
             state,
+            router,
             mapLayers,
             onMapControl,
             onLayerControl,
             openLayerList,
             LayerCheckBoxChange,
-            // fix!!! :router跳轉尚未綁定
-            rou
         }
     }
 }
@@ -96,8 +92,7 @@ export default {
         </div>
         <div class="py-3 px-4 content">
             <div class="mb-2 landBoundary">
-                <!-- fix!!! :router跳轉尚未綁定 -->
-                <div @click="rou()" class="my-3 fw-bold h5 text-primary cursor-pointer">前往地圖細節</div>
+                <div @click="router.push({ path: '/Map_Demo/detail' })" class="my-3 fw-bold h5 text-primary cursor-pointer">前往地圖細節</div>
                 <div v-for="(node, nodeIndex) in props.mapLayers" class="mb-2">
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
                         @click="openLayerList(nodeIndex)">

@@ -16,7 +16,7 @@ export default {
 
 <template>
     <!-- <Wes /> -->
-        <router-view />
+    <routerView />
     <!-- <div class="main"> -->
         <!-- <WebMap /> -->
     <!-- </div> -->

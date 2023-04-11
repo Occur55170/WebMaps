@@ -1,6 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
+import { useRouter } from 'vue-router'
 
 export default {
     props: {
@@ -11,16 +12,12 @@ export default {
         map: {}
     },
     setup(props, { emit }) {
+        const router = useRouter()
 
         function onMapControl(action) {
             emit('onMapControl', { action })
         }
 
-        // fix!!! :router跳轉尚未綁定
-        function goBack () {
-            console.log('back')
-            window.location.href = 'https://occur55170.github.io/Map_Demo/'
-        }
         function goTop () {
             window.scrollTo({
                 top: 0,
@@ -30,7 +27,7 @@ export default {
 
         return {
             onMapControl,
-            goBack,
+            router,
             goTop
         }
     }
@@ -207,7 +204,7 @@ export default {
             </div>
         </div>
         <div class="position-fixed bottom-0 end-0 w-auto m-5">
-            <div class="goBack mb-4" @click="goBack()">
+            <div class="goBack mb-4" @click="router.push({ name: 'index' })">
                 <img src="@/assets/mapDetail/back.svg" alt="">
             </div>
             <div class="goTop" @click="goTop()">
