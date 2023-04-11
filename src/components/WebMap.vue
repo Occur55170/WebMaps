@@ -26,12 +26,13 @@ import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
 import OLCesium from 'olcs/OLCesium.js';
+import VectorImageLayer from 'ol/layer/VectorImage.js';
+import TileState from 'ol/TileState.js';
+
 import 'ol/ol.css'
 
 import mapLayerList, { initLayers } from '../config/mapLayerList'
 import baseMapList from '../config/baseMapList'
-import VectorImageLayer from 'ol/layer/VectorImage.js';
-import TileState from 'ol/TileState.js';
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -537,11 +538,22 @@ export default {
             }
         }
 
-        function closeMapData() {
-            overlay.value.setPosition(undefined)
-        }
+        // function closeMapData() {
+        //     overlay.value.setPosition(undefined)
+        // }
+
+        // function switchMapDetail(id) {
+        //     if (feature) {
+        //         const coordinate = evt.coordinate
+        //         state.areaDataId = feature.get('name')
+        //         overlay.value.setPosition(coordinate)
+        //     } else {
+        //         overlay.value.setPosition(undefined)
+        //     }
+        // }
 
         onMounted(() => {
+
             $.ajax({
                 url: 'https://api.edtest.site/layers',
                 method: "GET"
@@ -584,7 +596,6 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
-            closeMapData,
         }
     }
 }

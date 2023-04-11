@@ -31,28 +31,11 @@ import { format } from 'ol/coordinate'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 
-let obj
-    ; (async () => {
-        await $.ajax({
-            url: 'https://api.edtest.site/layers',
-            method: 'GET',
-            dataType: '',
-            success: (res) => {
-                obj = res.map((node) => node)
-            },
-            error: (err) => {
-                return err
-            },
-        });
-    })();
-export async function initLayers() {
-    let obj
-    $.ajax({
+export const initLayers = async function() {
+    const obj = await $.ajax({
         url: 'https://api.edtest.site/layers',
         method: 'GET'
-    }).done(res => {
-        obj = res
-    });
+    })
     return obj
 }
 export default {
