@@ -16,11 +16,12 @@ export default {
 
 <template>
     <!-- <Wes /> -->
-    <div class="main">
-        <WebMap />
+        <router-view />
+    <!-- <div class="main"> -->
+        <!-- <WebMap /> -->
+    <!-- </div> -->
+    <!-- <mapDetails /> -->
 
-    </div>
-        <!-- <mapDetails /> -->
 </template>
 
 <style lang="sass">

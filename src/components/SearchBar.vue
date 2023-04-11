@@ -76,34 +76,34 @@ export default {
                 <div class="MapFeatureBtn text-white">
                     <a href="" v-if="props.dimensionMapStatus"
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
-                        <img src="../assets/img/icon/twoDimensional.svg">
+                        <img src="@/assets/img/icon/twoDimensional.svg">
                     </a>
                     <a href="" v-else
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
-                        <img src="../assets/img/icon/threeDimensional.svg">
+                        <img src="@/assets/img/icon/threeDimensional.svg">
                     </a>
                 </div>
             </li>
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white"
                     @click.prevent="toolSwitch('layerConditionBtn'), conditionWrap()">
-                    <img src="../assets/img/icon/baseLayer.svg" alt="">
+                    <img src="@/assets/img/icon/baseLayer.svg" alt="">
                 </a>
             </li>
             <li class="me-4 position-relative">
                 <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
-                    <img src="../assets/img/icon/singleWindow.svg" alt="" v-if="props.mapCount === 1">
-                    <img src="../assets/img/icon/doubleWindows.svg" alt="" v-if="props.mapCount === 2">
+                    <img src="@/assets/img/icon/singleWindow.svg" alt="" v-if="props.mapCount === 1">
+                    <img src="@/assets/img/icon/doubleWindows.svg" alt="" v-if="props.mapCount === 2">
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindowBtn">
                     <li class="mt-2">
                         <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 1)">
-                            <img src="../assets/img/icon/singleWindow.svg" alt="">
+                            <img src="@/assets/img/icon/singleWindow.svg" alt="">
                         </a>
                     </li>
                     <li class="mt-2">
                         <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 2)">
-                            <img src="../assets/img/icon/doubleWindows.svg" alt="">
+                            <img src="@/assets/img/icon/doubleWindows.svg" alt="">
                         </a>
                     </li>
                 </ul>

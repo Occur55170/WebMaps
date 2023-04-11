@@ -31,8 +31,8 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers } from '../config/mapLayerList'
-import baseMapList from '../config/baseMapList'
+import mapLayerList, { initLayers } from '@/config/mapLayerList'
+import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -111,41 +111,30 @@ export default {
             })
 
             // 監聽地圖點擊事件
-            state.map1.on('click', function (evt) {
-            });
+            // state.map1.on('click', function(evt, layer) {
+            //     const clickedFeature = state.map1.forEachFeatureAtPixel(evt.pixel, layer, {
+            //         layerFilter: (layer) => {
+            //             // return layer.getSource()
+            //             return layer;
+            //         },
+            //     });
+            //     if (clickedFeature) {
+            //         // Click on the WMS layer  do something
+            //     }
 
-            let target = state.targetNum == 1 ? state.map1 : state.map2
-            // 點擊事件
-            state.map1.on('click', function(evt, layer) {
-                console.log(state.targetNum)
-                const clickedFeature = state.map1.forEachFeatureAtPixel(evt.pixel, layer, {
-                    layerFilter: (layer) => {
-                        console.log(layer.get('id'))
-                        // return layer.getSource()
-                        return layer;
-                    },
-                });
-
-                console.log('succ', clickedFeature);
-                if (clickedFeature) {
-                    console.log('Click on the WMS layer');
-                    // do something
-                }
-
-                //     if (!($('body .areaData').hasClass('hidden'))) {
-                //         $('body .areaData').addClass('hidden')
-                //     }
-                //     state.areaDataId = feature.get('name')
-                //     nextTick(()=>{
-                //         $('body .areaData').removeClass('hidden')
-                //     })
-            })
+            //     //     if (!($('body .areaData').hasClass('hidden'))) {
+            //     //         $('body .areaData').addClass('hidden')
+            //     //     }
+            //     //     state.areaDataId = feature.get('name')
+            //     //     nextTick(()=>{
+            //     //         $('body .areaData').removeClass('hidden')
+            //     //     })
+            // })
         }
 
         function tileLoadFunction(tile, src) {
             var client = new XMLHttpRequest();
             client.open('GET', src);
-            // Uncomment to pass authentication header
             //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
             client.onload = function () {
                 client.setRequestHeader('Content-type','image/png');
@@ -302,11 +291,24 @@ export default {
         }
 
         function layerControl({ action, value }) {
+            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
+
+                        // needFix: 無法刪除全部subNodeIndex圖層
+                        if (`${value.nestedSubNodeIndex}`) {
+                            let layersAry = targetLayers.getArray()
+                            layersAry.forEach(element => {
+                                if(!(element.get('id'))){return}
+                                if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}`)) {
+                                    target.removeLayer(element)
+                                }
+                            })
+                            onMapLayerStatus('delete', target.getTarget(), value.id)
+                        }
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
@@ -317,7 +319,7 @@ export default {
 
 
                         // target.on('click', (evt) => {
-                        //     const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                        //     const feature = state.map1.forEachLayerAtPixel(evt.pixel, function (feature, layer) {
                         //         console.log(feature, layer)
                         //         return feature
                         //     })
@@ -607,7 +609,7 @@ export default {
             <div class="me-4" @click="addTest">123</div>
         </div> -->
         <div class="SearchBar position-absolute">
-            <img src="../assets/logo.svg" alt="" class="mb-2">
+            <img src="@/assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                 @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
@@ -620,7 +622,7 @@ export default {
             <asideTool @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
         </div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-            <!-- needFix -->
+            <!-- needFix 寬度設定是否調整 -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
@@ -709,7 +711,7 @@ export default {
 </template>
 
 <style lang="sass">
-@import '../assets/styles/all.module.scss'
+@import '@/assets/styles/all.module.scss'
 .mapWrap
     justify-content: space-between
     height: 100vh

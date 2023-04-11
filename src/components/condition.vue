@@ -2,10 +2,11 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 
-import mapLayerList, { initLayers } from '../config/mapLayerList'
-import baseMapList from '../config/baseMapList'
-import VectorImageLayer from 'ol/layer/VectorImage.js';
-import TileState from 'ol/TileState.js';
+import mapLayerList, { initLayers } from '@/config/mapLayerList'
+import baseMapList from '@/config/baseMapList'
+import VectorImageLayer from 'ol/layer/VectorImage.js'
+import TileState from 'ol/TileState.js'
+
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -28,6 +29,7 @@ export default {
         const mapLayers = mapLayerList
         const state = reactive({
             DropDown: null,
+            TilesListValue: 0
         })
 
         function onMapControl(action, value) {
@@ -44,11 +46,12 @@ export default {
                 state.DropDown = null
             }
         }
-        function LayerCheckboxChange(e, item) {
+        function LayerCheckBoxChange(e, item) {
             if (item.subNode.single_tiles || !(isNaN(item.nestedSubNodeIndex))) {
+                let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
                 // itemId有問題
                 onLayerControl('layerMode', {
-                    checked: e.target.checked,
+                    checked: defaultChecked,
                     nodeIndex: item.nodeIndex,
                     subNodeIndex: item.subNodeIndex,
                     nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
@@ -59,6 +62,12 @@ export default {
             }
         }
 
+        // fix!!! :router跳轉尚未綁定
+        function rou() {
+            const a = location.href || 'https://occur55170.github.io/Map_Demo/'
+            window.location.href = a + 'detail'
+        }
+
         return {
             props,
             state,
@@ -66,7 +75,9 @@ export default {
             onMapControl,
             onLayerControl,
             openLayerList,
-            LayerCheckboxChange,
+            LayerCheckBoxChange,
+            // fix!!! :router跳轉尚未綁定
+            rou
         }
     }
 }
@@ -85,6 +96,8 @@ export default {
         </div>
         <div class="py-3 px-4 content">
             <div class="mb-2 landBoundary">
+                <!-- fix!!! :router跳轉尚未綁定 -->
+                <div @click="rou()" class="my-3 fw-bold h5 text-primary cursor-pointer">前往地圖細節</div>
                 <div v-for="(node, nodeIndex) in props.mapLayers" class="mb-2">
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
                         @click="openLayerList(nodeIndex)">
@@ -94,32 +107,43 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
-                    <div class="ms-3" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
-                        <input type="checkbox"
-                        :checked="props.currentLayers.some(node=> node.id === subNode.id)"
-                        @change="(e) => {
-                            LayerCheckboxChange(e, {
-                                nodeIndex: nodeIndex,
-                                subNode: subNode,
-                                subNodeIndex: subNodeIndex,
-                                nestedSubNodeIndex: '',
-                                id: subNode.id
-                            })
-                        }">
-                        {{ subNode.title }}
-                        <div class="ms-3" v-for="(nestedSubNode, nestedSubNodeIndex) in subNode?.tiles_list">
+                    <div class="ms-3 mb-1" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
+                        <div v-if="subNode.single_tiles">
                             <input type="checkbox"
-                            :checked="props.currentLayers.some(node=> node.id === nestedSubNode.id)"
+                            :checked="props.currentLayers.some(node=> node.id === subNode.id)"
                             @change="(e) => {
-                                LayerCheckboxChange(e, {
+                                LayerCheckBoxChange(e, {
                                     nodeIndex: nodeIndex,
                                     subNode: subNode,
                                     subNodeIndex: subNodeIndex,
-                                    nestedSubNodeIndex: nestedSubNodeIndex,
-                                    id: nestedSubNode.id
+                                    nestedSubNodeIndex: '',
+                                    id: subNode.id
                                 })
                             }">
-                            {{ nestedSubNode.title }}
+                            {{ subNode.title }}
+                        </div>
+                        <div v-else>
+                            <input type="checkbox"
+                            :checked="props.currentLayers.some(node=> node.id === subNode.id)">
+                            {{ subNode.title }}
+                            <!-- <svg viewBox="0 0 24 24" :class="{ 'openTitle': false }">
+                                <path fill="currentColor" d="M8 5v14l11-7z" />
+                            </svg>
+                            <div class="ms-3"> -->
+                                <select name="" id="" class="ms-3"
+                                v-model="state.TilesListValue"
+                                @change="(e) => {
+                                    LayerCheckBoxChange(e, {
+                                        nodeIndex: nodeIndex,
+                                        subNode: subNode,
+                                        subNodeIndex: subNodeIndex,
+                                        nestedSubNodeIndex: state.TilesListValue,
+                                        id: subNode.id
+                                    })
+                                }">
+                                    <option :value="key" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
+                                </select>
+                            <!-- </div> -->
                         </div>
                     </div>
                 </div>
@@ -129,7 +153,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-// @import '../assets/styles/all.module.scss'
+// @import '@/assets/styles/all.module.scss'
 .closeBtn
     right:10px
     svg

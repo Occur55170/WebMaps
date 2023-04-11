@@ -17,7 +17,7 @@ import ImageLayer from 'ol/layer/Image'
 import ImageWMS from 'ol/source/ImageWMS'
 
 import 'ol/ol.css' // ol提供的css样式（必须引入）
-import riverpoly from '../assets/img/riverpoly.jpg'
+import riverpoly from '@/assets/img/riverpoly.jpg'
 
 export default {
     props: {

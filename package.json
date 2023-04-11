@@ -16,15 +16,16 @@
     "ol-cesium": "^2.13.1",
     "ol-ext": "^4.0.4",
     "olcs": "^2.13.1",
-    "vue": "^3.2.41"
+    "vue": "^3.2.41",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitejs/plugin-vue": "^4.1.0",
     "cesium": "^1.103.0",
     "sass": "^1.56.2",
     "unplugin-icons": "^0.14.14",
     "unplugin-vue-components": "^0.22.11",
-    "vite": "^4.2.1",
+    "vite": "^4.2.0",
     "vite-plugin-cesium": "^1.2.22"
   }
 }

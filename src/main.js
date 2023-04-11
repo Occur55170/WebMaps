@@ -7,10 +7,10 @@ import "bootstrap"
 import componentRegister from './config/componentRegister'
 
 import './assets/styles/all.module.scss'
-
+import router from '@/router/index.js'
 
 
 const app = createApp(App)
-app.use(componentRegister)
+app.use(router).use(componentRegister)
 
 app.mount('#app')

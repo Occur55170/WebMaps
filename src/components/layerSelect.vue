@@ -87,7 +87,7 @@ export default {
             </div>
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
                 <li v-for="(node, nodeIndex) in props.currentLayers">
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="node.id || true">
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="node.id">
                         <div>
                             {{ node?.label }}
                         </div>
@@ -154,7 +154,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@import '../assets/styles/all.module.scss'
+@import '@/assets/styles/all.module.scss'
 .closeBtn
     right:10px
     svg
@@ -175,7 +175,7 @@ export default {
         height: 16px
 .tool
     a
-        padding: 5px 10px
+        padding: 5px 0
     .visible
         color: red
     .Invisible
