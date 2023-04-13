@@ -119,12 +119,17 @@ export default {
                         </div>
                         <div v-else>
                             <input type="checkbox"
-                            :checked="props.currentLayers.some(node=> node.id === subNode.id)">
+                            :checked="props.currentLayers.some(node=> node.id === subNode.id)"
+                            @change="(e) => {
+                                LayerCheckBoxChange(e, {
+                                    nodeIndex: nodeIndex,
+                                    subNode: subNode,
+                                    subNodeIndex: subNodeIndex,
+                                    nestedSubNodeIndex: '',
+                                    id: subNode.id
+                                })
+                            }">
                             {{ subNode.title }}
-                            <!-- <svg viewBox="0 0 24 24" :class="{ 'openTitle': false }">
-                                <path fill="currentColor" d="M8 5v14l11-7z" />
-                            </svg>
-                            <div class="ms-3"> -->
                                 <select name="" id="" class="ms-3"
                                 v-model="state.TilesListValue"
                                 @change="(e) => {

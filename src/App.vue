@@ -49,5 +49,4 @@ export default {
     background: rgb(0, 0, 0, 0.1)
     .lightbox
         background: #fff
-
 </style>
