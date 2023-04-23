@@ -59,8 +59,7 @@ export default {
                         </li>
                     </ul>
                 </div>
-                <!-- fix:不能使用style -->
-                <div style="width: calc(100% - 300px);">
+                <div class="detailMain">
                     <h2 class="text-center">石磊部落</h2>
                     <div class="section mb-5 d-flex align-items-center">
                         <div class="text-brown fw-bold col-3 text-center">聚落座標</div>
@@ -89,8 +88,7 @@ export default {
                         <div class="text-brown fw-bold">部落地標</div>
                         <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
                         <div class="d-flex flex-nowrap mx-0">
-                            <!-- fix:不能使用style -->
-                            <img src="@/assets/mapDetail/3-1.png" alt="" class="me-4" style="width: 300px;">
+                            <img src="@/assets/mapDetail/3-1.png" alt="" class="me-4 w-10">
                             <div>
                                 <p>名稱 : 石磊國小</p>
                                 <p>地址 : 新竹縣尖石鄉49號</p>
@@ -266,6 +264,8 @@ export default {
         padding: 15px 60px
         // color: #841613
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)
+.detailMain
+    width: calc(100% - 300px)
 .section
     background: #fff
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)

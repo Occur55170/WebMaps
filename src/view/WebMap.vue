@@ -109,27 +109,11 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-
-            // 監聽地圖點擊事件
-            // state.map1.on('click', function(evt, layer) {
-            //     const clickedFeature = state.map1.forEachFeatureAtPixel(evt.pixel, layer, {
-            //         layerFilter: (layer) => {
-            //             // return layer.getSource()
-            //             return layer;
-            //         },
-            //     });
-            //     if (clickedFeature) {
-            //         // Click on the WMS layer  do something
-            //     }
-
-            //     //     if (!($('body .areaData').hasClass('hidden'))) {
-            //     //         $('body .areaData').addClass('hidden')
-            //     //     }
-            //     //     state.areaDataId = feature.get('name')
-            //     //     nextTick(()=>{
-            //     //         $('body .areaData').removeClass('hidden')
-            //     //     })
-            // })
+            let obj = {
+                action: 'layerMode',
+                value: {checked: true, nodeIndex: 0, subNodeIndex: 1, nestedSubNodeIndex: undefined, id: 'node0_subNode1_nestedSubNodeundefined'}
+            }
+            layerControl(obj)
         }
 
         function tileLoadFunction(tile, src) {
@@ -173,41 +157,6 @@ export default {
             })
             state.map1.addLayer(wmsLayer)
             // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
-        }
-
-        function addTest2() {
-            const SurfaceSource = new TileWMS({
-                maxzoom: 18,
-                minzoom: 3,
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                params: {
-                    'NAME': '1234',
-                    'REQUEST': 'GetMap',
-                    'SERVICE': 'WMS',
-                    'BGCOLOR': '0xFFFFFF',
-                    'TRANSPARENT': 'TRUE',
-                    'SRS': 'EPSG:4326',
-                    'LAYERS': '0',
-                    'VERSION': '1.1.1',
-                    'FORMAT': 'image/png',
-                    'STYLES': '',
-                    'SERVICE': 'WMS',
-                    'VERSION': '1.3.0',
-                    'FORMAT': 'image/png',
-                    'TRANSPARENT': 'true',
-                    'WIDTH': '282',
-                    'HEIGHT': '282',
-                    'CRS': 'EPSG:4326',
-                    'MAP_RESOLUTION': '99.00000214576721',
-                    'BBOX': '25.17420682683587,121.42962476983666,25.192868210694556,121.44828615369535'
-                },
-                serverType: 'mapserver'
-            })
-            const wmsLayer = new TileLayer({
-                source: SurfaceSource,
-            })
-            state.map1.addLayer(wmsLayer)
-            onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
         }
 
         function addPoint(targetLng, targetLat) {
@@ -289,7 +238,7 @@ export default {
                     break;
             }
         }
-
+        let test = {}
         function layerControl({ action, value }) {
             console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
@@ -312,13 +261,63 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
+                        target.on('click', function(evt) {
+                            target.forEachFeatureAtPixel(evt.pixel, function(layer){
+                                console.log(layer.getSource().getParams().LAYERS);
+                                console.log(layer)
+                                if(layer==='default') {
+                                    console.log('layer clicked');
+                                }
+                            });
+                            console.log(evt)
+                            if (!(test.one)) {
+                                test.one = evt
+                            } else if (!(test.two)) {
+                                test.two = evt
+                            } else {
+                                // activePointers
+                                // coordinate_
+                                // dragging
+                                // map
+                                // pixel_
+                                // target
+                                // type
+                                // originalEvent
+                                // coordinate
+                                // pixel
+                                // frameState
+                            }
+
+                        });
+
                         // 點擊事件
                         // forEachFeatureAtPixel
                         // forEachLayerAtPixel
                         // forEachFeatureAtPixel
 
 
+                        // 監聽地圖點擊事件
+                        // state.map1.on('click', function(evt, layer) {
+                        //     const clickedFeature = state.map1.forEachFeatureAtPixel(evt.pixel, layer, {
+                        //         layerFilter: (layer) => {
+                        //             // return layer.getSource()
+                        //             return layer;
+                        //         },
+                        //     });
+                        //     if (clickedFeature) {
+                        //         // Click on the WMS layer  do something
+                        //     }
+
+                        //     //     if (!($('body .areaData').hasClass('hidden'))) {
+                        //     //         $('body .areaData').addClass('hidden')
+                        //     //     }
+                        //     //     state.areaDataId = feature.get('name')
+                        //     //     nextTick(()=>{
+                        //     //         $('body .areaData').removeClass('hidden')
+                        //     //     })
+                        // })
                         // target.on('click', (evt) => {
+                        //     console.log(evt)
                         //     const feature = state.map1.forEachLayerAtPixel(evt.pixel, function (feature, layer) {
                         //         console.log(feature, layer)
                         //         return feature
@@ -329,12 +328,8 @@ export default {
                         //         // const coordinate = evt.coordinate
                         //         // state.areaDataId = feature.get('name')
                         //         // overlay.value.setPosition(coordinate)
-                        //     } else {
-                        //         console.log('無')
-                        //         // overlay.value.setPosition(undefined)
                         //     }
                         // })
-
                         // let newTileLayer = mapLayers[value.layerName]()
                         // if (Array.isArray(newTileLayer)) {
                         //     newTileLayer.forEach(node=>{
