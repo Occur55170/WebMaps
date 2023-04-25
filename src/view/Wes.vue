@@ -5,11 +5,12 @@ import ImageLayer from 'ol/layer/Image.js';
 import ImageWMS from 'ol/source/ImageWMS.js';
 import Map from 'ol/Map.js';
 import View from 'ol/View.js';
+import { url } from 'inspector';
 export default {
     props: {},
     setup(props, { emit }) {
-        onMounted(() => {
 
+        onMounted(() => {
             const wmsSource = new ImageWMS({
                 url: 'https://ahocevar.com/geoserver/wms',
                 params: { 'LAYERS': 'ne:ne' },
@@ -35,7 +36,7 @@ export default {
 
             map.on('click', (evt) => {
                 document.getElementById('info').innerHTML = '';
-                const viewResolution = /** @type {number} */ (view.getResolution());
+                const viewResolution = (view.getResolution());
                 const url = wmsSource.getFeatureInfoUrl(
                     evt.coordinate,
                     viewResolution,
@@ -61,8 +62,6 @@ export default {
             })
 
         })
-
-
         return {
         }
     }
@@ -70,10 +69,8 @@ export default {
 </script>
 
 <template>
-    <div>
         <div id="map" class="map"></div>
         <div id="info">&nbsp;</div>
-    </div>
 </template>
 
 <style>

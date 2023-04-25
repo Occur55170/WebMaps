@@ -31,7 +31,7 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers } from '@/config/mapLayerList'
+import mapLayerList, { initLayers, tribeIdList } from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
@@ -44,8 +44,7 @@ export default {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            // defaultCenter: [120.971859, 24.801583],
-            defaultCenter: [121.398333, 25.154365],
+            defaultCenter: [120.971859, 24.801583],
             defaultCenterZoom: 14,
             targetNum: 1,
             conditionWrap: false,
@@ -83,6 +82,7 @@ export default {
             areaDataId: '',
             ol3d: null,
         })
+
 
         const defaultView = new View({
             projection: 'EPSG:4326',
@@ -126,6 +126,7 @@ export default {
             };
             client.send();
         }
+
         function addTest() {
             const style = new Style({
                 fill: new Fill({
@@ -238,9 +239,11 @@ export default {
                     break;
             }
         }
-        let test = {}
+
+
+        // /tribe?tribeCode=${tribeCode}
+        // https://api.edtest.site/tribe?tribeCode=88
         function layerControl({ action, value }) {
-            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -261,34 +264,26 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        target.on('click', function(evt) {
-                            target.forEachFeatureAtPixel(evt.pixel, function(layer){
-                                console.log(layer.getSource().getParams().LAYERS);
-                                console.log(layer)
-                                if(layer==='default') {
-                                    console.log('layer clicked');
-                                }
-                            });
-                            console.log(evt)
-                            if (!(test.one)) {
-                                test.one = evt
-                            } else if (!(test.two)) {
-                                test.two = evt
-                            } else {
-                                // activePointers
-                                // coordinate_
-                                // dragging
-                                // map
-                                // pixel_
-                                // target
-                                // type
-                                // originalEvent
-                                // coordinate
-                                // pixel
-                                // frameState
-                            }
+                        // http://gis.edtest.site:8010/ogc/temp?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYER=%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D&FORMAT=image/png&STYLE=default&SLD_VERSION=1.1.0
 
-                        });
+                        // target.on('click', function(evt) {
+                        //     target.forEachFeatureAtPixel(evt.pixel, function(layer){
+                        //         if(layer==='default') {
+                        //             console.log('layer clicked');
+                        //         }
+                        //     });
+                        //         // activePointers
+                        //         // coordinate_
+                        //         // dragging
+                        //         // map
+                        //         // pixel_
+                        //         // target
+                        //         // type
+                        //         // originalEvent
+                        //         // coordinate
+                        //         // pixel
+                        //         // frameState
+                        // });
 
                         // 點擊事件
                         // forEachFeatureAtPixel
@@ -297,34 +292,11 @@ export default {
 
 
                         // 監聽地圖點擊事件
-                        // state.map1.on('click', function(evt, layer) {
-                        //     const clickedFeature = state.map1.forEachFeatureAtPixel(evt.pixel, layer, {
-                        //         layerFilter: (layer) => {
-                        //             // return layer.getSource()
-                        //             return layer;
-                        //         },
-                        //     });
-                        //     if (clickedFeature) {
-                        //         // Click on the WMS layer  do something
-                        //     }
-
-                        //     //     if (!($('body .areaData').hasClass('hidden'))) {
-                        //     //         $('body .areaData').addClass('hidden')
-                        //     //     }
-                        //     //     state.areaDataId = feature.get('name')
-                        //     //     nextTick(()=>{
-                        //     //         $('body .areaData').removeClass('hidden')
-                        //     //     })
-                        // })
                         // target.on('click', (evt) => {
-                        //     console.log(evt)
                         //     const feature = state.map1.forEachLayerAtPixel(evt.pixel, function (feature, layer) {
-                        //         console.log(feature, layer)
                         //         return feature
                         //     })
-                        //     console.log(feature)
                         //     if (feature) {
-                        //         console.log('有feature')
                         //         // const coordinate = evt.coordinate
                         //         // state.areaDataId = feature.get('name')
                         //         // overlay.value.setPosition(coordinate)
@@ -549,8 +521,27 @@ export default {
         //     }
         // }
 
-        onMounted(() => {
+        const getTribeDate = function() {
+            console.log(tribeIdList)
+            Object.keys(tribeIdList).forEach(tribeId=>{
+                // let result
+                // ⇒ 部落基礎資料
+                // ?tribeCode=${tribeCode}
+                $.ajax({
+                    // url: `https://api.edtest.site/tribe?tribeCode=${tribeCode}`,
+                    url: `https://api.edtest.site/tribe?tribeCode=${88}`,
+                    method: "GET"
+                }).done(res => {
+                    console.log('部落基礎資料', res)
+                }).fail(FailMethod => {
+                    console.log('Fail', FailMethod)
+                })
+                // return result
+            })
+        }
 
+        onMounted(() => {
+            getTribeDate()
             $.ajax({
                 url: 'https://api.edtest.site/layers',
                 method: "GET"

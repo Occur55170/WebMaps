@@ -31,6 +31,17 @@ import { format } from 'ol/coordinate'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 
+export const tribeIdList = {
+    88: '石磊部',
+    89: '平論文部',
+    90: '抬耀部',
+    91: '帛納外部',
+    133: '河頭部落',
+    118: '十八兒部落',
+    119: '五峰部落',
+    134: '泰平部落'
+}
+
 export const initLayers = async function() {
     const obj = await $.ajax({
         url: 'https://api.edtest.site/layers',
@@ -200,14 +211,35 @@ export default {
             })
         })
 
-
         return [raster, areaLineLayer]
         // 關閉地圖細節事件
     },
     getLayer: (layer, nestedSubNodeIndex, id) => {
+        // let a
+        // a = new VectorLayer({
+        //     source: new VectorSource({
+        //         url: 'http://gis.edtest.site:5173/ogc/temp',
+        //         params: {
+        //             SERVICE: 'WMS',
+        //             VERSION: '1.3.0',
+        //             REQUEST: 'GetMap',
+        //             LAYER: '%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D',
+        //             FORMAT: 'image/png',
+        //             STYLE: 'default',
+        //             SLD_VERSION: '1.1.0',
+        //             FORMAT: 'image/png',
+        //         }
+        //         // url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
+        //         // url: 'https://openlyersbook.github.io/openlayers_book_samples/assets/data/countries.geojson',
+        //         // format: new GeoJSON(),
+        //     }),
+        // });
+        // return a
+
         let result, layerSource
         let layerType = layer.layer_type
         let figureType = layer.figure_type
+        console.log(layerType)
         if (layerType === 'WMS') {
             let request = [], sub = {}
             const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
@@ -314,40 +346,6 @@ export default {
                             params: sub,
                             serverType: 'mapserver'
                         })
-                        // figure_type:"Line"
-                        // help_btn_display:true
-                        // help_memo:"<p>資料來源：中央地質調查所</p>\n<p>目前本網站所使用之斷層圖層為2021年版本，共36條活動斷層</p>"
-                        // icon:"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAPklEQVQ4jWNhoDJgGTVw1MDBZOB/Bob/+BQyMjAw/mdg2M/AwOCAi09bF8JsIOBKR3x8FAOpBUYNHDWQDAAAYp0G15wEqdwAAAAASUVORK5CYII="
-                        // id:"node2_subNode1_nestedSubNodeundefined"
-                        // info_box:null
-                        // layer_type:"WMS"
-                        // maxzoom:18
-                        // minzoom:3
-                        // prop_show_list:null
-                        // single_tiles:true
-                        // tile_url:null
-                        // tiles_list:null
-                        // tiles_list_description:""
-                        // tiles_url:"https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022Faults/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&LAYERS=0&STYLES=&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826"
-                        // title:"活動斷層"
-                        // let request = []
-                        // let sub = {}
-                        // const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-                        // if ( url ) {
-                        //     request = url.split("WMSServer?")
-                        //     request[1] = request[1].split('&')
-                        //     request[1].forEach(node=>{
-                        //         const subNode = node.split('=')
-                        //         sub[subNode[0]] = subNode[1]
-                        //     })
-                        // }
-                        // layerSource = new TileWMS({
-                        //     maxzoom: 18,
-                        //     minzoom: 3,
-                        //     url: request[0] + 'WMSServer?',
-                        //     params: sub,
-                        //     serverType: 'mapserver'
-                        // })
                         break;
                 default:
                     console.log('otherWMSLayer', figureType)
@@ -363,13 +361,22 @@ export default {
             console.log('GeoJsonLayer', figureType)
             switch (figureType) {
                 case 'Line':
+                    console.log('1')
                     result = new VectorLayer({
                         source: new VectorSource({
-                            url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
-                            format: new GeoJSON(),
-                            crossOrigin: 'anonymous',
-
-                            // url: 'https://openlayersbook.github.io/openlayers_book_samples/assets/data/countries.geojson',
+                            url: 'http://gis.edtest.site:8010/ogc/temp',
+                            params: {
+                                // http://gis.edtest.site:8010/ogc/temp
+                                SERVICE: 'WMS',
+                                VERSION: '1.3.0',
+                                REQUEST: 'GetMap',
+                                FORMAT: 'image/png',
+                                STYLE: 'default',
+                                SLD_VERSION: '1.1.0'
+                                // LAYER: '%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D',
+                            }
+                            // url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
+                            // url: 'https://openlyersbook.github.io/openlayers_book_samples/assets/data/countries.geojson',
                             // format: new GeoJSON(),
                         }),
                     });
@@ -412,6 +419,7 @@ export default {
                     console.log(figureType)
             }
         }
+
         return result
     },
     getLayerIndex: (layeredIndex) => {
