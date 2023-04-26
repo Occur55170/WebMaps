@@ -15,7 +15,7 @@ export default {
     props: {
         onClose: {
             type: Function,
-            default: () => { }
+            default: () => {}
         },
         mapLayers: {
             type: Array,
@@ -25,6 +25,10 @@ export default {
             type: Array,
             default: []
         },
+        tribeIdList: {
+            type: Object,
+            default: () => {}
+        }
     },
     setup(props, { emit }) {
         const mapLayers = mapLayerList
@@ -47,6 +51,7 @@ export default {
             } else {
                 state.DropDown = null
             }
+            console.log(state.DropDown)
         }
         function LayerCheckBoxChange(e, item) {
             if (item.subNode.single_tiles || !(isNaN(item.nestedSubNodeIndex))) {
@@ -64,6 +69,15 @@ export default {
             }
         }
 
+        function checkTribe(e) {
+            let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
+            onLayerControl('layerMode', {
+                checked: defaultChecked,
+                // needfix: 進入layerMode的新增圖層需要重構
+                type: 'tribe',
+                // tribeId: e.target.value
+            })
+        }
 
         return {
             props,
@@ -74,6 +88,7 @@ export default {
             onLayerControl,
             openLayerList,
             LayerCheckBoxChange,
+            checkTribe
         }
     }
 }
@@ -146,6 +161,29 @@ export default {
                             <!-- </div> -->
                         </div>
                     </div>
+                </div>
+                <div v-if="props.tribeIdList">
+                    <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none">
+                        <!-- @click="openLayerList('tribeIdList')" -->
+                        <input type="checkbox"
+                        @change="(e) => {
+                            checkTribe(e)
+                        }">
+                        <!-- <div :class="node.groupClass"></div> -->
+                        <div>選擇部落</div>
+                        <!-- <svg viewBox="0 0 24 24" :class="{ 'openTitle': state.DropDown == 'tribeIdList' }">
+                            <path fill="currentColor" d="M8 5v14l11-7z" />
+                        </svg> -->
+                    </div>
+                    <!-- v-if="state.DropDown == nodeIndex" -->
+                    <!-- <div v-for="item in Object.entries(props.tribeIdList)">
+                        <input type="checkbox"
+                        :value="item[0]"
+                        @change="(e) => {
+                            checkTribe(e)
+                        }">
+                        {{ item[1] }}
+                    </div> -->
                 </div>
             </div>
         </div>

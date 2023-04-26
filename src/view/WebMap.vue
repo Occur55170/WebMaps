@@ -249,41 +249,30 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
+                        // needfix: 進入layerMode的新增圖層需要重構
+                        if (value.type === 'tribe') {
+                            console.log(tribeIdList)
+                            // Object.entries(props.tribeIdList)
+                            // tribeIdList
+                            // getTribeDate ()
+                        } else {
+                            // needFix: 無法刪除全部subNodeIndex圖層
+                            if (`${value.nestedSubNodeIndex}`) {
+                                console.log('needFix', value.nestedSubNodeIndex)
+                                let layersAry = targetLayers.getArray()
+                                layersAry.forEach(element => {
+                                    if(!(element.get('id'))){return}
+                                    if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}`)) {
+                                        target.removeLayer(element)
+                                    }
+                                })
+                                onMapLayerStatus('delete', target.getTarget(), value.id)
+                            }
+                            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
+                            target.addLayer(targetLayer)
 
-                        // needFix: 無法刪除全部subNodeIndex圖層
-                        if (`${value.nestedSubNodeIndex}`) {
-                            let layersAry = targetLayers.getArray()
-                            layersAry.forEach(element => {
-                                if(!(element.get('id'))){return}
-                                if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}`)) {
-                                    target.removeLayer(element)
-                                }
-                            })
-                            onMapLayerStatus('delete', target.getTarget(), value.id)
+                            onMapLayerStatus('add', target.getTarget(), value.id)
                         }
-                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
-                        target.addLayer(targetLayer)
-
-                        // http://gis.edtest.site:8010/ogc/temp?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYER=%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D&FORMAT=image/png&STYLE=default&SLD_VERSION=1.1.0
-
-                        // target.on('click', function(evt) {
-                        //     target.forEachFeatureAtPixel(evt.pixel, function(layer){
-                        //         if(layer==='default') {
-                        //             console.log('layer clicked');
-                        //         }
-                        //     });
-                        //         // activePointers
-                        //         // coordinate_
-                        //         // dragging
-                        //         // map
-                        //         // pixel_
-                        //         // target
-                        //         // type
-                        //         // originalEvent
-                        //         // coordinate
-                        //         // pixel
-                        //         // frameState
-                        // });
 
                         // 點擊事件
                         // forEachFeatureAtPixel
@@ -325,7 +314,6 @@ export default {
                         //     target.addLayer(newTileLayer)
                         // }
 
-                        onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
@@ -521,15 +509,13 @@ export default {
         //     }
         // }
 
-        const getTribeDate = function() {
-            console.log(tribeIdList)
-            Object.keys(tribeIdList).forEach(tribeId=>{
+        function getTribeDate (tribeId) {
                 // let result
                 // ⇒ 部落基礎資料
                 // ?tribeCode=${tribeCode}
                 $.ajax({
                     // url: `https://api.edtest.site/tribe?tribeCode=${tribeCode}`,
-                    url: `https://api.edtest.site/tribe?tribeCode=${88}`,
+                    url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
                     method: "GET"
                 }).done(res => {
                     console.log('部落基礎資料', res)
@@ -537,11 +523,9 @@ export default {
                     console.log('Fail', FailMethod)
                 })
                 // return result
-            })
         }
 
         onMounted(() => {
-            getTribeDate()
             $.ajax({
                 url: 'https://api.edtest.site/layers',
                 method: "GET"
@@ -564,7 +548,8 @@ export default {
                     }
                 })
                 nextTick(()=>{
-                    console.log('res', state.layers)
+                    // getTribeDate()
+                    // console.log('res', state.layers)
                     initMap()
                     getCurrentLayerNames()
                 })
@@ -584,6 +569,7 @@ export default {
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
+            tribeIdList,
         }
     }
 }
@@ -624,6 +610,7 @@ export default {
                     v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
+                        tribeIdList: tribeIdList,
                         onClose: () => {
                             state.conditionWrap = false
                         }
