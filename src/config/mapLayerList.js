@@ -159,6 +159,12 @@ export default {
         })
     },
     DimensionMap: () => {
+            // 95TM2:
+            //     x: 283076.26
+            //     y: 2727660.24
+            // WGS84:
+            //     lat: 24.655499
+            //     lng: 121.326776
         const circleFeature = new Feature({
             name: 'DimensionMap',
             title: 'DimensionMap',
@@ -239,7 +245,6 @@ export default {
         let result, layerSource
         let layerType = layer.layer_type
         let figureType = layer.figure_type
-        console.log(layerType)
         if (layerType === 'WMS') {
             let request = [], sub = {}
             const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url

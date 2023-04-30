@@ -3,7 +3,7 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol'
-import { ImageArcGISRest, OSM } from 'ol/source.js';
+import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
 import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
@@ -37,14 +37,14 @@ import baseMapList from '@/config/baseMapList'
 import 'ol-ext/dist/ol-ext.css'
 
 import { get as getProjection } from 'ol/proj';
-
 export default {
     props: {},
     setup(props, { emit }) {
         const mapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
-            defaultCenter: [120.971859, 24.801583],
+            // defaultCenter: [120.971859, 24.801583],
+            defaultCenter: [121.326776, 24.655499],
             defaultCenterZoom: 14,
             targetNum: 1,
             conditionWrap: false,
@@ -109,55 +109,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-            let obj = {
-                action: 'layerMode',
-                value: {checked: true, nodeIndex: 0, subNodeIndex: 1, nestedSubNodeIndex: undefined, id: 'node0_subNode1_nestedSubNodeundefined'}
-            }
-            layerControl(obj)
-        }
-
-        function tileLoadFunction(tile, src) {
-            var client = new XMLHttpRequest();
-            client.open('GET', src);
-            //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
-            client.onload = function () {
-                client.setRequestHeader('Content-type','image/png');
-                tile.getImage().src = src;
-            };
-            client.send();
-        }
-
-        function addTest() {
-            const style = new Style({
-                fill: new Fill({
-                    color: '#ca8eff',
-                }),
-            });
-
-            const myStyle = new Style({
-                image: new Circle({
-                    radius: 5,
-                }),
-                fill: new Fill({
-                    color: 'rgba(255,255,255)',
-                }),
-                stroke: new Stroke({
-                    color: '[115, 76, 0, 1]',
-                    width: 5,
-                }),
-            })
-            const SurfaceSource = new TileWMS({
-                maxzoom: 18,
-                minzoom: 3,
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:4326&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
-                params: {},
-                tileLoadFunction: tileLoadFunction,
-            })
-            const wmsLayer = new TileLayer({
-                source: SurfaceSource,
-            })
-            state.map1.addLayer(wmsLayer)
-            // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
         }
 
         function addPoint(targetLng, targetLat) {
@@ -240,9 +191,6 @@ export default {
             }
         }
 
-
-        // /tribe?tribeCode=${tribeCode}
-        // https://api.edtest.site/tribe?tribeCode=88
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
@@ -251,14 +199,47 @@ export default {
                     if (value.checked) {
                         // needfix: 進入layerMode的新增圖層需要重構
                         if (value.type === 'tribe') {
-                            console.log(tribeIdList)
-                            // Object.entries(props.tribeIdList)
-                            // tribeIdList
-                            // getTribeDate ()
+                            // console.log('tribe', tribeIdList)
+                            Object.entries(tribeIdList).forEach((element)=>{
+                                getTribeDate(element[0]).then((e)=>{
+                                    console.log(element[0], e.basicInformation.tribeName)
+                                    const { lng, lat, tribeName } = e.basicInformation.coordinates.WGS84
+                                    const areaLineLayer = new Vector({
+                                        name: tribeName,
+                                        title: tribeName,
+                                        source: new VectorSource({
+                                            features: [new Feature({
+                                                name: `tribe_${element[0]}`,
+                                                title: e.basicInformation.tribeName,
+                                                tribeValue: element[0],
+                                                geometry: new Circle([lng, lat], 0.005),
+                                            })],
+                                        }),
+                                        style: new Style({
+                                            fill: new Fill({
+                                                color: '#0f9ce2'
+                                            }),
+                                        })
+                                    })
+                                    target.addLayer(areaLineLayer)
+                                })
+                            })
+
+                            console.log(target.getTarget(), value.id)
+                            onMapLayerStatus('add', target.getTarget(), value.id)
+
+                            state.map1.on('click', (evt)=>{
+                                const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                                    return feature
+                                })
+                                if (feature) {
+                                    console.log(feature)
+                                }
+                            })
+
                         } else {
                             // needFix: 無法刪除全部subNodeIndex圖層
                             if (`${value.nestedSubNodeIndex}`) {
-                                console.log('needFix', value.nestedSubNodeIndex)
                                 let layersAry = targetLayers.getArray()
                                 layersAry.forEach(element => {
                                     if(!(element.get('id'))){return}
@@ -274,47 +255,10 @@ export default {
                             onMapLayerStatus('add', target.getTarget(), value.id)
                         }
 
-                        // 點擊事件
-                        // forEachFeatureAtPixel
-                        // forEachLayerAtPixel
-                        // forEachFeatureAtPixel
-
-
-                        // 監聽地圖點擊事件
-                        // target.on('click', (evt) => {
-                        //     const feature = state.map1.forEachLayerAtPixel(evt.pixel, function (feature, layer) {
-                        //         return feature
-                        //     })
-                        //     if (feature) {
-                        //         // const coordinate = evt.coordinate
-                        //         // state.areaDataId = feature.get('name')
-                        //         // overlay.value.setPosition(coordinate)
-                        //     }
-                        // })
-                        // let newTileLayer = mapLayers[value.layerName]()
-                        // if (Array.isArray(newTileLayer)) {
-                        //     newTileLayer.forEach(node=>{
-                        //         target.addLayer(node)
-                        //     })
-                        //     // 點擊事件
-                        //     target.on('click', function (evt) {
-                        //         const feature =target.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                        //             return feature
-                        //         })
-                        //         if (feature) {
-                        //             const coordinate = evt.coordinate
-                        //             state.areaDataId = feature.get('name')
-                        //             overlay.value.setPosition(coordinate)
-                        //         } else {
-                        //             overlay.value.setPosition(undefined)
-                        //         }
-                        //     })
-                        //     target.addOverlay(overlay.value)
-                        // } else {
-                        //     target.addLayer(newTileLayer)
-                        // }
 
                     } else {
+                        // needfix: 刪除圖層
+                        console.log(value)
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
                             if (element.get('id') == value.id) {
@@ -469,6 +413,7 @@ export default {
         }
 
         function getCurrentLayerNames() {
+            // needfix 可以自行加入layer
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
             state.currentLayers = layers?.map(layer => {
@@ -509,24 +454,65 @@ export default {
         //     }
         // }
 
-        function getTribeDate (tribeId) {
-                // let result
-                // ⇒ 部落基礎資料
-                // ?tribeCode=${tribeCode}
-                $.ajax({
-                    // url: `https://api.edtest.site/tribe?tribeCode=${tribeCode}`,
-                    url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
-                    method: "GET"
-                }).done(res => {
-                    console.log('部落基礎資料', res)
-                }).fail(FailMethod => {
-                    console.log('Fail', FailMethod)
-                })
-                // return result
+        function tileLoadFunction(tile, src) {
+            var client = new XMLHttpRequest();
+            client.open('GET', src);
+            //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
+            client.onload = function () {
+                client.setRequestHeader('Content-type','image/png');
+                tile.getImage().src = src;
+            };
+            client.send();
         }
 
-        onMounted(() => {
-            $.ajax({
+        function addTest() {
+            const style = new Style({
+                fill: new Fill({
+                    color: '#ca8eff',
+                }),
+            });
+
+            const myStyle = new Style({
+                image: new Circle({
+                    radius: 5,
+                }),
+                fill: new Fill({
+                    color: 'rgba(255,255,255)',
+                }),
+                stroke: new Stroke({
+                    color: '[115, 76, 0, 1]',
+                    width: 5,
+                }),
+            })
+            const SurfaceSource = new TileWMS({
+                maxzoom: 18,
+                minzoom: 3,
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:4326&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
+                params: {},
+                tileLoadFunction: tileLoadFunction,
+            })
+            const wmsLayer = new TileLayer({
+                source: SurfaceSource,
+            })
+            state.map1.addLayer(wmsLayer)
+            // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
+        }
+
+        async function getTribeDate (tribeId) {
+            const result = await $.ajax({
+                url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
+                method: "GET"
+            }).done(res => {
+                return res
+                }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+                return false
+                })
+            return result
+        }
+
+        onMounted(async () => {
+            await $.ajax({
                 url: 'https://api.edtest.site/layers',
                 method: "GET"
             }).done(res => {
@@ -548,8 +534,7 @@ export default {
                     }
                 })
                 nextTick(()=>{
-                    // getTribeDate()
-                    // console.log('res', state.layers)
+                    // async ()
                     initMap()
                     getCurrentLayerNames()
                 })
@@ -577,9 +562,6 @@ export default {
 
 <template>
     <div>
-        <!-- <div class="d-flex w-full">
-            <div class="me-4" @click="addTest">123</div>
-        </div> -->
         <div class="SearchBar position-absolute">
             <img src="@/assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"

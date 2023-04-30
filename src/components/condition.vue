@@ -158,19 +158,18 @@ export default {
                                 }">
                                     <option :value="key" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
                                 </select>
-                            <!-- </div> -->
                         </div>
                     </div>
                 </div>
                 <div v-if="props.tribeIdList">
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none">
                         <!-- @click="openLayerList('tribeIdList')" -->
-                        <input type="checkbox"
+                        <input id="tribeItem" type="checkbox"
                         @change="(e) => {
                             checkTribe(e)
                         }">
                         <!-- <div :class="node.groupClass"></div> -->
-                        <div>選擇部落</div>
+                        <label for="tribeItem">選擇部落</label>
                         <!-- <svg viewBox="0 0 24 24" :class="{ 'openTitle': state.DropDown == 'tribeIdList' }">
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg> -->
