@@ -31,7 +31,7 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers, tribeIdList } from '@/config/mapLayerList'
+import mapLayerList, { initLayers, tribeIdList, getTribeData } from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
@@ -83,7 +83,6 @@ export default {
             ol3d: null,
         })
 
-
         const defaultView = new View({
             projection: 'EPSG:4326',
             center: state.defaultCenter,
@@ -91,13 +90,13 @@ export default {
         })
 
         const overlay = ref(null)
-        const popupCom = ref(null) // 弹窗容器
+        const mapDetailsPopup = ref(null) // 地圖細節小窗
         let ol3d = null
 
         // 初始化地圖
         function initMap() {
             overlay.value = new Overlay({
-                element: popupCom.value,
+                element: mapDetailsPopup.value,
                 autoPan: true,
                 autoPanAnimation: {
                     duration: 250
@@ -108,6 +107,8 @@ export default {
                 layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
+                // fix: !!!!有overlays，3D圖層無法使用
+                overlays: [overlay.value]
             })
         }
 
@@ -196,21 +197,19 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
+                    // needfix: 部落進入layerMode的新增圖層需要重構
                     if (value.checked) {
-                        // needfix: 進入layerMode的新增圖層需要重構
                         if (value.type === 'tribe') {
-                            // console.log('tribe', tribeIdList)
                             Object.entries(tribeIdList).forEach((element)=>{
-                                getTribeDate(element[0]).then((e)=>{
-                                    console.log(element[0], e.basicInformation.tribeName)
+                                getTribeData(element[0]).then((e)=>{
                                     const { lng, lat, tribeName } = e.basicInformation.coordinates.WGS84
                                     const areaLineLayer = new Vector({
                                         name: tribeName,
                                         title: tribeName,
                                         source: new VectorSource({
                                             features: [new Feature({
-                                                name: `tribe_${element[0]}`,
                                                 title: e.basicInformation.tribeName,
+                                                type: `tribeFeature`,
                                                 tribeValue: element[0],
                                                 geometry: new Circle([lng, lat], 0.005),
                                             })],
@@ -225,18 +224,16 @@ export default {
                                 })
                             })
 
-                            console.log(target.getTarget(), value.id)
-                            onMapLayerStatus('add', target.getTarget(), value.id)
-
-                            state.map1.on('click', (evt)=>{
+                            target.on('click', (evt)=>{
                                 const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
                                     return feature
                                 })
                                 if (feature) {
-                                    console.log(feature)
+                                    // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                                    state.areaDataId = feature.get('tribeValue')
                                 }
                             })
-
+                            onMapLayerStatus('add', target.getTarget(), value.id)
                         } else {
                             // needFix: 無法刪除全部subNodeIndex圖層
                             if (`${value.nestedSubNodeIndex}`) {
@@ -255,17 +252,33 @@ export default {
                             onMapLayerStatus('add', target.getTarget(), value.id)
                         }
 
-
                     } else {
-                        // needfix: 刪除圖層
-                        console.log(value)
-                        let layersAry = targetLayers.getArray()
-                        layersAry.forEach(element => {
-                            if (element.get('id') == value.id) {
-                                target.removeLayer(element)
-                            }
-                        })
-                        onMapLayerStatus('delete', target.getTarget(), value.id)
+                        if (value.type === 'tribe') {
+                            targetLayers.forEach((layer) => {
+                                if (layer instanceof Vector) {
+                                    layer.getSource().getFeatures().forEach((feature) => {
+                                        if (feature.get('type') === 'tribeFeature') {
+                                            layer.getSource().removeFeature(feature)
+
+                                            // needFix: 如果要素存在于地图上，需要更新地图视图
+                                            // if (feature.getGeometry()) {
+                                            //     map.getView().fit(source.getExtent(), { size: map.getSize() });
+                                            // }
+                                        }
+                                    })
+                                }
+                            })
+
+                        } else{
+                            // needfix: 刪除部落圖層
+                            let layersAry = targetLayers.getArray()
+                            layersAry.forEach(element => {
+                                if (element.get('id') == value.id) {
+                                    target.removeLayer(element)
+                                }
+                            })
+                            onMapLayerStatus('delete', target.getTarget(), value.id)
+                        }
                     }
                     break;
                 case 'selectLayerMode':
@@ -355,6 +368,7 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
+                    console.log(value)
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta] = value
                     if (value === '3D') {
@@ -413,7 +427,7 @@ export default {
         }
 
         function getCurrentLayerNames() {
-            // needfix 可以自行加入layer
+            // needfix: 修改成可自行加入特定layer
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
             state.currentLayers = layers?.map(layer => {
@@ -466,24 +480,7 @@ export default {
         }
 
         function addTest() {
-            const style = new Style({
-                fill: new Fill({
-                    color: '#ca8eff',
-                }),
-            });
 
-            const myStyle = new Style({
-                image: new Circle({
-                    radius: 5,
-                }),
-                fill: new Fill({
-                    color: 'rgba(255,255,255)',
-                }),
-                stroke: new Stroke({
-                    color: '[115, 76, 0, 1]',
-                    width: 5,
-                }),
-            })
             const SurfaceSource = new TileWMS({
                 maxzoom: 18,
                 minzoom: 3,
@@ -496,19 +493,6 @@ export default {
             })
             state.map1.addLayer(wmsLayer)
             // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
-        }
-
-        async function getTribeDate (tribeId) {
-            const result = await $.ajax({
-                url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
-                method: "GET"
-            }).done(res => {
-                return res
-                }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
-                return false
-                })
-            return result
         }
 
         onMounted(async () => {
@@ -534,7 +518,6 @@ export default {
                     }
                 })
                 nextTick(()=>{
-                    // async ()
                     initMap()
                     getCurrentLayerNames()
                 })
@@ -544,17 +527,16 @@ export default {
         })
 
         return {
-            addTest,
             state,
             props,
-            popupCom,
+            mapDetailsPopup,
             overlay,
+            tribeIdList,
             mapControl,
             layerControl,
             getCurrentLayerNames,
             changeTarget,
             conditionWrap,
-            tribeIdList,
         }
     }
 }
@@ -568,13 +550,15 @@ export default {
                 :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                 @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
-        <div class="mapSourceOption">
-            <mapSourceOption :baseMapsOptions="state.baseMapsOptions"
-                @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
-        </div>
-        <div class="asideTool position-absolute top-50 translate-middle-y" id="asideTool">
-            <asideTool @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-        </div>
+        <mapSourceOption
+        class="mapSourceOption"
+        :baseMapsOptions="state.baseMapsOptions"
+        @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
+
+        <asideTool
+        class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
+        @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
+
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needFix 寬度設定是否調整 -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
@@ -658,10 +642,8 @@ export default {
             </div>
         </div>
 
-        <!-- 弹窗容器 -->
-        <div ref="popupCom" class="areaData">
-            <areaData :id="state.areaDataId" />
-        </div>
+        <!-- 地圖細節小窗 -->
+        <areaData ref="mapDetailsPopup" id="areaData" class="areaData" v-if="state.areaDataId" :areaDataId="state.areaDataId" :maxHeight="500" />
     </div>
 </template>
 
@@ -702,11 +684,11 @@ export default {
 
 .areaData
     width: 450px
+    // max-height: 500px
     background: #fff
     position: absolute
-    bottom: 100%
+    top: 0
     right: 0
     box-sizing: border-box
     padding: 10px
-
 </style>

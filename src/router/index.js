@@ -10,6 +10,11 @@ const routes = [
         component: () => import("@/view/WebMap.vue"),
     },
     {
+        path: "/Map_Demo/Wes",
+        name: "Wes",
+        component: () => import("@/view/Wes.vue")
+    },
+    {
         path: "/Map_Demo/:action",
         name: "detail",
         component: () => import("@/view/mapDetails.vue")

@@ -6,9 +6,10 @@
 .bg-grey {background: $grey;}
 .bg-grey-light {background: $grey-light;}
 .bg-brown {background: $brown;}
-
+.bg-orange {background: $orange;}
 // text
 .text-brown {color: $brown;}
+.text-orange {color: $orange;}
 
 // icon
 .icon {
@@ -53,4 +54,8 @@
 }
 .hidden {
     display: none !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
 }

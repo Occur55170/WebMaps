@@ -31,7 +31,7 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers, tribeIdList } from '@/config/mapLayerList'
+import mapLayerList, { initLayers, tribeIdList, getTribeData } from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
@@ -98,46 +98,61 @@ export default {
         // forEachFeatureAtPixel
 
         onMounted(async () => {
-            const circleFeature = new Feature({
-                    name: 'DimensionMap',
-                    title: 'DimensionMap',
-                    geometry: new Circle([121.326776, 24.655499], 0.005),
+            let a = '%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D'
+            let b = window.encodeURI('新竹縣原住民部落範圍')
+            // LAYER=
+            // %E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D
+            // &REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&VERSION=1.1.1&FORMAT=image/png&STYLES=",
+            console.log(a === b)
+            // http://gis.edtest.site:8010/ogc/temp?LAYER=新竹縣原住民部落範圍&REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&VERSION=1.3.0&FORMAT=image/png&STYLES=
+            const wmsSource = new TileWMS({
+                url: 'http://gis.edtest.site:8010/ogc/temp',
+                params: {
+                    'LAYER': '新竹縣原住民部落範圍',
+                    // 'LAYER': '%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D',
+                    'REQUEST': 'GetMap',
+                    'SERVICE': 'WMS',
+                    'BGCOLOR': '0xFFFFFF',
+                    'TRANSPARENT': 'TRUE',
+                    'SRS': 'EPSG:4326',
+                    'VERSION': '1.3',
+                    'FORMAT': 'image/png',
+                    'STYLES': '',
+                },
+                serverType: 'geoserver'
             })
-            const coordinates = [
-                [120.971859, 24.801583],
-                [120.970000, 24.809583],
-                [120.985000, 24.808583],
-                [120.990000, 24.806583],
-                [120.971859, 24.801583]
-            ]
 
-            const areaLineLayer = new Vector({
-                name: 'DimensionMap',
-                title: 'DimensionMap',
-                source: new VectorSource({
-                    features: [new Feature({
-                        name: 'areaLineLayer',
-                        title: 'areaLineLayer',
-                        geometry: new Circle([121.326776, 24.655499], 0.005),
-                    })],
-                }),
-                style: new Style({
-                    fill: new Fill({
-                        color: '#0f9ce2'
-                    }),
-                })
+            const braster = new TileLayer ({
+                source: wmsSource
             })
+
 
             state.map1 = new Map({
                 target: 'map1',
-                layers: [baseMapList.sourceFun('default'), areaLineLayer],
+                layers: [baseMapList.sourceFun('default'), braster],
                 view: defaultView,
                 controls: [],
             })
+
+            state.map1.on('click', (evt)=>{
+                console.log(evt)
+                const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                    return feature
+                })
+                if (feature) {
+                    // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                    console.log('Feature')
+                }
+            })
         })
+
+        function showLayer() {
+            console.log(state.map1.getLayers().getArray())
+        }
 
         return {
             state,
+            showLayer
             // map
         }
     }
@@ -148,6 +163,7 @@ export default {
 
 <template>
     000
+    <div @click="showLayer">show</div>
     <div id="map1" class="map"></div>
     8999
 

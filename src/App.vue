@@ -1,7 +1,6 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
-// import Wes from './view/Wes.vue'
 
 export default {
     setup(props, { emit }) {
@@ -16,7 +15,6 @@ export default {
 </script>
 
 <template>
-    <!-- <Wes /> -->
     <routerView />
     <!-- <div class="main"> -->
         <!-- <WebMap /> -->

@@ -49,6 +49,20 @@ export const initLayers = async function() {
     })
     return obj
 }
+
+export async function getTribeData (tribeId) {
+    const result = await $.ajax({
+        url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
+        method: "GET"
+    }).done(res => {
+        return res
+        }).fail(FailMethod => {
+        console.log('Fail', FailMethod)
+        return false
+        })
+    return result
+}
+
 export default {
     america: () => {
         return new TileLayer({
@@ -135,29 +149,6 @@ export default {
             opacity: 1,
         });
     },
-    roads: () => {
-        const key = 'Gu2rcfenfMEKjKXgPF6H'
-        return new TileLayer({
-            name: 'roads',
-            type: 'roads',
-            source: new XYZ({
-                url: 'https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=' + key,
-                tileSize: 512,
-                maxZoom: 22,
-            }),
-        })
-    },
-    imagery: () => {
-        const key = 'Gu2rcfenfMEKjKXgPF6H'
-        return new TileLayer({
-            name: 'imagery',
-            type: 'imagery',
-            source: new XYZ({
-                url: 'https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=' + key,
-                maxZoom: 20,
-            }),
-        })
-    },
     DimensionMap: () => {
             // 95TM2:
             //     x: 283076.26
@@ -221,27 +212,6 @@ export default {
         // 關閉地圖細節事件
     },
     getLayer: (layer, nestedSubNodeIndex, id) => {
-        // let a
-        // a = new VectorLayer({
-        //     source: new VectorSource({
-        //         url: 'http://gis.edtest.site:5173/ogc/temp',
-        //         params: {
-        //             SERVICE: 'WMS',
-        //             VERSION: '1.3.0',
-        //             REQUEST: 'GetMap',
-        //             LAYER: '%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D',
-        //             FORMAT: 'image/png',
-        //             STYLE: 'default',
-        //             SLD_VERSION: '1.1.0',
-        //             FORMAT: 'image/png',
-        //         }
-        //         // url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
-        //         // url: 'https://openlyersbook.github.io/openlayers_book_samples/assets/data/countries.geojson',
-        //         // format: new GeoJSON(),
-        //     }),
-        // });
-        // return a
-
         let result, layerSource
         let layerType = layer.layer_type
         let figureType = layer.figure_type
@@ -313,6 +283,7 @@ export default {
                     })
                     break;
                 case 'Surface':
+                    // needFix: 要是連結格式不對，該如何處理
                     if ( url ) {
                         request = url.split("WMSServer?")
                         request[1] = request[1].split('&')
@@ -321,7 +292,6 @@ export default {
                             sub[subNode[0]] = subNode[1]
                         })
                     }
-                    // needFix!!
                     // "https://dwgis.ncdr.nat.gov.tw/arcgis/services/ncdr/NCDR_Maps/MapServer/WmsServerhttps://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentialSeaZone/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&LAYERS=1&STYLES=&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826"
                     // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
                     // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
