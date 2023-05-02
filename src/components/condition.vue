@@ -51,7 +51,6 @@ export default {
             } else {
                 state.DropDown = null
             }
-            console.log(state.DropDown)
         }
         function LayerCheckBoxChange(e, item) {
             if (item.subNode.single_tiles || !(isNaN(item.nestedSubNodeIndex))) {

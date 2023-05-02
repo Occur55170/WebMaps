@@ -37,6 +37,7 @@ import baseMapList from '@/config/baseMapList'
 import 'ol-ext/dist/ol-ext.css'
 
 import { get as getProjection } from 'ol/proj';
+
 export default {
     props: {},
     setup(props, { emit }) {
@@ -197,7 +198,7 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
-                    // needfix: 部落進入layerMode的新增圖層需要重構
+                    // needfix: 此處為測試用，正式會併入同api 可刪除部落進入layerMode的新增圖層需要重構
                     if (value.checked) {
                         if (value.type === 'tribe') {
                             Object.entries(tribeIdList).forEach((element)=>{
@@ -427,7 +428,6 @@ export default {
         }
 
         function getCurrentLayerNames() {
-            // needfix: 修改成可自行加入特定layer
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
             state.currentLayers = layers?.map(layer => {
@@ -454,9 +454,10 @@ export default {
             }
         }
 
-        // function closeMapData() {
-        //     overlay.value.setPosition(undefined)
-        // }
+        function closeMapData() {
+            // overlay.value.setPosition(undefined)
+            state.areaDataId = ''
+        }
 
         // function switchMapDetail(id) {
         //     if (feature) {
@@ -643,7 +644,13 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <areaData ref="mapDetailsPopup" id="areaData" class="areaData" v-if="state.areaDataId" :areaDataId="state.areaDataId" :maxHeight="500" />
+        <areaData ref="mapDetailsPopup" class="areaData"
+        v-if="state.areaDataId"
+        :closeMapData="()=>{
+            state.areaDataId = ''
+        }"
+        :areaDataId="state.areaDataId"
+        :maxHeight="500" />
     </div>
 </template>
 
@@ -684,11 +691,10 @@ export default {
 
 .areaData
     width: 450px
-    // max-height: 500px
+    max-height: 500px
     background: #fff
     position: absolute
     top: 0
     right: 0
     box-sizing: border-box
-    padding: 10px
 </style>

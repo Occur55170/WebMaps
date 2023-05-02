@@ -150,12 +150,6 @@ export default {
         });
     },
     DimensionMap: () => {
-            // 95TM2:
-            //     x: 283076.26
-            //     y: 2727660.24
-            // WGS84:
-            //     lat: 24.655499
-            //     lng: 121.326776
         const circleFeature = new Feature({
             name: 'DimensionMap',
             title: 'DimensionMap',
@@ -251,74 +245,75 @@ export default {
                     // })
 
                     if ( url ) {
-                        request = url.split("WMSServer?")
-                        request[1] = request[1].split('&')
-                        request[1].forEach(node=>{
-                            const subNode = node.split('=')
-                            sub[subNode[0]] = subNode[1]
-                        })
+                        const api = new URL(url)
+                        // 取得網址部分
+                        const origin = api.origin
+                        const pathname = api.pathname
+
+                        // 取得query參數
+                        const searchParams = api.searchParams;
+                        const searchParamsObject = {};
+                        for (const [key, value] of searchParams.entries()) {
+                            searchParamsObject[key] = value;
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
                     }
                     layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
-                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
-                        params: {
-                            'SERVICE': 'WMS',
-                            'BGCOLOR': '0xFFFFFF',
-                            'TRANSPARENT': 'TRUE',
-                            'SRS': 'EPSG:3826',
-                            'LAYERS': '0',
-                            'VERSION': '1.1.1',
-                            'FORMAT': 'image/png',
-                        },
+                        url: request[0],
+                        params: request[1],
                         serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     })
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0] + 'WMSServer?',
-                        params: sub,
-                        serverType: 'mapserver'
-                    })
                     break;
                 case 'Surface':
-                    // needFix: 要是連結格式不對，該如何處理
                     if ( url ) {
-                        request = url.split("WMSServer?")
-                        request[1] = request[1].split('&')
-                        request[1].forEach(node=>{
-                            const subNode = node.split('=')
-                            sub[subNode[0]] = subNode[1]
-                        })
+                        const api = new URL(url)
+                        // 取得網址部分
+                        const origin = api.origin
+                        const pathname = api.pathname
+
+                        // 取得query參數
+                        const searchParams = api.searchParams;
+                        const searchParamsObject = {};
+                        for (const [key, value] of searchParams.entries()) {
+                            searchParamsObject[key] = value;
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
                     }
-                    // "https://dwgis.ncdr.nat.gov.tw/arcgis/services/ncdr/NCDR_Maps/MapServer/WmsServerhttps://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentialSeaZone/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&LAYERS=1&STYLES=&FORMAT=image/png&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826"
-                    // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
-                    // url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer',
-                    // items_group
                     layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
-                        url: request[0] + 'WMSServer?',
-                        params: sub,
+                        url: request[0],
+                        params:  request[1],
                         serverType: 'mapserver'
                     })
                     break;
                     case 'Line':
                         // 活動斷層
                         if ( url ) {
-                            request = url.split("WMSServer?")
-                            request[1] = request[1].split('&')
-                            request[1].forEach(node=>{
-                                const subNode = node.split('=')
-                                sub[subNode[0]] = subNode[1]
-                            })
+                            const api = new URL(url)
+                            // 取得網址部分
+                            const origin = api.origin
+                            const pathname = api.pathname
+
+                            // 取得query參數
+                            const searchParams = api.searchParams;
+                            const searchParamsObject = {};
+                            for (const [key, value] of searchParams.entries()) {
+                                searchParamsObject[key] = value;
+                            }
+                            request[0] = origin + pathname
+                            request[1] = searchParamsObject
                         }
                         layerSource = new TileWMS({
                             maxzoom: 18,
                             minzoom: 3,
-                            url: request[0] + 'WMSServer?',
-                            params: sub,
+                            url: request[0],
+                            params: request[1],
                             serverType: 'mapserver'
                         })
                         break;
