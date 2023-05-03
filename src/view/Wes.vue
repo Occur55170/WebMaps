@@ -57,20 +57,34 @@ export default {
             source: new OSM(),
         })
 
+        // https://gis.stackexchange.com/questions/179114/error-when-trying-to-get-a-click-event-on-wms-layer
+        // function findFeaturesAtLocationOnClick(event) {
+        //     mouseLocation = map.getLonLatFromPixel(event.xy);
+        //     var url = events.getFullRequestString(
+        //         {
+        //             REQUEST: "GetFeatureInfo",
+        //             EXCEPTIONS: "application/vnd.ogc.se_xml",
+        //             BBOX: map.getExtent().toBBOX(),
+        //             X: event.xy.x,
+        //             Y: event.xy.y,
+        //             INFO_FORMAT: 'text/plain',
+        //             QUERY_LAYERS: 'events',
+        //             FEATURE_COUNT: 100,
+        //             WIDTH: map.size.w,
+        //             HEIGHT: map.size.h
+        //         },
+        //         wmsURL
+        //     );
+        //     OpenLayers.loadURL(url, '', this, setPopupHTML);
+        // }
+
+        // function setPopupHTML(response) {
+            // In this function, the response contains the exception I mentioned above
+
+        // }
 
         onMounted(async () => {
             const api = 'http://gis.edtest.site:8010/ogc/temp?LAYER=%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D&REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&VERSION=1.1.1&FORMAT=image/png&STYLES='
-            // const b = window.encodeURI('新竹縣原住民部落範圍')
-            // console.log(a === b)
-            // 'https://api.edtest.site/layers'
-            // $.ajax({
-            //     url: api,
-            //     method: "GET"
-            // }).done(res => {
-            //     console.log(res)
-            // }).fail(FailMethod => {
-            //     console.log('Fail', FailMethod)
-            // })
             const url = new URL(api);
 
             // 取得網址部分
@@ -83,19 +97,29 @@ export default {
             for (const [key, value] of searchParams.entries()) {
                 searchParamsObject[key] = value;
             }
-            console.log(origin + pathname, searchParamsObject)
 
-
-            // http://gis.edtest.site:8010/ogc/temp?LAYER=新竹縣原住民部落範圍&REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&VERSION=1.3.0&FORMAT=image/png&STYLES=
-            const wmsSource = new TileWMS({
-                url: origin + pathname,
-                params: searchParamsObject,
-                serverType: 'geoserver'
-            })
+            // searchParamsObject.TILE = true
+            console.log('2', searchParamsObject)
 
             const braster = new TileLayer ({
-                source: wmsSource
+                source: new TileWMS({
+                    url: origin + pathname,
+                    params: searchParamsObject,
+                    serverType: 'geoserver',
+                    // 需要開啟此
+                    // crossOrigin: 'anonymous',
+                })
             })
+
+
+            // const braster = new TileLayer({
+            //     source: new TileWMS({
+            //         url: 'https://ahocevar.com/geoserver/wms',
+            //         params: {'LAYERS': 'ne:ne', 'TILED': true},
+            //         serverType: 'geoserver',
+            //         crossOrigin: 'anonymous',
+            //     }),
+            // })
 
 
             state.map1 = new Map({
@@ -105,16 +129,29 @@ export default {
                 controls: [],
             })
 
+            console.log(braster.getSource())
             state.map1.on('click', (evt)=>{
-                console.log(evt)
-                const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                    return feature
+                // const data = braster.getData(evt.pixel)
+                const data = braster.getEventPixel(evt.originalEvent);
+                console.log('getData', data)
+                state.map1.forEachFeatureAtPixel(evt.pixel, function(layer) {
+                    console.log(layer.getSource().getParams().LAYERS)
                 })
-                if (feature) {
-                    // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                    console.log('Feature')
-                }
+                // if (feature) {
+                //     // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                //     console.log('Feature')
+                // }
             })
+
+            // state.map1.on('pointermove', function (evt) {
+            //     if (evt.dragging) {
+            //         return;
+            //     }
+            //     const data = braster.getData(evt.pixel);
+            //     console.log(data)
+            //     // const hit = data && data[3] > 0; // transparent pixels have zero for data[3]
+            //     // state.map1.getTargetElement().style.cursor = hit ? 'pointer' : '';
+            // });
         })
 
         function showLayer() {

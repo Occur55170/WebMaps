@@ -269,6 +269,7 @@ export default {
                     })
                     break;
                 case 'Surface':
+                    console.log(url)
                     if ( url ) {
                         const api = new URL(url)
                         // 取得網址部分
@@ -331,7 +332,6 @@ export default {
             console.log('GeoJsonLayer', figureType)
             switch (figureType) {
                 case 'Line':
-                    console.log('1')
                     result = new VectorLayer({
                         source: new VectorSource({
                             url: 'http://gis.edtest.site:8010/ogc/temp',

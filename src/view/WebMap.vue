@@ -198,8 +198,9 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
-                    // needfix: 此處為測試用，正式會併入同api 可刪除部落進入layerMode的新增圖層需要重構
                     if (value.checked) {
+
+                        // needfix: 此判斷為測試用(可刪除)，正式會併入同api
                         if (value.type === 'tribe') {
                             Object.entries(tribeIdList).forEach((element)=>{
                                 getTribeData(element[0]).then((e)=>{
@@ -235,6 +236,7 @@ export default {
                                 }
                             })
                             onMapLayerStatus('add', target.getTarget(), value.id)
+
                         } else {
                             // needFix: 無法刪除全部subNodeIndex圖層
                             if (`${value.nestedSubNodeIndex}`) {
@@ -249,6 +251,17 @@ export default {
                             }
                             let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                             target.addLayer(targetLayer)
+
+                            // target.on('click', (evt)=>{
+                            //     console.log(evt)
+                            //     const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+                            //         return feature
+                            //     })
+                            //     if (feature) {
+                            //         // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                            //         state.areaDataId = feature.get('tribeValue')
+                            //     }
+                            // })
 
                             onMapLayerStatus('add', target.getTarget(), value.id)
                         }
