@@ -200,71 +200,36 @@ export default {
                 case 'layerMode':
                     if (value.checked) {
 
-                        // needfix: 此判斷為測試用(可刪除)，正式會併入同api
-                        if (value.type === 'tribe') {
-                            Object.entries(tribeIdList).forEach((element)=>{
-                                getTribeData(element[0]).then((e)=>{
-                                    const { lng, lat, tribeName } = e.basicInformation.coordinates.WGS84
-                                    const areaLineLayer = new Vector({
-                                        name: tribeName,
-                                        title: tribeName,
-                                        source: new VectorSource({
-                                            features: [new Feature({
-                                                title: e.basicInformation.tribeName,
-                                                type: `tribeFeature`,
-                                                tribeValue: element[0],
-                                                geometry: new Circle([lng, lat], 0.005),
-                                            })],
-                                        }),
-                                        style: new Style({
-                                            fill: new Fill({
-                                                color: '#0f9ce2'
-                                            }),
-                                        })
-                                    })
-                                    target.addLayer(areaLineLayer)
-                                })
-                            })
-
-                            target.on('click', (evt)=>{
-                                const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                                    return feature
-                                })
-                                if (feature) {
-                                    // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                                    state.areaDataId = feature.get('tribeValue')
+                        // needFix: 無法刪除全部subNodeIndex圖層
+                            if (`${value.nestedSubNodeIndex}`) {
+                            let layersAry = targetLayers.getArray()
+                            layersAry.forEach(element => {
+                                if(!(element.get('id'))){return}
+                                if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}`)) {
+                                    target.removeLayer(element)
                                 }
                             })
-                            onMapLayerStatus('add', target.getTarget(), value.id)
-
-                        } else {
-                            // needFix: 無法刪除全部subNodeIndex圖層
-                            if (`${value.nestedSubNodeIndex}`) {
-                                let layersAry = targetLayers.getArray()
-                                layersAry.forEach(element => {
-                                    if(!(element.get('id'))){return}
-                                    if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}`)) {
-                                        target.removeLayer(element)
-                                    }
-                                })
-                                onMapLayerStatus('delete', target.getTarget(), value.id)
-                            }
-                            let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
-                            target.addLayer(targetLayer)
-
-                            // target.on('click', (evt)=>{
-                            //     console.log(evt)
-                            //     const feature = state.map1.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
-                            //         return feature
-                            //     })
-                            //     if (feature) {
-                            //         // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                            //         state.areaDataId = feature.get('tribeValue')
-                            //     }
-                            // })
-
-                            onMapLayerStatus('add', target.getTarget(), value.id)
+                            onMapLayerStatus('delete', target.getTarget(), value.id)
                         }
+                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
+                        target.addLayer(targetLayer)
+
+                        target.on('click', (evt)=>{
+                            // let layerList = targetLayers.getArray()
+                            // let tribeLayer = layerList.filter(node=> node.get('id') == 'node0_subNode3_nestedSubNodeundefined')[0]
+                            const data = targetLayer.getData(evt.pixel)
+                            console.log('getData', data)
+
+                            // target.forEachFeatureAtPixel(evt.pixel, function(layer) {
+                            //     console.log(layer.getSource().getParams().LAYERS)
+                            // })
+                            // if (feature) {
+                            //     // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                                //     console.log('Feature')
+                            // }
+                        })
+
+                        onMapLayerStatus('add', target.getTarget(), value.id)
 
                     } else {
                         if (value.type === 'tribe') {

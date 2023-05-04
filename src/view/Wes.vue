@@ -98,16 +98,14 @@ export default {
                 searchParamsObject[key] = value;
             }
 
-            // searchParamsObject.TILE = true
-            console.log('2', searchParamsObject)
-
             const braster = new TileLayer ({
                 source: new TileWMS({
+                    name: 'braster',
                     url: origin + pathname,
                     params: searchParamsObject,
                     serverType: 'geoserver',
                     // 需要開啟此
-                    // crossOrigin: 'anonymous',
+                    crossOrigin: 'anonymous',
                 })
             })
 
@@ -124,15 +122,21 @@ export default {
 
             state.map1 = new Map({
                 target: 'map1',
-                layers: [baseMapList.sourceFun('default'), braster],
+                layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
             })
 
-            console.log(braster.getSource())
+            state.map1.addLayer(braster)
+
             state.map1.on('click', (evt)=>{
-                // const data = braster.getData(evt.pixel)
-                const data = braster.getEventPixel(evt.originalEvent);
+                let layerList = state.map1.getLayers().getArray()
+                let tribeLayer = layerList.filter(node=> node.get('id') == 'node0_subNode3_nestedSubNodeundefined')
+                console.log(tribeLayer)
+                console.log(braster)
+                // const data = tribeLayer.getData(evt.pixel)
+
+                const data = braster.getData(evt.pixel)
                 console.log('getData', data)
                 state.map1.forEachFeatureAtPixel(evt.pixel, function(layer) {
                     console.log(layer.getSource().getParams().LAYERS)
