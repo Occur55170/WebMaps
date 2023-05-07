@@ -80,7 +80,7 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            areaDataId: '',
+            tribeId: '',
             ol3d: null,
         })
 
@@ -431,13 +431,13 @@ export default {
 
         function closeMapData() {
             // overlay.value.setPosition(undefined)
-            state.areaDataId = ''
+            state.tribeId = ''
         }
 
         // function switchMapDetail(id) {
         //     if (feature) {
         //         const coordinate = evt.coordinate
-        //         state.areaDataId = feature.get('name')
+        //         state.tribeId = feature.get('name')
         //         overlay.value.setPosition(coordinate)
         //     } else {
         //         overlay.value.setPosition(undefined)
@@ -618,11 +618,11 @@ export default {
 
         <!-- 地圖細節小窗 -->
         <areaData ref="mapDetailsPopup" class="areaData"
-        v-if="state.areaDataId"
+        v-if="state.tribeId"
         :closeMapData="()=>{
-            state.areaDataId = ''
+            state.tribeId = ''
         }"
-        :areaDataId="state.areaDataId"
+        :tribeId="state.tribeId"
         :maxHeight="500" />
     </div>
 </template>

@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router'
 
 export default {
     props: {
-        id: {
+        tribeId: {
             Type: String,
             default: 0
         },
@@ -13,6 +13,9 @@ export default {
     },
     setup(props, { emit }) {
         const router = useRouter()
+        const state = reactive({
+            tribeData: {}
+        })
 
         function onMapControl(action) {
             emit('onMapControl', { action })
@@ -25,9 +28,24 @@ export default {
             })
         }
 
+        onMounted(async () => {
+            const result = await $.ajax({
+                url: `https://api.edtest.site/tribe?tribeCode=${props.tribeId || 88}`,
+                method: "GET"
+            }).done(res => {
+                state.tribeData = res
+                return res
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+                return false
+            })
+            console.log(state.tribeData)
+        })
+
         return {
-            onMapControl,
             router,
+            state,
+            onMapControl,
             goTop
         }
     }
@@ -60,28 +78,29 @@ export default {
                     </ul>
                 </div>
                 <div class="detailMain">
-                    <h2 class="text-center">石磊部落</h2>
+                    <h2 class="text-center">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
                     <div class="section mb-5 d-flex align-items-center">
                         <div class="text-brown fw-bold col-3 text-center">聚落座標</div>
                         <div class="col-8">
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
-                            <p>【97TM2座標】X：283076.26， Y：2727660.24</p>
-                            <p>【WGS84座標】 經度：121.326776，緯度：24.655499 |</p>
+                            <p>【97TM2座標】 X：{{ state.tribeData?.basicInformation?.coordinates['95TM2'].x }}， {{ state.tribeData?.basicInformation?.coordinates['95TM2'].y }}</p>
+                            <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p>
                         </div>
                     </div>
                     <div class="row flex-nowrap mx-0 mb-5 justify-content-between">
                         <div class="section py-4 col-3 text-center pe-2">
                             <p class="mb-2 text-brown fw-bold">人口戶數</p>
-                            <p class="mb-0 fw-bold">77</p>
+                            <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.totalHouseholds }}</p>
                         </div>
                         <div class="section py-4 col-3 text-center pe-2">
                             <p class="mb-2 text-brown fw-bold">聚落規模</p>
-                            <p class="mb-0 fw-bold">高(20戶以上)</p>
+                                <!-- 高(20戶以上) -->
+                            <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.scale }}</p>
                         </div>
                         <div class="section py-4 col-3 text-center">
                             <p class="mb-2 text-brown fw-bold">行政區域</p>
-                            <p class="mb-0 fw-bold">新竹縣尖石鄉玉峰村9~10鄰</p>
+                            <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.area }}</p>
                         </div>
                     </div>
                     <div class="section mb-5">
@@ -102,8 +121,7 @@ export default {
                         <div class="text-brown fw-bold">自然環境</div>
                         <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
                         <div>
-                            <p>石磊部落周邊以大漢溪水系之上游馬里闊丸溪(玉峰溪)，與其支流石磊溪為主。部落位於石磊溪右岸的山坡地區域，海拔介於850至900公尺之間。部落範圍內地層以澳底層為主，岩性為砂、頁岩互層。砂岩呈淡灰色，顆粒細至中粒，淘選較佳，膠結良好、質地較為堅硬。頁岩則呈深灰色，因其頁理發達，且常受低度變質作用，易導致邊坡岩屑滑動等災害。
-                            </p>
+                            <p>{{ state.tribeData?.naturalEnvironment }}</p>
                         </div>
                     </div>
                     <div class="section mb-5">
@@ -116,6 +134,7 @@ export default {
                         </div>
                         <div>
                             <div class="text-brown fw-bold mb-2">文化地景點</div>
+                            <!-- {{ state.tribeData.culturalLandscape }} -->
                             <ul class="list-unstyled d-flex flex-wrap">
                                 <li class="col-3 px-2">
                                     <img src="@/assets/mapDetail/5-1.png" alt="" class="w-100">
@@ -166,35 +185,12 @@ export default {
                                 <div class="col-3 bg-brown text-white">災害原因</div>
                                 <div class="col-4 bg-brown text-white">災害描述</div>
                             </div>
-                            <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 bg-grey-light">1.</div>
-                                <div class="col-2 bg-grey-light">105/10</div>
-                                <div class="col-3 bg-grey-light">降雨</div>
-                                <div class="col-4 bg-grey-light">降雨造成石磊國小至天主堂農路段邊坡崩塌，崩塌範圍高20公尺，長2公尺。</div>
-                            </div>
-                            <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 bg-grey-light">2.</div>
-                                <div class="col-2 bg-grey-light">105/10</div>
-                                <div class="col-3 bg-grey-light">降雨</div>
-                                <div class="col-4 bg-grey-light">降雨造成石磊10鄰農路上邊坡崩塌，土石持續滑落，崩塌範圍高28公尺，長14公尺。</div>
-                            </div>
-                            <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 bg-grey-light">3.</div>
-                                <div class="col-2 bg-grey-light">105/09/25</div>
-                                <div class="col-3 bg-grey-light">降雨</div>
-                                <div class="col-4 bg-grey-light">降雨致石磊道路3.8K路基坍方，僅單線通車，道路中斷約60公尺長。</div>
-                            </div>
-                            <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 bg-grey-light">4.</div>
-                                <div class="col-2 bg-grey-light">97/08</div>
-                                <div class="col-3 bg-grey-light">辛樂克及薔蜜颱風</div>
-                                <div class="col-4 bg-grey-light">豪雨使土壤滑動，長約40公尺</div>
-                            </div>
-                            <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 bg-grey-light">5.</div>
-                                <div class="col-2 bg-grey-light">97/08</div>
-                                <div class="col-3 bg-grey-light">辛樂克及薔蜜颱風</div>
-                                <div class="col-4 bg-grey-light">颱風豪雨使土壤滑動，滑動長約23公尺，影響石磊道路7K+500。</div>
+                            <div class="d-flex flex-nowrap justify-content-between"
+                            v-for="(item, itemKey) in state.tribeData?.historicalDisasters" :key="itemKey">
+                                <div class="col-1 bg-grey-light">{{ itemKey+1 }}.</div>
+                                <div class="col-2 bg-grey-light">{{ item.date }}</div>
+                                <div class="col-3 bg-grey-light">{{ item.cause }}</div>
+                                <div class="col-4 bg-grey-light">{{ item.description }}</div>
                             </div>
                         </div>
                     </div>

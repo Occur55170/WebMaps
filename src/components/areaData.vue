@@ -5,7 +5,7 @@ import { compose } from 'ol/transform'
 
 export default {
     props: {
-        areaDataId:{
+        tribeId:{
             Type: String,
             default: 0
         },
@@ -38,15 +38,15 @@ export default {
             return result
         }
 
-        onUpdated(props.areaDataId, ()=>{
-            getTribeData(props.areaDataId).then((result)=>{
+        onUpdated(props.tribeId, ()=>{
+            getTribeData(props.tribeId).then((result)=>{
                 state.tribeData = result
             })
         })
 
 
         onMounted(()=>{
-            getTribeData(props.areaDataId).then((result)=>{
+            getTribeData(props.tribeId).then((result)=>{
                 state.tribeData = result
             })
         })
@@ -73,7 +73,7 @@ export default {
         </div>
         <img src="@/assets/example-AddressData.jpg" class="w-100" alt="">
         <div class="row mx-0 align-items-center p-2 position-relative">
-            <p>title: {{ props.areaDataId }} {{ state?.tribeData?.basicInformation?.tribeName }} </p>
+            <p>title: {{ props.tribeId }} {{ state?.tribeData?.basicInformation?.tribeName }} </p>
             <p>描述: {{ state?.tribeData?.basicInformation?.description }}</p>
             <div class="position-absolute w-auto top-0 end-0 mt-2">更多資訊</div>
             <p>{{ state?.tribeData?.basicInformation?.area }}</p>
