@@ -31,7 +31,7 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers, tribeIdList, getTribeData } from '@/config/mapLayerList'
+import mapLayerList, { initLayers, getTribeData } from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'

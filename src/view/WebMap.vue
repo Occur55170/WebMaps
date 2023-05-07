@@ -31,7 +31,7 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers, tribeIdList, getTribeData } from '@/config/mapLayerList'
+import mapLayerList, { initLayers, getTribeData } from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
@@ -199,9 +199,8 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-
                         // needFix: 無法刪除全部subNodeIndex圖層
-                            if (`${value.nestedSubNodeIndex}`) {
+                        if (`${value.nestedSubNodeIndex}`) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
                                 if(!(element.get('id'))){return}
@@ -213,21 +212,19 @@ export default {
                         }
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
+                                console.log('getData', targetLayer)
 
-                        target.on('click', (evt)=>{
-                            // let layerList = targetLayers.getArray()
-                            // let tribeLayer = layerList.filter(node=> node.get('id') == 'node0_subNode3_nestedSubNodeundefined')[0]
-                            const data = targetLayer.getData(evt.pixel)
-                            console.log('getData', data)
+                        if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
+                            target.on('click', (evt)=>{
+                                const data = targetLayer.getData(evt.pixel)
+                                // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                                console.log('getData', data)
+                                if (data[0]) {
 
-                            // target.forEachFeatureAtPixel(evt.pixel, function(layer) {
-                            //     console.log(layer.getSource().getParams().LAYERS)
-                            // })
-                            // if (feature) {
-                            //     // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                                //     console.log('Feature')
-                            // }
-                        })
+                                }
+
+                            })
+                        }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
 
@@ -510,7 +507,6 @@ export default {
             props,
             mapDetailsPopup,
             overlay,
-            tribeIdList,
             mapControl,
             layerControl,
             getCurrentLayerNames,
@@ -555,7 +551,6 @@ export default {
                     v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
-                        tribeIdList: tribeIdList,
                         onClose: () => {
                             state.conditionWrap = false
                         }

@@ -24,10 +24,6 @@ export default {
         currentLayers: {
             type: Array,
             default: []
-        },
-        tribeIdList: {
-            type: Object,
-            default: () => {}
         }
     },
     setup(props, { emit }) {
@@ -159,29 +155,6 @@ export default {
                                 </select>
                         </div>
                     </div>
-                </div>
-                <div v-if="props.tribeIdList">
-                    <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none">
-                        <!-- @click="openLayerList('tribeIdList')" -->
-                        <input id="tribeItem" type="checkbox"
-                        @change="(e) => {
-                            checkTribe(e)
-                        }">
-                        <!-- <div :class="node.groupClass"></div> -->
-                        <label for="tribeItem">選擇部落</label>
-                        <!-- <svg viewBox="0 0 24 24" :class="{ 'openTitle': state.DropDown == 'tribeIdList' }">
-                            <path fill="currentColor" d="M8 5v14l11-7z" />
-                        </svg> -->
-                    </div>
-                    <!-- v-if="state.DropDown == nodeIndex" -->
-                    <!-- <div v-for="item in Object.entries(props.tribeIdList)">
-                        <input type="checkbox"
-                        :value="item[0]"
-                        @change="(e) => {
-                            checkTribe(e)
-                        }">
-                        {{ item[1] }}
-                    </div> -->
                 </div>
             </div>
         </div>

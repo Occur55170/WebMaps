@@ -31,17 +31,6 @@ import { format } from 'ol/coordinate'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 
-export const tribeIdList = {
-    88: '石磊部',
-    89: '平論文部',
-    90: '抬耀部',
-    91: '帛納外部',
-    133: '河頭部落',
-    118: '十八兒部落',
-    119: '五峰部落',
-    134: '泰平部落'
-}
-
 export const initLayers = async function() {
     const obj = await $.ajax({
         url: 'https://api.edtest.site/layers',
@@ -214,36 +203,6 @@ export default {
             const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType) {
                 case 'Point':
-                    // needFix: 樣式尚未套用
-                    // const myStyle = new Style({
-                    //     image: new Icon({
-                    //         anchor: [0.5, 0.96],
-                    //         src: 'https://pixlr.com/img/icon/premium-tick.svg',
-                    //         crossOrigin: 'anonymous',
-                    //         scale: 2,
-                    //         // src: layer.tiles_url,
-                    //         // width: 300,
-                    //         // height: 300,
-                    //     }),
-                    //     stroke: new Stroke({
-                    //         color: '#319FD3',
-                    //         width: 1
-                    //     }),
-                    //     fill: new Fill({
-                    //         color: '#000000',
-                    //     }),
-                    //     text: new Text({
-                    //         font: '12px Calibri,sans-serif',
-                    //         fill: new Fill({
-                    //             color: '#ff0'
-                    //         }),
-                    //         stroke: new Stroke({
-                    //             color: '#09C',
-                    //             width: 3
-                    //         })
-                    //     })
-                    // })
-
                     if ( url ) {
                         const api = new URL(url)
                         // 取得網址部分
@@ -269,7 +228,6 @@ export default {
                     })
                     break;
                 case 'Surface':
-                    console.log(url)
                     if ( url ) {
                         const api = new URL(url)
                         // 取得網址部分
@@ -322,10 +280,17 @@ export default {
                     console.log('otherWMSLayer', figureType)
             }
             let tileTitle = isNaN(nestedSubNodeIndex) ? '' : `- ${ layer.tiles_list[nestedSubNodeIndex]?.title }`
+            console.log(layer)
             result = new TileLayer({
                 id: id,
                 label: `${ layer.title } ${ tileTitle }`,
-                source: layerSource,
+                source: new TileWMS({
+                    name: layer.title,
+                    url: layerSource.getUrls()[0],
+                    params: layerSource.getParams(),
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous',
+                }),
             })
         }
         if (layerType === 'GeoJson') {
@@ -350,16 +315,6 @@ export default {
                             // format: new GeoJSON(),
                         }),
                     });
-
-                    // help_btn_display true
-                    // help_memo "<p>資料來源：農委會水土保持局</p>\n<p>111年土石流災害潛勢溪流總計為1,729條。</p>"
-                    // icon "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAOUlEQVQ4jWNhoDJgGTVw1MDBYuBKhqcNjAxM9pQY9J/h38FwBukG2rgwnEG6gaoGUhOMGjhqIBkAAHaXB0Oou38UAAAAAElFTkSuQmCC"
-                    // prop_show_list ['Debrisno']
-                    // tile_url null
-                    // tiles_list null
-                    // tiles_list_description ""
-                    // tiles_url "https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson"
-                    // title "土石流潛勢溪流"
                     break;
                 case 'Point':
                     const wmsSource = new TileWMS({
@@ -375,7 +330,6 @@ export default {
                             'VERSION': '1.1.1',
                             'FORMAT': 'image/png',
                         },
-                        // serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     })
                     result = new TileLayer({
