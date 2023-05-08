@@ -61,25 +61,25 @@ export default {
                 <div class="aside px-0">
                     <ul class="ps-0">
                         <li class="text-center mb-5">
-                            <a class="bg-white fw-bold rounded text-decoration-none text-brown">基本資料</a>
+                            <a href="#section1" class="bg-white fw-bold rounded text-decoration-none text-brown">基本資料</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a class="bg-white fw-bold rounded text-decoration-none text-brown">部落地標</a>
+                            <a href="#section2" class="bg-white fw-bold rounded text-decoration-none text-brown">部落地標</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a class="bg-white fw-bold rounded text-decoration-none text-brown">自然環境</a>
+                            <a href="#section3" class="bg-white fw-bold rounded text-decoration-none text-brown">自然環境</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a class="bg-white fw-bold rounded text-decoration-none text-brown">人文環境</a>
+                            <a href="#section4" class="bg-white fw-bold rounded text-decoration-none text-brown">人文環境</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a class="bg-white fw-bold rounded text-decoration-none text-brown">歷史災害</a>
+                            <a href="#section5" class="bg-white fw-bold rounded text-decoration-none text-brown">歷史災害</a>
                         </li>
                     </ul>
                 </div>
                 <div class="detailMain">
                     <h2 class="text-center">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
-                    <div class="section mb-5 d-flex align-items-center">
+                    <div class="section mb-5 d-flex align-items-center" id="section1">
                         <div class="text-brown fw-bold col-3 text-center">聚落座標</div>
                         <div class="col-8">
                             <p>聚落坐標(97TM2,WGS84)</p>
@@ -89,21 +89,30 @@ export default {
                         </div>
                     </div>
                     <div class="row flex-nowrap mx-0 mb-5 justify-content-between">
-                        <div class="section py-4 col-3 text-center pe-2">
-                            <p class="mb-2 text-brown fw-bold">人口戶數</p>
+                        <div class="section py-4 px-0 col-3 text-center">
+                            <p class="mb-2 text-brown fs-5 fw-bold">
+                                <img src="@/assets/mapDetail/Frame.png" alt="">
+                                人口戶數
+                            </p>
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.totalHouseholds }}</p>
                         </div>
-                        <div class="section py-4 col-3 text-center pe-2">
-                            <p class="mb-2 text-brown fw-bold">聚落規模</p>
+                        <div class="section py-4 px-0 col-3 text-center">
+                            <p class="mb-2 text-brown fs-5 fw-bold">
+                                <img src="@/assets/mapDetail/Frame.png" alt="">
+                                聚落規模
+                            </p>
                                 <!-- 高(20戶以上) -->
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.scale }}</p>
                         </div>
-                        <div class="section py-4 col-3 text-center">
-                            <p class="mb-2 text-brown fw-bold">行政區域</p>
+                        <div class="section py-4 px-0 col-3 text-center">
+                            <p class="mb-2 text-brown fs-5 fw-bold">
+                                <img src="@/assets/mapDetail/Frame.png" alt="">
+                                行政區域
+                            </p>
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.area }}</p>
                         </div>
                     </div>
-                    <div class="section mb-5">
+                    <div class="section mb-5" id="section2">
                         <div class="text-brown fw-bold">部落地標</div>
                         <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
                         <div class="d-flex flex-nowrap mx-0">
@@ -117,14 +126,14 @@ export default {
                             </div>
                         </div>
                     </div>
-                    <div class="section mb-5">
+                    <div class="section mb-5" id="section3">
                         <div class="text-brown fw-bold">自然環境</div>
                         <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
                         <div>
                             <p>{{ state.tribeData?.naturalEnvironment }}</p>
                         </div>
                     </div>
-                    <div class="section mb-5">
+                    <div class="section mb-5" id="section4">
                         <div class="text-brown fw-bold">人文環境</div>
                         <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
                         <div>石磊部落範圍內之文化地景分佈如下圖所示。地標地物包括石磊國小、石磊天主堂、石磊文化健康站和石磊教會等。部落產業以農業為主，種植椴木香菇及有機農業，以高冷蔬菜為主。</div>
@@ -172,7 +181,7 @@ export default {
                         </div>
                     </div>
 
-                    <div class="section mb-5 history">
+                    <div class="section mb-5 history" id="section5">
                         <div class="text-brown fw-bold">歷史災害</div>
                         <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
                         <div class="mb-4">
@@ -198,10 +207,10 @@ export default {
             </div>
         </div>
         <div class="position-fixed bottom-0 end-0 w-auto m-5">
-            <div class="goBack mb-4" @click="router.push({ name: 'index' })">
+            <div class="goBack mb-4 cursor-pointer" @click="router.push({ name: 'index' })">
                 <img src="@/assets/mapDetail/back.svg" alt="">
             </div>
-            <div class="goTop" @click="goTop()">
+            <div class="goTop cursor-pointer" @click="goTop()">
                 <img src="@/assets/mapDetail/top.svg" alt="">
             </div>
         </div>

@@ -199,6 +199,7 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
+                        // fix:以下判斷會無法紀錄全部圖層
                         // needFix: 無法刪除全部subNodeIndex圖層
                         if (`${value.nestedSubNodeIndex}`) {
                             let layersAry = targetLayers.getArray()
@@ -212,13 +213,13 @@ export default {
                         }
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                                console.log('getData', targetLayer)
 
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             target.on('click', (evt)=>{
                                 const data = targetLayer.getData(evt.pixel)
+                                // console.log('getAttributions', data)
+
                                 // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                                console.log('getData', data)
                                 if (data[0]) {
 
                                 }
@@ -229,32 +230,13 @@ export default {
                         onMapLayerStatus('add', target.getTarget(), value.id)
 
                     } else {
-                        if (value.type === 'tribe') {
-                            targetLayers.forEach((layer) => {
-                                if (layer instanceof Vector) {
-                                    layer.getSource().getFeatures().forEach((feature) => {
-                                        if (feature.get('type') === 'tribeFeature') {
-                                            layer.getSource().removeFeature(feature)
-
-                                            // needFix: 如果要素存在于地图上，需要更新地图视图
-                                            // if (feature.getGeometry()) {
-                                            //     map.getView().fit(source.getExtent(), { size: map.getSize() });
-                                            // }
-                                        }
-                                    })
-                                }
-                            })
-
-                        } else{
-                            // needfix: 刪除部落圖層
-                            let layersAry = targetLayers.getArray()
-                            layersAry.forEach(element => {
-                                if (element.get('id') == value.id) {
-                                    target.removeLayer(element)
-                                }
-                            })
-                            onMapLayerStatus('delete', target.getTarget(), value.id)
-                        }
+                        let layersAry = targetLayers.getArray()
+                        layersAry.forEach(element => {
+                            if (element.get('id') == value.id) {
+                                target.removeLayer(element)
+                            }
+                        })
+                        onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
                     break;
                 case 'selectLayerMode':
@@ -519,6 +501,8 @@ export default {
 
 <template>
     <div>
+        {{ state.map1LayerStatus }}
+        {{ state.map2LayerStatus }}
         <div class="SearchBar position-absolute">
             <img src="@/assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
