@@ -39,7 +39,6 @@ export default {
                 console.log('Fail', FailMethod)
                 return false
             })
-            console.log(state.tribeData)
         })
 
         return {

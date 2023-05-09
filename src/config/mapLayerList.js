@@ -199,8 +199,8 @@ export default {
         let layerType = layer.layer_type
         let figureType = layer.figure_type
         if (layerType === 'WMS') {
-            let request = [], sub = {}
-            const url = isNaN(nestedSubNodeIndex) ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+            let request = []
+            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType) {
                 case 'Point':
                     if ( url ) {
@@ -279,8 +279,7 @@ export default {
                 default:
                     console.log('otherWMSLayer', figureType)
             }
-            let tileTitle = isNaN(nestedSubNodeIndex) ? '' : `- ${ layer.tiles_list[nestedSubNodeIndex]?.title }`
-            console.log(layer)
+            let tileTitle = layer.single_tiles ? '' : `- ${ layer.tiles_list[nestedSubNodeIndex]?.title }`
             result = new TileLayer({
                 id: id,
                 label: `${ layer.title } ${ tileTitle }`,
@@ -293,6 +292,7 @@ export default {
                 }),
             })
         }
+        // needfix: 結構混亂
         if (layerType === 'GeoJson') {
             console.log('GeoJsonLayer', figureType)
             switch (figureType) {

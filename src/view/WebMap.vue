@@ -64,7 +64,6 @@ export default {
             }),
             baseMapsOptions: computed(() => baseMapList.sourceData()),
             selectLock: false,
-
             mapCount: 1,
             map1: null,
             map2: null,
@@ -82,6 +81,7 @@ export default {
             }),
             tribeId: '',
             ol3d: null,
+            selectValueTemp: 0,
         })
 
         const defaultView = new View({
@@ -96,20 +96,20 @@ export default {
 
         // 初始化地圖
         function initMap() {
-            overlay.value = new Overlay({
-                element: mapDetailsPopup.value,
-                autoPan: true,
-                autoPanAnimation: {
-                    duration: 250
-                }
-            })
+            // overlay.value = new Overlay({
+            //     element: mapDetailsPopup.value,
+            //     autoPan: true,
+            //     autoPanAnimation: {
+            //         duration: 250
+            //     }
+            // })
             state.map1 = new Map({
                 target: 'map1',
                 layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
                 // fix: !!!!有overlays，3D圖層無法使用
-                overlays: [overlay.value]
+                // overlays: [overlay.value]
             })
         }
 
@@ -199,31 +199,39 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // fix:以下判斷會無法紀錄全部圖層
-                        // needFix: 無法刪除全部subNodeIndex圖層
-                        if (`${value.nestedSubNodeIndex}`) {
+                        if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
                                 if(!(element.get('id'))){return}
-                                if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}`)) {
+                                if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
                                     target.removeLayer(element)
                                 }
                             })
                             onMapLayerStatus('delete', target.getTarget(), value.id)
                         }
-                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], value.nestedSubNodeIndex, value.id)
+
+                        let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
+                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
+                        // 部落圖層點擊事件
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             target.on('click', (evt)=>{
-                                const data = targetLayer.getData(evt.pixel)
-                                // console.log('getAttributions', data)
+                                // const data = targetLayer.getData(evt.pixel)
 
-                                // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                                if (data[0]) {
+                                // // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                                // if (data[0]) {
 
-                                }
+                                // }
 
+                                // var coordinate = evt.coordinate;
+                                // var pixel = target.getPixelFromCoordinate(coordinate);
+                                // var features = targetLayer.getSource().getFeaturesAtCoordinate(coordinate);
+                                // if (features.length > 0) {
+                                //     var properties = features[0].getProperties();
+                                //     console.log(properties)
+                                //     // 在這裡對要素的屬性進行處理
+                                // }
                             })
                         }
 
@@ -231,24 +239,37 @@ export default {
 
                     } else {
                         let layersAry = targetLayers.getArray()
-                        layersAry.forEach(element => {
-                            if (element.get('id') == value.id) {
-                                target.removeLayer(element)
-                            }
-                        })
+                        let toRemoveLayerId
+                        // needfix: 此處寫死 淹水.台灣近岸海域風浪危害圖 兩個圖層，看之後是否可以改成以single_tiles判斷
+                        switch(value.id){
+                            case 'node0_subNode0_nestedSubNodeundefined':
+                                toRemoveLayerId = layersAry.filter(element => element.get('id') === 'node0_subNode0_nestedSubNodeundefined')
+                                toRemoveLayerId.forEach((node) => {
+                                    target.removeLayer(node)
+                                })
+                                break
+                            case 'node3_subNode1_nestedSubNodeundefined':
+                                toRemoveLayerId = layersAry.filter(element => element.get('id') === 'node3_subNode1_nestedSubNodeundefined')
+                                toRemoveLayerId.forEach((node) => {
+                                    target.removeLayer(node)
+                                })
+                                break
+                            default:
+                                layersAry.forEach(element => {
+                                    if (element.get('id') == value.id) {
+                                        target.removeLayer(element)
+                                    }
+                                })
+                                break
+                        }
                         onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
                     break;
                 case 'selectLayerMode':
                     if (state.selectLock) { return }
                     if (value.layerName === 'all') {
-                        let layersToRemove = []
                         let layersAry = targetLayers.getArray()
-                        layersAry.forEach(element => {
-                            if (element.get('name') !== 'default') {
-                                layersToRemove.push(element)
-                            }
-                        })
+                        let layersToRemove = layersAry.filter(node=> node.get('name') !== 'default')
                         layersToRemove.forEach((node) => {
                             target.removeLayer(node)
                         })
@@ -326,7 +347,6 @@ export default {
                     }
                     break;
                 case 'changeDimensionMap':
-                    console.log(value)
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta] = value
                     if (value === '3D') {
@@ -501,8 +521,7 @@ export default {
 
 <template>
     <div>
-        {{ state.map1LayerStatus }}
-        {{ state.map2LayerStatus }}
+        <div class="btn" @click="state.tribeId = '88'">88</div>
         <div class="SearchBar position-absolute">
             <img src="@/assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
@@ -537,6 +556,9 @@ export default {
                         currentLayers: state.currentLayers,
                         onClose: () => {
                             state.conditionWrap = false
+                        },
+                        showSelectLayerValue: (val) => {
+                            state.selectValueTemp = val
                         }
                     }"
                     @onMapControl="({ action, value }) => { mapControl({ action, value }) }"

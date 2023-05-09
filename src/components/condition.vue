@@ -24,7 +24,11 @@ export default {
         currentLayers: {
             type: Array,
             default: []
-        }
+        },
+        showSelectLayerValue: {
+            type: Function,
+            default: () => {}
+        },
     },
     setup(props, { emit }) {
         const mapLayers = mapLayerList
@@ -49,30 +53,27 @@ export default {
             }
         }
         function LayerCheckBoxChange(e, item) {
-            if (item.subNode.single_tiles || !(isNaN(item.nestedSubNodeIndex))) {
-                let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
-                // itemId有問題
-                onLayerControl('layerMode', {
-                    checked: defaultChecked,
-                    nodeIndex: item.nodeIndex,
-                    subNodeIndex: item.subNodeIndex,
-                    nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
-                    id: item.id
-                })
-            } else {
-                console.log('還有子選項')
-            }
+            let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
+            onLayerControl('layerMode', {
+                checked: defaultChecked,
+                nodeIndex: item.nodeIndex,
+                subNodeIndex: item.subNodeIndex,
+                nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
+                nestedSubNode: String(item.nestedSubNodeIndex) ? true : false,
+                id: item.id
+            })
         }
 
         function checkTribe(e) {
             let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
             onLayerControl('layerMode', {
                 checked: defaultChecked,
-                // needfix: 進入layerMode的新增圖層需要重構
-                type: 'tribe',
-                // tribeId: e.target.value
             })
         }
+
+        watch(()=>state.TilesListValue, (newVal , oldVal)=>{
+            props.showSelectLayerValue(newVal)
+        })
 
         return {
             props,
@@ -93,6 +94,7 @@ export default {
     <div class="rounded-4 bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
+            {{ state.TilesListValue }}
             <a href="" class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
                 <svg width="32" height="32" viewBox="0 0 24 24">
                     <path fill="currentColor"
