@@ -30,6 +30,8 @@ import 'ol/ol.css' // ol提供的css样式
 import { format } from 'ol/coordinate'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
+export const tribeIdList = [ 88, 89, 90, 91, 133, 118, 119, 134 ]
+
 
 export const initLayers = async function() {
     const obj = await $.ajax({
@@ -40,160 +42,13 @@ export const initLayers = async function() {
 }
 
 export async function getTribeData (tribeId) {
-    const result = await $.ajax({
+    return await $.ajax({
         url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
         method: "GET"
-    }).done(res => {
-        return res
-        }).fail(FailMethod => {
-        console.log('Fail', FailMethod)
-        return false
-        })
-    return result
+    })
 }
 
 export default {
-    america: () => {
-        return new TileLayer({
-            name: 'america',
-            className: 'america',
-            preload: Infinity,
-            source: new TileArcGISRest({
-                url: 'https://sampleserver6.arcgisonline.com/ArcGIS/rest/services/' + 'USA/MapServer',
-            }),
-        })
-    },
-    EsriJSON: () => {
-        const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + 'RIVERPOLY_(1)/FeatureServer/0'
-        const style = new Style({
-            fill: new Fill(),
-            stroke: new Stroke({
-                color: [0, 38, 115, 1],
-                width: 0.5,
-            }),
-        });
-
-        const newVectorSource = new VectorSource({
-            format: new EsriJSON(),
-            url: function (extent, resolution, projection) {
-                const srid = projection.getCode().split(/:(?=\d+$)/).pop();
-                const url = serviceUrl + '/query/?f=json&' + 'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
-                    encodeURIComponent(`{"xmin":${extent[0]},"ymin":${extent[1]},"xmax":${extent[2]},"ymax":${extent[3]},"spatialReference":{"wkid":${srid}}}`) +
-                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
-                return url;
-            },
-            strategy: tileStrategy(
-                createXYZ({
-                    tileSize: 512,
-                })
-            ),
-        });
-
-        return new VectorLayer({
-            name: 'EsriJSON',
-            source: newVectorSource,
-            style: function (feature) {
-                const color = [0, 38, 115, 1];
-                style.getFill().setColor(color);
-                return style;
-            },
-            opacity: 0.7,
-        });
-    },
-    BsriJSON: () => {
-        const serviceUrl = 'https://services8.arcgis.com/jz4Cju60Wi6R7jAW/arcgis/rest/services/' + '河川支流/FeatureServer/0'
-        const style = new Style({
-            fill: new Fill(),
-            stroke: new Stroke({
-                color: [0, 0, 0, 1],
-                width: 0.5,
-            }),
-        });
-
-        const newVectorSource = new VectorSource({
-            format: new EsriJSON(),
-            url: function (extent, resolution, projection) {
-                const srid = projection.getCode().split(/:(?=\d+$)/).pop();
-                const url = serviceUrl + '/query/?f=json&' + 'returnGeometry=true&spatialRel=esriSpatialRelIntersects&geometry=' +
-                    encodeURIComponent(`{"xmin":${extent[0]},"ymin":${extent[1]},"xmax":${extent[2]},"ymax":${extent[3]},"spatialReference":{"wkid":${srid}}}`) +
-                    '&geometryType=esriGeometryEnvelope&inSR=' + srid + '&outFields=*' + '&outSR=' + srid;
-                return url;
-            },
-            strategy: tileStrategy(
-                createXYZ({
-                    tileSize: 512,
-                })
-            ),
-        });
-
-        return new VectorLayer({
-            name: 'BsriJSON',
-            type: 'BsriJSON',
-            source: newVectorSource,
-            style: function (feature) {
-                const color = [0, 0, 0, 1];
-                style.getFill().setColor(color);
-                return style;
-            },
-            opacity: 1,
-        });
-    },
-    DimensionMap: () => {
-        const circleFeature = new Feature({
-            name: 'DimensionMap',
-            title: 'DimensionMap',
-            geometry: new Circle([120.9984423386347, 24.791781619336316], 0.005),
-        })
-
-        const circleStyle = new Style({
-            renderer(coordinates, state) {
-                const [[x, y], [x1, y1]] = coordinates;
-                const ctx = state.context;
-                const dx = x1 - x;
-                const dy = y1 - y;
-                const radius = Math.sqrt(dx * dx + dy * dy);
-                ctx.beginPath();
-                ctx.arc(x, y, radius, 0, 2 * Math.PI, true);
-                ctx.fillStyle = 'rgba(255,0,0)';
-                ctx.fill();
-            },
-        })
-        const raster = new VectorLayer({
-            source: new VectorSource({
-                features: [circleFeature],
-            }),
-            style: circleStyle
-        })
-
-        const coordinates = [
-            [120.971859, 24.801583],
-            [120.970000, 24.809583],
-            [120.985000, 24.808583],
-            [120.990000, 24.806583],
-            [120.971859, 24.801583]
-        ]
-
-
-        const areaLineLayer = new Vector({
-            name: 'DimensionMap',
-            title: 'DimensionMap',
-            source: new VectorSource({
-                features: [new Feature({
-                    name: 'areaLineLayer',
-                    title: 'areaLineLayer',
-                    geometry: new Polygon([coordinates]),
-                })],
-            }),
-            style: new Style({
-                fill: new Fill({
-                    color: '#0f9ce2'
-                }),
-            })
-        })
-
-        return [raster, areaLineLayer]
-        // 關閉地圖細節事件
-    },
     getLayer: (layer, nestedSubNodeIndex, id) => {
         let result, layerSource
         let layerType = layer.layer_type
@@ -364,8 +219,3 @@ export default {
         return {nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex}
     },
 }
-
-
-// [230, 0, 0, 1] 紅色
-// [104, 104, 104, 1] 灰色
-// [115, 76, 0, 1] 土黃色

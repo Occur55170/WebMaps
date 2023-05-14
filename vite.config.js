@@ -21,7 +21,6 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
                     prefix: 'icon'
                 }),
             }),
-            // 'vite-plugin-sass',
             {
               includePaths: ['./src/styles']
             }

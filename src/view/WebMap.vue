@@ -5,7 +5,6 @@ import $ from 'jquery'
 import { Map, View, Feature } from 'ol'
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
-import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
 
 import { TileArcGISRest } from 'ol/source.js'
 
@@ -31,7 +30,7 @@ import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
 
-import mapLayerList, { initLayers, getTribeData } from '@/config/mapLayerList'
+import mapLayerList from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
@@ -90,26 +89,15 @@ export default {
             zoom: state.defaultCenterZoom,
         })
 
-        const overlay = ref(null)
-        const mapDetailsPopup = ref(null) // 地圖細節小窗
         let ol3d = null
 
         // 初始化地圖
         function initMap() {
-            // overlay.value = new Overlay({
-            //     element: mapDetailsPopup.value,
-            //     autoPan: true,
-            //     autoPanAnimation: {
-            //         duration: 250
-            //     }
-            // })
             state.map1 = new Map({
                 target: 'map1',
                 layers: [baseMapList.sourceFun('default')],
                 view: defaultView,
                 controls: [],
-                // fix: !!!!有overlays，3D圖層無法使用
-                // overlays: [overlay.value]
             })
         }
 
@@ -194,6 +182,7 @@ export default {
         }
 
         function layerControl({ action, value }) {
+            console.log({ action, value })
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -202,7 +191,7 @@ export default {
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
-                                if(!(element.get('id'))){return}
+                                if (!(element.get('id'))) { return }
                                 if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
                                     target.removeLayer(element)
                                 }
@@ -216,12 +205,17 @@ export default {
 
                         // 部落圖層點擊事件
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
-                            target.on('click', (evt)=>{
-                                // const data = targetLayer.getData(evt.pixel)
+                            target.on('click', (evt) => {
+                                const data = targetLayer.getData(evt.pixel)
+                                console.log(data)
 
                                 // // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
                                 // if (data[0]) {
+                                    // 获取色块的范围
+                                    // var extent = clickedFeature.getGeometry().getExtent();
 
+                                    // // 判断点击位置是否在色块的范围内
+                                    // var isInside = ol.extent.containsCoordinate(extent, coordinate);
                                 // }
 
                                 // var coordinate = evt.coordinate;
@@ -241,7 +235,7 @@ export default {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
                         // needfix: 此處寫死 淹水.台灣近岸海域風浪危害圖 兩個圖層，看之後是否可以改成以single_tiles判斷
-                        switch(value.id){
+                        switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 toRemoveLayerId = layersAry.filter(element => element.get('id') === 'node0_subNode0_nestedSubNodeundefined')
                                 toRemoveLayerId.forEach((node) => {
@@ -269,7 +263,7 @@ export default {
                     if (state.selectLock) { return }
                     if (value.layerName === 'all') {
                         let layersAry = targetLayers.getArray()
-                        let layersToRemove = layersAry.filter(node=> node.get('name') !== 'default')
+                        let layersToRemove = layersAry.filter(node => node.get('name') !== 'default')
                         layersToRemove.forEach((node) => {
                             target.removeLayer(node)
                         })
@@ -287,15 +281,15 @@ export default {
                     let layeredIndex = mapLayerList.getLayerIndex(value.id)
                     let nowTileLayer = mapLayers.getLayer(state.layers[layeredIndex.nodeIndex].group_layers[layeredIndex.subNodeIndex], layeredIndex.nestedSubNodeIndex, value.id)
                     if (value.movement === 'up') {
-                        if (value.key +1 == targetLayers.getArray().length) { return }
+                        if (value.key + 1 == targetLayers.getArray().length) { return }
                         value.checked = false
-                        layerControl({action: 'layerMode', value: value})
+                        layerControl({ action: 'layerMode', value: value })
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
                         if (value.key - 1 == 0) { return }
                         value.checked = false
-                        layerControl({action: 'layerMode', value: value})
+                        layerControl({ action: 'layerMode', value: value })
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
                     break;
@@ -320,7 +314,7 @@ export default {
                     let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
                     state.mapCount = value
                     let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
-                    let otherLayersData = otherLayers.map(item=> mapLayerList.getLayerIndex(item))
+                    let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
                     if (value === 2) {
                         state[otherMap] = new Map({
                             target: otherMap,
@@ -336,6 +330,11 @@ export default {
                                 map: state[otherMap],
                             })
                             ol3d.setEnabled(true)
+                            // needfix: token搬移到env
+                            let accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NzM3MWFhYS0xMjNlLTQ3MTMtODFjZS0xZjMzM2I5NGZiYTEiLCJpZCI6MTMwODE4LCJpYXQiOjE2ODQwNzM3Mjl9.UYu4kBialPo19dcvosHzZTpg2BD1zkFQnjCD78YiiYo'
+                            Cesium.Ion.defaultAccessToken = accessToken
+                            let scene = ol3d.getCesiumScene({})
+                            scene.terrainProvider = Cesium.createWorldTerrain({})
                         }
                     }
                     if (value === 1) {
@@ -354,6 +353,11 @@ export default {
                             map: target,
                         })
                         ol3d.setEnabled(true)
+                        // needfix: token搬移到env
+                        let accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NzM3MWFhYS0xMjNlLTQ3MTMtODFjZS0xZjMzM2I5NGZiYTEiLCJpZCI6MTMwODE4LCJpYXQiOjE2ODQwNzM3Mjl9.UYu4kBialPo19dcvosHzZTpg2BD1zkFQnjCD78YiiYo'
+                        Cesium.Ion.defaultAccessToken = accessToken
+                        let scene = ol3d.getCesiumScene({})
+                        scene.terrainProvider = Cesium.createWorldTerrain({})
                         state[`${ta}LayerStatus`].push('3D')
                     } else {
                         ol3d.setEnabled(false)
@@ -371,7 +375,7 @@ export default {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
-                    let otherLayersData = otherLayers.map(item=> mapLayerList.getLayerIndex(item))
+                    let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
 
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
@@ -432,46 +436,61 @@ export default {
         }
 
         function closeMapData() {
-            // overlay.value.setPosition(undefined)
             state.tribeId = ''
         }
 
-        // function switchMapDetail(id) {
-        //     if (feature) {
-        //         const coordinate = evt.coordinate
-        //         state.tribeId = feature.get('name')
-        //         overlay.value.setPosition(coordinate)
-        //     } else {
-        //         overlay.value.setPosition(undefined)
+
+
+        // 假設這是你的 API 函式，a使用 Promise 包裝非同步請求
+        function callAPI(params) {
+            return new Promise((resolve, reject) => {
+                // 執行 API 請求
+                // ...
+
+                // 假設回傳的資料為 response
+                const response = 'API response';
+
+                // 模擬非同步延遲
+                setTimeout(() => {
+                    resolve(response);
+                }, 1000);
+            });
+        }
+
+        // async function fetchData() {
+        //     const tribeIdList = [88, 89, 90, 91, 133, 118, 119, 134]
+        //     const promises = []
+
+        //     // 進行八次非同步請求，每次帶不同的參數
+        //     tribeIdList.forEach(tribeId => {
+        //         const promise = getTribeDate(tribeId);
+        //         promises.push(promise);
+        //     })
+
+        //     try {
+        //         // 使用 Promise.all() 等待所有請求完成
+        //         const responses = await Promise.all(promises);
+
+        //         // 在這裡可以處理所有回傳的資料，例如將它們放在一個陣列中
+        //         const data = responses.map(response => {
+        //             return response.basicInformation.coordinates
+        //         });
+
+        //         // 在這裡可以進行後續動作，使用 data 陣列
+        //         console.log(data);
+        //     } catch (error) {
+        //         // 處理錯誤
+        //         console.error(error);
         //     }
         // }
-
-        function tileLoadFunction(tile, src) {
-            var client = new XMLHttpRequest();
-            client.open('GET', src);
-            //client.setRequestHeader("Authorization", "Basic " + window.btoa(user + ":" + pass));
-            client.onload = function () {
-                client.setRequestHeader('Content-type','image/png');
-                tile.getImage().src = src;
-            };
-            client.send();
-        }
-
-        function addTest() {
-
-            const SurfaceSource = new TileWMS({
-                maxzoom: 18,
-                minzoom: 3,
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingArea1721/MapServer/WMSServer?REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:4326&LAYERS=0&VERSION=1.1.1&FORMAT=image/png&STYLES=',
-                params: {},
-                tileLoadFunction: tileLoadFunction,
-            })
-            const wmsLayer = new TileLayer({
-                source: SurfaceSource,
-            })
-            state.map1.addLayer(wmsLayer)
-            // onMapLayerStatus('add', state.map1.getTarget(), value.layerName)
-        }
+        // // 呼叫 fetchData() 函式來執行
+        // fetchData();
+        // async function getTribeDate(tribeId) {
+        //     return await $.ajax({
+        //         url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
+        //         method: "GET"
+        //     })
+        // }
 
         onMounted(async () => {
             await $.ajax({
@@ -484,7 +503,7 @@ export default {
                         subNodeIndex = subIndex
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                         if (!(sub.single_tiles)) {
-                            sub.tiles_list.forEach((nestedSub, nestedSubIndex)=>{
+                            sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
                                 nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                             })
@@ -495,7 +514,7 @@ export default {
                         value: index,
                     }
                 })
-                nextTick(()=>{
+                nextTick(() => {
                     initMap()
                     getCurrentLayerNames()
                 })
@@ -507,8 +526,6 @@ export default {
         return {
             state,
             props,
-            mapDetailsPopup,
-            overlay,
             mapControl,
             layerControl,
             getCurrentLayerNames,
@@ -528,14 +545,11 @@ export default {
                 :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                 @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
-        <mapSourceOption
-        class="mapSourceOption"
-        :baseMapsOptions="state.baseMapsOptions"
-        @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
+        <mapSourceOption class="mapSourceOption" :baseMapsOptions="state.baseMapsOptions"
+            @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
 
-        <asideTool
-        class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-        @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
+        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
 
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needFix 寬度設定是否調整 -->
@@ -550,8 +564,7 @@ export default {
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
-                    <condition
-                    v-bind="{
+                    <condition v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -560,9 +573,8 @@ export default {
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
                         }
-                    }"
-                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                     <!-- need continue -->
                 </div>
             </div>
@@ -623,13 +635,9 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <areaData ref="mapDetailsPopup" class="areaData"
-        v-if="state.tribeId"
-        :closeMapData="()=>{
+        <areaData class="areaData" v-if="state.tribeId" :closeMapData="() => {
             state.tribeId = ''
-        }"
-        :tribeId="state.tribeId"
-        :maxHeight="500" />
+        }" :tribeId="state.tribeId" :maxHeight="500" />
     </div>
 </template>
 
