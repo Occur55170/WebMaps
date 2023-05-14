@@ -94,7 +94,6 @@ export default {
     <div class="rounded-4 bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
-            {{ state.TilesListValue }}
             <a href="" class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
                 <svg width="32" height="32" viewBox="0 0 24 24">
                     <path fill="currentColor"

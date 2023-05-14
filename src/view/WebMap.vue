@@ -538,7 +538,6 @@ export default {
 
 <template>
     <div>
-        <div class="btn" @click="state.tribeId = '88'">88</div>
         <div class="SearchBar position-absolute">
             <img src="@/assets/logo.svg" alt="" class="mb-2">
             <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
