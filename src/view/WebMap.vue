@@ -34,8 +34,9 @@ import mapLayerList from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
-
+import * as olTilecoord from 'ol/tilecoord'
 import { get as getProjection } from 'ol/proj';
+import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js';
 
 export default {
     props: {},
@@ -99,6 +100,18 @@ export default {
                 view: defaultView,
                 controls: [],
             })
+            let obj = {
+                action: "layerMode",
+                value: {
+                    checked: true,
+                    id: "node0_subNode3_nestedSubNodeundefined",
+                    nestedSubNode: false,
+                    nestedSubNodeIndex: undefined,
+                    nodeIndex: 0,
+                    subNodeIndex: 3
+                }
+            }
+            layerControl(obj)
         }
 
         function addPoint(targetLng, targetLat) {
@@ -182,7 +195,6 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            console.log({ action, value })
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -206,16 +218,37 @@ export default {
                         // 部落圖層點擊事件
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             target.on('click', (evt) => {
+
                                 const data = targetLayer.getData(evt.pixel)
-                                console.log(data)
+                                console.log(evt.pixel, data)
 
-                                // // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                                const features = []
+
+                                // const tileGrid = source.getTileGrid()
+                                // const tileCoord = source.getTileCoord(evt.pixel)
+                                // const tileExtent = tileGrid.getTileCoordExtent(tileCoord)
+
+
+                                // if (targetLayer instanceof ol.layer.Tile) {
+                                //     const source = targetLayer.getSource();
+                                //     const tileGrid = source.getTileGrid();
+                                //     const tileCoord = source.getTileCoordForPixel(pixel);
+                                //     const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+                                //     console.log(source, tileGrid, tileCoord, tileExtent)
+                                //     // tileExtent 即为色块的范围
+                                // }
+
+                                // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
                                 // if (data[0]) {
-                                    // 获取色块的范围
-                                    // var extent = clickedFeature.getGeometry().getExtent();
+                                //     console.log(evt.pixel)
+                                //     const source = targetLayer.getSource()
+                                //     console.log('source', source)
+                                //     console.log('getTileGrid', source.getTileGrid())
+                                //     // 获取色块的范围
+                                //     var extent = clickedFeature.getGeometry().getExtent()
 
-                                    // // 判断点击位置是否在色块的范围内
-                                    // var isInside = ol.extent.containsCoordinate(extent, coordinate);
+                                //     // 判断点击位置是否在色块的范围内
+                                //     var isInside = ol.extent.containsCoordinate(extent, coordinate)
                                 // }
 
                                 // var coordinate = evt.coordinate;
