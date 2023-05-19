@@ -468,63 +468,6 @@ export default {
             }
         }
 
-        function closeMapData() {
-            state.tribeId = ''
-        }
-
-
-
-        // 假設這是你的 API 函式，a使用 Promise 包裝非同步請求
-        function callAPI(params) {
-            return new Promise((resolve, reject) => {
-                // 執行 API 請求
-                // ...
-
-                // 假設回傳的資料為 response
-                const response = 'API response';
-
-                // 模擬非同步延遲
-                setTimeout(() => {
-                    resolve(response);
-                }, 1000);
-            });
-        }
-
-        // async function fetchData() {
-        //     const tribeIdList = [88, 89, 90, 91, 133, 118, 119, 134]
-        //     const promises = []
-
-        //     // 進行八次非同步請求，每次帶不同的參數
-        //     tribeIdList.forEach(tribeId => {
-        //         const promise = getTribeDate(tribeId);
-        //         promises.push(promise);
-        //     })
-
-        //     try {
-        //         // 使用 Promise.all() 等待所有請求完成
-        //         const responses = await Promise.all(promises);
-
-        //         // 在這裡可以處理所有回傳的資料，例如將它們放在一個陣列中
-        //         const data = responses.map(response => {
-        //             return response.basicInformation.coordinates
-        //         });
-
-        //         // 在這裡可以進行後續動作，使用 data 陣列
-        //         console.log(data);
-        //     } catch (error) {
-        //         // 處理錯誤
-        //         console.error(error);
-        //     }
-        // }
-        // // 呼叫 fetchData() 函式來執行
-        // fetchData();
-        // async function getTribeDate(tribeId) {
-        //     return await $.ajax({
-        //         url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
-        //         method: "GET"
-        //     })
-        // }
-
         onMounted(async () => {
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
