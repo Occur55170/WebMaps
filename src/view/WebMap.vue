@@ -3,6 +3,9 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol'
+import Select from 'ol/interaction/Select';
+import { click } from 'ol/events/condition';
+
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
 
@@ -215,52 +218,142 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        // 部落圖層點擊事件
+                        // var popup;
+
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
-                            target.on('click', (evt) => {
 
-                                const data = targetLayer.getData(evt.pixel)
-                                console.log(evt.pixel, data)
+                            var features = targetLayer.getSource().getFeatures();
+                             // 遍歷所選的要素
+                             features.forEach(function (feature) {
+                                    var properties = feature.getProperties();
 
-                                const features = []
+                                    // 遍歷屬性對象
+                                    for (var key in properties) {
+                                        if (properties.hasOwnProperty(key)) {
+                                            var value = properties[key];
 
-                                // const tileGrid = source.getTileGrid()
-                                // const tileCoord = source.getTileCoord(evt.pixel)
-                                // const tileExtent = tileGrid.getTileCoordExtent(tileCoord)
+                                            // 使用屬性和值進行後續處理
+                                            console.log(key + ': ' + value);
+                                        }
+                                    }
+                                });
+                            
 
+                            // 創建選擇器
+                            var selector = new Select({
+                                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
+                                condition: click // 設置觸發選擇的事件條件
+                            });
+                            console.log(`targetNum:${state.targetNum}`)
+                            console.log(`selector:${selector}`)
+                            console.log(`layers:${target?.getLayers()?.getArray()}`)
 
-                                // if (targetLayer instanceof ol.layer.Tile) {
-                                //     const source = targetLayer.getSource();
-                                //     const tileGrid = source.getTileGrid();
-                                //     const tileCoord = source.getTileCoordForPixel(pixel);
-                                //     const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
-                                //     console.log(source, tileGrid, tileCoord, tileExtent)
-                                //     // tileExtent 即为色块的范围
-                                // }
+                            target.getInteractions().forEach(e => {
+                                target.removeInteraction(e);
+                            });
 
-                                // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
-                                // if (data[0]) {
-                                //     console.log(evt.pixel)
-                                //     const source = targetLayer.getSource()
-                                //     console.log('source', source)
-                                //     console.log('getTileGrid', source.getTileGrid())
-                                //     // 获取色块的范围
-                                //     var extent = clickedFeature.getGeometry().getExtent()
+                            // 將選擇器添加到地圖上
+                            target.addInteraction(selector);
 
-                                //     // 判断点击位置是否在色块的范围内
-                                //     var isInside = ol.extent.containsCoordinate(extent, coordinate)
-                                // }
+                            console.log(`getInteractions:${target.getInteractions().getArray().length}`)
 
-                                // var coordinate = evt.coordinate;
-                                // var pixel = target.getPixelFromCoordinate(coordinate);
-                                // var features = targetLayer.getSource().getFeaturesAtCoordinate(coordinate);
-                                // if (features.length > 0) {
-                                //     var properties = features[0].getProperties();
-                                //     console.log(properties)
-                                //     // 在這裡對要素的屬性進行處理
-                                // }
-                            })
+                            // 監聽選擇器的選擇變化事件
+                            selector.on('select', function (event) {
+                                // var selectedFeatures = event.target.getFeatures();
+                                var selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
+
+                                // var pixel = event.pixel;
+                                // var features = target.getFeaturesAtPixel(pixel);
+                                console.log(`Hello`)
+                                // 遍歷所選的要素
+                                selectedFeatures.forEach(function (feature) {
+                                    var properties = feature.getProperties();
+
+                                    // 遍歷屬性對象
+                                    for (var key in properties) {
+                                        if (properties.hasOwnProperty(key)) {
+                                            var value = properties[key];
+
+                                            // 使用屬性和值進行後續處理
+                                            console.log(key + ': ' + value);
+                                        }
+                                    }
+                                });
+                            });
                         }
+
+
+                        // // 監聽地圖的點擊事件
+                        // target.on('click', function (event) {
+                        //     var pixel = event.pixel;
+
+                        //     var features = target.getFeaturesAtPixel(pixel);
+
+                        //     // var selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
+                        //     console.log(`Hello2 :${features.length}`)
+                        //     // 遍歷所選的要素
+                        //     features.forEach(function (feature) {
+                        //         var properties = feature.getProperties();
+                        //         console.log(`Hello2`)
+                        //         // 遍歷屬性對象
+                        //         for (var key in properties) {
+                        //             if (properties.hasOwnProperty(key)) {
+                        //                 var value = properties[key];
+
+                        //                 // 使用屬性和值進行後續處理
+                        //                 console.log(key + ': ' + value);
+                        //             }
+                        //         }
+                        //     });
+                        // });
+
+
+                        // // 部落圖層點擊事件
+                        // if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
+                        //     target.on('click', (evt) => {
+
+                        //         const data = targetLayer.getData(evt.pixel)
+                        //         console.log(evt.pixel, data)
+
+                        //         const features = []
+
+                        //         // const tileGrid = source.getTileGrid()
+                        //         // const tileCoord = source.getTileCoord(evt.pixel)
+                        //         // const tileExtent = tileGrid.getTileCoordExtent(tileCoord)
+
+
+                        //         // if (targetLayer instanceof ol.layer.Tile) {
+                        //         //     const source = targetLayer.getSource();
+                        //         //     const tileGrid = source.getTileGrid();
+                        //         //     const tileCoord = source.getTileCoordForPixel(pixel);
+                        //         //     const tileExtent = tileGrid.getTileCoordExtent(tileCoord);
+                        //         //     console.log(source, tileGrid, tileCoord, tileExtent)
+                        //         //     // tileExtent 即为色块的范围
+                        //         // }
+
+                        //         // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
+                        //         // if (data[0]) {
+                        //         //     console.log(evt.pixel)
+                        //         //     const source = targetLayer.getSource()
+                        //         //     console.log('source', source)
+                        //         //     console.log('getTileGrid', source.getTileGrid())
+                        //         //     // 获取色块的范围
+                        //         //     var extent = clickedFeature.getGeometry().getExtent()
+
+                        //         //     // 判断点击位置是否在色块的范围内
+                        //         //     var isInside = ol.extent.containsCoordinate(extent, coordinate)
+                        //         // }
+
+                        //         // var coordinate = evt.coordinate;
+                        //         // var pixel = target.getPixelFromCoordinate(coordinate);
+                        //         // var features = targetLayer.getSource().getFeaturesAtCoordinate(coordinate);
+                        //         // if (features.length > 0) {
+                        //         //     var properties = features[0].getProperties();
+                        //         //     console.log(properties)
+                        //         //     // 在這裡對要素的屬性進行處理
+                        //         // }
+                        //     })
+                        // }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
 
