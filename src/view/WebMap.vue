@@ -100,18 +100,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-            let obj = {
-                action: "layerMode",
-                value: {
-                    checked: true,
-                    id: "node0_subNode3_nestedSubNodeundefined",
-                    nestedSubNode: false,
-                    nestedSubNodeIndex: undefined,
-                    nodeIndex: 0,
-                    subNodeIndex: 3
-                }
-            }
-            layerControl(obj)
         }
 
         function addPoint(targetLng, targetLat) {

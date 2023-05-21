@@ -15,10 +15,8 @@ import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorL
 import OLCesium from 'olcs/OLCesium.js';
 onMounted(() => {
     // 在元素加载完之后再执行地图初始化
-    // initMap()
     const baseMaps = baseMapList
     let newTileLayer = baseMaps.sourceFun('imagery')
-    console.log(newTileLayer)
     var olmap = new Map({
         name: 'default',
         target: 'cesiumContainer',
@@ -29,17 +27,39 @@ onMounted(() => {
         ],
         view: new View({
             projection: 'EPSG:4326',
-            center: [120.971859, 24.801583],
+            center: [121.326776, 24.655499],
             zoom: 14
         })
     })
+
+    let obj = new TileLayer({
+        source: new TileWMS({
+            name: '測試',
+            url: 'http://gis.edtest.site:8010/ogc/temp',
+            params: {
+                BGCOLOR: "0xFFFFFF",
+                FORMAT: "image/png",
+                LAYER: "新竹縣原住民部落範圍",
+                REQUEST: "GetMap",
+                SERVICE: "WMS",
+                SRS: "EPSG:3826",
+                STYLES: "",
+                TRANSPARENT: "TRUE",
+                VERSION: "1.1.1"
+            },
+            serverType: 'geoserver',
+            crossOrigin: 'anonymous',
+        }),
+    })
+    olmap.addLayer(obj)
     olmap.on('click', (evt) => {
         const coordinate = evt.coordinate;
         console.log(coordinate)
 
         const resolution = olmap.getView().getResolution();
-        const projection = getProjection('EPSG:4326')
-        console.log(resolution, projection)
+        console.log(resolution)
+        const projection = olmap.getProjection('EPSG:3826')
+        console.log(projection)
         // const source = targetLayer.getSource()
         // const tileGrid = source.getTileGrid();
 
@@ -74,7 +94,6 @@ onMounted(() => {
         //     // tileExtent 即为色块的范围
         // }
 
-        // needfix: 已抓入圖層.需要加入後續事件小視窗及後續另開連結事件
         // if (data[0]) {
         //     console.log(evt.pixel)
         //     const source = targetLayer.getSource()
