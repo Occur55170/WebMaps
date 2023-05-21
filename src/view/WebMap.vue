@@ -8,8 +8,10 @@ import { click } from 'ol/events/condition';
 
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
-
+import {WFS,} from 'ol/format'
+import * as ol from 'ol';
 import { TileArcGISRest } from 'ol/source.js'
+
 
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
@@ -22,7 +24,7 @@ import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
-import { tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
 import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
@@ -221,23 +223,21 @@ export default {
                         // var popup;
 
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
+                          console.log(`Show me`)
 
-                            var features = targetLayer.getSource().getFeatures();
-                             // 遍歷所選的要素
-                             features.forEach(function (feature) {
-                                    var properties = feature.getProperties();
+                            var vectorSource = new VectorSource({
+                              format: new GeoJSON(),
+                              url: function(extent) {
 
-                                    // 遍歷屬性對象
-                                    for (var key in properties) {
-                                        if (properties.hasOwnProperty(key)) {
-                                            var value = properties[key];
-
-                                            // 使用屬性和值進行後續處理
-                                            console.log(key + ': ' + value);
-                                        }
-                                    }
-                                });
-                            
+                                return 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=新竹縣原住民部落範圍&outputFormat=application/json';
+                              },
+                              strategy: bbox
+                            });
+                            var vector = new Vector({
+                            source: vectorSource
+                            });
+                            target.addLayer(vector);
+                          
 
                             // 創建選擇器
                             var selector = new Select({
@@ -255,16 +255,11 @@ export default {
                             // 將選擇器添加到地圖上
                             target.addInteraction(selector);
 
-                            console.log(`getInteractions:${target.getInteractions().getArray().length}`)
 
                             // 監聽選擇器的選擇變化事件
                             selector.on('select', function (event) {
-                                // var selectedFeatures = event.target.getFeatures();
                                 var selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
 
-                                // var pixel = event.pixel;
-                                // var features = target.getFeaturesAtPixel(pixel);
-                                console.log(`Hello`)
                                 // 遍歷所選的要素
                                 selectedFeatures.forEach(function (feature) {
                                     var properties = feature.getProperties();
