@@ -21,7 +21,7 @@ import PerspectiveMap from "ol-ext/map/PerspectiveMap"
 import WFS from 'ol/format/WFS.js'
 import EsriJSON from 'ol/format/EsriJSON.js'
 import { createXYZ } from 'ol/tilegrid.js'
-import { tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
 import Projection from 'ol/proj/Projection.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
@@ -30,10 +30,12 @@ import 'ol/ol.css' // ol提供的css样式
 import { format } from 'ol/coordinate'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
-export const tribeIdList = [ 88, 89, 90, 91, 133, 118, 119, 134 ]
+import Select from 'ol/interaction/Select';
+import { click } from 'ol/events/condition';
+export const tribeIdList = [88, 89, 90, 91, 133, 118, 119, 134]
 
 
-export const initLayers = async function() {
+export const initLayers = async function () {
     const obj = await $.ajax({
         url: 'https://api.edtest.site/layers',
         method: 'GET'
@@ -41,7 +43,7 @@ export const initLayers = async function() {
     return obj
 }
 
-export async function getTribeData (tribeId) {
+export async function getTribeData(tribeId) {
     return await $.ajax({
         url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
         method: "GET"
@@ -53,12 +55,13 @@ export default {
         let result, layerSource
         let layerType = layer.layer_type
         let figureType = layer.figure_type
+        let tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
+        let request = []
         if (layerType === 'WMS') {
-            let request = []
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType) {
                 case 'Point':
-                    if ( url ) {
+                    if (url) {
                         const api = new URL(url)
                         // 取得網址部分
                         const origin = api.origin
@@ -83,7 +86,7 @@ export default {
                     })
                     break;
                 case 'Surface':
-                    if ( url ) {
+                    if (url) {
                         const api = new URL(url)
                         // 取得網址部分
                         const origin = api.origin
@@ -102,42 +105,41 @@ export default {
                         maxzoom: 18,
                         minzoom: 3,
                         url: request[0],
-                        params:  request[1],
+                        params: request[1],
                         serverType: 'mapserver'
                     })
                     break;
-                    case 'Line':
-                        // 活動斷層
-                        if ( url ) {
-                            const api = new URL(url)
-                            // 取得網址部分
-                            const origin = api.origin
-                            const pathname = api.pathname
+                case 'Line':
+                    // 活動斷層
+                    if (url) {
+                        const api = new URL(url)
+                        // 取得網址部分
+                        const origin = api.origin
+                        const pathname = api.pathname
 
-                            // 取得query參數
-                            const searchParams = api.searchParams;
-                            const searchParamsObject = {};
-                            for (const [key, value] of searchParams.entries()) {
-                                searchParamsObject[key] = value;
-                            }
-                            request[0] = origin + pathname
-                            request[1] = searchParamsObject
+                        // 取得query參數
+                        const searchParams = api.searchParams;
+                        const searchParamsObject = {};
+                        for (const [key, value] of searchParams.entries()) {
+                            searchParamsObject[key] = value;
                         }
-                        layerSource = new TileWMS({
-                            maxzoom: 18,
-                            minzoom: 3,
-                            url: request[0],
-                            params: request[1],
-                            serverType: 'mapserver'
-                        })
-                        break;
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: request[0],
+                        params: request[1],
+                        serverType: 'mapserver'
+                    })
+                    break;
                 default:
-                    console.log('otherWMSLayer', figureType)
+                    console.log('error-otherWMSLayer:', figureType)
             }
-            let tileTitle = layer.single_tiles ? '' : `- ${ layer.tiles_list[nestedSubNodeIndex]?.title }`
             result = new TileLayer({
                 id: id,
-                label: `${ layer.title } ${ tileTitle }`,
+                label: `${layer.title} ${tileTitle}`,
                 source: new TileWMS({
                     name: layer.title,
                     url: layerSource.getUrls()[0],
@@ -146,6 +148,30 @@ export default {
                     crossOrigin: 'anonymous',
                 }),
             })
+        }
+        // only 部落圖層
+        if (layerType === 'WFS') {
+            // fix
+            console.log('only')
+            // let vectorSource = new VectorSource({
+            //     format: new GeoJSON(),
+            //     url: function (extent) {
+            //         return layer.tiles_url
+            //     },
+            //     strategy: bbox
+            // })
+            // result = new Vector({
+            //     id: id,
+            //     label: `${layer.title} ${tileTitle}`,
+            //     source: vectorSource
+            // })
+
+            // 創建選擇器
+            // window.selector = new Select({
+            //     layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
+            //     condition: click // 設置觸發選擇的事件條件
+            // });
+
         }
         // needfix: 結構混亂
         if (layerType === 'GeoJson') {
@@ -199,12 +225,13 @@ export default {
             }
         }
 
+
         return result
     },
     getLayerIndex: (layeredIndex) => {
         let nodeIndex, subNodeIndex = undefined, nestedSubNodeIndex = undefined
-        layeredIndex.split('_').forEach((element, key)=>{
-            switch(key) {
+        layeredIndex.split('_').forEach((element, key) => {
+            switch (key) {
                 case 0:
                     nodeIndex = Number(element.split('node')[1])
                     break;
@@ -216,6 +243,6 @@ export default {
                     break;
             }
         })
-        return {nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex}
+        return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex }
     },
 }

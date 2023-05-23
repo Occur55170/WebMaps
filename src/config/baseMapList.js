@@ -33,7 +33,6 @@ var configBaseMap = [
 export default {
     sourceFun: (val, itemKey, itemValue) => {
         let mapSource = configBaseMap.find(node=> node.name == val)
-        console.log(mapSource.urls)
         let vector = {
             preload: Infinity,
             name: mapSource.name,

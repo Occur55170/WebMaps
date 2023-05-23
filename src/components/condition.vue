@@ -59,8 +59,7 @@ export default {
                 nodeIndex: item.nodeIndex,
                 subNodeIndex: item.subNodeIndex,
                 nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
-                nestedSubNode: String(item.nestedSubNodeIndex) ? true : false,
-                id: item.id
+                id: item.single_tiles ? item.id : e.target.selectedOptions[0].id
             })
         }
 
@@ -123,6 +122,7 @@ export default {
                                     subNode: subNode,
                                     subNodeIndex: subNodeIndex,
                                     nestedSubNodeIndex: '',
+                                    single_tiles: subNode.single_tiles,
                                     id: subNode.id
                                 })
                             }">
@@ -137,6 +137,7 @@ export default {
                                     subNode: subNode,
                                     subNodeIndex: subNodeIndex,
                                     nestedSubNodeIndex: '',
+                                    single_tiles: subNode.single_tiles,
                                     id: subNode.id
                                 })
                             }">
@@ -149,10 +150,11 @@ export default {
                                         subNode: subNode,
                                         subNodeIndex: subNodeIndex,
                                         nestedSubNodeIndex: state.TilesListValue,
+                                        single_tiles: subNode.single_tiles,
                                         id: subNode.id
                                     })
                                 }">
-                                    <option :value="key" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
+                                    <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
                                 </select>
                         </div>
                     </div>
@@ -162,9 +164,7 @@ export default {
     </div>
 </template>
 
-<style lang="sass" scoped>
-// @import '@/assets/styles/all.module.scss'
-.closeBtn
+<style lang="sass" scoped>.closeBtn
     right:10px
     svg
         width: 20px
