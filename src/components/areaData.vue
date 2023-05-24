@@ -38,7 +38,7 @@ export default {
             return result
         }
 
-        // fix
+        // fix: 不會更新
         onUpdated(props.tribeAreaData['編號'], ()=>{
             console.log(2, props.tribeAreaData['編號'])
             getTribeData(props.tribeAreaData['編號']).then((result)=>{

@@ -207,7 +207,7 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        // fix
+                        // needfix 3接4
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             let obj1 = {
                                 action: "layerMode",
