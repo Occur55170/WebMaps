@@ -13,14 +13,6 @@ import TileWMS from 'ol/source/TileWMS.js'
 import ImageWMS from 'ol/source/ImageWMS.js'
 import TileGrid from 'ol/tilegrid/TileGrid.js'
 import * as olTilegrid from 'ol/tilegrid'
-import * as olProj from 'ol/proj'
-
-import { ImageArcGISRest, OSM } from 'ol/source.js'
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
-
-import WFS from 'ol/format/WFS.js'
-import EsriJSON from 'ol/format/EsriJSON.js'
-import { createXYZ } from 'ol/tilegrid.js'
 import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
 import Projection from 'ol/proj/Projection.js'
@@ -32,7 +24,6 @@ import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 import Select from 'ol/interaction/Select';
 import { click } from 'ol/events/condition';
-export const tribeIdList = [88, 89, 90, 91, 133, 118, 119, 134]
 
 
 export const initLayers = async function () {
@@ -149,29 +140,18 @@ export default {
                 }),
             })
         }
-        // only 部落圖層
+        // only 部落圖層點擊用layer
         if (layerType === 'WFS') {
-            // fix
-            console.log('only')
-            // let vectorSource = new VectorSource({
-            //     format: new GeoJSON(),
-            //     url: function (extent) {
-            //         return layer.tiles_url
-            //     },
-            //     strategy: bbox
-            // })
-            // result = new Vector({
-            //     id: id,
-            //     label: `${layer.title} ${tileTitle}`,
-            //     source: vectorSource
-            // })
-
-            // 創建選擇器
-            // window.selector = new Select({
-            //     layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
-            //     condition: click // 設置觸發選擇的事件條件
-            // });
-
+            let vectorSource = new VectorSource({
+                format: new GeoJSON(),
+                url: 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=新竹縣原住民部落範圍&outputFormat=application/json',
+                strategy: bbox
+            })
+            result = new Vector({
+                id: id,
+                label: `${layer.title} ${tileTitle}`,
+                source: vectorSource
+            })
         }
         // needfix: 結構混亂
         if (layerType === 'GeoJson') {

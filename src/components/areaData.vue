@@ -5,7 +5,7 @@ import { compose } from 'ol/transform'
 
 export default {
     props: {
-        tribeId:{
+        tribeAreaData:{
             Type: String,
             default: 0
         },
@@ -38,18 +38,23 @@ export default {
             return result
         }
 
-        onUpdated(props.tribeId, ()=>{
-            getTribeData(props.tribeId).then((result)=>{
+        // fix
+        onUpdated(props.tribeAreaData['編號'], ()=>{
+            console.log(2, props.tribeAreaData['編號'])
+            getTribeData(props.tribeAreaData['編號']).then((result)=>{
                 state.tribeData = result
             })
         })
 
 
         onMounted(()=>{
-            getTribeData(props.tribeId).then((result)=>{
+            // state.tribeData = props.tribeAreaData
+            console.log(3, props.tribeAreaData['編號'])
+            getTribeData(props.tribeAreaData['編號']).then((result)=>{
                 state.tribeData = result
             })
         })
+        console.log(props.tribeAreaData)
 
         return {
             props,
@@ -63,7 +68,7 @@ export default {
 <template>
     <div class="bg-white rounded py-2 " style="overflow-y: auto;">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
-            <p>詳細資訊 {{ state.scrollY }}</p>
+            <p>詳細資訊</p>
             <!-- needfix:尚未加入關閉地圖資訊按鈕事件 -->
             <div class="position-absolute col-auto end-0" style="top: 10px;" @click="closeMapData">
                 <svg width="32" height="32" viewBox="0 0 24 24">

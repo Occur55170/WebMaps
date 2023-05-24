@@ -59,7 +59,8 @@ export default {
                 nodeIndex: item.nodeIndex,
                 subNodeIndex: item.subNodeIndex,
                 nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
-                id: item.single_tiles ? item.id : e.target.selectedOptions[0].id
+                // 判斷是否有子層即是勾選的還是下拉
+                id: (item.single_tiles || !(e.target.selectedOptions)) ? item.id : e.target.selectedOptions[0].id
             })
         }
 

@@ -84,7 +84,7 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            tribeId: '',
+            tribeAreaData: {},
             ol3d: null,
             selectValueTemp: 0,
         })
@@ -105,19 +105,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-            // fix!!!
-            let obj = {
-                action: "layerMode",
-                value: {
-                    checked: true,
-                    id: "node0_subNode4_nestedSubNodeundefined",
-                    nestedSubNode: false,
-                    nestedSubNodeIndex: undefined,
-                    nodeIndex: 0,
-                    subNodeIndex: 3
-                }
-            }
-            layerControl(obj)
         }
 
         function addPoint(targetLng, targetLat) {
@@ -219,58 +206,58 @@ export default {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                        if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
-                            console.log(`Show me`)
 
-                            var vectorSource = new VectorSource({
-                              format: new GeoJSON(),
-                              url: function(extent) {
-                                return 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=新竹縣原住民部落範圍&outputFormat=application/json';
-                              },
-                              strategy: bbox
-                            });
-                            var vector = new Vector({
-                             source: vectorSource
-                            });
-                            target.addLayer(vector);
+                        // fix
+                        if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
+                            let obj1 = {
+                                action: "layerMode",
+                                value: {
+                                    checked: true,
+                                    id: "node0_subNode4_nestedSubNodeundefined",
+                                    nestedSubNode: false,
+                                    nestedSubNodeIndex: undefined,
+                                    nodeIndex: 0,
+                                    subNodeIndex: 4
+                                }
+                            }
+                            layerControl(obj1)
+                        }
+
+                        if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
+
+                            // target.on('click', (evt) => {
+                            //     const data = targetLayer.getData(evt.pixel)
+                            //     console.log(evt.pixel, data)
+                            // })
 
                             // 創建選擇器
-                            var selector = new Select({
+                            let selector = new Select({
                                 layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
                                 condition: click // 設置觸發選擇的事件條件
-                            });
-
-                            console.log(`targetNum:${state.targetNum}`)
-                            console.log(`selector:${selector}`)
-                            console.log(`layers:${target?.getLayers()?.getArray()}`)
-
-                            target.getInteractions().forEach(e => {
-                                target.removeInteraction(e);
-                            });
+                            })
 
                             // 將選擇器添加到地圖上
-                            target.addInteraction(selector);
-
+                            target.addInteraction(selector)
 
                             // 監聽選擇器的選擇變化事件
-                            selector.on('select', function (event) {
-                                var selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
+                            selector.on('select', (event) => {
+                                let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
 
                                 // 遍歷所選的要素
-                                selectedFeatures.forEach(function (feature) {
-                                    var properties = feature.getProperties();
+                                selectedFeatures.forEach((feature) => {
+                                    let properties = feature.getProperties()
+                                    Object.entries(properties).forEach(node=>{
+                                        const key = node[0], value = node[1]
+                                        state.tribeAreaData[key] = value
+                                    })
+                                })
 
-                                    // 遍歷屬性對象
-                                    for (var key in properties) {
-                                        if (properties.hasOwnProperty(key)) {
-                                            var value = properties[key];
+                                // fix: 定位地圖細節小窗
+                                console.log(state.tribeAreaData.geometry)
 
-                                            // 使用屬性和值進行後續處理
-                                            console.log(key + ': ' + value);
-                                        }
-                                    }
-                                });
-                            });
+                            })
+
+
                         }
 
 
@@ -420,7 +407,8 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-
+                    // fix: 3會壓在4圖層上
+                    console.log(otherLayersData)
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
                         layers: [
@@ -550,7 +538,8 @@ export default {
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
-                    <condition v-bind="{
+                    <condition
+                    v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -621,9 +610,13 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <areaData class="areaData" v-if="state.tribeId" :closeMapData="() => {
-            state.tribeId = ''
-        }" :tribeId="state.tribeId" :maxHeight="500" />
+        <areaData class="areaData"
+        v-if="state.tribeAreaData?.geometry"
+        :closeMapData="() => {
+            state.tribeAreaData = ''
+        }"
+        :tribeAreaData="state.tribeAreaData"
+        :maxHeight="500" />
     </div>
 </template>
 
