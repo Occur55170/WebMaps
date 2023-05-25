@@ -43,6 +43,8 @@ export async function getTribeData(tribeId) {
 
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
+        // needfix: 近年歷史災害82處部落點位 等api修改後刪掉
+        if (id === 'node0_subNode5_nestedSubNodeundefined') {layer.layer_type = 'WFS'}
         let result, layerSource
         let layerType = layer.layer_type
         let figureType = layer.figure_type
@@ -162,18 +164,13 @@ export default {
                         source: new VectorSource({
                             url: 'http://gis.edtest.site:8010/ogc/temp',
                             params: {
-                                // http://gis.edtest.site:8010/ogc/temp
                                 SERVICE: 'WMS',
                                 VERSION: '1.3.0',
                                 REQUEST: 'GetMap',
                                 FORMAT: 'image/png',
                                 STYLE: 'default',
                                 SLD_VERSION: '1.1.0'
-                                // LAYER: '%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D',
                             }
-                            // url: 'https://dmap.ncdr.nat.gov.tw/GeoJson/土石流潛勢溪流.geojson',
-                            // url: 'https://openlyersbook.github.io/openlayers_book_samples/assets/data/countries.geojson',
-                            // format: new GeoJSON(),
                         }),
                     });
                     break;

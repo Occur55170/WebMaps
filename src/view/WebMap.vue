@@ -8,7 +8,7 @@ import { click } from 'ol/events/condition';
 
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
-import { WFS, } from 'ol/format'
+import { IGC, WFS, } from 'ol/format'
 import * as ol from 'ol';
 import { TileArcGISRest } from 'ol/source.js'
 
@@ -224,42 +224,8 @@ export default {
                         }
 
                         if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
-
-                            // target.on('click', (evt) => {
-                            //     const data = targetLayer.getData(evt.pixel)
-                            //     console.log(evt.pixel, data)
-                            // })
-
-                            // 創建選擇器
-                            let selector = new Select({
-                                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
-                                condition: click // 設置觸發選擇的事件條件
-                            })
-
-                            // 將選擇器添加到地圖上
-                            target.addInteraction(selector)
-
-                            // 監聽選擇器的選擇變化事件
-                            selector.on('select', (event) => {
-                                let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
-
-                                // 遍歷所選的要素
-                                selectedFeatures.forEach((feature) => {
-                                    let properties = feature.getProperties()
-                                    Object.entries(properties).forEach(node=>{
-                                        const key = node[0], value = node[1]
-                                        state.tribeAreaData[key] = value
-                                    })
-                                })
-
-                                // fix: 定位地圖細節小窗
-                                console.log(state.tribeAreaData.geometry)
-
-                            })
-
-
+                            mapClickEvent(target)
                         }
-
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
@@ -406,9 +372,15 @@ export default {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
+
+                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
+                        let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
+                        otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
+                    }
+
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    // fix: 3會壓在4圖層上
-                    console.log(otherLayersData)
+
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
                         layers: [
@@ -418,6 +390,10 @@ export default {
                         view: defaultView,
                         controls: [],
                     })
+
+                    mapClickEvent(state[`map${value}`])
+
+
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
@@ -467,6 +443,34 @@ export default {
             }
         }
 
+        function mapClickEvent(target) {
+            // 創建選擇器
+            let selector = new Select({
+                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
+                condition: click // 設置觸發選擇的事件條件
+            })
+
+            // 將選擇器添加到地圖上
+            target.addInteraction(selector)
+
+            // 監聽選擇器的選擇變化事件
+            selector.on('select', (event) => {
+                let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
+
+                // 遍歷所選的要素
+                selectedFeatures.forEach((feature) => {
+                    let properties = feature.getProperties()
+                    Object.entries(properties).forEach(node => {
+                        const key = node[0], value = node[1]
+                        state.tribeAreaData[key] = value
+                    })
+                })
+
+                // fix: 定位地圖細節小窗
+                console.log(state.tribeAreaData.geometry)
+            })
+        }
+
         onMounted(async () => {
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
@@ -475,12 +479,12 @@ export default {
                 state.layers = res.map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = undefined, nestedSubNodeIndex = undefined
-                        subNodeIndex = subIndex
-                        sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                            subNodeIndex = subIndex
+                            sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
-                                nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                                    nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                             })
                         }
                     })
@@ -499,16 +503,16 @@ export default {
         })
 
         return {
-            state,
-            props,
-            mapControl,
-            layerControl,
-            getCurrentLayerNames,
-            changeTarget,
-            conditionWrap,
+                state,
+                props,
+                mapControl,
+                layerControl,
+                getCurrentLayerNames,
+                changeTarget,
+                conditionWrap,
+            }
         }
     }
-}
 </script>
 
 <template>
@@ -538,8 +542,7 @@ export default {
                     圖層選項
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
-                    <condition
-                    v-bind="{
+                    <condition v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -548,9 +551,8 @@ export default {
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
                         }
-                    }"
-                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -610,13 +612,9 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <areaData class="areaData"
-        v-if="state.tribeAreaData?.geometry"
-        :closeMapData="() => {
+        <areaData class="areaData" v-if="state.tribeAreaData?.geometry" :closeMapData="() => {
             state.tribeAreaData = ''
-        }"
-        :tribeAreaData="state.tribeAreaData"
-        :maxHeight="500" />
+        }" :tribeAreaData="state.tribeAreaData" :maxHeight="500" />
     </div>
 </template>
 

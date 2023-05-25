@@ -31,16 +31,15 @@ export default {
                 method: "GET"
             }).done(res => {
                 return res
-                }).fail(FailMethod => {
+            }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
                 return false
-                })
+            })
             return result
         }
 
         // fix: 不會更新
         onUpdated(props.tribeAreaData['編號'], ()=>{
-            console.log(2, props.tribeAreaData['編號'])
             getTribeData(props.tribeAreaData['編號']).then((result)=>{
                 state.tribeData = result
             })
@@ -49,7 +48,6 @@ export default {
 
         onMounted(()=>{
             // state.tribeData = props.tribeAreaData
-            console.log(3, props.tribeAreaData['編號'])
             getTribeData(props.tribeAreaData['編號']).then((result)=>{
                 state.tribeData = result
             })
