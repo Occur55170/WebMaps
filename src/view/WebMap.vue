@@ -84,9 +84,12 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            tribeAreaData: {},
             ol3d: null,
             selectValueTemp: 0,
+            areaData: {
+                position: [],
+                tribeAreaData: {},
+            },
         })
 
         const defaultView = new View({
@@ -455,19 +458,25 @@ export default {
 
             // 監聽選擇器的選擇變化事件
             selector.on('select', (event) => {
+                // event,
+                // console.log('event', event.mapBrowserEven.pixel)
                 let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
-
-                // 遍歷所選的要素
-                selectedFeatures.forEach((feature) => {
-                    let properties = feature.getProperties()
-                    Object.entries(properties).forEach(node => {
-                        const key = node[0], value = node[1]
-                        state.tribeAreaData[key] = value
+                if (event.selected) {
+                    state.areaData.position = event.mapBrowserEvent.pixel
+                    // 遍歷所選的要素
+                    selectedFeatures.forEach((feature) => {
+                        let properties = feature.getProperties()
+                        Object.entries(properties).forEach(node => {
+                            const key = node[0], value = node[1]
+                            state.areaData.tribeAreaData[key] = value
+                        })
                     })
-                })
+                } else {
+
+                }
 
                 // fix: 定位地圖細節小窗
-                console.log(state.tribeAreaData.geometry)
+                // console.log(state.areaData.tribeAreaData.geometry)
             })
         }
 
@@ -612,9 +621,19 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <areaData class="areaData" v-if="state.tribeAreaData?.geometry" :closeMapData="() => {
-            state.tribeAreaData = ''
-        }" :tribeAreaData="state.tribeAreaData" :maxHeight="500" />
+        <!--  -->
+        {{ state.areaData.position[0] }}
+        {{ state.areaData.position[1] }}
+        <areaData class="areaData"
+        :style="{
+            bottom: state.areaData.position[0],
+            right: state.areaData.position[1],
+        }"
+        v-if="state.areaData?.tribeAreaData?.geometry"
+        :closeMapData="() => {
+            state.areaData.tribeAreaData = ''
+        }"
+        :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
     </div>
 </template>
 
@@ -658,7 +677,7 @@ export default {
     max-height: 500px
     background: #fff
     position: absolute
-    top: 0
-    right: 0
+    top: 50%
+    right: 50%
     box-sizing: border-box
 </style>

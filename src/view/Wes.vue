@@ -8,7 +8,7 @@ import { click } from 'ol/events/condition';
 
 import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
-import { WFS, } from 'ol/format'
+import { IGC, WFS, } from 'ol/format'
 import * as ol from 'ol';
 import { TileArcGISRest } from 'ol/source.js'
 
@@ -42,6 +42,7 @@ import 'ol-ext/dist/ol-ext.css'
 import * as olTilecoord from 'ol/tilecoord'
 import { get as getProjection } from 'ol/proj';
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js';
+import Overlay from 'ol/Overlay.js';
 
 export default {
     props: {},
@@ -84,9 +85,12 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            tribeId: '',
             ol3d: null,
             selectValueTemp: 0,
+            areaData: {
+                nodeRef: null,
+                tribeAreaData: {},
+            },
         })
 
         const defaultView = new View({
@@ -105,19 +109,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-            // fix!!!
-            let obj = {
-                action: "layerMode",
-                value: {
-                    checked: true,
-                    id: "node0_subNode4_nestedSubNodeundefined",
-                    nestedSubNode: false,
-                    nestedSubNodeIndex: undefined,
-                    nodeIndex: 0,
-                    subNodeIndex: 3
-                }
-            }
-            layerControl(obj)
         }
 
         function addPoint(targetLng, targetLat) {
@@ -219,60 +210,26 @@ export default {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                        if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
-                            console.log(`Show me`)
 
-                            let vectorSource = new VectorSource({
-                              format: new GeoJSON(),
-                              url: function(extent) {
-                                return 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=新竹縣原住民部落範圍&outputFormat=application/json';
-                              },
-                              strategy: bbox
-                            });
-                            let vector = new Vector({
-                             source: vectorSource
-                            });
-                            target.addLayer(vector);
-
-                            // 創建選擇器
-                            let selector = new Select({
-                                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
-                                condition: click // 設置觸發選擇的事件條件
-                            });
-
-                            // console.log(`targetNum:${state.targetNum}`)
-                            // console.log(`selector:${selector}`)
-                            // console.log(`layers:${target?.getLayers()?.getArray()}`)
-
-                            // target.getInteractions().forEach(e => {
-                            //     target.removeInteraction(e);
-                            // });
-
-                            // 將選擇器添加到地圖上
-                            target.addInteraction(selector);
-
-
-                            // 監聽選擇器的選擇變化事件
-                            selector.on('select', function (event) {
-                                var selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
-
-                                // 遍歷所選的要素
-                                selectedFeatures.forEach(function (feature) {
-                                    var properties = feature.getProperties();
-
-                                    // 遍歷屬性對象
-                                    for (var key in properties) {
-                                        if (properties.hasOwnProperty(key)) {
-                                            var value = properties[key];
-
-                                            // 使用屬性和值進行後續處理
-                                            console.log(key + ': ' + value);
-                                        }
-                                    }
-                                });
-                            });
+                        // needfix 3接4
+                        if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
+                            let obj1 = {
+                                action: "layerMode",
+                                value: {
+                                    checked: true,
+                                    id: "node0_subNode4_nestedSubNodeundefined",
+                                    nestedSubNode: false,
+                                    nestedSubNodeIndex: undefined,
+                                    nodeIndex: 0,
+                                    subNodeIndex: 4
+                                }
+                            }
+                            layerControl(obj1)
                         }
 
+                        if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
+                            mapClickEvent(target)
+                        }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
@@ -419,6 +376,13 @@ export default {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
+
+                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
+                        let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
+                        otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
+                    }
+
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
 
                     state[`map${value}`] = new Map({
@@ -430,6 +394,10 @@ export default {
                         view: defaultView,
                         controls: [],
                     })
+
+                    mapClickEvent(state[`map${value}`])
+
+
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
@@ -479,6 +447,56 @@ export default {
             }
         }
 
+        function mapClickEvent(target) {
+            // 創建選擇器
+            let selector = new Select({
+                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
+                condition: click // 設置觸發選擇的事件條件
+            })
+
+            // 將選擇器添加到地圖上
+            target.addInteraction(selector)
+
+            // 監聽選擇器的選擇變化事件
+            selector.on('select', (event) => {
+                let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
+                if (event.selected[0]) {
+
+                    // fix: 重複點會失效
+                    state.areaData.nodeRef = new Overlay({
+                        element: document.getElementById('popup'),
+                        autoPan: true, // 如果弹窗在底图边缘时，底图会移动
+                        autoPanAnimation: { // 底图移动动画
+                            duration: 250
+                        }
+                    });
+                    target.addOverlay(state.areaData.nodeRef );
+                    state.areaData.nodeRef.setPosition(event.mapBrowserEvent.coordinate)
+
+                    // 遍歷所選的要素
+                    selectedFeatures.forEach((feature) => {
+                        let properties = feature.getProperties()
+                        Object.entries(properties).forEach(node => {
+                            const key = node[0], value = node[1]
+                            state.areaData.tribeAreaData[key] = value
+                        })
+                    })
+                } else {
+                    state.areaData.nodeRef.setPosition(null)
+                    target.removeOverlay(state.areaData.nodeRef )
+                    state.areaData.nodeRef = null
+                }
+            })
+        }
+
+        function closeMapData() {
+            state.areaData.position = []
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            state.areaData.nodeRef.setPosition(null)
+            target.removeOverlay(state.areaData.nodeRef )
+            state.areaData.nodeRef = null
+        }
+
         onMounted(async () => {
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
@@ -487,12 +505,12 @@ export default {
                 state.layers = res.map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = undefined, nestedSubNodeIndex = undefined
-                        subNodeIndex = subIndex
-                        sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                            subNodeIndex = subIndex
+                            sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
-                                nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                                    nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                             })
                         }
                     })
@@ -511,16 +529,17 @@ export default {
         })
 
         return {
-            state,
-            props,
-            mapControl,
-            layerControl,
-            getCurrentLayerNames,
-            changeTarget,
-            conditionWrap,
+                state,
+                props,
+                mapControl,
+                layerControl,
+                getCurrentLayerNames,
+                changeTarget,
+                conditionWrap,
+                closeMapData
+            }
         }
     }
-}
 </script>
 
 <template>
@@ -559,9 +578,8 @@ export default {
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
                         }
-                    }"
-                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -621,9 +639,27 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <areaData class="areaData" v-if="state.tribeId" :closeMapData="() => {
-            state.tribeId = ''
-        }" :tribeId="state.tribeId" :maxHeight="500" />
+        <div
+        id="popup"
+        >
+            <areaData class="areaData"
+            v-if="state.areaData.nodeRef"
+            :closeMapData="() => {
+                // state.areaData.tribeAreaData = ''
+                closeMapData()
+            }"
+            :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
+        </div>
+        <!-- <areaData class="areaData"
+        :style="{
+            bottom: state.areaData.position[0],
+            right: state.areaData.position[1],
+        }"
+        v-if="state.areaData?.tribeAreaData?.geometry"
+        :closeMapData="() => {
+            state.areaData.tribeAreaData = ''
+        }"
+        :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" /> -->
     </div>
 </template>
 
@@ -667,7 +703,12 @@ export default {
     max-height: 500px
     background: #fff
     position: absolute
-    top: 0
-    right: 0
+    top: 50%
+    right: 50%
     box-sizing: border-box
+
+#popup
+    border: 1px solid #088
+    border-radius: 10px
+    background-color: #0FF
 </style>
