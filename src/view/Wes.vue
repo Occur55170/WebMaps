@@ -89,6 +89,7 @@ export default {
             selectValueTemp: 0,
             areaData: {
                 nodeRef: null,
+                overlay: null,
                 tribeAreaData: {},
             },
         })
@@ -461,17 +462,16 @@ export default {
             selector.on('select', (event) => {
                 let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
                 if (event.selected[0]) {
-
-                    // fix: 重複點會失效
-                    state.areaData.nodeRef = new Overlay({
-                        element: document.getElementById('popup'),
+                    // needfix: autoPan失效
+                    state.areaData.overlay = new Overlay({
+                        element: state.areaData.nodeRef,
                         autoPan: true, // 如果弹窗在底图边缘时，底图会移动
                         autoPanAnimation: { // 底图移动动画
                             duration: 250
                         }
                     });
-                    target.addOverlay(state.areaData.nodeRef );
-                    state.areaData.nodeRef.setPosition(event.mapBrowserEvent.coordinate)
+                    target.addOverlay(state.areaData.overlay);
+                    state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
 
                     // 遍歷所選的要素
                     selectedFeatures.forEach((feature) => {
@@ -482,9 +482,9 @@ export default {
                         })
                     })
                 } else {
-                    state.areaData.nodeRef.setPosition(null)
-                    target.removeOverlay(state.areaData.nodeRef )
-                    state.areaData.nodeRef = null
+                    state.areaData.overlay.setPosition(null)
+                    target.removeOverlay(state.areaData.overlay)
+                    state.areaData.overlay = null
                 }
             })
         }
@@ -492,9 +492,9 @@ export default {
         function closeMapData() {
             state.areaData.position = []
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            state.areaData.nodeRef.setPosition(null)
-            target.removeOverlay(state.areaData.nodeRef )
-            state.areaData.nodeRef = null
+            state.areaData.overlay.setPosition(null)
+            target.removeOverlay(state.areaData.overlay)
+            state.areaData.overlay = null
         }
 
         onMounted(async () => {
@@ -505,12 +505,12 @@ export default {
                 state.layers = res.map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = undefined, nestedSubNodeIndex = undefined
-                            subNodeIndex = subIndex
-                            sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                        subNodeIndex = subIndex
+                        sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
-                                    nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                                nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                             })
                         }
                     })
@@ -529,17 +529,17 @@ export default {
         })
 
         return {
-                state,
-                props,
-                mapControl,
-                layerControl,
-                getCurrentLayerNames,
-                changeTarget,
-                conditionWrap,
-                closeMapData
-            }
+            state,
+            props,
+            mapControl,
+            layerControl,
+            getCurrentLayerNames,
+            changeTarget,
+            conditionWrap,
+            closeMapData
         }
     }
+}
 </script>
 
 <template>
@@ -639,27 +639,15 @@ export default {
         </div>
 
         <!-- 地圖細節小窗 -->
-        <div
-        id="popup"
-        >
-            <areaData class="areaData"
-            v-if="state.areaData.nodeRef"
-            :closeMapData="() => {
-                // state.areaData.tribeAreaData = ''
+        <div id="popup"
+        style="position: fixed;top: 100%; left: 100%;"
+        :ref="(e)=>{
+            state.areaData.nodeRef = e
+        }">
+            <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
                 closeMapData()
-            }"
-            :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
+            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
         </div>
-        <!-- <areaData class="areaData"
-        :style="{
-            bottom: state.areaData.position[0],
-            right: state.areaData.position[1],
-        }"
-        v-if="state.areaData?.tribeAreaData?.geometry"
-        :closeMapData="() => {
-            state.areaData.tribeAreaData = ''
-        }"
-        :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" /> -->
     </div>
 </template>
 

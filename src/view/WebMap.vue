@@ -42,6 +42,7 @@ import 'ol-ext/dist/ol-ext.css'
 import * as olTilecoord from 'ol/tilecoord'
 import { get as getProjection } from 'ol/proj';
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js';
+import Overlay from 'ol/Overlay.js';
 
 export default {
     props: {},
@@ -87,7 +88,8 @@ export default {
             ol3d: null,
             selectValueTemp: 0,
             areaData: {
-                position: [],
+                nodeRef: null,
+                overlay: null,
                 tribeAreaData: {},
             },
         })
@@ -447,23 +449,27 @@ export default {
         }
 
         function mapClickEvent(target) {
-            // 創建選擇器
             let selector = new Select({
-                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
-                condition: click // 設置觸發選擇的事件條件
+                layers: target?.getLayers()?.getArray(),
+                condition: click
             })
 
-            // 將選擇器添加到地圖上
             target.addInteraction(selector)
 
-            // 監聽選擇器的選擇變化事件
             selector.on('select', (event) => {
-                // event,
-                // console.log('event', event.mapBrowserEven.pixel)
-                let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
-                if (event.selected) {
-                    state.areaData.position = event.mapBrowserEvent.pixel
-                    // 遍歷所選的要素
+                let selectedFeatures = event.selected;
+                if (event.selected[0]) {
+                    // needfix: autoPan失效
+                    state.areaData.overlay = new Overlay({
+                        element: state.areaData.nodeRef,
+                        autoPan: true,
+                        autoPanAnimation: {
+                            duration: 250
+                        }
+                    });
+                    target.addOverlay(state.areaData.overlay);
+                    state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
+
                     selectedFeatures.forEach((feature) => {
                         let properties = feature.getProperties()
                         Object.entries(properties).forEach(node => {
@@ -471,14 +477,20 @@ export default {
                             state.areaData.tribeAreaData[key] = value
                         })
                     })
+                    console.log('data', state.areaData.tribeAreaData)
                 } else {
-
+                    target.removeOverlay(state.areaData.overlay)
+                    state.areaData.overlay = null
                 }
-
-                // fix: 定位地圖細節小窗
-                // console.log(state.areaData.tribeAreaData.geometry)
             })
         }
+
+        function closeMapData() {
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            target.removeOverlay(state.areaData.overlay)
+            state.areaData.overlay = null
+        }
+
 
         onMounted(async () => {
             await $.ajax({
@@ -487,13 +499,12 @@ export default {
             }).done(res => {
                 state.layers = res.map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
-                        let subNodeIndex = undefined, nestedSubNodeIndex = undefined
-                            subNodeIndex = subIndex
-                            sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                        let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
+                        sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
-                                    nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                                nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                             })
                         }
                     })
@@ -512,16 +523,17 @@ export default {
         })
 
         return {
-                state,
-                props,
-                mapControl,
-                layerControl,
-                getCurrentLayerNames,
-                changeTarget,
-                conditionWrap,
-            }
+            state,
+            props,
+            mapControl,
+            layerControl,
+            getCurrentLayerNames,
+            changeTarget,
+            conditionWrap,
+            closeMapData
         }
     }
+}
 </script>
 
 <template>
@@ -620,20 +632,15 @@ export default {
             </div>
         </div>
 
-        <!-- 地圖細節小窗 -->
-        <!--  -->
-        {{ state.areaData.position[0] }}
-        {{ state.areaData.position[1] }}
-        <areaData class="areaData"
-        :style="{
-            bottom: state.areaData.position[0],
-            right: state.areaData.position[1],
-        }"
-        v-if="state.areaData?.tribeAreaData?.geometry"
-        :closeMapData="() => {
-            state.areaData.tribeAreaData = ''
-        }"
-        :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
+        <div id="popup"
+        style="position: fixed;top: 100%; left: 100%;"
+        :ref="(e)=>{
+            state.areaData.nodeRef = e
+        }">
+            <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
+                closeMapData()
+            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
+        </div>
     </div>
 </template>
 
@@ -680,4 +687,8 @@ export default {
     top: 50%
     right: 50%
     box-sizing: border-box
+#popup
+    border: 1px solid #088
+    border-radius: 10px
+    background-color: #0FF
 </style>

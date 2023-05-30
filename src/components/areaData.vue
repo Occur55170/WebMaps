@@ -1,7 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onUpdated, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
-import { compose } from 'ol/transform'
+import { useRouter } from 'vue-router'
 
 export default {
     props: {
@@ -19,10 +19,18 @@ export default {
         }
     },
     setup(props, { emit }){
+        const router = useRouter()
         const state = reactive({
             media: 'photo',
             scrollY: false,
             tribeData: {},
+            // tribeData: computed(async()=>{
+            //     let result = await getTribeData(props.tribeAreaData['編號']).then((result)=>{
+            //         state.tribeData = result
+            //     })
+            //     console.log('res')
+            //     return result
+            // })
         })
 
         async function getTribeData (tribeId) {
@@ -40,6 +48,7 @@ export default {
 
         // fix: 不會更新
         onUpdated(props.tribeAreaData['編號'], ()=>{
+            console.log("!!props.tribeAreaData['編號']")
             getTribeData(props.tribeAreaData['編號']).then((result)=>{
                 state.tribeData = result
             })
@@ -47,7 +56,6 @@ export default {
 
 
         onMounted(()=>{
-            // state.tribeData = props.tribeAreaData
             getTribeData(props.tribeAreaData['編號']).then((result)=>{
                 state.tribeData = result
             })
@@ -55,6 +63,7 @@ export default {
         console.log(props.tribeAreaData)
 
         return {
+            router,
             props,
             state,
         }
@@ -66,6 +75,8 @@ export default {
 <template>
     <div class="bg-white rounded py-2 " style="overflow-y: auto;">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
+            <!-- fix: 不會更新，但props會更新 -->
+            {{ props.tribeAreaData['編號'] }}
             <p>詳細資訊</p>
             <!-- needfix:尚未加入關閉地圖資訊按鈕事件 -->
             <div class="position-absolute col-auto end-0" style="top: 10px;" @click="closeMapData">
@@ -78,7 +89,11 @@ export default {
         <div class="row mx-0 align-items-center p-2 position-relative">
             <p>title: {{ props.tribeId }} {{ state?.tribeData?.basicInformation?.tribeName }} </p>
             <p>描述: {{ state?.tribeData?.basicInformation?.description }}</p>
-            <div class="position-absolute w-auto top-0 end-0 mt-2">更多資訊</div>
+            <div class="position-absolute w-auto top-0 end-0 mt-2"
+            @click="()=>{
+                // router.push('/Map_Demo/88')
+                router.push({ path: '/Map_Demo/detail' })
+            }">更多資訊</div>
             <p>{{ state?.tribeData?.basicInformation?.area }}</p>
             <a href="">
                 <img src="@/assets/img/icon/vector.svg" alt="">

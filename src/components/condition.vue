@@ -31,7 +31,7 @@ export default {
         },
     },
     setup(props, { emit }) {
-        const mapLayers = mapLayerList
+        const mapList = mapLayerList
         const router = useRouter()
         const state = reactive({
             DropDown: null,
@@ -74,17 +74,22 @@ export default {
         watch(()=>state.TilesListValue, (newVal , oldVal)=>{
             props.showSelectLayerValue(newVal)
         })
+        function sho(subNodeIndex, subNodeIds){
+            console.log('sho', subNodeIndex)
+            console.log('www', subNodeIds)
+        }
 
         return {
             props,
             state,
             router,
-            mapLayers,
+            mapList,
             onMapControl,
             onLayerControl,
             openLayerList,
             LayerCheckBoxChange,
-            checkTribe
+            checkTribe,
+            sho
         }
     }
 }
@@ -130,8 +135,12 @@ export default {
                             {{ subNode.title }}
                         </div>
                         <div v-else>
+                            <!-- needfix: 直接選擇select，然後透過checkbox不會自動關閉所有圖層 -->
                             <input type="checkbox"
-                            :checked="props.currentLayers.some(node=> node.id === subNode.id)"
+                            :checked="props.currentLayers.some(node=> {
+                                let subNodeIds = mapList.getLayerIndex(node.id)
+                                return  subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
+                            })"
                             @change="(e) => {
                                 LayerCheckBoxChange(e, {
                                     nodeIndex: nodeIndex,

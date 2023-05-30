@@ -207,6 +207,7 @@ export default {
     },
     getLayerIndex: (layeredIndex) => {
         let nodeIndex, subNodeIndex = undefined, nestedSubNodeIndex = undefined
+        if (!(layeredIndex)){return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex }}
         layeredIndex.split('_').forEach((element, key) => {
             switch (key) {
                 case 0:
