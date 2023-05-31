@@ -1,7 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router';
 
 export default {
     props: {
@@ -13,6 +13,7 @@ export default {
     },
     setup(props, { emit }) {
         const router = useRouter()
+        const route = useRoute()
         const state = reactive({
             tribeData: {}
         })
@@ -30,9 +31,10 @@ export default {
 
         onMounted(async () => {
             const result = await $.ajax({
-                url: `https://api.edtest.site/tribe?tribeCode=${props.tribeId || 88}`,
+                url: `https://api.edtest.site/tribe?tribeCode=${route.params?.action || 88}`,
                 method: "GET"
             }).done(res => {
+                console.log('succ', res)
                 state.tribeData = res
                 return res
             }).fail(FailMethod => {
@@ -83,7 +85,8 @@ export default {
                         <div class="col-8">
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
-                            <p>【97TM2座標】 X：{{ state.tribeData?.basicInformation?.coordinates['95TM2'].x }}， {{ state.tribeData?.basicInformation?.coordinates['95TM2'].y }}</p>
+                            <!-- !! fix:95TM2、97TM2 -->
+                            <!-- <p>【97TM2座標】 X：{{ state.tribeData?.basicInformation?.coordinates['95TM2'].x }}， {{ state.tribeData?.basicInformation?.coordinates['95TM2'].y }}</p> -->
                             <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p>
                         </div>
                     </div>

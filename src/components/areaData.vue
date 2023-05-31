@@ -24,13 +24,6 @@ export default {
             media: 'photo',
             scrollY: false,
             tribeData: {},
-            // tribeData: computed(async()=>{
-            //     let result = await getTribeData(props.tribeAreaData['編號']).then((result)=>{
-            //         state.tribeData = result
-            //     })
-            //     console.log('res')
-            //     return result
-            // })
         })
 
         async function getTribeData (tribeId) {
@@ -47,9 +40,15 @@ export default {
         }
 
         // fix: 不會更新
-        onUpdated(props.tribeAreaData['編號'], ()=>{
-            console.log("!!props.tribeAreaData['編號']")
-            getTribeData(props.tribeAreaData['編號']).then((result)=>{
+        // onUpdated(props.tribeAreaData['編號'], ()=>{
+        //     console.log("!!props.tribeAreaData['編號']")
+        //     getTribeData(props.tribeAreaData['編號']).then((result)=>{
+        //         state.tribeData = result
+        //     })
+        // })
+        watch(() => props.tribeAreaData['編號'], async (newVal)=>{
+            console.log(newVal)
+            await getTribeData(newVal).then((result)=>{
                 state.tribeData = result
             })
         })
@@ -60,7 +59,6 @@ export default {
                 state.tribeData = result
             })
         })
-        console.log(props.tribeAreaData)
 
         return {
             router,
@@ -75,11 +73,8 @@ export default {
 <template>
     <div class="bg-white rounded py-2 " style="overflow-y: auto;">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
-            <!-- fix: 不會更新，但props會更新 -->
-            {{ props.tribeAreaData['編號'] }}
             <p>詳細資訊</p>
-            <!-- needfix:尚未加入關閉地圖資訊按鈕事件 -->
-            <div class="position-absolute col-auto end-0" style="top: 10px;" @click="closeMapData">
+            <div class="position-absolute col-auto end-0" style="top: 10px;" @click="props.closeMapData">
                 <svg width="32" height="32" viewBox="0 0 24 24">
                     <path fill="currentColor" d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z"/>
                 </svg>
@@ -92,7 +87,7 @@ export default {
             <div class="position-absolute w-auto top-0 end-0 mt-2"
             @click="()=>{
                 // router.push('/Map_Demo/88')
-                router.push({ path: '/Map_Demo/detail' })
+                router.push({ path: `/Map_Demo/${props.tribeAreaData['編號']}` })
             }">更多資訊</div>
             <p>{{ state?.tribeData?.basicInformation?.area }}</p>
             <a href="">

@@ -477,7 +477,6 @@ export default {
                             state.areaData.tribeAreaData[key] = value
                         })
                     })
-                    console.log('data', state.areaData.tribeAreaData)
                 } else {
                     target.removeOverlay(state.areaData.overlay)
                     state.areaData.overlay = null
