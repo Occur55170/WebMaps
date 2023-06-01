@@ -39,7 +39,7 @@ export default {
             return result
         }
 
-        // needfix: 是否改成computed
+        // needfix: 優化，改成computed
         watch(() => props.tribeAreaData['編號'], async (newVal)=>{
             await getTribeData(newVal).then((result)=>{
                 state.tribeData = result
