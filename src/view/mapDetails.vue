@@ -34,7 +34,6 @@ export default {
                 url: `https://api.edtest.site/tribe?tribeCode=${route.params?.action || 88}`,
                 method: "GET"
             }).done(res => {
-                console.log('succ', res)
                 state.tribeData = res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
