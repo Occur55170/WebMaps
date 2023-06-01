@@ -220,16 +220,8 @@ export default {
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
 .detail
-    // background-image: url('src/assets/mapDetail/DetailBKG.png')
-    background: #E1E1E1
+    background-image: url('src/assets/mapDetail/background.svg')
     box-sizing: border-box
-    &::after
-        // content: ''
-        position: absolute
-        width: 100%
-        height: 100%
-        background: #E1E1E1
-        z-index: -1
 .detailCon
     padding: 0 calc((100% - 1460px)/2)
     h2

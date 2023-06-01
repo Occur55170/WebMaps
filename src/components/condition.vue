@@ -99,16 +99,15 @@ export default {
     <div class="rounded-4 bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
-            <a href="" class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
+            <div class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
                 <svg width="32" height="32" viewBox="0 0 24 24">
                     <path fill="currentColor"
                         d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z" />
                 </svg>
-            </a>
+            </div>
         </div>
         <div class="py-3 px-4 content">
             <div class="mb-2 landBoundary">
-                <div @click="router.push({ path: '/Map_Demo/detail' })" class="my-3 fw-bold h5 text-primary cursor-pointer">前往地圖細節</div>
                 <div v-for="(node, nodeIndex) in props.mapLayers" class="mb-2">
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
                         @click="openLayerList(nodeIndex)">
@@ -135,7 +134,7 @@ export default {
                             {{ subNode.title }}
                         </div>
                         <div v-else>
-                            <!-- needfix: 直接選擇select，然後透過checkbox不會自動關閉所有圖層 -->
+                            <!-- fix: 直接選擇select，然後透過checkbox不會自動關閉所有圖層 -->
                             <input type="checkbox"
                             :checked="props.currentLayers.some(node=> {
                                 let subNodeIds = mapList.getLayerIndex(node.id)
