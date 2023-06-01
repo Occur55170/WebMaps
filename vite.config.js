@@ -10,7 +10,8 @@ import path from 'path'   // 需安装此模块
 export default defineConfig(({ command, mode, ssrBuild }) => {
     // 根據當前工作目錄中的 `mode` 加載 .env 文件
     // 設置第三個參數為 '' 來加載所有環境變量，而不管是否有 `VITE_` 前綴。
-    const env = loadEnv(mode, process.cwd())
+    const ENV = loadEnv(mode, process.cwd(), '')
+
     return {
         plugins: [
             vue(),
@@ -53,6 +54,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
             alias: {
                 '@': path.resolve(__dirname, 'src')
             }
-        }
+        },
+        envDir: path.resolve(__dirname, "./env")
     }
 })

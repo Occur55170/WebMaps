@@ -332,9 +332,7 @@ export default {
                                 map: state[otherMap],
                             })
                             ol3d.setEnabled(true)
-                            // needfix: token搬移到env
-                            let accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NzM3MWFhYS0xMjNlLTQ3MTMtODFjZS0xZjMzM2I5NGZiYTEiLCJpZCI6MTMwODE4LCJpYXQiOjE2ODQwNzM3Mjl9.UYu4kBialPo19dcvosHzZTpg2BD1zkFQnjCD78YiiYo'
-                            Cesium.Ion.defaultAccessToken = accessToken
+                            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
                             let scene = ol3d.getCesiumScene({})
                             scene.terrainProvider = Cesium.createWorldTerrain({})
                         }
@@ -355,9 +353,7 @@ export default {
                             map: target,
                         })
                         ol3d.setEnabled(true)
-                        // needfix: token搬移到env
-                        let accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NzM3MWFhYS0xMjNlLTQ3MTMtODFjZS0xZjMzM2I5NGZiYTEiLCJpZCI6MTMwODE4LCJpYXQiOjE2ODQwNzM3Mjl9.UYu4kBialPo19dcvosHzZTpg2BD1zkFQnjCD78YiiYo'
-                        Cesium.Ion.defaultAccessToken = accessToken
+                        Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
                         let scene = ol3d.getCesiumScene({})
                         scene.terrainProvider = Cesium.createWorldTerrain({})
                         state[`${ta}LayerStatus`].push('3D')
@@ -378,10 +374,9 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
-                        let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
-                        otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
+                        let b = otherLayers.splice(otherLayers.indexOf('node0_subNode4_nestedSubNodeundefined'), 1)[0]
+                        otherLayers.push(b)
                     }
 
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
@@ -449,31 +444,27 @@ export default {
         }
 
         function mapClickEvent(target) {
-            // 創建選擇器
             let selector = new Select({
-                layers: target?.getLayers()?.getArray(), // 設置要進行點擊選擇的圖層
-                condition: click // 設置觸發選擇的事件條件
+                layers: target?.getLayers()?.getArray(),
+                condition: click
             })
 
-            // 將選擇器添加到地圖上
             target.addInteraction(selector)
 
-            // 監聽選擇器的選擇變化事件
             selector.on('select', (event) => {
-                let selectedFeatures = event.selected; // 或者使用 event.target.getFeatures()
+                let selectedFeatures = event.selected;
                 if (event.selected[0]) {
                     // needfix: autoPan失效
                     state.areaData.overlay = new Overlay({
                         element: state.areaData.nodeRef,
-                        autoPan: true, // 如果弹窗在底图边缘时，底图会移动
-                        autoPanAnimation: { // 底图移动动画
+                        autoPan: true,
+                        autoPanAnimation: {
                             duration: 250
                         }
                     });
                     target.addOverlay(state.areaData.overlay);
                     state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
 
-                    // 遍歷所選的要素
                     selectedFeatures.forEach((feature) => {
                         let properties = feature.getProperties()
                         Object.entries(properties).forEach(node => {
@@ -482,7 +473,6 @@ export default {
                         })
                     })
                 } else {
-                    state.areaData.overlay.setPosition(null)
                     target.removeOverlay(state.areaData.overlay)
                     state.areaData.overlay = null
                 }
@@ -490,9 +480,7 @@ export default {
         }
 
         function closeMapData() {
-            state.areaData.position = []
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            state.areaData.overlay.setPosition(null)
             target.removeOverlay(state.areaData.overlay)
             state.areaData.overlay = null
         }
@@ -504,8 +492,7 @@ export default {
             }).done(res => {
                 state.layers = res.map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
-                        let subNodeIndex = undefined, nestedSubNodeIndex = undefined
-                        subNodeIndex = subIndex
+                        let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
@@ -638,7 +625,6 @@ export default {
             </div>
         </div>
 
-        <!-- 地圖細節小窗 -->
         <div id="popup"
         style="position: fixed;top: 100%; left: 100%;"
         :ref="(e)=>{
@@ -694,7 +680,6 @@ export default {
     top: 50%
     right: 50%
     box-sizing: border-box
-
 #popup
     border: 1px solid #088
     border-radius: 10px

@@ -39,15 +39,8 @@ export default {
             return result
         }
 
-        // fix: 不會更新
-        // onUpdated(props.tribeAreaData['編號'], ()=>{
-        //     console.log("!!props.tribeAreaData['編號']")
-        //     getTribeData(props.tribeAreaData['編號']).then((result)=>{
-        //         state.tribeData = result
-        //     })
-        // })
+        // needfix: 是否改成computed
         watch(() => props.tribeAreaData['編號'], async (newVal)=>{
-            console.log(newVal)
             await getTribeData(newVal).then((result)=>{
                 state.tribeData = result
             })
@@ -86,7 +79,6 @@ export default {
             <p>描述: {{ state?.tribeData?.basicInformation?.description }}</p>
             <div class="position-absolute w-auto top-0 end-0 mt-2"
             @click="()=>{
-                // router.push('/Map_Demo/88')
                 router.push({ path: `/Map_Demo/${props.tribeAreaData['編號']}` })
             }">更多資訊</div>
             <p>{{ state?.tribeData?.basicInformation?.area }}</p>

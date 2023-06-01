@@ -332,9 +332,7 @@ export default {
                                 map: state[otherMap],
                             })
                             ol3d.setEnabled(true)
-                            // needfix: token搬移到env
-                            let accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NzM3MWFhYS0xMjNlLTQ3MTMtODFjZS0xZjMzM2I5NGZiYTEiLCJpZCI6MTMwODE4LCJpYXQiOjE2ODQwNzM3Mjl9.UYu4kBialPo19dcvosHzZTpg2BD1zkFQnjCD78YiiYo'
-                            Cesium.Ion.defaultAccessToken = accessToken
+                            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
                             let scene = ol3d.getCesiumScene({})
                             scene.terrainProvider = Cesium.createWorldTerrain({})
                         }
@@ -355,9 +353,7 @@ export default {
                             map: target,
                         })
                         ol3d.setEnabled(true)
-                        // needfix: token搬移到env
-                        let accessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0NzM3MWFhYS0xMjNlLTQ3MTMtODFjZS0xZjMzM2I5NGZiYTEiLCJpZCI6MTMwODE4LCJpYXQiOjE2ODQwNzM3Mjl9.UYu4kBialPo19dcvosHzZTpg2BD1zkFQnjCD78YiiYo'
-                        Cesium.Ion.defaultAccessToken = accessToken
+                        Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
                         let scene = ol3d.getCesiumScene({})
                         scene.terrainProvider = Cesium.createWorldTerrain({})
                         state[`${ta}LayerStatus`].push('3D')

@@ -43,7 +43,7 @@ export async function getTribeData(tribeId) {
 
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
-        // needfix: 近年歷史災害82處部落點位 等api修改後刪掉
+        // needfix: 近年歷史災害82處部落點位的type不正確，等api修改後刪掉
         if (id === 'node0_subNode5_nestedSubNodeundefined') {layer.layer_type = 'WFS'}
         let result, layerSource
         let layerType = layer.layer_type
@@ -142,7 +142,8 @@ export default {
                 }),
             })
         }
-        // only 部落圖層點擊用layer
+        // only 部落圖層點擊用laye
+        // needfix: 加入背景顏色
         if (layerType === 'WFS') {
             let vectorSource = new VectorSource({
                 format: new GeoJSON(),
@@ -155,7 +156,6 @@ export default {
                 source: vectorSource
             })
         }
-        // needfix: 結構混亂
         if (layerType === 'GeoJson') {
             console.log('GeoJsonLayer', figureType)
             switch (figureType) {
@@ -193,15 +193,11 @@ export default {
                     result = new TileLayer({
                         source: wmsSource,
                     })
-
-                    // help_btn_display:true
-                    // help_memo:"<p>資料來源:國家災害防救科技中心</p>\n<p>收整水利署、新聞、媒體及現勘資料2017年~2021年</p>"
                     break;
                 default:
                     console.log(figureType)
             }
         }
-
 
         return result
     },

@@ -30,16 +30,14 @@ export default {
         }
 
         onMounted(async () => {
-            const result = await $.ajax({
+            await $.ajax({
                 url: `https://api.edtest.site/tribe?tribeCode=${route.params?.action || 88}`,
                 method: "GET"
             }).done(res => {
                 console.log('succ', res)
                 state.tribeData = res
-                return res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
-                return false
             })
         })
 
