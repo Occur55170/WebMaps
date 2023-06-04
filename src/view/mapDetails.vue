@@ -15,6 +15,19 @@ export default {
         const router = useRouter()
         const route = useRoute()
         const state = reactive({
+            redArray: [88, 89, 90, 91],
+            mainTextColor: computed(()=>{
+                return state.redArray.includes(Number(route.params.action)) ? 'text-brown' : 'text-steel'
+            }),
+            mainBgColor: computed(()=>{
+                return state.redArray.includes(Number(route.params.action)) ? 'bg-brown' : 'bg-steel'
+            }),
+            type: computed(()=>{
+                return state.redArray.includes(Number(route.params.action)) ? 1 : 2
+            }),
+            coordinates: computed(()=>{
+                return (state.tribeData?.basicInformation?.coordinates) ? Object.entries(state.tribeData?.basicInformation?.coordinates) : null
+            }),
             tribeData: {}
         })
 
@@ -31,13 +44,14 @@ export default {
 
         onMounted(async () => {
             await $.ajax({
-                url: `https://api.edtest.site/tribe?tribeCode=${route.params?.action || 88}`,
+                url: `https://api.edtest.site/tribe?tribeCode=${route.params?.action}`,
                 method: "GET"
             }).done(res => {
                 state.tribeData = res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
+            console.log(state.tribeData)
         })
 
         return {
@@ -53,69 +67,71 @@ export default {
 
 <template>
     <div class="row mx-0 detail position-relative">
-        <div class="redTotem"></div>
+        <div class="redTotem" :class="state.type == 1 ? 'redTotem' : 'blueTotem'"></div>
         <div class="detailCon">
             <div class="row mx-0">
                 <div class="aside px-0">
                     <ul class="ps-0">
                         <li class="text-center mb-5">
-                            <a href="#section1" class="bg-white fw-bold rounded text-decoration-none text-brown">基本資料</a>
+                            <a href="#section1" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">基本資料</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section2" class="bg-white fw-bold rounded text-decoration-none text-brown">部落地標</a>
+                            <a href="#section2" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">部落地標</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section3" class="bg-white fw-bold rounded text-decoration-none text-brown">自然環境</a>
+                            <a href="#section3" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">自然環境</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section4" class="bg-white fw-bold rounded text-decoration-none text-brown">人文環境</a>
+                            <a href="#section4" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">人文環境</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section5" class="bg-white fw-bold rounded text-decoration-none text-brown">歷史災害</a>
+                            <a href="#section5" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">歷史災害</a>
                         </li>
                     </ul>
                 </div>
                 <div class="detailMain">
                     <h2 class="text-center">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
                     <div class="section mb-5 d-flex align-items-center" id="section1">
-                        <div class="text-brown fw-bold col-3 text-center">聚落座標</div>
+                        <div class="text-brown fw-bold col-3 text-center" :class="state.mainTextColor">聚落座標</div>
                         <div class="col-8">
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
-                            <!-- !! fix:95TM2、97TM2 -->
-                            <!-- <p>【97TM2座標】 X：{{ state.tribeData?.basicInformation?.coordinates['95TM2'].x }}， {{ state.tribeData?.basicInformation?.coordinates['95TM2'].y }}</p> -->
-                            <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p>
+                            <!-- fix -->
+                            <p v-for="(item, itemKey) in state.coordinates">【 {{ item[0] }}座標 】 經度：{{ item[1].lng }}，緯度：{{ item[1].lat }}</p>
+                            <!-- <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p> -->
                         </div>
                     </div>
                     <div class="row flex-nowrap mx-0 mb-5 justify-content-between">
                         <div class="section py-4 px-0 col-3 text-center">
-                            <p class="mb-2 text-brown fs-5 fw-bold">
-                                <img src="@/assets/mapDetail/Frame.png" alt="">
+                            <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
+                                <!-- needfix: <img :src="`@/assets/mapDetail/frame-2.png`"> -->
+                                <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                                <img src="@/assets/mapDetail/frame-2.png" v-else>
                                 人口戶數
                             </p>
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.totalHouseholds }}</p>
                         </div>
                         <div class="section py-4 px-0 col-3 text-center">
-                            <p class="mb-2 text-brown fs-5 fw-bold">
-                                <img src="@/assets/mapDetail/Frame.png" alt="">
+                            <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
+                                <img src="@/assets/mapDetail/frame-1.png">
                                 聚落規模
                             </p>
                                 <!-- 高(20戶以上) -->
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.scale }}</p>
                         </div>
                         <div class="section py-4 px-0 col-3 text-center">
-                            <p class="mb-2 text-brown fs-5 fw-bold">
-                                <img src="@/assets/mapDetail/Frame.png" alt="">
+                            <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
+                                <img src="@/assets/mapDetail/frame-1.png">
                                 行政區域
                             </p>
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.area }}</p>
                         </div>
                     </div>
                     <div class="section mb-5" id="section2">
-                        <div class="text-brown fw-bold">部落地標</div>
-                        <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
+                        <div class="fw-bold" :class="state.mainTextColor">部落地標</div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="d-flex flex-nowrap mx-0">
-                            <img src="@/assets/mapDetail/3-1.png" alt="" class="me-4 w-10">
+                            <img src="@/assets/mapDetail/3-1.png" class="me-4 w-10">
                             <div>
                                 <p>名稱 : 石磊國小</p>
                                 <p>地址 : 新竹縣尖石鄉49號</p>
@@ -126,54 +142,54 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section3">
-                        <div class="text-brown fw-bold">自然環境</div>
-                        <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
+                        <div class="fw-bold" :class="state.mainTextColor">自然環境</div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div>
                             <p>{{ state.tribeData?.naturalEnvironment }}</p>
                         </div>
                     </div>
                     <div class="section mb-5" id="section4">
-                        <div class="text-brown fw-bold">人文環境</div>
-                        <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
+                        <div class="fw-bold" :class="state.mainTextColor">人文環境</div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div>石磊部落範圍內之文化地景分佈如下圖所示。地標地物包括石磊國小、石磊天主堂、石磊文化健康站和石磊教會等。部落產業以農業為主，種植椴木香菇及有機農業，以高冷蔬菜為主。</div>
                         <div class="my-5">
                             <p class="mb-2">部落名稱:石磊部落</p>
                             <p class="mb-2">主要原住民族群:泰雅族</p>
                         </div>
                         <div>
-                            <div class="text-brown fw-bold mb-2">文化地景點</div>
+                            <div class="fw-bold mb-2" :class="state.mainTextColor">文化地景點</div>
                             <!-- {{ state.tribeData.culturalLandscape }} -->
                             <ul class="list-unstyled d-flex flex-wrap">
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-1.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-1.png" class="w-100">
                                     <p>石磊文化健康站</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-2.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-2.png" class="w-100">
                                     <p>石磊天主堂</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-3.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-3.png" class="w-100">
                                     <p>石磊教會</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-4.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-4.png" class="w-100">
                                     <p>石磊國小</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-5.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-5.png" class="w-100">
                                     <p>抬耀橋</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-6.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-6.png" class="w-100">
                                     <p>抬耀瀑布</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-7.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-7.png" class="w-100">
                                     <p>段木香菇</p>
                                 </li>
                                 <li class="col-3 px-2">
-                                    <img src="@/assets/mapDetail/5-8.png" alt="" class="w-100">
+                                    <img src="@/assets/mapDetail/5-8.png" class="w-100">
                                     <p>有機高冷蔬菜</p>
                                 </li>
                             </ul>
@@ -181,17 +197,17 @@ export default {
                     </div>
 
                     <div class="section mb-5 history" id="section5">
-                        <div class="text-brown fw-bold">歷史災害</div>
-                        <hr class="text-brown border-5 opacity-100 mt-1 mb-3">
+                        <div class="fw-bold" :class="state.mainTextColor">歷史災害</div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="mb-4">
                             依據111年尖石鄉公所地區災害防救計畫及查詢災害復建工程經費審議及執行資訊系統後，將發生於石磊部落範圍內(及鄰近)之災害事件彙整如下表，並於111年12月22日進行現場調查。災害原因多為降雨及颱風事件，主要的災害類型為土石崩落及邊坡災害。
                         </div>
                         <div class="table w-100">
                             <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 bg-brown text-white">編號</div>
-                                <div class="col-2 bg-brown text-white">日期</div>
-                                <div class="col-3 bg-brown text-white">災害原因</div>
-                                <div class="col-4 bg-brown text-white">災害描述</div>
+                                <div class="col-1 text-white" :class="state.mainBgColor">編號</div>
+                                <div class="col-2 text-white" :class="state.mainBgColor">日期</div>
+                                <div class="col-3 text-white" :class="state.mainBgColor">災害原因</div>
+                                <div class="col-4 text-white" :class="state.mainBgColor">災害描述</div>
                             </div>
                             <div class="d-flex flex-nowrap justify-content-between"
                             v-for="(item, itemKey) in state.tribeData?.historicalDisasters" :key="itemKey">
@@ -207,10 +223,10 @@ export default {
         </div>
         <div class="position-fixed bottom-0 end-0 w-auto m-5">
             <div class="goBack mb-4 cursor-pointer" @click="router.push({ name: 'index' })">
-                <img src="@/assets/mapDetail/back.svg" alt="">
+                <img src="@/assets/mapDetail/back.svg">
             </div>
             <div class="goTop cursor-pointer" @click="goTop()">
-                <img src="@/assets/mapDetail/top.svg" alt="">
+                <img src="@/assets/mapDetail/top.svg">
             </div>
         </div>
     </div>
@@ -247,6 +263,9 @@ export default {
 .redTotem
     height: 135px
     background-image: url('@/assets/mapDetail/redTotem.svg')
+.blueTotem
+    height: 135px
+    background-image: url('@/assets/mapDetail/blueTotem.svg')
 .aside
     width: 200px
     margin-top: 140px
