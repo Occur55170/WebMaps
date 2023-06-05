@@ -97,7 +97,10 @@ export default {
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
                             <!-- fix -->
-                            <p v-for="(item, itemKey) in state.coordinates">【 {{ item[0] }}座標 】 經度：{{ item[1].lng }}，緯度：{{ item[1].lat }}</p>
+                            <p v-for="(item, itemKey) in state.coordinates">
+                                <p>
+                                    【 {{ item[0] }}座標 】 經度：{{ item[1]?.lng || item[1]?.x }}，緯度：{{ item[1]?.lat || item[1]?.y }}</p>
+                                </p>
                             <!-- <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p> -->
                         </div>
                     </div>
