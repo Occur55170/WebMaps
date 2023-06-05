@@ -13,7 +13,7 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
-            selectMap: props.baseMapsOptions[0]
+            selectMap: props.baseMapsOptions[0].name
         })
         function onChangeBaseMaps(name){
             let action = 'baseMap'

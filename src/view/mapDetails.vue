@@ -106,7 +106,6 @@ export default {
                                 <span v-if="item[1].lat">緯度：{{ item[1].lat }}</span>
                                 <span v-if="item[1].y">Y：{{ item[1].y }}</span>
                             </p>
-                            <!-- <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p> -->
                         </div>
                     </div>
                     <div class="row flex-nowrap mx-0 mb-5 justify-content-between">
