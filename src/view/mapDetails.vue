@@ -97,7 +97,15 @@ export default {
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
                             <!-- fix -->
-                            <p v-for="(item, itemKey) in state.coordinates">【 {{ item[0] }}座標 】 經度：{{ item[1].lng }}，緯度：{{ item[1].lat }}</p>
+                            {{ state.coordinates }}
+                            <p v-for="(item, itemKey) in state.coordinates">
+                                【 {{ item[0] }}座標 】
+                                <span v-if="item[1].lng">經度：{{ item[1].lng }}</span>
+                                <span v-if="item[1].x">X：{{ item[1].x }}</span>
+                                ，
+                                <span v-if="item[1].lat">緯度：{{ item[1].lat }}</span>
+                                <span v-if="item[1].y">Y：{{ item[1].y }}</span>
+                            </p>
                             <!-- <p>【WGS84座標】 經度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lng }}，緯度：{{ state.tribeData?.basicInformation?.coordinates['WGS84'].lat }}</p> -->
                         </div>
                     </div>
@@ -277,7 +285,6 @@ export default {
     a
         display: block
         padding: 15px 60px
-        // color: #841613
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)
 .detailMain
     width: calc(100% - 300px)

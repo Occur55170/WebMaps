@@ -31,6 +31,7 @@ export default {
                 url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
                 method: "GET"
             }).done(res => {
+                console.log(res)
                 return res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
@@ -114,8 +115,4 @@ export default {
 
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
-
-// .lightbox
-//     top: 20%
-//     left: 50%
 </style>
