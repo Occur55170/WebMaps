@@ -142,13 +142,11 @@ export default {
                 }),
             })
         }
-        // only 部落圖層點擊用laye
+        // only 部落圖層點擊用layer
         // needfix: 加入背景顏色
         if (layerType === 'WFS') {
-            console.log(layer.tiles_url)
             let vectorSource = new VectorSource({
                 format: new GeoJSON(),
-                // fix!!!
                 url: layer.tiles_url,
                 strategy: bbox
             })

@@ -193,11 +193,11 @@ export default {
         }
 
         function layerControl({ action, value }) {
+            console.log({ action, value })
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
-                    console.log(value.id)
                     if (value.checked) {
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
@@ -237,16 +237,20 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // fix: 此處寫死 淹水.台灣近岸海域風浪危害圖 兩個圖層，看之後是否可以改成以single_tiles判斷
+                        // needfix: 結構優化
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
-                                toRemoveLayerId = layersAry.filter(element => element.get('id') === 'node0_subNode0_nestedSubNodeundefined')
+                                toRemoveLayerId = layersAry.filter(element => {
+                                    return element.get('id') ? element?.get('id').includes('node0_subNode0_nestedSubNode') : false
+                                })
                                 toRemoveLayerId.forEach((node) => {
                                     target.removeLayer(node)
                                 })
                                 break
                             case 'node3_subNode1_nestedSubNodeundefined':
-                                toRemoveLayerId = layersAry.filter(element => element.get('id') === 'node3_subNode1_nestedSubNodeundefined')
+                                toRemoveLayerId = layersAry.filter(element => {
+                                    return element.get('id') ? element?.get('id').includes('node3_subNode1_nestedSubNodeundefined') : false
+                                })
                                 toRemoveLayerId.forEach((node) => {
                                     target.removeLayer(node)
                                 })
@@ -456,7 +460,6 @@ export default {
             selector.on('select', (event) => {
                 let selectedFeatures = event.selected;
                 if (event.selected[0]) {
-                    // needfix: autoPan失效
                     state.areaData.overlay = new Overlay({
                         element: state.areaData.nodeRef,
                         autoPan: true,
@@ -498,13 +501,6 @@ export default {
                         let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
 
-                        // fix: 加入https node0_subNode3.4.5_nestedSubNodeundefined
-                        let stopAry = ['node0_subNode3_nestedSubNodeundefined', 'node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined']
-                        if(stopAry.includes(sub.id)) {
-                            let newUrl = sub.tiles_url.replace(/http:\/\//g, "https://");
-                            console.log(newUrl)
-                        }
-
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
@@ -542,24 +538,24 @@ export default {
 
 <template>
     <div>
-        <div class="SearchBar position-absolute">
-            <img src="@/assets/logo.svg" alt="" class="mb-2">
-            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
-        </div>
-        <mapSourceOption class="mapSourceOption" :baseMapsOptions="state.baseMapsOptions"
-            @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
-
-        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
             <!-- needFix 寬度設定是否調整 -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
         </div>
+        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
+        <mapSourceOption class="mapSourceOption position-absolute" :baseMapsOptions="state.baseMapsOptions"
+            @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
+
+        <div class="SearchBar position-absolute">
+            <img src="@/assets/logo.svg" alt="" class="mb-2">
+            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
+                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+        </div>
+
         <div class="condition position-absolute">
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
@@ -616,6 +612,7 @@ export default {
                 </div>
             </div>
         </div>
+
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
             <div class="p-4 rounded bg-white" style="width: 250px;">
                 <p class="text-center fw-bold">是否要刪除全部圖層</p>
@@ -635,15 +632,21 @@ export default {
                 </div>
             </div>
         </div>
-
         <div id="popup"
-        style="position: fixed;top: 100%; left: 100%;"
+        class="position-absolute"
         :ref="(e)=>{
             state.areaData.nodeRef = e
         }">
             <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
                 closeMapData()
             }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
+        </div>
+
+        <div class="m-Navbar position-fixed bottom-0 start-0 w-full">
+            <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
+                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+
         </div>
     </div>
 </template>
@@ -657,13 +660,10 @@ export default {
 .mapWrap .ol-viewport
     height: 100vh
     width: 100vw
-
-
 .asideTool
     z-index: 220
     left: 5px
 .SearchBar
-    position: absolute
     top: 20px
     left: 20px
     z-index: 220
@@ -671,28 +671,33 @@ export default {
     width: 480px
     right: 1%
     bottom: 5%
-
 .mapSourceOption
-    position: fixed
     top: 20px
     right: 20px
     z-index: 220
-
 .middleLine
     width: 5px
     background: $blue-steel
-
-
 .areaData
     width: 450px
     max-height: 500px
     background: #fff
-    position: absolute
-    top: 50%
-    right: 50%
     box-sizing: border-box
 #popup
     border: 1px solid #088
     border-radius: 10px
     background-color: #0FF
+
+.m-Navbar
+    display: none !important
+
+
+@media (max-width: 600px)
+    .SearchBar
+        display: none
+    .condition
+        display: none
+    .m-Navbar
+        display: block !important
+
 </style>
