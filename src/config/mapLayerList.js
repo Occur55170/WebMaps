@@ -145,9 +145,11 @@ export default {
         // only 部落圖層點擊用laye
         // needfix: 加入背景顏色
         if (layerType === 'WFS') {
+            console.log(layer.tiles_url)
             let vectorSource = new VectorSource({
                 format: new GeoJSON(),
-                url: 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=新竹縣原住民部落範圍&outputFormat=application/json',
+                // fix!!!
+                url: layer.tiles_url,
                 strategy: bbox
             })
             result = new Vector({

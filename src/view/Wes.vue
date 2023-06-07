@@ -197,6 +197,7 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
+                    console.log(value.id)
                     if (value.checked) {
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
@@ -236,7 +237,7 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // needfix: 此處寫死 淹水.台灣近岸海域風浪危害圖 兩個圖層，看之後是否可以改成以single_tiles判斷
+                        // fix: 此處寫死 淹水.台灣近岸海域風浪危害圖 兩個圖層，看之後是否可以改成以single_tiles判斷
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 toRemoveLayerId = layersAry.filter(element => element.get('id') === 'node0_subNode0_nestedSubNodeundefined')
@@ -374,9 +375,10 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
+                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
-                        let b = otherLayers.splice(otherLayers.indexOf('node0_subNode4_nestedSubNodeundefined'), 1)[0]
-                        otherLayers.push(b)
+                        let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
+                        otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
                     }
 
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
@@ -485,6 +487,7 @@ export default {
             state.areaData.overlay = null
         }
 
+
         onMounted(async () => {
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
@@ -494,6 +497,14 @@ export default {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+
+                        // fix: 加入https node0_subNode3.4.5_nestedSubNodeundefined
+                        let stopAry = ['node0_subNode3_nestedSubNodeundefined', 'node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined']
+                        if(stopAry.includes(sub.id)) {
+                            sub.tiles_url = sub.tiles_url.replace(/http:\/\//g, "https://");
+                            console.log(sub.tiles_url)
+                        }
+
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
