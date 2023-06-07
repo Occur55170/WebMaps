@@ -197,6 +197,7 @@ export default {
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
+                    console.log(value.id)
                     if (value.checked) {
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
@@ -496,6 +497,14 @@ export default {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+
+                        // fix: 加入https node0_subNode3.4.5_nestedSubNodeundefined
+                        let stopAry = ['node0_subNode3_nestedSubNodeundefined', 'node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined']
+                        if(stopAry.includes(sub.id)) {
+                            sub.tiles_url = sub.tiles_url.replace(/http:\/\//g, "https://");
+                            console.log(sub.tiles_url)
+                        }
+
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
