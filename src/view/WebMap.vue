@@ -501,8 +501,8 @@ export default {
                         // fix: 加入https node0_subNode3.4.5_nestedSubNodeundefined
                         let stopAry = ['node0_subNode3_nestedSubNodeundefined', 'node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined']
                         if(stopAry.includes(sub.id)) {
-                            let newUrl = sub.tiles_url.replace(/http:\/\//g, "https://");
-                            console.log(newUrl)
+                            sub.tiles_url = sub.tiles_url.replace(/http:\/\//g, "https://");
+                            console.log(sub.tiles_url)
                         }
 
                         if (!(sub.single_tiles)) {
