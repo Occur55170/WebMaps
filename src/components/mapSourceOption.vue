@@ -23,6 +23,7 @@ export default {
             }
             emit('onChangeBaseMaps', { action, value })
         }
+        console.log(props.baseMapsOptions)
         return {
             state,
             props,
