@@ -6,6 +6,7 @@ export default {
             type: Array,
             default: []
         },
+        // needfix
         onChangeBaseMaps: {
             type: Function,
             default: ()=>{}

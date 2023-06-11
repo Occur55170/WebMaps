@@ -15,7 +15,15 @@ export default {
         dimensionMapStatus: {
             type: Boolean,
             default: false
-        }
+        },
+        openLayerSelect: {
+            type: Function,
+            default: () => {}
+        },
+        onLayerControl: {
+            type: Function,
+            default: () => {}
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -42,6 +50,7 @@ export default {
             })
         }
         function onLayerControl(action, value) {
+            console.log(11)
             if (action === 'changeMapCount') {
                 state.toolSwitch['splitWindowBtn'] = false
             }
@@ -70,10 +79,22 @@ export default {
 </script>
 
 <template>
-    <div>
-        <ul class="list-unstyled d-flex align-items-center flex-nowrap w-full">
+    <div class="w-100">
+        <div class="position-fixed top-0 w-100 d-flex justify-content-end flex-wrap">
+            <img src="@/assets/logo.svg" class="w-100" alt="">
+            <div class="switchControl me-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
+                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
+                    onChangeTarget(1)
+                }">上</div>
+                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
+                    onChangeTarget(2)
+                }">下</div>
+            </div>
+        </div>
+
+        <ul class="list-unstyled d-flex align-items-center justify-content-between flex-nowrap w-100 bg-white mb-0">
             <li class="me-4 position-relative">
-                <div class="MapFeatureBtn text-white">
+                <div class="text-white">
                     <a href="" v-if="props.dimensionMapStatus"
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
                         <img src="@/assets/img/icon/twoDimensional.svg">
@@ -85,69 +106,36 @@ export default {
                 </div>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white"
+                <a href="" class="text-white"
                     @click.prevent="toolSwitch('layerConditionBtn'), conditionWrap()">
                     <img src="@/assets/img/icon/baseLayer.svg" alt="">
                 </a>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
-                    <img src="@/assets/img/icon/singleWindow.svg" alt="" v-if="props.mapCount === 1">
-                    <img src="@/assets/img/icon/doubleWindows.svg" alt="" v-if="props.mapCount === 2">
+                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5" @click="props.openLayerSelect()">
+                    已選圖層
+                </button>
+            </li>
+            <li class="me-4 position-relative">
+                <a href="" class="text-white" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
+                    <img src="@/assets/img/icon/singleWindow.svg" alt="">
                 </a>
-                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindowBtn">
-                    <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 1)">
-                            <img src="@/assets/img/icon/singleWindow.svg" alt="">
-                        </a>
-                    </li>
-                    <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 2)">
-                            <img src="@/assets/img/icon/doubleWindows.svg" alt="">
-                        </a>
-                    </li>
-                </ul>
+                <a href="" class="text-white" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
+                    <img src="@/assets/img/icon/doubleWindows.svg" alt="">
+                </a>
             </li>
         </ul>
-
-        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">
-            <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
-                onChangeTarget(1)
-            }">左</div>
-            <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
-                onChangeTarget(2)
-            }">右</div>
-        </div>
     </div>
 </template>
 
 <style lang="sass">
-.MapFeatureBtn
-    display: block
-    border-radius: 10px
-    width: 68px
-    height: 68px
-    box-sizing: border-box
-    img
-        width: 100%
-        height: 100%
-        &:hover
-            filter: brightness(0.5)
-    svg
-        font-size: 24px
-        width: 100%
-        height: 100%
-
 .switchControl
-    top: 10px
-    left: 50%
     background: rgba(30, 30, 30, 0.9)
     box-sizing: border-box
     div
-        padding:5px 28px
+        padding:5px
         cursor: pointer
         box-sizing: border-box
     .active
         background: #247BA0
-
 </style>

@@ -77,6 +77,9 @@ export default {
             map2LayerStatus: [],
             deleteLightbox: false,
             // 目前地圖狀態為2D or 3D
+            mapHeight:computed(()=>{
+                return '100vh'
+            }),
             dimensionMap: {
                 map1: '2D',
                 map2: '2D'
@@ -193,7 +196,6 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            console.log({ action, value })
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -317,12 +319,12 @@ export default {
                     })
                     break;
                 case 'changeMapCount':
-                    if (state.mapCount === value) { return }
+                    if (state.mapCount === value.qty) { return }
                     let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
-                    state.mapCount = value
+                    state.mapCount = value.qty
                     let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    if (value === 2) {
+                    if (value.qty === 2) {
                         state[otherMap] = new Map({
                             target: otherMap,
                             layers: [
@@ -342,7 +344,7 @@ export default {
                             scene.terrainProvider = Cesium.createWorldTerrain({})
                         }
                     }
-                    if (value === 1) {
+                    if (value.qty === 1) {
                         state[otherMap] = null
                         const element = document.getElementById(otherMap)
                         while (element.firstChild) {
@@ -538,25 +540,35 @@ export default {
 
 <template>
     <div>
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
+        <div class="w-100 d-flex flex-column flex-sm-row flex-nowrap mapWrap" id="mapWrap">
             <!-- needFix 寬度設定是否調整 -->
-            <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+            <div id="map1"
+            :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"
+            :style="{'height': state.mapHeight}"
+            ></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
+            <div id="map2"
+            :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"
+            :style="{'height': state.mapHeight}"
+            ></div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
             @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-        <mapSourceOption class="mapSourceOption position-absolute" :baseMapsOptions="state.baseMapsOptions"
+        <mapSourceOption class="mapSourceOption d-none d-sm-block position-absolute" :baseMapsOptions="state.baseMapsOptions"
             @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
 
-        <div class="SearchBar position-absolute">
+        <div class="SearchBar d-none d-sm-block position-absolute">
             <img src="@/assets/logo.svg" alt="" class="mb-2">
-            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            <SearchBar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+            @onChangeTarget="(value) => { changeTarget(value) }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
-        <div class="condition position-absolute">
+        <div class="conditionCom d-none d-sm-block position-absolute">
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
@@ -572,8 +584,9 @@ export default {
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
                         }
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -632,9 +645,7 @@ export default {
                 </div>
             </div>
         </div>
-        <div id="popup"
-        class="position-absolute"
-        :ref="(e)=>{
+        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
             state.areaData.nodeRef = e
         }">
             <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
@@ -642,10 +653,35 @@ export default {
             }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
         </div>
 
-        <div class="m-Navbar position-fixed bottom-0 start-0 w-full">
-            <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
+            <condition
+            class="position-absolute bottom-100 w-100"
+            v-if="state.layerSelect"
+            v-bind="{
+                mapLayers: state.mapLayers,
+                currentLayers: state.currentLayers,
+                onClose: () => {
+                    state.conditionWrap = false
+                },
+                showSelectLayerValue: (val) => {
+                    state.selectValueTemp = val
+                }
+            }"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+            <mNavbar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            :openLayerSelect="() => {
+                state.layerSelect = !state.layerSelect
+            }"
+            :onLayerControl="({ action, value }) => {
+                layerControl({ action, value })
+            }"
+            @onChangeTarget="(value) => { changeTarget(value)
+            }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
 
         </div>
     </div>
@@ -667,7 +703,7 @@ export default {
     top: 20px
     left: 20px
     z-index: 220
-.condition
+.conditionCom
     width: 480px
     right: 1%
     bottom: 5%
@@ -688,16 +724,12 @@ export default {
     border-radius: 10px
     background-color: #0FF
 
-.m-Navbar
-    display: none !important
 
 
 @media (max-width: 600px)
-    .SearchBar
-        display: none
-    .condition
-        display: none
     .m-Navbar
-        display: block !important
-
+        z-index: 222
+    .middleLine
+        height: 1px
+        width: 100%
 </style>

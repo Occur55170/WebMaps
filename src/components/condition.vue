@@ -96,7 +96,7 @@ export default {
 </script>
 
 <template>
-    <div class="rounded-4 bg-white">
+    <div class="condition bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
             <div class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
@@ -173,7 +173,10 @@ export default {
     </div>
 </template>
 
-<style lang="sass" scoped>.closeBtn
+<style lang="sass" scoped>
+.condition
+    border-radius: 10px
+.closeBtn
     right:10px
     svg
         width: 20px
@@ -193,4 +196,8 @@ export default {
         height: 16px
     .wrap
         display: none
+@media (max-width: 600px)
+    .condition
+        border-radius: 0
+
 </style>
