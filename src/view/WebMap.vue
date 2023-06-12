@@ -77,9 +77,6 @@ export default {
             map2LayerStatus: [],
             deleteLightbox: false,
             // 目前地圖狀態為2D or 3D
-            mapHeight:computed(()=>{
-                return '100vh'
-            }),
             dimensionMap: {
                 map1: '2D',
                 map2: '2D'
@@ -94,6 +91,10 @@ export default {
                 nodeRef: null,
                 overlay: null,
                 tribeAreaData: {},
+            },
+            comHeight: {
+                wrapHeight: '',
+                mapHeight: '',
             },
         })
 
@@ -492,7 +493,6 @@ export default {
             state.areaData.overlay = null
         }
 
-
         onMounted(async () => {
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
@@ -522,6 +522,11 @@ export default {
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
+
+            state.comHeight.wrapHeight = window.innerHeight
+            window.onresize = (e)=>{
+                state.comHeight.wrapHeight = e.target.innerHeight
+            }
         })
 
         return {
@@ -542,14 +547,14 @@ export default {
     <div>
         <div class="w-100 d-flex flex-column flex-sm-row flex-nowrap mapWrap" id="mapWrap">
             <!-- needFix 寬度設定是否調整 -->
-            <div id="map1"
+            <div class="h-100" id="map1"
             :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"
-            :style="{'height': state.mapHeight}"
+            :style="{'height': state.comHeight.wrapHeight + 'px'}"
             ></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div id="map2"
+            <div class="h-100" id="map2"
             :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"
-            :style="{'height': state.mapHeight}"
+            :style="{'height': state.comHeight.wrapHeight + 'px'}"
             ></div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
