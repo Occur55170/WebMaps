@@ -15,7 +15,7 @@ export default {
         const router = useRouter()
         const route = useRoute()
         const state = reactive({
-            redArray: [88, 89, 90, 91],
+            redArray: [134],
             mainTextColor: computed(()=>{
                 return state.redArray.includes(Number(route.params.action)) ? 'text-brown' : 'text-steel'
             }),
@@ -51,7 +51,6 @@ export default {
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
-            console.log(state.tribeData)
         })
 
         return {

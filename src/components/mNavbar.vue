@@ -16,11 +16,19 @@ export default {
             type: Boolean,
             default: false
         },
+        openConditionWrap: {
+            type: Function,
+            default: () => {}
+        },
         openLayerSelect: {
             type: Function,
             default: () => {}
         },
         onLayerControl: {
+            type: Function,
+            default: () => {}
+        },
+        onChangeTarget: {
             type: Function,
             default: () => {}
         },
@@ -50,21 +58,17 @@ export default {
             })
         }
         function onLayerControl(action, value) {
-            console.log(11)
             if (action === 'changeMapCount') {
                 state.toolSwitch['splitWindowBtn'] = false
             }
-            emit('onLayerControl', { action, value })
+            props.onLayerControl({ action, value })
         }
 
         function conditionWrap() {
             emit('conditionWrap')
         }
 
-        function onChangeTarget(value) {
-            state.targetNum = value
-            emit('onChangeTarget', value)
-        }
+        console.log(props.openLayerSelect)
 
         return {
             props,
@@ -72,7 +76,6 @@ export default {
             toolSwitch,
             onLayerControl,
             conditionWrap,
-            onChangeTarget
         }
     }
 }
@@ -83,11 +86,15 @@ export default {
         <div class="position-fixed top-0 w-100 d-flex justify-content-end flex-wrap">
             <img src="@/assets/logo.svg" class="w-100" alt="">
             <div class="switchControl me-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
-                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
-                    onChangeTarget(1)
+                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }"
+                @click="() => {
+                    state.targetNum = 1
+                    props.onChangeTarget(1)
                 }">上</div>
-                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
-                    onChangeTarget(2)
+                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }"
+                @click="() => {
+                    state.targetNum = 2
+                    props.onChangeTarget(2)
                 }">下</div>
             </div>
         </div>
@@ -106,10 +113,9 @@ export default {
                 </div>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="text-white"
-                    @click.prevent="toolSwitch('layerConditionBtn'), conditionWrap()">
+                <div class="text-white" @click="props.openConditionWrap()">
                     <img src="@/assets/img/icon/baseLayer.svg" alt="">
-                </a>
+                </div>
             </li>
             <li class="me-4 position-relative">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5" @click="props.openLayerSelect()">
@@ -117,12 +123,14 @@ export default {
                 </button>
             </li>
             <li class="me-4 position-relative">
-                <a href="" class="text-white" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
-                    <img src="@/assets/img/icon/singleWindow.svg" alt="">
-                </a>
-                <a href="" class="text-white" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
-                    <img src="@/assets/img/icon/doubleWindows.svg" alt="">
-                </a>
+                <div class="text-white">
+                    <a href="" class="text-white" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
+                        <img src="@/assets/img/icon/singleWindow.svg" alt="">
+                    </a>
+                    <a href="" class="text-white" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
+                        <img src="@/assets/img/icon/doubleWindows.svg" alt="">
+                    </a>
+                </div>
             </li>
         </ul>
     </div>

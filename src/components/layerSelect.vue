@@ -47,7 +47,7 @@ export default {
 </script>
 
 <template>
-    <div class="rounded-4 bg-white">
+    <div class="layerSelect bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
             <p class="mb-0 fs-5">已選擇的圖層</p>
             <div class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
@@ -155,6 +155,8 @@ export default {
 
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
+.layerSelect
+    border-radius: 10px
 .closeBtn
     right:10px
     svg
@@ -199,4 +201,8 @@ export default {
         color: #247BA0
     .unlock
         color: $grey
+
+@media (max-width: 600px)
+    .layerSelect
+        border-radius: 0
 </style>

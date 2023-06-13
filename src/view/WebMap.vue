@@ -197,6 +197,7 @@ export default {
         }
 
         function layerControl({ action, value }) {
+            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -375,6 +376,7 @@ export default {
         }
 
         function changeTarget(value) {
+            console.log(value)
             state.targetNum = value
             let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {
@@ -524,9 +526,12 @@ export default {
             })
 
             state.comHeight.wrapHeight = window.innerHeight
+            console.log(state.comHeight.wrapHeight / state.mapCount)
             window.onresize = (e)=>{
                 state.comHeight.wrapHeight = e.target.innerHeight
+                console.log(state.comHeight.wrapHeight / state.mapCount)
             }
+
         })
 
         return {
@@ -545,16 +550,16 @@ export default {
 
 <template>
     <div>
-        <div class="w-100 d-flex flex-column flex-sm-row flex-nowrap mapWrap" id="mapWrap">
+        <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <!-- needFix 寬度設定是否調整 -->
-            <div class="h-100" id="map1"
-            :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"
-            :style="{'height': state.comHeight.wrapHeight + 'px'}"
+            <div id="map1"
+            :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
+            :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
             ></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div class="h-100" id="map2"
-            :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"
-            :style="{'height': state.comHeight.wrapHeight + 'px'}"
+            <div id="map2"
+            :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
+            :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
             ></div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
@@ -661,7 +666,7 @@ export default {
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
             <condition
             class="position-absolute bottom-100 w-100"
-            v-if="state.layerSelect"
+            v-if="state.conditionWrap"
             v-bind="{
                 mapLayers: state.mapLayers,
                 currentLayers: state.currentLayers,
@@ -674,20 +679,55 @@ export default {
             }"
             @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
             @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+
+            <div v-if="state.layerSelect">
+                    <layerSelect
+                    class="position-absolute bottom-100 w-100"
+                    v-bind="{
+                        selectLock: state.selectLock,
+                        currentLayers: state.currentLayers,
+                        onClose: () => {
+                            state.layerSelect = false
+                        },
+                        onChangLayerVisible: (action) => {
+                            layerControl(action)
+                        },
+                        onChangeOrderLayer: ({ action, value }) => {
+                            layerControl({ action, value })
+                        },
+                        onLockLayer: () => {
+                            state.selectLock = !state.selectLock
+                        },
+                        onDeleteLayer: ({ action, value }) => {
+                            if (value.layerName == 'all') {
+                                state.deleteLightbox = true
+                            } else {
+                                layerControl({ action, value })
+                            }
+                        },
+                        onDeleteLayerAll: () => {
+                            state.deleteLightbox = true
+                        }
+                    }" />
+                </div>
+
             <mNavbar
             :dimensionMapStatus="state.toSearchDimensionStatus"
             :currentLayers="state.currentLayers"
             :mapCount="state.mapCount"
+            :openConditionWrap="() => {
+                state.conditionWrap = !state.conditionWrap
+                state.layerSelect = false
+            }"
             :openLayerSelect="() => {
                 state.layerSelect = !state.layerSelect
+                state.conditionWrap = false
             }"
             :onLayerControl="({ action, value }) => {
                 layerControl({ action, value })
             }"
-            @onChangeTarget="(value) => { changeTarget(value)
-            }"
+            :onChangeTarget="(value) => { changeTarget(value) }"
             @conditionWrap="(value) => { conditionWrap(value) }" />
-
         </div>
     </div>
 </template>
