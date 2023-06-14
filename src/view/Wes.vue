@@ -214,7 +214,7 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        // needfix 3接4
+                        // TODO: 3接4，之後刪除
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             let obj1 = {
                                 action: "layerMode",
@@ -238,7 +238,7 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // needfix: 結構優化
+                        // TODO: 結構優化
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 toRemoveLayerId = layersAry.filter(element => {
@@ -380,7 +380,7 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
@@ -540,7 +540,7 @@ export default {
 <template>
     <div>
         <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-            <!-- needFix 寬度設定是否調整 -->
+            <!-- TODO: 寬度設定是否調整 -->
             <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>

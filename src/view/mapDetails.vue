@@ -42,9 +42,17 @@ export default {
             })
         }
 
+
+
         onMounted(async () => {
+            console.log(11)
+            console.log(route.params.id)
+            // TODO: 尚未加入沒id時導轉回map事件
+            if(!(route.params.id)){
+                router.push({ path: `/Map_Demo/map` })
+            }
             await $.ajax({
-                url: `https://api.edtest.site/tribe?tribeCode=${route.params?.action}`,
+                url: `https://api.edtest.site/tribe?tribeCode=${route.params?.id}`,
                 method: "GET"
             }).done(res => {
                 state.tribeData = res
@@ -95,7 +103,7 @@ export default {
                         <div class="col-8">
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
-                            <!-- fix -->
+                            <!-- FIXME:座標顯示異常 -->
                             <p v-for="(item, itemKey) in state.coordinates">
                                 <p>
                                     【 {{ item[0] }}座標 】 經度：{{ item[1]?.lng || item[1]?.x }}，緯度：{{ item[1]?.lat || item[1]?.y }}</p>
@@ -106,7 +114,7 @@ export default {
                     <div class="row flex-nowrap mx-0 mb-5 justify-content-between">
                         <div class="section py-4 px-0 col-3 text-center">
                             <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
-                                <!-- needfix: <img :src="`@/assets/mapDetail/frame-2.png`"> -->
+                                <!-- TODO: <img :src="`@/assets/mapDetail/frame-2.png`"> -->
                                 <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                                 <img src="@/assets/mapDetail/frame-2.png" v-else>
                                 人口戶數

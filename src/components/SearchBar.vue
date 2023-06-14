@@ -15,7 +15,15 @@ export default {
         dimensionMapStatus: {
             type: Boolean,
             default: false
-        }
+        },
+        baseMapsOptions: {
+            type: Array,
+            default: []
+        },
+        onChangeBaseMaps: {
+            Type: Function,
+            default: ()=>{}
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -107,6 +115,13 @@ export default {
                         </a>
                     </li>
                 </ul>
+            </li>
+            <li>
+                <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                :baseMapsOptions="props.baseMapsOptions"
+                :onChangeBaseMaps="({ action, value })=>{
+                    props.onChangeBaseMaps({ action, value })
+                }" />
             </li>
         </ul>
 

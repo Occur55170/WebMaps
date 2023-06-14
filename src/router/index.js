@@ -1,23 +1,24 @@
 import { createRouter, createWebHistory } from 'vue-router'
-// const routes = [
-//     {path: "/", name: "Home", component: () => import("@/views/Home.vue")},
-//     {path: "/web_build", name: "WebBuild", component: () => import("@/views/auth/WebBuild.vue")}
-//   ]
 const routes = [
     {
-        path: "/Map_Demo/",
-        name: "index",
-        component: () => import("@/view/WebMap.vue"),
+        path: '/Map_Demo/',
+        name: 'index',
+        component: () => import('@/view/index.vue'),
     },
     {
-        path: "/Map_Demo/Wes",
-        name: "Wes",
-        component: () => import("@/view/Wes.vue")
+        path: '/Map_Demo/map',
+        name: 'map',
+        component: () => import('@/view/WebMap.vue'),
     },
     {
-        path: "/Map_Demo/:action",
-        name: "detail",
-        component: () => import("@/view/mapDetails.vue")
+        path: '/Map_Demo/mapDetails/:id',
+        name: 'detail',
+        component: () => import('@/view/mapDetails.vue')
+    },
+    {
+        path: '/Map_Demo/Wes',
+        name: 'Wes',
+        component: () => import('@/view/Wes.vue')
     },
 ]
 

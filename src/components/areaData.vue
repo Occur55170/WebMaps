@@ -39,7 +39,7 @@ export default {
             return result
         }
 
-        // needfix: 優化，改成computed
+        // TODO: 優化，改成computed
         watch(() => props.tribeAreaData['編號'], async (newVal)=>{
             await getTribeData(newVal).then((result)=>{
                 state.tribeData = result
@@ -79,7 +79,7 @@ export default {
                 <span class="">{{ props.tribeId }} {{ state?.tribeData?.basicInformation?.tribeName }} </span>
                 <div class="p-2 bg-steel w-auto text-white d-inline-block rounded-2 cursor-pointer"
                 @click="()=>{
-                    router.push({ path: `/Map_Demo/${props.tribeAreaData['編號']}` })
+                    router.push({ path: `/Map_Demo/mapDetails/${props.tribeAreaData['編號']}` })
                 }">更多資訊</div>
             </div>
             <p>描述: {{ state?.tribeData?.basicInformation?.description }}</p>

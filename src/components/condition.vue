@@ -134,7 +134,7 @@ export default {
                             {{ subNode.title }}
                         </div>
                         <div v-else>
-                            <!-- fix: 直接選擇select，然後透過checkbox不會自動關閉所有圖層 -->
+                            <!-- FIXME: 直接選擇select，然後透過checkbox不會自動關閉所有圖層 -->
                             <input type="checkbox"
                             :checked="props.currentLayers.some(node=> {
                                 let subNodeIds = mapList.getLayerIndex(node.id)

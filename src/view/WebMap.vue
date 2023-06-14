@@ -217,7 +217,7 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        // needfix 3接4
+                        // TODO: 3接4
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             let obj1 = {
                                 action: "layerMode",
@@ -241,7 +241,7 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // needfix: 結構優化
+                        // TODO: 結構優化
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 toRemoveLayerId = layersAry.filter(element => {
@@ -384,7 +384,7 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
@@ -551,7 +551,7 @@ export default {
 <template>
     <div>
         <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
-            <!-- needFix 寬度設定是否調整 -->
+            <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
             :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
             :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
@@ -564,8 +564,6 @@ export default {
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
             @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-        <mapSourceOption class="mapSourceOption d-none d-sm-block position-absolute" :baseMapsOptions="state.baseMapsOptions"
-            @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
 
         <div class="SearchBar d-none d-sm-block position-absolute">
             <img src="@/assets/logo.svg" alt="" class="mb-2">
@@ -573,6 +571,10 @@ export default {
             :dimensionMapStatus="state.toSearchDimensionStatus"
             :currentLayers="state.currentLayers"
             :mapCount="state.mapCount"
+            :baseMapsOptions="state.baseMapsOptions"
+            :onChangeBaseMaps="({ action, value })=>{
+                layerControl({ action, value })
+            }"
             @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
             @onChangeTarget="(value) => { changeTarget(value) }"
             @conditionWrap="(value) => { conditionWrap(value) }" />
@@ -752,10 +754,6 @@ export default {
     width: 480px
     right: 1%
     bottom: 5%
-.mapSourceOption
-    top: 20px
-    right: 20px
-    z-index: 220
 .middleLine
     width: 5px
     background: $blue-steel

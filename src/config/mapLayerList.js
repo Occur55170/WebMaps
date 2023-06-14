@@ -42,7 +42,7 @@ export async function getTribeData(tribeId){
 
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
-        // needfix: 近年歷史災害82處部落點位的type不正確，等api修改後刪掉
+        // TODO: 近年歷史災害82處部落點位的type不正確，等api修改後刪掉
         if (id === 'node0_subNode5_nestedSubNodeundefined'){ layer.layer_type = 'WFS' }
         let result, layerSource
         const layerType = layer.layer_type
@@ -142,7 +142,7 @@ export default {
             })
         }
         // only 部落圖層點擊用layer
-        // needfix: 加入背景顏色
+        // TODO: 加入背景顏色
         if (layerType === 'WFS'){
             const vectorSource = new VectorSource({
                 format: new GeoJSON(),

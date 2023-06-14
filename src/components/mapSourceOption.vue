@@ -6,11 +6,10 @@ export default {
             type: Array,
             default: []
         },
-        // needfix
         onChangeBaseMaps: {
             type: Function,
             default: ()=>{}
-        }
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -22,9 +21,8 @@ export default {
                 checked: true,
                 layerName: state.selectMap
             }
-            emit('onChangeBaseMaps', { action, value })
+            props.onChangeBaseMaps({ action, value })
         }
-        console.log(props.baseMapsOptions)
         return {
             state,
             props,
