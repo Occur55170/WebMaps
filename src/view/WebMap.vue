@@ -376,7 +376,6 @@ export default {
         }
 
         function changeTarget(value) {
-            console.log(value)
             state.targetNum = value
             let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {

@@ -20,11 +20,23 @@ const routes = [
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
+    // {
+    //     path: '/:pathMatch(.*)*',
+    //     name: '404',
+    //     component: () => import('@/view/WebMap.vue'),
+    // },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes
+})
+router.beforeEach((to, from, next) => {
+    if (!to.name){
+        next({ name: 'map' }) // 重定向到特定页面
+    } else {
+        next() // 继续导航
+    }
 })
 
 export default router
