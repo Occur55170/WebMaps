@@ -68,7 +68,7 @@ export default {
             emit('conditionWrap')
         }
 
-        // console.log(props.openLayerSelect)
+        // console.log(props.openLayerSelect)......................................................
 
         return {
             props,
@@ -104,28 +104,28 @@ export default {
                 <div class="text-white">
                     <a href="" v-if="props.dimensionMapStatus"
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
-                        <img src="@/assets/img/icon/twoDimensional.svg">
+                        <img src="@/assets/img/icon/2Dphone.svg">
                     </a>
                     <a href="" v-else
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
-                        <img src="@/assets/img/icon/threeDimensional.svg">
+                        <img src="@/assets/img/icon/3Dphone.svg">
                     </a>
                 </div>
             </li>
             <li class="me-4 position-relative">
                 <div class="text-white" @click="props.openConditionWrap()">
-                    <img src="@/assets/img/icon/baseLayer.svg" alt="">
+                    <img src="@/assets/img/icon/vectorPhone.svg" alt="">
                 </div>
             </li>
             <li class="me-4 position-relative">
-                <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5" @click="props.openLayerSelect()">
-                    已選圖層
+                <button class="border-0 w-100 rounded-4 p-2 bg-transparent" @click="props.openLayerSelect()">
+                    <img src="@/assets/img/icon/selectVectorPhon.svg" alt="">
                 </button>
             </li>
             <li class="me-4 position-relative">
                 <div class="text-white">
                     <a href="" class="text-white" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
-                        <img src="@/assets/img/icon/singleWindow.svg" alt="">
+                        <img src="@/assets/img/icon/singleWindowPhone.svg" alt="">
                     </a>
                     <a href="" class="text-white" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
                         <img src="@/assets/img/icon/doubleWindows.svg" alt="">

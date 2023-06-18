@@ -17,6 +17,7 @@
     "ol-ext": "^4.0.4",
     "olcs": "^2.13.1",
     "vue": "^3.2.41",
+    "vue-carousel": "^0.18.0",
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
