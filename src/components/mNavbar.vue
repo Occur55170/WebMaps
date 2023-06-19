@@ -84,7 +84,7 @@ export default {
 <template>
     <div class="w-100">
         <div class="position-fixed top-0 w-100 d-flex justify-content-end flex-wrap">
-            <img src="@/assets/logo.svg" class="w-100" alt="">
+            <img src="@/assets/logo.svg" class="w-100">
             <div class="switchControl me-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
                 <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }"
                 @click="() => {
@@ -99,37 +99,37 @@ export default {
             </div>
         </div>
 
-        <ul class="list-unstyled d-flex align-items-center justify-content-between flex-nowrap w-100 bg-white mb-0">
-            <li class="me-4 position-relative">
-                <div class="text-white">
-                    <a href="" v-if="props.dimensionMapStatus"
+        <ul class="list-unstyled d-flex align-items-center justify-content-around py-2 flex-nowrap w-100 bg-white mb-0">
+            <li>
+                <div>
+                    <div class="navbarBtn" v-if="props.dimensionMapStatus"
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
-                        <img src="@/assets/img/icon/2Dphone.svg">
-                    </a>
-                    <a href="" v-else
+                        <img src="@/assets/img/icon/2D-m.svg">
+                    </div>
+                    <div class="navbarBtn" v-else
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
-                        <img src="@/assets/img/icon/3Dphone.svg">
-                    </a>
+                        <img src="@/assets/img/icon/3D-m.svg">
+                    </div>
                 </div>
             </li>
-            <li class="me-4 position-relative">
-                <div class="text-white" @click="props.openConditionWrap()">
-                    <img src="@/assets/img/icon/vectorPhone.svg" alt="">
+            <li>
+                <div class="navbarBtn" @click="props.openConditionWrap()">
+                    <img src="@/assets/img/icon/vector-m.svg">
                 </div>
             </li>
-            <li class="me-4 position-relative">
-                <button class="border-0 w-100 rounded-4 p-2 bg-transparent" @click="props.openLayerSelect()">
-                    <img src="@/assets/img/icon/selectVectorPhon.svg" alt="">
-                </button>
+            <li>
+                <div class="navbarBtn" @click="props.openLayerSelect()">
+                    <img src="@/assets/img/icon/selectVector-m.svg">
+                </div>
             </li>
-            <li class="me-4 position-relative">
+            <li>
                 <div class="text-white">
-                    <a href="" class="text-white" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
-                        <img src="@/assets/img/icon/singleWindowPhone.svg" alt="">
-                    </a>
-                    <a href="" class="text-white" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
-                        <img src="@/assets/img/icon/doubleWindows.svg" alt="">
-                    </a>
+                    <div class="navbarBtn" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
+                        <img src="@/assets/img/icon/singleWindow-m.svg">
+                    </div>
+                    <div class="navbarBtn" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
+                        <img src="@/assets/img/icon/doubleWindow-m.svg">
+                    </div>
                 </div>
             </li>
         </ul>
@@ -146,4 +146,16 @@ export default {
         box-sizing: border-box
     .active
         background: #247BA0
+
+ul
+    li
+        .navbarBtn
+            width: 60px
+            height: 60px
+            img
+                width: 100%
+                height: 100%
+        &:nth-Child(1) .navbarBtn, &:nth-Child(4) .navbarBtn
+            width: 50px
+            height: 50px
 </style>

@@ -116,13 +116,6 @@ export default {
                     </li>
                 </ul>
             </li>
-            <li>
-                <mapSourceOption class="mapSourceOption d-none d-sm-block"
-                :baseMapsOptions="props.baseMapsOptions"
-                :onChangeBaseMaps="({ action, value })=>{
-                    props.onChangeBaseMaps({ action, value })
-                }" />
-            </li>
         </ul>
 
         <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">

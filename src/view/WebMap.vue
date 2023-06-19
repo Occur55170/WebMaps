@@ -371,6 +371,13 @@ export default {
                         state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
                     }
                     break;
+                case 'setOpacity':
+                    if (targetLayers.getArray()[value.key].getOpacity() !== 1) {
+                        targetLayers.getArray()[value.key].setOpacity(1)
+                    } else {
+                        targetLayers.getArray()[value.key].setOpacity(0.5)
+                    }
+                    break;
             }
             getCurrentLayerNames()
         }
@@ -565,7 +572,25 @@ export default {
             @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
 
         <div class="SearchBar d-none d-sm-block position-absolute">
-            <img src="@/assets/logo.svg" alt="" class="mb-2">
+            <div class="d-flex align-items-center">
+                <img src="@/assets/logo.svg" alt="" class="mb-2">
+                <ul>
+                    <li class="d-flex align-items-center">
+                        <span class="me-2">部落</span>
+                        <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                        :baseMapsOptions="state.baseMapsOptions"
+                        :onChangeBaseMaps="({ action, value })=>{
+                            layerControl({ action, value })
+                        }" />
+                    </li>
+                    <li class="d-flex align-items-center">
+
+                    </li>
+                    <li class="d-flex align-items-center">
+
+                    </li>
+                </ul>
+            </div>
             <SearchBar
             :dimensionMapStatus="state.toSearchDimensionStatus"
             :currentLayers="state.currentLayers"
@@ -613,12 +638,6 @@ export default {
                         onClose: () => {
                             state.layerSelect = false
                         },
-                        onChangLayerVisible: (action) => {
-                            layerControl(action)
-                        },
-                        onChangeOrderLayer: ({ action, value }) => {
-                            layerControl({ action, value })
-                        },
                         onLockLayer: () => {
                             state.selectLock = !state.selectLock
                         },
@@ -631,7 +650,10 @@ export default {
                         },
                         onDeleteLayerAll: () => {
                             state.deleteLightbox = true
-                        }
+                        },
+                        onLayerControl: ({ action, value }) => {
+                            layerControl({ action, value })
+                        },
                     }" />
                 </div>
             </div>
@@ -708,8 +730,12 @@ export default {
                         },
                         onDeleteLayerAll: () => {
                             state.deleteLightbox = true
-                        }
-                    }" />
+                        },
+                    }"
+                    :setOpacity="({ action, value })=>{
+                        layerControl({ action, value })
+                    }"
+                    />
                 </div>
 
             <mNavbar

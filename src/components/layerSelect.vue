@@ -9,19 +9,11 @@ export default {
             type: Function,
             default: ()=>{}
         },
-        onChangLayerVisible: {
-            type: Function,
-            default: ()=>{}
-        },
         onDeleteLayer: {
             type: Function,
             default: ()=>{}
         },
         onLockLayer: {
-            type: Function,
-            default: ()=>{}
-        },
-        onChangeOrderLayer: {
             type: Function,
             default: ()=>{}
         },
@@ -32,11 +24,14 @@ export default {
         selectLock: {
             type: Boolean,
             default: false
+        },
+        onLayerControl: {
+            type: Function,
+            default: ()=>{}
         }
     },
     setup(props, { emit }) {
-        const state = reactive({
-        })
+        const state = reactive({})
 
         return {
             props,
@@ -93,7 +88,16 @@ export default {
                         </div>
                         <div class="tool">
                             <a href=""
-                            @click.prevent="props.onChangeOrderLayer({
+                            @click.prevent="props.onLayerControl({
+                                action: 'setOpacity',
+                                value: {
+                                    key: nodeIndex,
+                                }
+                            })">
+                                <img src="@/assets/img/icon/vectorOpacity.svg" alt="">
+                            </a>
+                            <a href=""
+                            @click.prevent="props.onLayerControl({
                                 action: 'changeOrder',
                                 value: {
                                     movement:'up',
@@ -106,7 +110,7 @@ export default {
                                 </svg>
                             </a>
                             <a href=""
-                            @click.prevent="props.onChangeOrderLayer({
+                            @click.prevent="props.onLayerControl({
                                 action: 'changeOrder',
                                 value: {
                                     movement: 'down',
@@ -123,7 +127,7 @@ export default {
                                 'Invisible': !node?.visible
                             }"
                             @click.prevent="()=>{
-                                props.onChangLayerVisible({
+                                props.onLayerControl({
                                     action: 'changeLayerVisible',
                                     value: {
                                         key: nodeIndex,

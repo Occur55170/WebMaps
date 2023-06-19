@@ -3,9 +3,9 @@ import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import OSM from 'ol/source/OSM'
 const key = 'Gu2rcfenfMEKjKXgPF6H'
 
-var configBaseMap = [
+const configBaseMap = [
     {
-        name: "default",
+        name: 'default',
         label: '預設',
         urls: new OSM(),
         crossOrigin: 'anonymous'
@@ -32,24 +32,24 @@ var configBaseMap = [
 ]
 export default {
     sourceFun: (val, itemKey, itemValue) => {
-        let mapSource = configBaseMap.find(node=> node.name == val)
-        let vector = {
+        const mapSource = configBaseMap.find(node => node.name === val)
+        const vector = {
             preload: Infinity,
             name: mapSource.name,
             label: mapSource.label,
             source: mapSource.urls,
             crossOrigin: 'anonymous',
         }
-        if(itemValue) {
+        if (itemValue){
             vector[itemKey] = itemValue
         }
         return new TileLayer(vector)
     },
-    sourceData: ()=> {
-        return configBaseMap.map(node=>{
+    sourceData: () => {
+        return configBaseMap.map(node => {
             return {
-                'name': node.name,
-                'label': node.label
+                name: node.name,
+                label: node.label
             }
         })
     }
