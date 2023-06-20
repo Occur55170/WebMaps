@@ -68,7 +68,6 @@ export default {
                     }
                 })
             }),
-            baseMapsOptions: computed(() => baseMapList.sourceData()),
             selectLock: false,
             mapCount: 1,
             map1: null,
@@ -92,6 +91,10 @@ export default {
                 overlay: null,
                 tribeAreaData: {},
             },
+            comSize: {
+                wrapHeight: '',
+                wrapWidth: '',
+            },
         })
 
         const defaultView = new View({
@@ -100,13 +103,23 @@ export default {
             zoom: state.defaultCenterZoom,
         })
 
+        const defaultLayer = new Tile({
+            preload: Infinity,
+            name: 'source_nlsc_EMAP',
+            label: '臺灣通用電子地圖',
+            source: new XYZ({
+                url: 'https://wmts.nlsc.gov.tw/wmts/EMAP5/default/EPSG:3857/{z}/{y}/{x}'
+            }),
+            crossOrigin: 'anonymous',
+        })
+
         let ol3d = null
 
         // 初始化地圖
         function initMap() {
             state.map1 = new Map({
                 target: 'map1',
-                layers: [baseMapList.sourceFun('default')],
+                layers: [baseMapList.getBaseMapData(0)],
                 view: defaultView,
                 controls: [],
             })
@@ -193,7 +206,7 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            console.log({ action, value })
+            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -213,7 +226,7 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        // needfix 3接4
+                        // TODO: 3接4
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             let obj1 = {
                                 action: "layerMode",
@@ -229,18 +242,21 @@ export default {
                             layerControl(obj1)
                         }
 
-                        if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
-                            mapClickEvent(target)
+                        if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
+                            mapClickEvent(target, value.id)
                         }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // needfix: 結構優化
+                        // TODO: 結構優化
+                        // FIXME: 直接選擇select，然後透過checkbox不會自動關閉所有圖層
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
+                                // toRemoveLayerId = layersAry.filter(node => !(node.get('id') === undefined))
                                 toRemoveLayerId = layersAry.filter(element => {
+                                    console.log(element.get('id'))
                                     return element.get('id') ? element?.get('id').includes('node0_subNode0_nestedSubNode') : false
                                 })
                                 toRemoveLayerId.forEach((node) => {
@@ -270,7 +286,7 @@ export default {
                     if (state.selectLock) { return }
                     if (value.layerName === 'all') {
                         let layersAry = targetLayers.getArray()
-                        let layersToRemove = layersAry.filter(node => node.get('name') !== 'default')
+                        let layersToRemove = layersAry.filter(node => !(node.get('id') === undefined))
                         layersToRemove.forEach((node) => {
                             target.removeLayer(node)
                         })
@@ -306,7 +322,15 @@ export default {
                     targetLayers.getArray()[value.key].setVisible(visibleStatus)
                     break;
                 case 'baseMap':
-                    let newTileLayer = baseMaps.sourceFun(value.layerName)
+                    let newTileLayer = new Tile({
+                        preload: Infinity,
+                        name: value.layer.name,
+                        label: value.layer.label,
+                        source: new XYZ({
+                            url: value.layer.url
+                        }),
+                        crossOrigin: 'anonymous',
+                    })
                     targetLayers.extend([newTileLayer])
 
                     let layersAry = targetLayers.getArray()
@@ -317,16 +341,16 @@ export default {
                     })
                     break;
                 case 'changeMapCount':
-                    if (state.mapCount === value) { return }
+                    if (state.mapCount === value.qty) { return }
                     let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
-                    state.mapCount = value
+                    state.mapCount = value.qty
                     let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    if (value === 2) {
+                    if (value.qty === 2) {
                         state[otherMap] = new Map({
                             target: otherMap,
                             layers: [
-                                baseMapList.sourceFun('default'),
+                                baseMapList.getBaseMapData(0),
                                 ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
                             ],
                             view: defaultView,
@@ -342,7 +366,7 @@ export default {
                             scene.terrainProvider = Cesium.createWorldTerrain({})
                         }
                     }
-                    if (value === 1) {
+                    if (value.qty === 1) {
                         state[otherMap] = null
                         const element = document.getElementById(otherMap)
                         while (element.firstChild) {
@@ -367,6 +391,13 @@ export default {
                         state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
                     }
                     break;
+                case 'setOpacity':
+                    if (targetLayers.getArray()[value.key].getOpacity() !== 1) {
+                        targetLayers.getArray()[value.key].setOpacity(1)
+                    } else {
+                        targetLayers.getArray()[value.key].setOpacity(0.5)
+                    }
+                    break;
             }
             getCurrentLayerNames()
         }
@@ -379,7 +410,7 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
@@ -390,7 +421,7 @@ export default {
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
                         layers: [
-                            baseMapList.sourceFun('default'),
+                            baseMapList.getBaseMapData(0),
                             ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
                         ],
                         view: defaultView,
@@ -399,7 +430,7 @@ export default {
 
                     mapClickEvent(state[`map${value}`])
 
-
+                    // FIXME: 切換3D會有問題跳回平面
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
@@ -449,16 +480,14 @@ export default {
             }
         }
 
-        function mapClickEvent(target) {
+        function mapClickEvent(target, vid='node0_subNode4_nestedSubNodeundefined') {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
                 condition: click
             })
-
             target.addInteraction(selector)
-
             selector.on('select', (event) => {
-                let selectedFeatures = event.selected;
+                let selectedFeatures = event.selected
                 if (event.selected[0]) {
                     state.areaData.overlay = new Overlay({
                         element: state.areaData.nodeRef,
@@ -470,14 +499,22 @@ export default {
                     target.addOverlay(state.areaData.overlay);
                     state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
 
-                    selectedFeatures.forEach((feature) => {
-                        let properties = feature.getProperties()
-                        Object.entries(properties).forEach(node => {
-                            const key = node[0], value = node[1]
-                            state.areaData.tribeAreaData[key] = value
+                    // TODO: 重置area小地圖id
+                    state.areaData.tribeAreaData = {}
+                    // TODO: 優化結構，獲取state.areaData.overlay方式修正，考慮整包selectedFeatures放進去
+                    if (selectedFeatures[0].get('編號') === undefined) {
+                        state.areaData.tribeAreaData = selectedFeatures[0]
+                    } else {
+                        selectedFeatures.forEach((feature) => {
+                            let properties = feature.getProperties()
+                            Object.entries(properties).forEach(node => {
+                                const key = node[0], value = node[1]
+                                state.areaData.tribeAreaData[key] = value
+                                })
                         })
-                    })
+                    }
                 } else {
+                    state.areaData.tribeAreaData = {}
                     target.removeOverlay(state.areaData.overlay)
                     state.areaData.overlay = null
                 }
@@ -489,7 +526,6 @@ export default {
             target.removeOverlay(state.areaData.overlay)
             state.areaData.overlay = null
         }
-
 
         onMounted(async () => {
             await $.ajax({
@@ -520,6 +556,14 @@ export default {
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
+
+            state.comSize.wrapHeight = window.innerHeight
+            state.comSize.wrapWidth = window.innerWidth
+            window.onresize = (e)=>{
+                state.comSize.wrapHeight = e.target.innerHeight
+                state.comSize.wrapWidth = e.target.innerWidth
+            }
+
         })
 
         return {
@@ -538,25 +582,51 @@ export default {
 
 <template>
     <div>
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-            <!-- needFix 寬度設定是否調整 -->
-            <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+        <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
+            <!-- TODO: 寬度設定是否調整 -->
+            <div id="map1"
+            :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 && (state.comSize.wrapWidth < 600) }"
+            ></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
+            <div id="map2"
+            :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 && (state.comSize.wrapWidth < 600) }"
+            ></div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
             @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-        <mapSourceOption class="mapSourceOption position-absolute" :baseMapsOptions="state.baseMapsOptions"
-            @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
 
-        <div class="SearchBar position-absolute">
-            <img src="@/assets/logo.svg" alt="" class="mb-2">
-            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+        <div class="SearchBar d-none d-sm-block position-absolute">
+            <div class="d-flex align-items-center">
+                <img src="@/assets/logo.svg" alt="" class="mb-2">
+                <ul>
+                    <li class="d-flex align-items-center">
+                        <span class="me-2">部落</span>
+                        <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                        :onChangeBaseMaps="({ action, value })=>{
+                            layerControl({ action, value })
+                        }" />
+                    </li>
+                    <li class="d-flex align-items-center">
+
+                    </li>
+                    <li class="d-flex align-items-center">
+
+                    </li>
+                </ul>
+            </div>
+            <SearchBar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            :onChangeBaseMaps="({ action, value })=>{
+                layerControl({ action, value })
+            }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+            @onChangeTarget="(value) => { changeTarget(value) }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
-        <div class="condition position-absolute">
+        <div class="conditionCom d-none d-sm-block position-absolute">
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
@@ -572,8 +642,9 @@ export default {
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
                         }
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -589,12 +660,6 @@ export default {
                         onClose: () => {
                             state.layerSelect = false
                         },
-                        onChangLayerVisible: (action) => {
-                            layerControl(action)
-                        },
-                        onChangeOrderLayer: ({ action, value }) => {
-                            layerControl({ action, value })
-                        },
                         onLockLayer: () => {
                             state.selectLock = !state.selectLock
                         },
@@ -607,7 +672,10 @@ export default {
                         },
                         onDeleteLayerAll: () => {
                             state.deleteLightbox = true
-                        }
+                        },
+                        onLayerControl: ({ action, value }) => {
+                            layerControl({ action, value })
+                        },
                     }" />
                 </div>
             </div>
@@ -632,9 +700,7 @@ export default {
                 </div>
             </div>
         </div>
-        <div id="popup"
-        class="position-absolute"
-        :ref="(e)=>{
+        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
             state.areaData.nodeRef = e
         }">
             <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
@@ -642,11 +708,75 @@ export default {
             }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
         </div>
 
-        <div class="m-Navbar position-fixed bottom-0 start-0 w-full">
-            <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
+            <condition
+            class="position-absolute bottom-100 w-100"
+            v-if="state.conditionWrap"
+            v-bind="{
+                mapLayers: state.mapLayers,
+                currentLayers: state.currentLayers,
+                onClose: () => {
+                    state.conditionWrap = false
+                },
+                showSelectLayerValue: (val) => {
+                    state.selectValueTemp = val
+                }
+            }"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
 
+            <div v-if="state.layerSelect">
+                    <layerSelect
+                    class="position-absolute bottom-100 w-100"
+                    v-bind="{
+                        selectLock: state.selectLock,
+                        currentLayers: state.currentLayers,
+                        onClose: () => {
+                            state.layerSelect = false
+                        },
+                        onChangLayerVisible: (action) => {
+                            layerControl(action)
+                        },
+                        onChangeOrderLayer: ({ action, value }) => {
+                            layerControl({ action, value })
+                        },
+                        onLockLayer: () => {
+                            state.selectLock = !state.selectLock
+                        },
+                        onDeleteLayer: ({ action, value }) => {
+                            if (value.layerName == 'all') {
+                                state.deleteLightbox = true
+                            } else {
+                                layerControl({ action, value })
+                            }
+                        },
+                        onDeleteLayerAll: () => {
+                            state.deleteLightbox = true
+                        },
+                    }"
+                    :setOpacity="({ action, value })=>{
+                        layerControl({ action, value })
+                    }"
+                    />
+                </div>
+
+            <mNavbar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            :openConditionWrap="() => {
+                state.conditionWrap = !state.conditionWrap
+                state.layerSelect = false
+            }"
+            :openLayerSelect="() => {
+                state.layerSelect = !state.layerSelect
+                state.conditionWrap = false
+            }"
+            :onLayerControl="({ action, value }) => {
+                layerControl({ action, value })
+            }"
+            :onChangeTarget="(value) => { changeTarget(value) }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
     </div>
 </template>
@@ -667,14 +797,10 @@ export default {
     top: 20px
     left: 20px
     z-index: 220
-.condition
+.conditionCom
     width: 480px
     right: 1%
     bottom: 5%
-.mapSourceOption
-    top: 20px
-    right: 20px
-    z-index: 220
 .middleLine
     width: 5px
     background: $blue-steel
@@ -688,16 +814,12 @@ export default {
     border-radius: 10px
     background-color: #0FF
 
-.m-Navbar
-    display: none !important
 
 
 @media (max-width: 600px)
-    .SearchBar
-        display: none
-    .condition
-        display: none
     .m-Navbar
-        display: block !important
-
+        z-index: 222
+    .middleLine
+        height: 1px
+        width: 100%
 </style>

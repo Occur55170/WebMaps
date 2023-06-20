@@ -15,7 +15,23 @@ export default {
         dimensionMapStatus: {
             type: Boolean,
             default: false
-        }
+        },
+        openConditionWrap: {
+            type: Function,
+            default: () => {}
+        },
+        openLayerSelect: {
+            type: Function,
+            default: () => {}
+        },
+        onLayerControl: {
+            type: Function,
+            default: () => {}
+        },
+        onChangeTarget: {
+            type: Function,
+            default: () => {}
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -45,16 +61,11 @@ export default {
             if (action === 'changeMapCount') {
                 state.toolSwitch['splitWindowBtn'] = false
             }
-            emit('onLayerControl', { action, value })
+            props.onLayerControl({ action, value })
         }
 
         function conditionWrap() {
             emit('conditionWrap')
-        }
-
-        function onChangeTarget(value) {
-            state.targetNum = value
-            emit('onChangeTarget', value)
         }
 
         return {
@@ -63,91 +74,86 @@ export default {
             toolSwitch,
             onLayerControl,
             conditionWrap,
-            onChangeTarget
         }
     }
 }
 </script>
 
 <template>
-    <div>
-        <ul class="list-unstyled d-flex align-items-center flex-nowrap w-full">
-            <li class="me-4 position-relative">
-                <div class="MapFeatureBtn text-white">
-                    <a href="" v-if="props.dimensionMapStatus"
+    <div class="w-100">
+        <div class="position-fixed top-0 w-100 d-flex justify-content-end flex-wrap">
+            <img src="@/assets/logo.svg" class="w-100">
+            <div class="switchControl me-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
+                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }"
+                @click="() => {
+                    state.targetNum = 1
+                    props.onChangeTarget(1)
+                }">上</div>
+                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }"
+                @click="() => {
+                    state.targetNum = 2
+                    props.onChangeTarget(2)
+                }">下</div>
+            </div>
+        </div>
+
+        <ul class="list-unstyled d-flex align-items-center justify-content-around py-2 flex-nowrap w-100 bg-white mb-0">
+            <li>
+                <div>
+                    <div class="navbarBtn" v-if="props.dimensionMapStatus"
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
-                        <img src="@/assets/img/icon/twoDimensional.svg">
-                    </a>
-                    <a href="" v-else
+                        <img src="@/assets/img/icon/2D-m.svg">
+                    </div>
+                    <div class="navbarBtn" v-else
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
-                        <img src="@/assets/img/icon/threeDimensional.svg">
-                    </a>
+                        <img src="@/assets/img/icon/3D-m.svg">
+                    </div>
                 </div>
             </li>
-            <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white"
-                    @click.prevent="toolSwitch('layerConditionBtn'), conditionWrap()">
-                    <img src="@/assets/img/icon/baseLayer.svg" alt="">
-                </a>
+            <li>
+                <div class="navbarBtn" @click="props.openConditionWrap()">
+                    <img src="@/assets/img/icon/vector-m.svg">
+                </div>
             </li>
-            <li class="me-4 position-relative">
-                <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
-                    <img src="@/assets/img/icon/singleWindow.svg" alt="" v-if="props.mapCount === 1">
-                    <img src="@/assets/img/icon/doubleWindows.svg" alt="" v-if="props.mapCount === 2">
-                </a>
-                <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindowBtn">
-                    <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 1)">
-                            <img src="@/assets/img/icon/singleWindow.svg" alt="">
-                        </a>
-                    </li>
-                    <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 2)">
-                            <img src="@/assets/img/icon/doubleWindows.svg" alt="">
-                        </a>
-                    </li>
-                </ul>
+            <li>
+                <div class="navbarBtn" @click="props.openLayerSelect()">
+                    <img src="@/assets/img/icon/selectVector-m.svg">
+                </div>
+            </li>
+            <li>
+                <div class="text-white">
+                    <div class="navbarBtn" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
+                        <img src="@/assets/img/icon/singleWindow-m.svg">
+                    </div>
+                    <div class="navbarBtn" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
+                        <img src="@/assets/img/icon/doubleWindow-m.svg">
+                    </div>
+                </div>
             </li>
         </ul>
-
-        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">
-            <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
-                onChangeTarget(1)
-            }">左</div>
-            <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
-                onChangeTarget(2)
-            }">右</div>
-        </div>
     </div>
 </template>
 
 <style lang="sass">
-.MapFeatureBtn
-    display: block
-    border-radius: 10px
-    width: 68px
-    height: 68px
-    box-sizing: border-box
-    img
-        width: 100%
-        height: 100%
-        &:hover
-            filter: brightness(0.5)
-    svg
-        font-size: 24px
-        width: 100%
-        height: 100%
-
 .switchControl
-    top: 10px
-    left: 50%
     background: rgba(30, 30, 30, 0.9)
     box-sizing: border-box
     div
-        padding:5px 28px
+        padding:5px
         cursor: pointer
         box-sizing: border-box
     .active
         background: #247BA0
 
+ul
+    li
+        .navbarBtn
+            width: 60px
+            height: 60px
+            img
+                width: 100%
+                height: 100%
+        &:nth-Child(1) .navbarBtn, &:nth-Child(4) .navbarBtn
+            width: 50px
+            height: 50px
 </style>

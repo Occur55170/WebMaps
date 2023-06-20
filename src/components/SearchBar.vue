@@ -15,7 +15,7 @@ export default {
         dimensionMapStatus: {
             type: Boolean,
             default: false
-        }
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -97,12 +97,12 @@ export default {
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindowBtn">
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 1)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', {qty: 1})">
                             <img src="@/assets/img/icon/singleWindow.svg" alt="">
                         </a>
                     </li>
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', 2)">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', {qty: 2})">
                             <img src="@/assets/img/icon/doubleWindows.svg" alt="">
                         </a>
                     </li>
@@ -121,7 +121,7 @@ export default {
     </div>
 </template>
 
-<style lang="sass">
+<style lang="sass" scoped>
 .MapFeatureBtn
     display: block
     border-radius: 10px

@@ -22,11 +22,10 @@ import 'ol/ol.css' // ol提供的css样式
 import { format } from 'ol/coordinate'
 import { get as getProjection, transformExtent } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
-import Select from 'ol/interaction/Select';
-import { click } from 'ol/events/condition';
+import Select from 'ol/interaction/Select'
+import { click } from 'ol/events/condition'
 
-
-export const initLayers = async function () {
+export const initLayers = async function(){
     const obj = await $.ajax({
         url: 'https://api.edtest.site/layers',
         method: 'GET'
@@ -34,37 +33,35 @@ export const initLayers = async function () {
     return obj
 }
 
-export async function getTribeData(tribeId) {
+export async function getTribeData(tribeId){
     return await $.ajax({
         url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
-        method: "GET"
+        method: 'GET'
     })
 }
 
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
-        // needfix: 近年歷史災害82處部落點位的type不正確，等api修改後刪掉
-        if (id === 'node0_subNode5_nestedSubNodeundefined') {layer.layer_type = 'WFS'}
         let result, layerSource
-        let layerType = layer.layer_type
-        let figureType = layer.figure_type
-        let tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
-        let request = []
-        if (layerType === 'WMS') {
+        const layerType = layer.layer_type
+        const figureType = layer.figure_type
+        const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
+        const request = []
+        if (layerType === 'WMS'){
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-            switch (figureType) {
+            switch (figureType){
                 case 'Point':
-                    if (url) {
+                    if (url){
                         const api = new URL(url)
                         // 取得網址部分
                         const origin = api.origin
                         const pathname = api.pathname
 
                         // 取得query參數
-                        const searchParams = api.searchParams;
-                        const searchParamsObject = {};
-                        for (const [key, value] of searchParams.entries()) {
-                            searchParamsObject[key] = value;
+                        const searchParams = api.searchParams
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
                         }
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
@@ -77,19 +74,19 @@ export default {
                         serverType: 'mapserver',
                         crossOrigin: 'anonymous',
                     })
-                    break;
+                    break
                 case 'Surface':
-                    if (url) {
+                    if (url){
                         const api = new URL(url)
                         // 取得網址部分
                         const origin = api.origin
                         const pathname = api.pathname
 
                         // 取得query參數
-                        const searchParams = api.searchParams;
-                        const searchParamsObject = {};
-                        for (const [key, value] of searchParams.entries()) {
-                            searchParamsObject[key] = value;
+                        const searchParams = api.searchParams
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
                         }
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
@@ -101,20 +98,20 @@ export default {
                         params: request[1],
                         serverType: 'mapserver'
                     })
-                    break;
+                    break
                 case 'Line':
                     // 活動斷層
-                    if (url) {
+                    if (url){
                         const api = new URL(url)
                         // 取得網址部分
                         const origin = api.origin
                         const pathname = api.pathname
 
                         // 取得query參數
-                        const searchParams = api.searchParams;
-                        const searchParamsObject = {};
-                        for (const [key, value] of searchParams.entries()) {
-                            searchParamsObject[key] = value;
+                        const searchParams = api.searchParams
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
                         }
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
@@ -126,12 +123,12 @@ export default {
                         params: request[1],
                         serverType: 'mapserver'
                     })
-                    break;
+                    break
                 default:
                     console.log('error-otherWMSLayer:', figureType)
             }
             result = new TileLayer({
-                id: id,
+                id,
                 label: `${layer.title} ${tileTitle}`,
                 source: new TileWMS({
                     name: layer.title,
@@ -143,22 +140,22 @@ export default {
             })
         }
         // only 部落圖層點擊用layer
-        // needfix: 加入背景顏色
-        if (layerType === 'WFS') {
-            let vectorSource = new VectorSource({
+        // TODO: 加入背景顏色
+        if (layerType === 'WFS'){
+            const vectorSource = new VectorSource({
                 format: new GeoJSON(),
                 url: layer.tiles_url,
                 strategy: bbox
             })
             result = new Vector({
-                id: id,
+                id,
                 label: `${layer.title} ${tileTitle}`,
                 source: vectorSource
             })
         }
-        if (layerType === 'GeoJson') {
+        if (layerType === 'GeoJson'){
             console.log('GeoJsonLayer', figureType)
-            switch (figureType) {
+            switch (figureType){
                 case 'Line':
                     result = new VectorLayer({
                         source: new VectorSource({
@@ -172,28 +169,28 @@ export default {
                                 SLD_VERSION: '1.1.0'
                             }
                         }),
-                    });
-                    break;
+                    })
+                    break
                 case 'Point':
-                    const wmsSource = new TileWMS({
+                    layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
                         url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
                         params: {
-                            'SERVICE': 'WMS',
-                            'BGCOLOR': '0xFFFFFF',
-                            'TRANSPARENT': 'TRUE',
-                            'SRS': 'EPSG:3826',
-                            'LAYERS': '0',
-                            'VERSION': '1.1.1',
-                            'FORMAT': 'image/png',
+                            SERVICE: 'WMS',
+                            BGCOLOR: '0xFFFFFF',
+                            TRANSPARENT: 'TRUE',
+                            SRS: 'EPSG:3826',
+                            LAYERS: '0',
+                            VERSION: '1.1.1',
+                            FORMAT: 'image/png',
                         },
                         crossOrigin: 'anonymous',
                     })
                     result = new TileLayer({
-                        source: wmsSource,
+                        source: layerSource,
                     })
-                    break;
+                    break
                 default:
                     console.log(figureType)
             }
@@ -202,19 +199,19 @@ export default {
         return result
     },
     getLayerIndex: (layeredIndex) => {
-        let nodeIndex, subNodeIndex = undefined, nestedSubNodeIndex = undefined
-        if (!(layeredIndex)){return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex }}
+        let nodeIndex; let subNodeIndex; let nestedSubNodeIndex
+        if (!(layeredIndex)){ return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex } }
         layeredIndex.split('_').forEach((element, key) => {
-            switch (key) {
+            switch (key){
                 case 0:
                     nodeIndex = Number(element.split('node')[1])
-                    break;
+                    break
                 case 1:
                     subNodeIndex = Number(element.split('subNode')[1])
-                    break;
+                    break
                 case 2:
                     nestedSubNodeIndex = element.split('nestedSubNode')[1] !== 'undefined' ? Number(element.split('nestedSubNode')[1]) : 'undefined'
-                    break;
+                    break
             }
         })
         return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex }

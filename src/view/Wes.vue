@@ -92,6 +92,10 @@ export default {
                 overlay: null,
                 tribeAreaData: {},
             },
+            comHeight: {
+                wrapHeight: '',
+                mapHeight: '',
+            },
         })
 
         const defaultView = new View({
@@ -193,12 +197,11 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            console.log({ action, value })
+            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
-                    console.log(value.id)
                     if (value.checked) {
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
@@ -214,7 +217,7 @@ export default {
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
 
-                        // needfix 3接4
+                        // TODO: 3接4
                         if (value.id === 'node0_subNode3_nestedSubNodeundefined') {
                             let obj1 = {
                                 action: "layerMode",
@@ -238,7 +241,7 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // needfix: 結構優化
+                        // TODO: 結構優化
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 toRemoveLayerId = layersAry.filter(element => {
@@ -318,12 +321,12 @@ export default {
                     })
                     break;
                 case 'changeMapCount':
-                    if (state.mapCount === value) { return }
+                    if (state.mapCount === value.qty) { return }
                     let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
-                    state.mapCount = value
+                    state.mapCount = value.qty
                     let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    if (value === 2) {
+                    if (value.qty === 2) {
                         state[otherMap] = new Map({
                             target: otherMap,
                             layers: [
@@ -343,7 +346,7 @@ export default {
                             scene.terrainProvider = Cesium.createWorldTerrain({})
                         }
                     }
-                    if (value === 1) {
+                    if (value.qty === 1) {
                         state[otherMap] = null
                         const element = document.getElementById(otherMap)
                         while (element.firstChild) {
@@ -368,6 +371,13 @@ export default {
                         state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
                     }
                     break;
+                case 'setOpacity':
+                    if (targetLayers.getArray()[value.key].getOpacity() !== 1) {
+                        targetLayers.getArray()[value.key].setOpacity(1)
+                    } else {
+                        targetLayers.getArray()[value.key].setOpacity(0.5)
+                    }
+                    break;
             }
             getCurrentLayerNames()
         }
@@ -380,7 +390,7 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // needfix: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
@@ -491,7 +501,6 @@ export default {
             state.areaData.overlay = null
         }
 
-
         onMounted(async () => {
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
@@ -521,6 +530,14 @@ export default {
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
+
+            state.comHeight.wrapHeight = window.innerHeight
+            console.log(state.comHeight.wrapHeight / state.mapCount)
+            window.onresize = (e)=>{
+                state.comHeight.wrapHeight = e.target.innerHeight
+                console.log(state.comHeight.wrapHeight / state.mapCount)
+            }
+
         })
 
         return {
@@ -539,25 +556,55 @@ export default {
 
 <template>
     <div>
-        <div class="w-100 d-flex flex-nowrap mapWrap" id="mapWrap">
-            <!-- needFix 寬度設定是否調整 -->
-            <div id="map1" :class="{ 'w-100': state.map1?.getTarget() == 'map1' }"></div>
+        <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
+            <!-- TODO: 寬度設定是否調整 -->
+            <div id="map1"
+            :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
+            :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
+            ></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div id="map2" :class="{ 'w-100': state.map2?.getTarget() == 'map2' }"></div>
+            <div id="map2"
+            :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
+            :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
+            ></div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
             @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-        <mapSourceOption class="mapSourceOption position-absolute" :baseMapsOptions="state.baseMapsOptions"
-            @onChangeBaseMaps="({ action, value }) => { layerControl({ action, value }) }" />
 
-        <div class="SearchBar position-absolute">
-            <img src="@/assets/logo.svg" alt="" class="mb-2">
-            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+        <div class="SearchBar d-none d-sm-block position-absolute">
+            <div class="d-flex align-items-center">
+                <img src="@/assets/logo.svg" alt="" class="mb-2">
+                <ul>
+                    <li class="d-flex align-items-center">
+                        <span class="me-2">部落</span>
+                        <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                        :baseMapsOptions="state.baseMapsOptions"
+                        :onChangeBaseMaps="({ action, value })=>{
+                            layerControl({ action, value })
+                        }" />
+                    </li>
+                    <li class="d-flex align-items-center">
+
+                    </li>
+                    <li class="d-flex align-items-center">
+
+                    </li>
+                </ul>
+            </div>
+            <SearchBar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            :baseMapsOptions="state.baseMapsOptions"
+            :onChangeBaseMaps="({ action, value })=>{
+                layerControl({ action, value })
+            }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+            @onChangeTarget="(value) => { changeTarget(value) }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
-        <div class="condition position-absolute">
+        <div class="conditionCom d-none d-sm-block position-absolute">
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
@@ -573,8 +620,9 @@ export default {
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
                         }
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -590,12 +638,6 @@ export default {
                         onClose: () => {
                             state.layerSelect = false
                         },
-                        onChangLayerVisible: (action) => {
-                            layerControl(action)
-                        },
-                        onChangeOrderLayer: ({ action, value }) => {
-                            layerControl({ action, value })
-                        },
                         onLockLayer: () => {
                             state.selectLock = !state.selectLock
                         },
@@ -608,7 +650,10 @@ export default {
                         },
                         onDeleteLayerAll: () => {
                             state.deleteLightbox = true
-                        }
+                        },
+                        onLayerControl: ({ action, value }) => {
+                            layerControl({ action, value })
+                        },
                     }" />
                 </div>
             </div>
@@ -633,9 +678,7 @@ export default {
                 </div>
             </div>
         </div>
-        <div id="popup"
-        class="position-absolute"
-        :ref="(e)=>{
+        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
             state.areaData.nodeRef = e
         }">
             <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
@@ -643,11 +686,75 @@ export default {
             }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
         </div>
 
-        <div class="m-Navbar position-fixed bottom-0 start-0 w-full">
-            <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
+            <condition
+            class="position-absolute bottom-100 w-100"
+            v-if="state.conditionWrap"
+            v-bind="{
+                mapLayers: state.mapLayers,
+                currentLayers: state.currentLayers,
+                onClose: () => {
+                    state.conditionWrap = false
+                },
+                showSelectLayerValue: (val) => {
+                    state.selectValueTemp = val
+                }
+            }"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
 
+            <div v-if="state.layerSelect">
+                    <layerSelect
+                    class="position-absolute bottom-100 w-100"
+                    v-bind="{
+                        selectLock: state.selectLock,
+                        currentLayers: state.currentLayers,
+                        onClose: () => {
+                            state.layerSelect = false
+                        },
+                        onChangLayerVisible: (action) => {
+                            layerControl(action)
+                        },
+                        onChangeOrderLayer: ({ action, value }) => {
+                            layerControl({ action, value })
+                        },
+                        onLockLayer: () => {
+                            state.selectLock = !state.selectLock
+                        },
+                        onDeleteLayer: ({ action, value }) => {
+                            if (value.layerName == 'all') {
+                                state.deleteLightbox = true
+                            } else {
+                                layerControl({ action, value })
+                            }
+                        },
+                        onDeleteLayerAll: () => {
+                            state.deleteLightbox = true
+                        },
+                    }"
+                    :setOpacity="({ action, value })=>{
+                        layerControl({ action, value })
+                    }"
+                    />
+                </div>
+
+            <mNavbar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            :openConditionWrap="() => {
+                state.conditionWrap = !state.conditionWrap
+                state.layerSelect = false
+            }"
+            :openLayerSelect="() => {
+                state.layerSelect = !state.layerSelect
+                state.conditionWrap = false
+            }"
+            :onLayerControl="({ action, value }) => {
+                layerControl({ action, value })
+            }"
+            :onChangeTarget="(value) => { changeTarget(value) }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
     </div>
 </template>
@@ -668,14 +775,10 @@ export default {
     top: 20px
     left: 20px
     z-index: 220
-.condition
+.conditionCom
     width: 480px
     right: 1%
     bottom: 5%
-.mapSourceOption
-    top: 20px
-    right: 20px
-    z-index: 220
 .middleLine
     width: 5px
     background: $blue-steel
@@ -689,16 +792,12 @@ export default {
     border-radius: 10px
     background-color: #0FF
 
-.m-Navbar
-    display: none !important
 
 
 @media (max-width: 600px)
-    .SearchBar
-        display: none
-    .condition
-        display: none
     .m-Navbar
-        display: block !important
-
+        z-index: 222
+    .middleLine
+        height: 1px
+        width: 100%
 </style>
