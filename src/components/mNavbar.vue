@@ -68,8 +68,6 @@ export default {
             emit('conditionWrap')
         }
 
-        // console.log(props.openLayerSelect)......................................................
-
         return {
             props,
             state,

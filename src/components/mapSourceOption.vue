@@ -1,11 +1,9 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
+import $ from 'jquery'
+
 export default {
     props: {
-        baseMapsOptions: {
-            type: Array,
-            default: []
-        },
         onChangeBaseMaps: {
             type: Function,
             default: ()=>{}
@@ -13,16 +11,30 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
-            selectMap: props.baseMapsOptions[0].name
+            selectMap: null,
+            mapSourceList: []
         })
-        function onChangeBaseMaps(name){
+        function onChangeBaseMaps(){
             let action = 'baseMap'
             let value = {
-                checked: true,
-                layerName: state.selectMap
+                layer: state.mapSourceList.find(node=> node.label === state.selectMap)
             }
             props.onChangeBaseMaps({ action, value })
         }
+
+        onMounted(async ()=>{
+            await $.ajax({
+                url: `https://api.edtest.site/underLayers`,
+                method: "GET"
+            }).done(res => {
+                console.log(res)
+                state.mapSourceList = res.data
+                state.selectMap = res.data[0].label
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+            })
+        })
+
         return {
             state,
             props,
@@ -36,9 +48,9 @@ export default {
     <div>
         <select name="" id="" v-model="state.selectMap"
         @change="(e) => {
-            onChangeBaseMaps()
+            onChangeBaseMaps(e)
         }">
-            <option :value="node.name" v-for="(node, node_i) in props.baseMapsOptions">{{ node.label }}</option>
+            <option v-for="(node, nodeIndex) in state.mapSourceList" :key="nodeIndex" :value="node.label">{{ node.label }}</option>
         </select>
     </div>
 </template>

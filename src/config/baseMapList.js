@@ -30,6 +30,53 @@ const configBaseMap = [
         }),
     },
 ]
+const baseMapDataList = [
+    {
+        name: 'source_nlsc_EMAP',
+        label: '臺灣通用電子地圖',
+        url: 'https://wmts.nlsc.gov.tw/wmts/EMAP5/default/EPSG:3857/{z}/{y}/{x}'
+    },
+    {
+        name: 'source_nlsc_PHOTO2',
+        label: '正射影像圖(臺灣通用)',
+        url: 'https://wmts.nlsc.gov.tw/wmts/PHOTO2/default/EPSG:3857/{z}/{y}/{x}'
+    },
+    {
+        name: 'source_nlsc_LUIMAP',
+        label: '國土利用調查成果圖',
+        url: 'https://wmts.nlsc.gov.tw/wmts/LUIMAP/default/EPSG:3857/{z}/{y}/{x}'
+    },
+    {
+        name: 'source_gm_m',
+        label: 'Google 電子地圖',
+        url: 'https://mt{1-3}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}'
+    },
+    {
+        name: 'source_gm_s',
+        label: 'Google 衛星地圖',
+        url: 'https://mt{1-3}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'
+    },
+    {
+        name: 'source_gm_y',
+        label: 'Google 混合地圖',
+        url: 'https://mt{1-3}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+    },
+    {
+        name: 'source_gm_p',
+        label: 'Google 地形圖',
+        url: 'https://mt{1-3}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}'
+    },
+    {
+        name: 'source_moeacgs_CGS',
+        label: '地調所地質圖(五萬分之一)',
+        url: 'https://gis3.moeacgs.gov.tw/api/Tile/v1/getTile.cfm?layer=CGS_CGS_MAP&x={x}&y={y}&z={z}'
+    },
+    {
+        name: 'source_osm_m',
+        label: 'OSM 電子地圖',
+        url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    }
+]
 export default {
     sourceFun: (val, itemKey, itemValue) => {
         const mapSource = configBaseMap.find(node => node.name === val)
@@ -44,6 +91,26 @@ export default {
             vector[itemKey] = itemValue
         }
         return new TileLayer(vector)
+    },
+    // layers: [baseMapList.getBaseMapData(0)],
+    getBaseMapData: (value) => {
+        let layer
+        if (Number.isInteger(value)){
+            layer = baseMapDataList[value]
+        } else {
+            layer = value.layer
+        }
+
+        const newTileLayer = new Tile({
+            preload: Infinity,
+            name: layer.name,
+            label: layer.label,
+            source: new XYZ({
+                url: layer.url
+            }),
+            crossOrigin: 'anonymous',
+        })
+        return newTileLayer
     },
     sourceData: () => {
         return configBaseMap.map(node => {

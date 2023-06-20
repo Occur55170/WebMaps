@@ -16,14 +16,6 @@ export default {
             type: Boolean,
             default: false
         },
-        baseMapsOptions: {
-            type: Array,
-            default: []
-        },
-        onChangeBaseMaps: {
-            Type: Function,
-            default: ()=>{}
-        },
     },
     setup(props, { emit }) {
         const state = reactive({

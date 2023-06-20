@@ -92,9 +92,9 @@ export default {
                 overlay: null,
                 tribeAreaData: {},
             },
-            comHeight: {
+            comSize: {
                 wrapHeight: '',
-                mapHeight: '',
+                wrapWidth: '',
             },
         })
 
@@ -104,13 +104,23 @@ export default {
             zoom: state.defaultCenterZoom,
         })
 
+        const defaultLayer = new Tile({
+            preload: Infinity,
+            name: 'source_nlsc_EMAP',
+            label: '臺灣通用電子地圖',
+            source: new XYZ({
+                url: 'https://wmts.nlsc.gov.tw/wmts/EMAP5/default/EPSG:3857/{z}/{y}/{x}'
+            }),
+            crossOrigin: 'anonymous',
+        })
+
         let ol3d = null
 
         // 初始化地圖
         function initMap() {
             state.map1 = new Map({
                 target: 'map1',
-                layers: [baseMapList.sourceFun('default')],
+                layers: [baseMapList.getBaseMapData(0)],
                 view: defaultView,
                 controls: [],
             })
@@ -233,7 +243,8 @@ export default {
                             layerControl(obj1)
                         }
 
-                        if (value.id === 'node0_subNode4_nestedSubNodeundefined') {
+                        if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
+                            console.log(target)
                             mapClickEvent(target)
                         }
 
@@ -274,10 +285,14 @@ export default {
                     if (state.selectLock) { return }
                     if (value.layerName === 'all') {
                         let layersAry = targetLayers.getArray()
-                        let layersToRemove = layersAry.filter(node => node.get('name') !== 'default')
-                        layersToRemove.forEach((node) => {
+                        // FIXME: 刪除全部圖層問題
+                        // let layersToRemove = layersAry.filter(node => true)
+                        layersAry.forEach((node) => {
                             target.removeLayer(node)
                         })
+
+                        targetLayers.extend([baseMapList.getBaseMapData(0)])
+
                     } else {
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
@@ -310,7 +325,15 @@ export default {
                     targetLayers.getArray()[value.key].setVisible(visibleStatus)
                     break;
                 case 'baseMap':
-                    let newTileLayer = baseMaps.sourceFun(value.layerName)
+                    let newTileLayer = new Tile({
+                        preload: Infinity,
+                        name: value.layer.name,
+                        label: value.layer.label,
+                        source: new XYZ({
+                            url: value.layer.url
+                        }),
+                        crossOrigin: 'anonymous',
+                    })
                     targetLayers.extend([newTileLayer])
 
                     let layersAry = targetLayers.getArray()
@@ -330,7 +353,7 @@ export default {
                         state[otherMap] = new Map({
                             target: otherMap,
                             layers: [
-                                baseMapList.sourceFun('default'),
+                                baseMapList.getBaseMapData(0),
                                 ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
                             ],
                             view: defaultView,
@@ -401,7 +424,7 @@ export default {
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
                         layers: [
-                            baseMapList.sourceFun('default'),
+                            baseMapList.getBaseMapData(0),
                             ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
                         ],
                         view: defaultView,
@@ -410,7 +433,7 @@ export default {
 
                     mapClickEvent(state[`map${value}`])
 
-
+                    // FIXME: 切換3D會有問題跳回平面
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
@@ -465,10 +488,10 @@ export default {
                 layers: target?.getLayers()?.getArray(),
                 condition: click
             })
-
             target.addInteraction(selector)
-
             selector.on('select', (event) => {
+                console.log(event)
+
                 let selectedFeatures = event.selected;
                 if (event.selected[0]) {
                     state.areaData.overlay = new Overlay({
@@ -489,10 +512,12 @@ export default {
                         })
                     })
                 } else {
+                    state.areaData.tribeAreaData = {}
                     target.removeOverlay(state.areaData.overlay)
                     state.areaData.overlay = null
                 }
             })
+            console.log('tribeAreaData', state.areaData.tribeAreaData)
         }
 
         function closeMapData() {
@@ -531,11 +556,11 @@ export default {
                 console.log('Fail', FailMethod)
             })
 
-            state.comHeight.wrapHeight = window.innerHeight
-            console.log(state.comHeight.wrapHeight / state.mapCount)
+            state.comSize.wrapHeight = window.innerHeight
+            state.comSize.wrapWidth = window.innerWidth
             window.onresize = (e)=>{
-                state.comHeight.wrapHeight = e.target.innerHeight
-                console.log(state.comHeight.wrapHeight / state.mapCount)
+                state.comSize.wrapHeight = e.target.innerHeight
+                state.comSize.wrapWidth = e.target.innerWidth
             }
 
         })
@@ -556,16 +581,15 @@ export default {
 
 <template>
     <div>
+        {{state.comSize.wrapHeight < 600}}
         <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
-            :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
-            :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
+            :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 && (state.comSize.wrapWidth < 600) }"
             ></div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2"
-            :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 }"
-            :style="{'height': state.comHeight.wrapHeight / state.mapCount + 'px'}"
+            :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100':state.mapCount === 1, 'h-50':state.mapCount === 2 && (state.comSize.wrapWidth < 600) }"
             ></div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
@@ -578,7 +602,6 @@ export default {
                     <li class="d-flex align-items-center">
                         <span class="me-2">部落</span>
                         <mapSourceOption class="mapSourceOption d-none d-sm-block"
-                        :baseMapsOptions="state.baseMapsOptions"
                         :onChangeBaseMaps="({ action, value })=>{
                             layerControl({ action, value })
                         }" />
