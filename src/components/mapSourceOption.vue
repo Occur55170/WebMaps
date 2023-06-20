@@ -27,7 +27,6 @@ export default {
                 url: `https://api.edtest.site/underLayers`,
                 method: "GET"
             }).done(res => {
-                console.log(res)
                 state.mapSourceList = res.data
                 state.selectMap = res.data[0].label
             }).fail(FailMethod => {

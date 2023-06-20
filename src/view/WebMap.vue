@@ -68,7 +68,6 @@ export default {
                     }
                 })
             }),
-            baseMapsOptions: computed(() => baseMapList.sourceData()),
             selectLock: false,
             mapCount: 1,
             map1: null,
@@ -244,8 +243,7 @@ export default {
                         }
 
                         if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
-                            console.log(target)
-                            mapClickEvent(target)
+                            mapClickEvent(target, value.id)
                         }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
@@ -253,9 +251,12 @@ export default {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
                         // TODO: 結構優化
+                        // FIXME: 直接選擇select，然後透過checkbox不會自動關閉所有圖層
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
+                                // toRemoveLayerId = layersAry.filter(node => !(node.get('id') === undefined))
                                 toRemoveLayerId = layersAry.filter(element => {
+                                    console.log(element.get('id'))
                                     return element.get('id') ? element?.get('id').includes('node0_subNode0_nestedSubNode') : false
                                 })
                                 toRemoveLayerId.forEach((node) => {
@@ -285,14 +286,10 @@ export default {
                     if (state.selectLock) { return }
                     if (value.layerName === 'all') {
                         let layersAry = targetLayers.getArray()
-                        // FIXME: 刪除全部圖層問題
-                        // let layersToRemove = layersAry.filter(node => true)
-                        layersAry.forEach((node) => {
+                        let layersToRemove = layersAry.filter(node => !(node.get('id') === undefined))
+                        layersToRemove.forEach((node) => {
                             target.removeLayer(node)
                         })
-
-                        targetLayers.extend([baseMapList.getBaseMapData(0)])
-
                     } else {
                         let layersAry = targetLayers.getArray()
                         layersAry.forEach(element => {
@@ -483,16 +480,14 @@ export default {
             }
         }
 
-        function mapClickEvent(target) {
+        function mapClickEvent(target, vid='node0_subNode4_nestedSubNodeundefined') {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
                 condition: click
             })
             target.addInteraction(selector)
             selector.on('select', (event) => {
-                console.log(event)
-
-                let selectedFeatures = event.selected;
+                let selectedFeatures = event.selected
                 if (event.selected[0]) {
                     state.areaData.overlay = new Overlay({
                         element: state.areaData.nodeRef,
@@ -504,20 +499,26 @@ export default {
                     target.addOverlay(state.areaData.overlay);
                     state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
 
-                    selectedFeatures.forEach((feature) => {
-                        let properties = feature.getProperties()
-                        Object.entries(properties).forEach(node => {
-                            const key = node[0], value = node[1]
-                            state.areaData.tribeAreaData[key] = value
+                    // TODO: 重置area小地圖id
+                    state.areaData.tribeAreaData = {}
+                    // TODO: 優化結構，獲取state.areaData.overlay方式修正，考慮整包selectedFeatures放進去
+                    if (selectedFeatures[0].get('編號') === undefined) {
+                        state.areaData.tribeAreaData = selectedFeatures[0]
+                    } else {
+                        selectedFeatures.forEach((feature) => {
+                            let properties = feature.getProperties()
+                            Object.entries(properties).forEach(node => {
+                                const key = node[0], value = node[1]
+                                state.areaData.tribeAreaData[key] = value
+                                })
                         })
-                    })
+                    }
                 } else {
                     state.areaData.tribeAreaData = {}
                     target.removeOverlay(state.areaData.overlay)
                     state.areaData.overlay = null
                 }
             })
-            console.log('tribeAreaData', state.areaData.tribeAreaData)
         }
 
         function closeMapData() {
@@ -581,7 +582,6 @@ export default {
 
 <template>
     <div>
-        {{state.comSize.wrapHeight < 600}}
         <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
@@ -618,7 +618,6 @@ export default {
             :dimensionMapStatus="state.toSearchDimensionStatus"
             :currentLayers="state.currentLayers"
             :mapCount="state.mapCount"
-            :baseMapsOptions="state.baseMapsOptions"
             :onChangeBaseMaps="({ action, value })=>{
                 layerControl({ action, value })
             }"

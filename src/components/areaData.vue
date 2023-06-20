@@ -21,6 +21,7 @@ export default {
     setup(props, { emit }){
         const router = useRouter()
         const state = reactive({
+            type: 1,
             media: 'photo',
             scrollY: false,
             tribeData: {},
@@ -39,18 +40,54 @@ export default {
             return result
         }
 
-        // TODO: 優化，改成computed
-        watch(() => props.tribeAreaData['編號'], async (newVal)=>{
-            await getTribeData(newVal).then((result)=>{
-                state.tribeData = result
+        async function getDisasterData (id) {
+            const result = await $.ajax({
+                url: `https://api.edtest.site/historicalDiseaster?id=${id}`,
+                method: "GET"
+            }).done(res => {
+                return res
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+                return false
             })
+            return result
+        }
+
+        // TODO: 優化，改成computed
+        //FIXME: 結構優化[xxx, ]加入歷史災害
+        watch(() => [props.tribeAreaData['編號'], props.tribeAreaData.id_], async (newVal)=>{
+            console.log(newVal[1] !== undefined)
+            console.log('newVal', newVal)
+            if (newVal[1] !== undefined) {
+                console.log(newVal[1])
+                state.type = 2
+                await getDisasterData(newVal[1]).then((result)=>{
+                    state.tribeData = result.data
+                })
+            } else {
+                console.log(newVal[0])
+                state.type = 1
+                await getTribeData(newVal[0]).then((result)=>{
+                    state.tribeData = result
+                })
+            }
         })
 
 
         onMounted(()=>{
-            getTribeData(props.tribeAreaData['編號']).then((result)=>{
-                state.tribeData = result
-            })
+            //FIXME: 結構優化
+            console.log(props.tribeAreaData)
+            if (props.tribeAreaData.id_ !== undefined){
+                state.type = 2
+                getDisasterData(props.tribeAreaData.id_).then((result)=>{
+                    state.tribeData = result.data
+                })
+            } else {
+                state.type = 1
+                getTribeData(props.tribeAreaData['編號'] || props.tribeAreaData.id_).then((result)=>{
+                    state.tribeData = result
+                })
+            }
         })
 
         return {
@@ -64,7 +101,7 @@ export default {
 </script>
 
 <template>
-    <div class="bg-white rounded py-2 " style="overflow-y: auto;">
+    <div class="bg-white rounded py-2 " style="overflow-y: auto;" v-if="state.type === 1">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
             <p>詳細資訊</p>
             <!-- <div class="position-absolute col-auto end-0 cursor-pointer" style="top: 10px;" @click="props.closeMapData">
@@ -73,6 +110,7 @@ export default {
                 </svg>
             </div> -->
         </div>
+        <!-- FIXME: 圖片! -->
         <img src="@/assets/example-AddressData.jpg" class="w-100" alt="">
         <div class="row mx-0 align-items-center p-2 position-relative">
             <div class="d-flex flex-nowrap align-items-center justify-content-between my-2">
@@ -108,6 +146,18 @@ export default {
             <div class="py-2 px-4" v-if="state.media === 'video'">
                 <div>影片影片影片影片影片影片</div>
             </div>
+        </div>
+    </div>
+    <div v-else>
+        <div class="row mx-0 align-items-center p-2 position-relative">
+            <p>事件: {{ state?.tribeData?.event }}</p>
+            <p>年分: {{ state?.tribeData?.years }}</p>
+            <p>鄉鎮: {{ state?.tribeData?.township }}</p>
+            <p>村落: {{ state?.tribeData?.village }}</p>
+            <p>地方: {{ state?.tribeData?.place }}</p>
+            <p>災害種類: {{ state?.tribeData?.category }}</p>
+            <p>描述: {{ state?.tribeData?.description }}</p>
+            <p>時間: {{ state?.tribeData?.date }}</p>
         </div>
     </div>
 </template>
