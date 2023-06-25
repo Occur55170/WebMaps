@@ -528,7 +528,61 @@ export default {
             state.areaData.overlay = null
         }
 
+        function getBaseData(){
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url: 'https://api.edtest.site/underLayers',
+                    method: 'GET'
+                }).done(res => {
+                    console.log(res)
+                }).fail(FailMethod => {
+                    console.log('Fail', FailMethod)
+                })
+
+                if (drinksName.includes("ironman")) {
+                    reject("ironman冬瓜檸檬賣完了");
+                }
+                setTimeout(() => {
+                resolve(`這是你點的${drinksName}`);
+                }, time);
+            })
+        }
+        function getLayerData(){
+            return new Promise(
+                $.ajax({
+                    url: 'https://api.edtest.site/layers',
+                    method: "GET"
+                }).done(res => {
+                    state.layers = res.map((node, index) => {
+                        node.group_layers.forEach((sub, subIndex) => {
+                            let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
+                            sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+
+                            if (!(sub.single_tiles)) {
+                                sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
+                                    nestedSubNodeIndex = nestedSubIndex
+                                    nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
+                                })
+                            }
+                        })
+                        return {
+                            ...node,
+                            value: index,
+                        }
+                    })
+                    nextTick(() => {
+                        initMap()
+                        getCurrentLayerNames()
+                    })
+                }).fail(FailMethod => {
+                    console.log('Fail', FailMethod)
+                })
+            )
+        }
         onMounted(async () => {
+            let a = ''
+            let b = ''
+            // Promise.all([getBaseData, getLayerData])
             await $.ajax({
                 url: 'https://api.edtest.site/layers',
                 method: "GET"

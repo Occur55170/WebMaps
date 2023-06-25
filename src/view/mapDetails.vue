@@ -43,7 +43,6 @@ export default {
         }
 
 
-
         onMounted(async () => {
             // TODO: 尚未加入沒id時導轉回map事件
             await $.ajax({
@@ -199,7 +198,6 @@ export default {
                                 <div class="col-4 bg-grey-light">{{ item.description }}</div>
                             </div>
                         </div>
-                        <!-- FIXME:加入輪播 -->
                         <Carousel class="mb-5 history table w-100 d-block d-sm-none"
                         style="padding:0"
                         :items-to-show="1"

@@ -90,16 +90,6 @@ const baseMapDataList = [
         url: 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'
     }
 ]
-async function initBaseMapData(){
-    await $.ajax({
-        url: 'https://api.edtest.site/underLayers',
-        method: 'GET'
-    }).done(res => {
-        console.log(res)
-    }).fail(FailMethod => {
-        console.log('Fail', FailMethod)
-    })
-}
 
 export default {
     getBaseMapData: (value) => {

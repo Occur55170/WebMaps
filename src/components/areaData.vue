@@ -76,8 +76,8 @@ export default {
 
 
         onMounted(()=>{
-            //FIXME: 結構優化
             console.log(props.tribeAreaData)
+            //FIXME: 結構優化
             if (props.tribeAreaData.id_ !== undefined){
                 state.type = 2
                 getDisasterData(props.tribeAreaData.id_).then((result)=>{
@@ -154,13 +154,12 @@ export default {
     <div v-else>
         <div class="row mx-0 align-items-center p-2 position-relative">
             <p>事件: {{ state?.tribeData?.event }}</p>
-            <p>年分: {{ state?.tribeData?.years }}</p>
+            <p>發生時間: {{ state?.tribeData?.date }}</p>
             <p>鄉鎮: {{ state?.tribeData?.township }}</p>
             <p>村落: {{ state?.tribeData?.village }}</p>
             <p>地方: {{ state?.tribeData?.place }}</p>
             <p>災害種類: {{ state?.tribeData?.category }}</p>
             <p>描述: {{ state?.tribeData?.description }}</p>
-            <p>時間: {{ state?.tribeData?.date }}</p>
         </div>
     </div>
 </template>
