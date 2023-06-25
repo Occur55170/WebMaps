@@ -248,10 +248,11 @@ export default {
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
+                        console.log('current')
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
+                        // TODO: 待查:直接選擇select，然後透過checkbox不會自動關閉所有圖層
                         // TODO: 結構優化
-                        // FIXME: 直接選擇select，然後透過checkbox不會自動關閉所有圖層
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 // toRemoveLayerId = layersAry.filter(node => !(node.get('id') === undefined))
@@ -599,18 +600,11 @@ export default {
             <div class="d-flex align-items-center">
                 <img src="@/assets/logo.svg" alt="" class="mb-2">
                 <ul>
-                    <li class="d-flex align-items-center">
-                        <span class="me-2">部落</span>
+                    <li class="me-2 d-flex align-items-center">
                         <mapSourceOption class="mapSourceOption d-none d-sm-block"
                         :onChangeBaseMaps="({ action, value })=>{
                             layerControl({ action, value })
                         }" />
-                    </li>
-                    <li class="d-flex align-items-center">
-
-                    </li>
-                    <li class="d-flex align-items-center">
-
                     </li>
                 </ul>
             </div>
@@ -700,6 +694,7 @@ export default {
                 </div>
             </div>
         </div>
+
         <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
             state.areaData.nodeRef = e
         }">

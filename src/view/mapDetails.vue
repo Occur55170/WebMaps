@@ -1,7 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router'
 
 export default {
     props: {
@@ -45,11 +45,7 @@ export default {
 
 
         onMounted(async () => {
-            console.log(route.params.id)
             // TODO: 尚未加入沒id時導轉回map事件
-            if(!(route.params.id)){
-                router.push({ path: `/Map_Demo/map` })
-            }
             await $.ajax({
                 url: `https://api.edtest.site/tribe?tribeCode=${route.params?.id}`,
                 method: "GET"
@@ -65,7 +61,7 @@ export default {
             router,
             state,
             onMapControl,
-            goTop
+            goTop,
         }
     }
 }
@@ -204,26 +200,17 @@ export default {
                             </div>
                         </div>
                         <!-- FIXME:加入輪播 -->
-                        <div class="table w-100 d-none d-sm-none">
-                            <div class="d-flex flex-nowrap justify-content-between">
-                                <div class="col-1 text-white" :class="state.mainBgColor">編號</div>
-                                <div class="col-2 text-white" :class="state.mainBgColor">日期</div>
-                                <div class="col-3 text-white" :class="state.mainBgColor">災害原因</div>
-                                <div class="col-4 text-white" :class="state.mainBgColor">災害描述</div>
-                            </div>
-                            <div class="d-flex flex-nowrap justify-content-between"
-                            v-for="(item, itemKey) in state.tribeData?.historicalDisasters" :key="itemKey">
-                                <div class="col-1 bg-grey-light">{{ itemKey+1 }}</div>
-                                <div class="col-2 bg-grey-light">{{ item.date }}</div>
-                                <div class="col-3 bg-grey-light">{{ item.cause }}</div>
-                                <div class="col-4 bg-grey-light">{{ item.description }}</div>
-                            </div>
-                        </div>
+                        <Carousel class="mb-5 history table w-100 d-block d-sm-none"
+                        style="padding:0"
+                        :items-to-show="1"
+                        :autoplay="2000"
+                        :wrap-around="true"
+                        :carouselList="state.tribeData?.historicalDisasters" />
                     </div>
                 </div>
             </div>
         </div>
-        <div class="position-fixed bottom-0 end-0 w-auto m-5">
+        <div class="position-fixed bottom-0 end-0 w-auto m-2 m-sm-5">
             <div class="goBack mb-4 cursor-pointer" @click="router.push({ name: 'index' })">
                 <img src="@/assets/mapDetail/back.svg">
             </div>
@@ -237,7 +224,8 @@ export default {
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
 .detail
-    background-image: url('src/assets/mapDetail/background.svg')
+    // TODO: 連結底圖
+    // background-image: url('src/assets/mapDetail/background.svg')
     box-sizing: border-box
 .detailCon
     padding: 0 calc((100% - 1460px)/2)
