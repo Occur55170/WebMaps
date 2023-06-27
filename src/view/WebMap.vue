@@ -12,7 +12,6 @@ import { IGC, WFS, } from 'ol/format'
 import * as ol from 'ol';
 import { TileArcGISRest } from 'ol/source.js'
 
-
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
@@ -36,7 +35,7 @@ import TileState from 'ol/TileState.js';
 import 'ol/ol.css'
 
 import mapLayerList from '@/config/mapLayerList'
-import baseMapList from '@/config/baseMapList'
+import baseMapList, { getBaseMapAll }  from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
 import * as olTilecoord from 'ol/tilecoord'
@@ -74,6 +73,10 @@ export default {
             map2: null,
             map1LayerStatus: [],
             map2LayerStatus: [],
+            temp: {
+                map1BaseStatus: 0,
+                map2BaseStatus: 0,
+            },
             deleteLightbox: false,
             // 目前地圖狀態為2D or 3D
             dimensionMap: {
@@ -94,6 +97,7 @@ export default {
             comSize: {
                 wrapHeight: '',
                 wrapWidth: '',
+                conditionCom: {},
             },
         })
 
@@ -101,16 +105,6 @@ export default {
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
-        })
-
-        const defaultLayer = new Tile({
-            preload: Infinity,
-            name: 'source_nlsc_EMAP',
-            label: '臺灣通用電子地圖',
-            source: new XYZ({
-                url: 'https://wmts.nlsc.gov.tw/wmts/EMAP5/default/EPSG:3857/{z}/{y}/{x}'
-            }),
-            crossOrigin: 'anonymous',
         })
 
         let ol3d = null
@@ -248,7 +242,6 @@ export default {
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
-                        console.log('current')
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
                         // TODO: 待查:直接選擇select，然後透過checkbox不會自動關閉所有圖層
@@ -257,7 +250,7 @@ export default {
                             case 'node0_subNode0_nestedSubNodeundefined':
                                 // toRemoveLayerId = layersAry.filter(node => !(node.get('id') === undefined))
                                 toRemoveLayerId = layersAry.filter(element => {
-                                    console.log(element.get('id'))
+                                    // console.log(element.get('id'))
                                     return element.get('id') ? element?.get('id').includes('node0_subNode0_nestedSubNode') : false
                                 })
                                 toRemoveLayerId.forEach((node) => {
@@ -323,22 +316,26 @@ export default {
                     targetLayers.getArray()[value.key].setVisible(visibleStatus)
                     break;
                 case 'baseMap':
+                    state.temp[`map${ state.targetNum }BaseStatus`] = value.baseId
                     let newTileLayer = new Tile({
                         preload: Infinity,
-                        name: value.layer.name,
-                        label: value.layer.label,
+                        name: value.name,
+                        label: value.label,
+                        type: value.mapType,
+                        baseId: value.baseId,
                         source: new XYZ({
-                            url: value.layer.url
+                            url: value.url
                         }),
                         crossOrigin: 'anonymous',
                     })
                     targetLayers.extend([newTileLayer])
 
-                    let layersAry = targetLayers.getArray()
+                    let layersAry = target?.getLayers().getArray()
                     layersAry.forEach(element => {
-                        if (element.get('name') !== value.layerName) {
+                        if (element.get('type') == 'base' && element.get('baseId') !== value.baseId ) {
                             target.removeLayer(element)
                         }
+                        return true
                     })
                     break;
                 case 'changeMapCount':
@@ -400,7 +397,7 @@ export default {
                     }
                     break;
             }
-            getCurrentLayerNames()
+            getCurrentMapData()
         }
 
         function changeTarget(value) {
@@ -418,11 +415,10 @@ export default {
                     }
 
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
                         layers: [
-                            baseMapList.getBaseMapData(0),
+                            baseMapList.getBaseMapData(state.temp[`map${state.targetNum}BaseStatus`]),
                             ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
                         ],
                         view: defaultView,
@@ -450,11 +446,11 @@ export default {
                 }
             }
             nextTick(() => {
-                getCurrentLayerNames()
+                getCurrentMapData()
             })
         }
 
-        function getCurrentLayerNames() {
+        function getCurrentMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
             state.currentLayers = layers?.map(layer => {
@@ -529,65 +525,41 @@ export default {
         }
 
         function getBaseData(){
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: 'https://api.edtest.site/underLayers',
-                    method: 'GET'
-                }).done(res => {
-                    console.log(res)
-                }).fail(FailMethod => {
-                    console.log('Fail', FailMethod)
-                })
-
-                if (drinksName.includes("ironman")) {
-                    reject("ironman冬瓜檸檬賣完了");
-                }
-                setTimeout(() => {
-                resolve(`這是你點的${drinksName}`);
-                }, time);
+            return $.ajax({
+                url: 'https://api.edtest.site/underLayers',
+                method: 'GET'
+            }).done(res => {
+                return res
             })
         }
+
         function getLayerData(){
-            return new Promise(
-                $.ajax({
+            return $.ajax({
                     url: 'https://api.edtest.site/layers',
                     method: "GET"
                 }).done(res => {
-                    state.layers = res.map((node, index) => {
-                        node.group_layers.forEach((sub, subIndex) => {
-                            let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
-                            sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
-
-                            if (!(sub.single_tiles)) {
-                                sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
-                                    nestedSubNodeIndex = nestedSubIndex
-                                    nestedSub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
-                                })
-                            }
-                        })
-                        return {
-                            ...node,
-                            value: index,
-                        }
-                    })
-                    nextTick(() => {
-                        initMap()
-                        getCurrentLayerNames()
-                    })
-                }).fail(FailMethod => {
-                    console.log('Fail', FailMethod)
+                    return(res)
                 })
-            )
         }
+
         onMounted(async () => {
-            let a = ''
-            let b = ''
-            // Promise.all([getBaseData, getLayerData])
-            await $.ajax({
-                url: 'https://api.edtest.site/layers',
-                method: "GET"
-            }).done(res => {
-                state.layers = res.map((node, index) => {
+            let a = getBaseData()
+            let b = getLayerData()
+            Promise.all([a, b]).then((value)=>{
+                // TODO: pref
+                let result = value[0].data.map((node, nodeIndex)=>{
+                    return {
+                        mapType: 'base',
+                        baseId: nodeIndex,
+                        onCurrent: false,
+                        ...node
+                    }
+                })
+                baseMapList.setBaseMapData(result)
+                state.temp.map1BaseStatus = 0
+                state.temp.baseMapList = getBaseMapAll()
+
+                state.layers = value[1].map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
@@ -606,10 +578,8 @@ export default {
                 })
                 nextTick(() => {
                     initMap()
-                    getCurrentLayerNames()
+                    getCurrentMapData()
                 })
-            }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
             })
 
             state.comSize.wrapHeight = window.innerHeight
@@ -621,15 +591,19 @@ export default {
 
         })
 
+        function show() {
+            baseMapList.showBaseMapData()
+        }
+
         return {
             state,
             props,
             mapControl,
             layerControl,
-            getCurrentLayerNames,
             changeTarget,
             conditionWrap,
-            closeMapData
+            closeMapData,
+            show
         }
     }
 }
@@ -656,6 +630,7 @@ export default {
                 <ul>
                     <li class="me-2 d-flex align-items-center">
                         <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                        :baseMapList = "state.temp.baseMapList"
                         :onChangeBaseMaps="({ action, value })=>{
                             layerControl({ action, value })
                         }" />
@@ -674,14 +649,29 @@ export default {
             @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
+            <!-- <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5" @click="show">
+                圖層選項
+            </button> -->
+
+            <!--
+                :style="{
+                    'overflow-y': state.comSize.conditionCom.offsetHeight > (state.comSize.wrapHeight / 2) ? 'none' : 'scroll'
+                }"
+            -->
+
         <div class="conditionCom d-none d-sm-block position-absolute">
             <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" v-if="state.conditionWrap">
-                    <condition v-bind="{
+                <div class="mb-4" style="max-height: 50%;"
+                :ref="(e)=>{
+                    state.comSize.conditionCom = e
+                }"
+                v-if="state.conditionWrap">
+                    <condition
+                    v-bind="{
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {

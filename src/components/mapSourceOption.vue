@@ -4,6 +4,10 @@ import $ from 'jquery'
 
 export default {
     props: {
+        baseMapList: {
+            type: Array,
+            default: []
+        },
         onChangeBaseMaps: {
             type: Function,
             default: ()=>{}
@@ -11,27 +15,18 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({
-            selectMap: null,
+            selectMap: 0,
             mapSourceList: []
         })
+        // TODO: 優化
         function onChangeBaseMaps(){
             let action = 'baseMap'
-            let value = {
-                layer: state.mapSourceList.find(node=> node.label === state.selectMap)
-            }
+            let value = props.baseMapList.find(node=> node.baseId === state.selectMap)
             props.onChangeBaseMaps({ action, value })
         }
 
         onMounted(async ()=>{
-            await $.ajax({
-                url: `https://api.edtest.site/underLayers`,
-                method: "GET"
-            }).done(res => {
-                state.mapSourceList = res.data
-                state.selectMap = res.data[0].label
-            }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
-            })
+            state.selectMap = 0
         })
 
         return {
@@ -49,7 +44,7 @@ export default {
         @change="(e) => {
             onChangeBaseMaps(e)
         }">
-            <option v-for="(node, nodeIndex) in state.mapSourceList" :key="nodeIndex" :value="node.label">{{ node.label }}</option>
+            <option v-for="(node, nodeIndex) in props.baseMapList" :key="nodeIndex" :value="node.baseId">{{ node.label }}</option>
         </select>
     </div>
 </template>
