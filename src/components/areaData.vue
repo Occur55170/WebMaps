@@ -54,19 +54,15 @@ export default {
             return result
         }
 
-        // TODO: 優化，改成computed
-        //FIXME: 結構優化[xxx, ]加入歷史災害
+        //TODO: 結構優化[xxx, ]加入歷史災害
         watch(() => [props.tribeAreaData['編號'], props.tribeAreaData.id_], async (newVal)=>{
-            console.log(newVal[1] !== undefined)
             console.log('newVal', newVal)
             if (newVal[1] !== undefined) {
-                console.log(newVal[1])
                 state.type = 2
                 await getDisasterData(newVal[1]).then((result)=>{
                     state.tribeData = result.data
                 })
             } else {
-                console.log(newVal[0])
                 state.type = 1
                 await getTribeData(newVal[0]).then((result)=>{
                     state.tribeData = result
@@ -76,7 +72,7 @@ export default {
 
 
         onMounted(()=>{
-            console.log(props.tribeAreaData)
+            // console.log(props.tribeAreaData)
             //FIXME: 結構優化
             if (props.tribeAreaData.id_ !== undefined){
                 state.type = 2
@@ -86,7 +82,6 @@ export default {
             } else {
                 state.type = 1
                 getTribeData(props.tribeAreaData['編號'] || props.tribeAreaData.id_).then((result)=>{
-                    console.log(result)
                     state.tribeData = result
                 })
             }
@@ -153,13 +148,27 @@ export default {
     </div>
     <div v-else>
         <div class="row mx-0 align-items-center p-2 position-relative">
-            <p>事件: {{ state?.tribeData?.event }}</p>
-            <p>發生時間: {{ state?.tribeData?.date }}</p>
-            <p>鄉鎮: {{ state?.tribeData?.township }}</p>
-            <p>村落: {{ state?.tribeData?.village }}</p>
-            <p>地方: {{ state?.tribeData?.place }}</p>
-            <p>災害種類: {{ state?.tribeData?.category }}</p>
-            <p>描述: {{ state?.tribeData?.description }}</p>
+            <div class="py-2 px-4">
+                <p>事件: {{ state?.tribeData?.event }}</p>
+            </div>
+            <div class="py-2 px-4">
+                <p>發生時間: {{ state?.tribeData?.date }}</p>
+            </div>
+            <div class="py-2 px-4">
+                <p>鄉鎮: {{ state?.tribeData?.township }}</p>
+            </div>
+            <div class="py-2 px-4">
+                <p>村落: {{ state?.tribeData?.village }}</p>
+            </div>
+            <div class="py-2 px-4">
+                <p>地方: {{ state?.tribeData?.place }}</p>
+            </div>
+            <div class="py-2 px-4">
+                <p>災害種類: {{ state?.tribeData?.category }}</p>
+            </div>
+            <div class="py-2 px-4">
+                <p>描述: {{ state?.tribeData?.description }}</p>
+            </div>
         </div>
     </div>
 </template>
