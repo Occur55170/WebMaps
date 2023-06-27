@@ -74,10 +74,6 @@ export default {
         watch(()=>state.TilesListValue, (newVal , oldVal)=>{
             props.showSelectLayerValue(newVal)
         })
-        function sho(subNodeIndex, subNodeIds){
-            console.log('sho', subNodeIndex)
-            console.log('www', subNodeIds)
-        }
 
         return {
             props,
@@ -89,7 +85,6 @@ export default {
             openLayerList,
             LayerCheckBoxChange,
             checkTribe,
-            sho
         }
     }
 }

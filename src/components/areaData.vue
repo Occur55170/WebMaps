@@ -56,7 +56,6 @@ export default {
 
         //TODO: 結構優化[xxx, ]加入歷史災害
         watch(() => [props.tribeAreaData['編號'], props.tribeAreaData.id_], async (newVal)=>{
-            console.log('newVal', newVal)
             if (newVal[1] !== undefined) {
                 state.type = 2
                 await getDisasterData(newVal[1]).then((result)=>{
@@ -72,7 +71,6 @@ export default {
 
 
         onMounted(()=>{
-            // console.log(props.tribeAreaData)
             //FIXME: 結構優化
             if (props.tribeAreaData.id_ !== undefined){
                 state.type = 2

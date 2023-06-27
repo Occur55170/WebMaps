@@ -44,7 +44,6 @@ export default {
 
 
         onMounted(async () => {
-            // TODO: 尚未加入沒id時導轉回map事件
             await $.ajax({
                 url: `https://api.edtest.site/tribe?tribeCode=${route.params?.id}`,
                 method: "GET"
@@ -54,7 +53,6 @@ export default {
                 console.log('Fail', FailMethod)
             })
         })
-        console.log(state.type == 1)
 
         return {
             router,

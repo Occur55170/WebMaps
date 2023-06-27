@@ -532,10 +532,8 @@ export default {
             })
 
             state.comHeight.wrapHeight = window.innerHeight
-            console.log(state.comHeight.wrapHeight / state.mapCount)
             window.onresize = (e)=>{
                 state.comHeight.wrapHeight = e.target.innerHeight
-                console.log(state.comHeight.wrapHeight / state.mapCount)
             }
 
         })

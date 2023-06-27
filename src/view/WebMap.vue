@@ -248,9 +248,7 @@ export default {
                         // TODO: 結構優化
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
-                                // toRemoveLayerId = layersAry.filter(node => !(node.get('id') === undefined))
                                 toRemoveLayerId = layersAry.filter(element => {
-                                    // console.log(element.get('id'))
                                     return element.get('id') ? element?.get('id').includes('node0_subNode0_nestedSubNode') : false
                                 })
                                 toRemoveLayerId.forEach((node) => {
@@ -648,16 +646,6 @@ export default {
             @onChangeTarget="(value) => { changeTarget(value) }"
             @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
-
-            <!-- <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5" @click="show">
-                圖層選項
-            </button> -->
-
-            <!--
-                :style="{
-                    'overflow-y': state.comSize.conditionCom.offsetHeight > (state.comSize.wrapHeight / 2) ? 'none' : 'scroll'
-                }"
-            -->
 
         <div class="conditionCom d-none d-sm-block position-absolute">
             <div class="mb-2">
