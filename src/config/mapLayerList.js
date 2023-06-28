@@ -91,6 +91,7 @@ export default {
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
                     }
+                    console.log(request)
                     layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,

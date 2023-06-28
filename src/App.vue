@@ -15,20 +15,12 @@ export default {
 </script>
 
 <template>
-    <routerView />
-    <!-- <div class="main"> -->
-        <!-- <WebMap /> -->
-    <!-- </div> -->
-    <!-- <mapDetails /> -->
-
+    <routerView class="wrap" />
 </template>
 
 <style lang="sass">
-.main
-    position: fixed
-    top: 0
-    left: 0
-    height: 100%
+.wrap
+    height: 100vh
     width: 100%
 .lightWrap
     z-index: 999

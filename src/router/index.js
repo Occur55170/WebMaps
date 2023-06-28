@@ -20,11 +20,6 @@ const routes = [
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
-    // {
-    //     path: '/:pathMatch(.*)*',
-    //     name: '404',
-    //     component: () => import('@/view/WebMap.vue'),
-    // },
 ]
 
 const router = createRouter({

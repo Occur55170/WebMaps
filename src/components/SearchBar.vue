@@ -76,11 +76,11 @@ export default {
                 <div class="MapFeatureBtn text-white">
                     <a href="" v-if="props.dimensionMapStatus"
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
-                        <img src="@/assets/img/icon/twoDimensional.svg">
+                        <img src="@/assets/img/icon/2D.svg">
                     </a>
                     <a href="" v-else
                     @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
-                        <img src="@/assets/img/icon/threeDimensional.svg">
+                        <img src="@/assets/img/icon/3D.svg">
                     </a>
                 </div>
             </li>
@@ -132,7 +132,7 @@ export default {
         width: 100%
         height: 100%
         &:hover
-            filter: brightness(0.5)
+            filter: brightness(0.9)
     svg
         font-size: 24px
         width: 100%
