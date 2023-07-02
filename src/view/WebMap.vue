@@ -218,6 +218,7 @@ export default {
                         }
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                        console.log(targetLayer)
                         target.addLayer(targetLayer)
 
                         // TODO: 3接4

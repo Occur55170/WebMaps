@@ -19,7 +19,6 @@ export default {
 <template>
   <div class="wrap">
     <div class="startCon">
-        <!-- <img src="@/assets/img/logo.jpg" alt=""> -->
         <img src="@/assets/img/logo.svg" class="logo" alt="">
         <a href="" @click.prevent="route.push({name: 'map'})">
             進入圖臺

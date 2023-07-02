@@ -20,10 +20,18 @@ import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
 import { format } from 'ol/coordinate'
-import { get as getProjection, transformExtent } from 'ol/proj.js'
+import { get as getProjection, transformExtent, fromLonLat } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 import Select from 'ol/interaction/Select'
 import { click } from 'ol/events/condition'
+
+import proj4 from 'proj4'
+import { register } from 'ol/proj/proj4.js'
+proj4.defs(
+    'EPSG:3826',
+    '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs'
+)
+register(proj4)
 
 export const initLayers = async function(){
     const obj = await $.ajax({
@@ -91,7 +99,6 @@ export default {
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
                     }
-                    console.log(request)
                     layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
@@ -137,6 +144,7 @@ export default {
                     params: layerSource.getParams(),
                     serverType: 'geoserver',
                     crossOrigin: 'anonymous',
+                    projection: layerSource.getParams()?.SRS,
                 }),
             })
         }
@@ -155,46 +163,63 @@ export default {
             })
         }
         if (layerType === 'GeoJson'){
-            console.log('GeoJsonLayer', figureType)
+            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType){
                 case 'Line':
-                    result = new VectorLayer({
-                        source: new VectorSource({
-                            url: 'http://gis.edtest.site:8010/ogc/temp',
-                            params: {
-                                SERVICE: 'WMS',
-                                VERSION: '1.3.0',
-                                REQUEST: 'GetMap',
-                                FORMAT: 'image/png',
-                                STYLE: 'default',
-                                SLD_VERSION: '1.1.0'
-                            }
-                        }),
-                    })
-                    break
-                case 'Point':
+                    // TODO: 土石流潛勢溪流 失效
+                    if (url){
+                        const api = new URL(url)
+                        const { origin, pathname, searchParams } = api
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
                     layerSource = new TileWMS({
                         maxzoom: 18,
                         minzoom: 3,
-                        url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
-                        params: {
-                            SERVICE: 'WMS',
-                            BGCOLOR: '0xFFFFFF',
-                            TRANSPARENT: 'TRUE',
-                            SRS: 'EPSG:3826',
-                            LAYERS: '0',
-                            VERSION: '1.1.1',
-                            FORMAT: 'image/png',
-                        },
-                        crossOrigin: 'anonymous',
+                        url: request[0],
+                        params: request[1],
+                        serverType: 'mapserver'
+                    })
+                    break
+                case 'Point':
+                    // TODO: 雨量站 失效
+                    if (url){
+                        const api = new URL(url)
+                        const { origin, pathname, searchParams } = api
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: request[0],
+                        params: request[1],
+                        serverType: 'mapserver'
                     })
                     result = new TileLayer({
                         source: layerSource,
                     })
                     break
                 default:
-                    console.log(figureType)
+                    console.log('error-otherWMSLayer:', figureType)
             }
+            result = new VectorLayer({
+                source: new VectorSource({
+                    url: layerSource.getUrls()[0],
+                    params: layerSource.getParams(),
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous',
+                    projection: layerSource.getParams()?.SRS,
+                }),
+            })
         }
 
         return result
