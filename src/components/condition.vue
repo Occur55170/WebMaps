@@ -177,6 +177,10 @@ export default {
         width: 20px
         height: 20px
 .content
+    overflow-y: scroll
+    background: #fff
+    .landBoundary
+        max-height: 500px
     .title
         cursor: pointer
         svg

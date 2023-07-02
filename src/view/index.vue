@@ -18,11 +18,14 @@ export default {
 
 <template>
   <div class="wrap">
-    <div class="startCon">
-        <img src="@/assets/img/logo.svg" class="logo" alt="">
-        <a href="" @click.prevent="route.push({name: 'map'})">
-            進入圖臺
-        </a>
+    <div class="startCon w-100 w-sm-50">
+        <div class="content">
+            <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
+            <p class="fs-6">敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述</p>
+            <a href="" class="d-inline-block" @click.prevent="route.push({name: 'map'})">
+                <img src="@/assets/img/enterMapBtn.svg" alt="">
+            </a>
+        </div>
     </div>
   </div>
 </template>
@@ -34,23 +37,60 @@ export default {
     background-repeat: no-repeat
     background-size: cover
     background-position: bottom
+    box-sizing: border-box
+    padding: 100px
 .startCon
+    max-width: 900px
+    .logo
+        margin-bottom: 40px
+    .content
+        box-sizing: border-box
+        padding: 0 0 0 60px
+        margin: 50px 0
+        &>p
+            margin-bottom: 60px
     &::before
         content: ''
-        background-image: url('src/assets/img/indexHead.svg')
-        background-repeat-y: no-repeat
+        background-image: url('src/assets/img/indexHead-be.svg')
+        background-repeat: no-repeat
         display: block
-        width: 48%
+        width: 100%
         height: 30px
     &::after
         content: ''
-        background-image: url('src/assets/img/indexHead.svg')
-        background-repeat-y: no-repeat
+        background-image: url('src/assets/img/indexHead-af.svg')
+        background-repeat: no-repeat
         display: block
-        width: 26%
+        width: 100%
         height: 30px
-.logo
-    width: 200px
-.startCon
-    color: #000
+        background-position: right
+@media (max-width: 600px)
+    .wrap
+        background-image: url('src/assets/img/indexBackground-m.svg')
+        background-size: cover
+        padding: 10px
+    .startCon
+        max-width: 900px
+        padding: 30px
+        .logo
+            margin-bottom: 0
+        .content
+            box-sizing: border-box
+            padding: 0 0 0 20%
+            margin: 50px 0
+            text-align: center
+            &>p
+                margin: 30px 0
+                text-align: left
+                line-height: 1.6
+        &::before
+            content: ''
+            background-image: url('src/assets/img/indexHead-be.svg')
+            background-repeat: no-repeat
+            background-size: contain
+            display: block
+            width: 70%
+            height: 16px
+        &::after
+            display: none
 </style>
