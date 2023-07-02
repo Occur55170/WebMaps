@@ -20,11 +20,11 @@ const routes = [
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
-    {
-        path: '/Map_Demo/opp',
-        name: 'opp',
-        component: () => import('@/components/opp.vue')
-    },
+    // {
+    //     path: '/Map_Demo/opp',
+    //     name: 'opp',
+    //     component: () => import('@/components/opp.vue')
+    // },
 ]
 
 const router = createRouter({
