@@ -244,7 +244,6 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         let toRemoveLayerId
-                        // TODO: 待查:直接選擇select，然後透過checkbox不會自動關閉所有圖層
                         // TODO: 結構優化
                         switch (value.id) {
                             case 'node0_subNode0_nestedSubNodeundefined':
@@ -326,9 +325,9 @@ export default {
                         }),
                         crossOrigin: 'anonymous',
                     })
-                    targetLayers.extend([newTileLayer])
-
                     let layersAry = target?.getLayers().getArray()
+                    targetLayers.insertAt(0, newTileLayer)
+
                     layersAry.forEach(element => {
                         if (element.get('type') == 'base' && element.get('baseId') !== value.baseId ) {
                             target.removeLayer(element)

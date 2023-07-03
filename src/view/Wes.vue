@@ -110,12 +110,12 @@ function initMap() {
 
 function show() {
     // 获取图层的数据源
-    console.log(map.value.getLayers().getArray())
-    const source = map.value.getLayers().getArray();
+    console.log(map.value.getLayers())
+    const source = map.value.getLayers();
     // 获取图层的投影属性
-    const projection = source[1].getSource();
+    // const projection = source[1].getSource();
 
-    console.log(projection);
+    // console.log(projection);
 }
 // features: (new GeoJSON({
 //     dataProjection: 'EPSG:3826',

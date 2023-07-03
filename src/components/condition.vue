@@ -129,7 +129,6 @@ export default {
                             {{ subNode.title }}
                         </div>
                         <div v-else>
-                            <!-- FIXME: 直接選擇select，然後透過checkbox不會自動關閉所有圖層 -->
                             <input type="checkbox"
                             :checked="props.currentLayers.some(node=> {
                                 let subNodeIds = mapList.getLayerIndex(node.id)
@@ -145,7 +144,7 @@ export default {
                                     id: subNode.id
                                 })
                             }">
-                            {{ subNode.title }}
+                                {{ subNode.title }}
                                 <select name="" id="" class="ms-3"
                                 v-model="state.TilesListValue"
                                 @change="(e) => {
