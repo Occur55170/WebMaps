@@ -29,13 +29,21 @@ export default {
             type: Function,
             default: () => {}
         },
+        selectLayerOption: {
+            type: Object,
+            default: {}
+        },
+        moveToMap: {
+            type: Function,
+            default: () => {}
+        }
     },
     setup(props, { emit }) {
         const mapList = mapLayerList
         const router = useRouter()
         const state = reactive({
             DropDown: null,
-            TilesListValue: 0
+            TilesListValue: 0,
         })
 
         function onMapControl(action, value) {
@@ -74,6 +82,7 @@ export default {
         watch(()=>state.TilesListValue, (newVal , oldVal)=>{
             props.showSelectLayerValue(newVal)
         })
+
 
         return {
             props,
@@ -127,6 +136,13 @@ export default {
                                 })
                             }">
                             {{ subNode.title }}
+                            <div v-if="props.selectLayerOption[subNode.id] !== undefined ">
+                                <select name="" id="" @change="props.moveToMap">
+                                    <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
+                                        {{ item.properties['事件'] }}
+                                    </option>
+                                </select>
+                            </div>
                         </div>
                         <div v-else>
                             <input type="checkbox"

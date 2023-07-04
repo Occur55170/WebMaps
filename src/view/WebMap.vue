@@ -102,6 +102,7 @@ export default {
                 wrapWidth: '',
                 conditionCom: {},
             },
+            selectLayerOption: {}
         })
 
         let ol3d = null
@@ -174,7 +175,7 @@ export default {
                         const { xAxis, yAxis } = value
                         View.animate({
                             center: [xAxis, yAxis],
-                            zoom: 10,
+                            zoom: 17,
                             duration: 100,
                         });
                     } else {
@@ -242,6 +243,8 @@ export default {
 
                         if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
                             mapClickEvent(target, value.id)
+                            // FIXME: 結構優化
+                            addSelectElement(value)
                         }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)
@@ -273,6 +276,10 @@ export default {
                                     }
                                 })
                                 break
+                        }
+                        if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
+                            // FIXME: 結構優化
+                            addSelectElement(value)
                         }
                         onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
@@ -543,6 +550,39 @@ export default {
                 })
         }
 
+        function addSelectElement(value){
+            // 'node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'
+            const { checked, id } = value
+            if (!checked) { state.selectLayerOption = {}; return }
+            if (id === 'node0_subNode5_nestedSubNodeundefined'){
+                $.ajax({
+                    url: 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=%E8%BF%91%E5%B9%B4%E6%AD%B7%E5%8F%B2%E7%81%BD%E5%AE%B382%E8%99%95%E9%83%A8%E8%90%BD%E9%BB%9E%E4%BD%8D&outputFormat=application/json',
+                    method: 'GET',
+                    success: (res) => {
+                        state.selectLayerOption[id] = res.features
+                    },
+                    error: (res) => {
+                        console.log(res.features)
+                    }
+                })
+            }
+        }
+
+        function moveToMap(val){
+            // FIXME: node0_subNode5_nestedSubNodeundefined 改成判斷id
+            if (state.selectLayerOption['node0_subNode5_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
+                let obj = {
+                    action: 'moveTo',
+                    value: {
+                        xAxis: state.selectLayerOption['node0_subNode5_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0],
+                        yAxis: state.selectLayerOption['node0_subNode5_nestedSubNodeundefined'][val.target.value].geometry.coordinates[1]
+                    }
+                }
+                mapControl(obj)
+            }
+        }
+
+
         onMounted(async () => {
             let a = getBaseData()
             let b = getLayerData()
@@ -592,10 +632,6 @@ export default {
 
         })
 
-        function show() {
-            baseMapList.showBaseMapData()
-        }
-
         return {
             state,
             props,
@@ -604,7 +640,8 @@ export default {
             changeTarget,
             conditionWrap,
             closeMapData,
-            show,
+            addSelectElement,
+            moveToMap,
         }
     }
 }
@@ -663,6 +700,7 @@ export default {
                 v-if="state.conditionWrap">
                     <condition
                     v-bind="{
+                        selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -670,6 +708,9 @@ export default {
                         },
                         showSelectLayerValue: (val) => {
                             state.selectValueTemp = val
+                        },
+                        moveToMap: (val) => {
+                            moveToMap(val)
                         }
                     }"
                     @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
@@ -845,9 +886,6 @@ export default {
     box-sizing: border-box
     border-radius: 10px
     border: 1px solid #088
-
-
-
 @media (max-width: 600px)
     .m-Navbar
         z-index: 222

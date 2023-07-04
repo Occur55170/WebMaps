@@ -35,11 +35,8 @@ export default {
                     zoom: 14,
                 }),
             })
-            console.log(2)
             nextTick(()=>{
-                console.log(3)
                 map.once('rendercomplete', function () {
-                    console.log('444')
                     toPng(map.getTargetElement()).then(function (dataURL) {
                         console.log(dataURL)
                         imgSrc = dataURL

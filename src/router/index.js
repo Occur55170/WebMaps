@@ -15,16 +15,16 @@ const routes = [
         name: 'detail',
         component: () => import('@/view/mapDetails.vue')
     },
-    {
-        path: '/Map_Demo/Wes',
-        name: 'Wes',
-        component: () => import('@/view/Wes.vue')
-    },
-    {
-        path: '/Map_Demo/opp',
-        name: 'opp',
-        component: () => import('@/components/opp.vue')
-    },
+    // {
+    //     path: '/Map_Demo/Wes',
+    //     name: 'Wes',
+    //     component: () => import('@/view/Wes.vue')
+    // },
+    // {
+    //     path: '/Map_Demo/opp',
+    //     name: 'opp',
+    //     component: () => import('@/components/opp.vue')
+    // },
 ]
 
 const router = createRouter({

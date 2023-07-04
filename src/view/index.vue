@@ -33,7 +33,7 @@ export default {
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
 .wrap
-    background-image: url('src/assets/img/indexBackground.svg')
+    background-image: url('@/assets/img/indexBackground.svg')
     background-repeat: no-repeat
     background-size: cover
     background-position: bottom
@@ -51,14 +51,14 @@ export default {
             margin-bottom: 60px
     &::before
         content: ''
-        background-image: url('src/assets/img/indexHead-be.svg')
+        background-image: url('@/assets/img/indexHead-be.svg')
         background-repeat: no-repeat
         display: block
         width: 100%
         height: 30px
     &::after
         content: ''
-        background-image: url('src/assets/img/indexHead-af.svg')
+        background-image: url('@/assets/img/indexHead-af.svg')
         background-repeat: no-repeat
         display: block
         width: 100%
@@ -66,7 +66,7 @@ export default {
         background-position: right
 @media (max-width: 600px)
     .wrap
-        background-image: url('src/assets/img/indexBackground-m.svg')
+        background-image: url('@/assets/img/indexBackground-m.svg')
         background-size: cover
         padding: 10px
     .startCon
@@ -85,7 +85,7 @@ export default {
                 line-height: 1.6
         &::before
             content: ''
-            background-image: url('src/assets/img/indexHead-be.svg')
+            background-image: url('@/assets/img/indexHead-be.svg')
             background-repeat: no-repeat
             background-size: contain
             display: block
