@@ -16,7 +16,11 @@ export default {
         maxHeight: {
             Type: Number,
             default: 0
-        }
+        },
+        coordinate: {
+            type: Object,
+            default: {}
+        },
     },
     setup(props, { emit }){
         const router = useRouter()
@@ -108,6 +112,9 @@ export default {
         </div>
         <!-- FIXME: 圖片!:找到該座標位置 小地圖 -->
         <img src="@/assets/example-AddressData.jpg" class="w-100" alt="">
+        <!-- <div>
+            <areaImg :coordinate="props.coordinate" />
+        </div> -->
         <div class="row mx-0 align-items-center p-2 position-relative">
             <div class="d-flex flex-nowrap align-items-center justify-content-between my-2">
                 <span class="">{{ state?.tribeData?.basicInformation?.tribeName }} </span>

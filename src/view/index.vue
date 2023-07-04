@@ -21,7 +21,7 @@ export default {
     <div class="startCon w-100 w-sm-50">
         <div class="content">
             <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
-            <p class="fs-6">敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述敘述</p>
+            <p class="fs-6">保護您與家人，防範災害。提供最新安全資訊、防護措施和應對指南。建立安全居住環境，增強防災能力。攜手合作，共築安全明天！</p>
             <a href="" class="d-inline-block" @click.prevent="route.push({name: 'map'})">
                 <img src="@/assets/img/enterMapBtn.svg" alt="">
             </a>

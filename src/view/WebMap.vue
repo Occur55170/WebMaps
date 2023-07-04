@@ -39,9 +39,12 @@ import baseMapList, { getBaseMapAll }  from '@/config/baseMapList'
 
 import 'ol-ext/dist/ol-ext.css'
 import * as olTilecoord from 'ol/tilecoord'
-import { get as getProjection } from 'ol/proj';
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js';
-import Overlay from 'ol/Overlay.js';
+import { get as getProjection } from 'ol/proj'
+import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
+import Overlay from 'ol/Overlay.js'
+
+
+import { toPng } from "html-to-image";
 
 export default {
     props: {},
@@ -101,19 +104,21 @@ export default {
             },
         })
 
+        let ol3d = null
+
         const defaultView = new View({
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
         })
 
-        let ol3d = null
-
         // 初始化地圖
         function initMap() {
             state.map1 = new Map({
                 target: 'map1',
-                layers: [baseMapList.getBaseMapData(0)],
+                layers: [
+                    baseMapList.getBaseMapData(0)
+                ],
                 view: defaultView,
                 controls: [],
             })
@@ -125,7 +130,6 @@ export default {
                     features: [
                         new Feature({
                             geometry: new Point([targetLng, targetLat]),
-                            name: 'Null Island',
                             population: 4000,
                             rainfall: 500,
                         })
@@ -136,7 +140,7 @@ export default {
                         anchor: [0.5, 100],
                         anchorXUnits: 'fraction',
                         anchorYUnits: 'pixels',
-                        // 圖片連結需修改
+                        // FIXME: 圖片連結需修改
                         src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
                     }),
                 })
@@ -481,6 +485,7 @@ export default {
             })
             target.addInteraction(selector)
             selector.on('select', (event) => {
+                // TODO: 截圖結構修改
                 let selectedFeatures = event.selected
                 if (event.selected[0]) {
                     state.areaData.overlay = new Overlay({
@@ -492,7 +497,6 @@ export default {
                     });
                     target.addOverlay(state.areaData.overlay);
                     state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
-
                     // TODO: 重置area小地圖id
                     state.areaData.tribeAreaData = {}
                     // TODO: 優化結構，獲取state.areaData.overlay方式修正，考慮整包selectedFeatures放進去
@@ -600,7 +604,7 @@ export default {
             changeTarget,
             conditionWrap,
             closeMapData,
-            show
+            show,
         }
     }
 }
@@ -731,7 +735,10 @@ export default {
         }">
             <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
                 closeMapData()
-            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500" />
+            }"
+            :tribeAreaData="state.areaData.tribeAreaData"
+            :maxHeight="500"
+            :coordinate="state.areaData.overlay.get('position')" />
         </div>
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
