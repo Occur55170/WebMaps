@@ -36,7 +36,6 @@ export default {
                 url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
                 method: "GET"
             }).done(res => {
-                console.log(res)
                 return res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
@@ -100,7 +99,7 @@ export default {
 </script>
 
 <template>
-    <div class="bg-white rounded py-2 " style="overflow-y: auto;" v-if="state.type === 1">
+    <div class="bg-white rounded py-2" style="overflow-y: auto;" v-if="state.type === 1">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
             <p>詳細資訊</p>
             <!-- TODO: 關閉事件 -->
@@ -110,11 +109,7 @@ export default {
                 </svg>
             </div> -->
         </div>
-        <!-- FIXME: 圖片!:找到該座標位置 小地圖 -->
-        <img src="@/assets/example-AddressData.jpg" class="w-100" alt="">
-        <!-- <div>
-            <areaImg :coordinate="props.coordinate" />
-        </div> -->
+        <areaImg :coordinate="props.coordinate" />
         <div class="row mx-0 align-items-center p-2 position-relative">
             <div class="d-flex flex-nowrap align-items-center justify-content-between my-2">
                 <span class="">{{ state?.tribeData?.basicInformation?.tribeName }} </span>
@@ -151,28 +146,35 @@ export default {
             </div>
         </div>
     </div>
-    <div v-else>
-        <div class="row mx-0 align-items-center p-2 position-relative">
-            <div class="py-2 px-4">
-                <p>事件: {{ state?.tribeData?.event }}</p>
+    <div class="bg-white rounded py-2" v-else>
+        <div class="row mx-0 align-items-center px-2 py-4 position-relative">
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">事件:</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.event }}</div>
             </div>
-            <div class="py-2 px-4">
-                <p>發生時間: {{ state?.tribeData?.date }}</p>
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">發生時間:</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.date }}</div>
             </div>
-            <div class="py-2 px-4">
-                <p>鄉鎮: {{ state?.tribeData?.township }}</p>
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">鄉鎮: </div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.township }}</div>
             </div>
-            <div class="py-2 px-4">
-                <p>村落: {{ state?.tribeData?.village }}</p>
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">地方: </div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.village }}</div>
             </div>
-            <div class="py-2 px-4">
-                <p>地方: {{ state?.tribeData?.place }}</p>
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">村落: </div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.place }}</div>
             </div>
-            <div class="py-2 px-4">
-                <p>災害種類: {{ state?.tribeData?.category }}</p>
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">災害種類: </div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.category }}</div>
             </div>
-            <div class="py-2 px-4">
-                <p>描述: {{ state?.tribeData?.description }}</p>
+            <div class="row mx-0 mb-2">
+                <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">描述: </div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.description }}</div>
             </div>
         </div>
     </div>

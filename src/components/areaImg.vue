@@ -24,7 +24,6 @@ export default {
             imgSrc: 'dddd'
         })
         onMounted(async () => {
-            console.log(props.coordinate)
             map = new Map({
                 target: 'imgMap',
                 layers: [
@@ -33,27 +32,28 @@ export default {
                         crossOrigin: "Anonymous",
                         source: new OSM(),
                     }),
-                    new Vector({
-                        source: new VectorSource({
-                            features: [
-                                new Feature({
-                                    geometry: new Point(props.coordinate),
-                                    name: 'Null Island',
-                                    population: 4000,
-                                    rainfall: 500,
-                                })
-                            ]
-                        }),
-                        style: new Style({
-                            image: new Icon({
-                                anchor: [0.5, 100],
-                                anchorXUnits: 'fraction',
-                                anchorYUnits: 'pixels',
-                                // 圖片連結需修改
-                                src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-                            }),
-                        })
-                    })
+                    // FIXME: 加入座標icon
+                    // new Vector({
+                    //     source: new VectorSource({
+                    //         features: [
+                    //             new Feature({
+                    //                 geometry: new Point(props.coordinate),
+                    //                 name: 'Null Island',
+                    //                 population: 4000,
+                    //                 rainfall: 500,
+                    //             })
+                    //         ]
+                    //     }),
+                    //     style: new Style({
+                    //         image: new Icon({
+                    //             anchor: [0.5, 100],
+                    //             anchorXUnits: 'fraction',
+                    //             anchorYUnits: 'pixels',
+                    //             // 圖片連結需修改
+                    //             src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
+                    //         }),
+                    //     })
+                    // })
                 ],
                 view: new View({
                     projection: 'EPSG:4326',
@@ -63,9 +63,8 @@ export default {
             })
             map.once('loadend', function () {
                 toPng(map.getTargetElement()).then(function (dataURL) {
-                    console.log(dataURL)
-                    // document.getElementById('imgMap').remove()
-                    // state.imgSrc = dataURL
+                    document.getElementById('imgMap').remove()
+                    state.imgSrc = dataURL
                 })
             })
         })
@@ -78,9 +77,20 @@ export default {
 </script>
 
 <template>
-    <div>
-        {{ props.coordinate }}
-        <div id="imgMap" style="width: 600px; height: 100px;"></div>
-        <!-- <img :src="state.imgSrc" alt="" class="w-100"> -->
+    <div class="position-relative" style="overflow: hidden;">
+        <div id="imgMap" class="position-absolute" style="width: 600px; height: 600px;"></div>
+        <div :style="{
+            'background': `url('${state.imgSrc}')`,
+            'background-size': 'cover'
+        }"
+        style="width: 100%; height: 200px;">
+
+        </div>
     </div>
 </template>
+
+<style lang="sass" scoped>
+#imgMap
+    top: 0
+    left: 0
+</style>

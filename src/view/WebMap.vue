@@ -730,7 +730,8 @@ export default {
             </div>
         </div>
 
-        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
+        <div id="popup" class="position-absolute bottom-0"
+        :ref="(e) => {
             state.areaData.nodeRef = e
         }">
             <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
@@ -839,13 +840,11 @@ export default {
     background: $blue-steel
 .areaData
     width: 450px
-    max-height: 500px
+    max-height: 550px
     background: #fff
     box-sizing: border-box
-#popup
-    border: 1px solid #088
     border-radius: 10px
-    background-color: #0FF
+    border: 1px solid #088
 
 
 
