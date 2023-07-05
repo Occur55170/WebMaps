@@ -244,7 +244,7 @@ export default {
                         if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
                             mapClickEvent(target, value.id)
                             // FIXME: 結構優化
-                            addSelectElement(value)
+                            // addSelectElement(value)
                         }
 
                         onMapLayerStatus('add', target.getTarget(), value.id)

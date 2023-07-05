@@ -136,13 +136,13 @@ export default {
                                 })
                             }">
                             {{ subNode.title }}
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined ">
+                            <!-- <div v-if="props.selectLayerOption[subNode.id] !== undefined ">
                                 <select name="" id="" @change="props.moveToMap">
                                     <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
                                         {{ item.properties['事件'] }}
                                     </option>
                                 </select>
-                            </div>
+                            </div> -->
                         </div>
                         <div v-else>
                             <input type="checkbox"
