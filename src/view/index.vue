@@ -18,7 +18,8 @@ export default {
 
 <template>
   <div class="wrap">
-    <div class="startCon w-100 w-sm-50">
+    <div class="startCon">
+        <!-- w-100 w-sm-50 -->
         <div class="content">
             <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
             <p class="fs-6">保護您與家人，防範災害。提供最新安全資訊、防護措施和應對指南。建立安全居住環境，增強防災能力。攜手合作，共築安全明天！</p>
@@ -64,6 +65,11 @@ export default {
         width: 100%
         height: 30px
         background-position: right
+@media (max-width: 1700px)
+    .startCon
+        max-width: 70%
+        padding: 30px
+
 @media (max-width: 600px)
     .wrap
         background-image: url('@/assets/img/indexBackground-m.svg')
