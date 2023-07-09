@@ -251,7 +251,7 @@ export default {
                             }
                         }
 
-                        if (['node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'].includes(value.id)) {
+                        if (['node4_subNode0_nestedSubNodeundefined', 'node7_subNode0_nestedSubNodeundefined'].includes(value.id)) {
                             // FIXME: 結構優化
                             addSelectElement(value)
                         }
@@ -507,13 +507,18 @@ export default {
             state.areaData.overlay = null
         }
 
+        // FIXME: 加入下拉式選單
+        // "node4_subNode0_nestedSubNodeundefined"
+        // https://api.edtest.site/tribes
+        // "node7_subNode0_nestedSubNodeundefined"
+        // https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default
         function addSelectElement(value) {
-            // 'node0_subNode4_nestedSubNodeundefined', 'node0_subNode5_nestedSubNodeundefined'
+            // 'node0_subNode4_nestedSubNodeundefined', 'node7_subNode0_nestedSubNodeundefined'
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
-            if (id === 'node0_subNode5_nestedSubNodeundefined') {
+            if (id === 'node7_subNode0_nestedSubNodeundefined') {
                 $.ajax({
-                    url: 'http://gis.edtest.site:8010/ogc/temp?SERVICE=WFS&VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=%E8%BF%91%E5%B9%B4%E6%AD%B7%E5%8F%B2%E7%81%BD%E5%AE%B382%E8%99%95%E9%83%A8%E8%90%BD%E9%BB%9E%E4%BD%8D&outputFormat=application/json',
+                    url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default",
                     method: 'GET',
                     success: (res) => {
                         state.selectLayerOption[id] = res.features
@@ -526,13 +531,13 @@ export default {
         }
 
         function moveToMap(val) {
-            // FIXME: node0_subNode5_nestedSubNodeundefined 改成判斷id
-            if (state.selectLayerOption['node0_subNode5_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
+            // FIXME: node7_subNode0_nestedSubNodeundefined 改成判斷id
+            if (state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
                 let obj = {
                     action: 'moveTo',
                     value: {
-                        xAxis: state.selectLayerOption['node0_subNode5_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0],
-                        yAxis: state.selectLayerOption['node0_subNode5_nestedSubNodeundefined'][val.target.value].geometry.coordinates[1]
+                        xAxis: state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0],
+                        yAxis: state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[1]
                     }
                 }
                 mapControl(obj)
