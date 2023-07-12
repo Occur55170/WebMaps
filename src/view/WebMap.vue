@@ -224,8 +224,10 @@ export default {
                             onMapLayerStatus('delete', target.getTarget(), value.id)
                         }
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
+                        console.log(state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
+
                         if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
                             // FIXME: 結構優化
                             mapClickEvent(target, value.id)
@@ -251,9 +253,13 @@ export default {
                             }
                         }
 
-                        if (['node4_subNode0_nestedSubNodeundefined', 'node7_subNode0_nestedSubNodeundefined'].includes(value.id)) {
+                        if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
                             // FIXME: 結構優化
                             addSelectElement(value)
+
+                            state.areaData.tribeAreaData = {}
+                            target.removeOverlay(state.areaData.overlay)
+                            state.areaData.overlay = null
                         }
 
                         onMapLayerStatus('delete', target.getTarget(), value.id)
@@ -507,15 +513,23 @@ export default {
             state.areaData.overlay = null
         }
 
+        // FIXME: 優化
         // FIXME: 加入下拉式選單
-        // "node4_subNode0_nestedSubNodeundefined"
-        // https://api.edtest.site/tribes
-        // "node7_subNode0_nestedSubNodeundefined"
-        // https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default
         function addSelectElement(value) {
-            // 'node0_subNode4_nestedSubNodeundefined', 'node7_subNode0_nestedSubNodeundefined'
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
+            if (id === 'node4_subNode0_nestedSubNodeundefined') {
+                $.ajax({
+                    url: "https://api.edtest.site/tribes",
+                    method: 'GET',
+                    success: (res) => {
+                        state.selectLayerOption[id] = res
+                    },
+                    error: (res) => {
+                        console.log(res)
+                    }
+                })
+            }
             if (id === 'node7_subNode0_nestedSubNodeundefined') {
                 $.ajax({
                     url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default",
@@ -532,7 +546,18 @@ export default {
 
         function moveToMap(val) {
             // FIXME: node7_subNode0_nestedSubNodeundefined 改成判斷id
-            if (state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
+            // FIXME: 優化
+            if (Object.keys(state.selectLayerOption)[0] === 'node4_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84 !== null) {
+                let obj = {
+                    action: 'moveTo',
+                    value: {
+                        xAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lng,
+                        yAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lat
+                    }
+                }
+                mapControl(obj)
+            }
+            if (Object.keys(state.selectLayerOption)[0] === 'node7_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
                 let obj = {
                     action: 'moveTo',
                     value: {
@@ -541,7 +566,7 @@ export default {
                     }
                 }
                 mapControl(obj)
-            }
+            }x
         }
 
         function getBaseData() {

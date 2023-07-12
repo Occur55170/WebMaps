@@ -24,6 +24,7 @@ import { get as getProjection, transformExtent, fromLonLat } from 'ol/proj.js'
 import { getTopLeft, getWidth } from 'ol/extent.js'
 import Select from 'ol/interaction/Select'
 import { click } from 'ol/events/condition'
+import Static from 'ol/source/ImageStatic.js'
 
 import proj4 from 'proj4'
 import { register } from 'ol/proj/proj4.js'
@@ -336,46 +337,64 @@ export default {
                 }),
             })
         }
-        // if (layerType === 'Image'){
-        //     const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-        //     switch (figureType){
-        //         case 'Surface':
-        //             console.log(layer)
-        //             // TODO: 雨量站 失效
-        //             if (url){
-        //                 const api = new URL(url)
-        //                 const { origin, pathname, searchParams } = api
-        //                 const searchParamsObject = {}
-        //                 for (const [key, value] of searchParams.entries()){
-        //                     searchParamsObject[key] = value
-        //                 }
-        //                 request[0] = origin + pathname
-        //                 request[1] = searchParamsObject
-        //             }
-        //             layerSource = new TileWMS({
-        //                 maxzoom: 18,
-        //                 minzoom: 3,
-        //                 url: request[0],
-        //                 params: request[1],
-        //                 serverType: 'mapserver'
-        //             })
-        //             result = new TileLayer({
-        //                 source: layerSource,
-        //             })
-        //             break
-        //         default:
-        //             console.log('error-otherWMSLayer:', figureType)
-        //     }
-        //     result = new VectorLayer({
-        //         source: new VectorSource({
-        //             url: layerSource.getUrls()[0],
-        //             params: layerSource.getParams(),
-        //             serverType: 'geoserver',
-        //             crossOrigin: 'anonymous',
-        //             projection: layerSource.getParams()?.SRS,
-        //         }),
-        //     })
-        // }
+        if (layerType === 'Image'){
+            console.log(layer)
+            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+            // let a = [117.1595,
+            // 21.2646,
+            // 123.9804,
+            // 26.5353]
+            const extent = [0, 0, 1024, 968]
+            const projection = new Projection({
+                code: 'xkcd-image',
+                units: 'pixels',
+                extent,
+            })
+            result = new ImageLayer({
+                source: new Static({
+                    url: 'https://s3.ap-northeast-1.amazonaws.com/common.cwb.images/ncdr/forecast.png?AWSAccessKeyId=ASIAU6XV5PTRLJK2P3I2&Signature=H8fIgvFpJtN25FJQ7wI8XYXvpyQ%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEFwaDmFwLW5vcnRoZWFzdC0xIkYwRAIfFinJqG4UmImmCrf6%2FLdfuLY2SkCZb1%2Fd04AW3oL8RAIhAP%2BqNqdbJRg1HRs7E5tJMKWY65UzSlJVnmpdHjEg9WA3KoIDCNX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMzQwODkxODkyOTYyIgxb1MtkkbBOCsajf10q1gJQV2mOT2XsxGa8nFXJPXAJ2ymYuwbunwJMtu5lVV3Z5Cs0JaMPSwhLxwc8zJbIAvO61CNpu4ztWGRhp76rWsNyAAP2ODnavgWu%2BY9tLRxHFJKP%2FereOVELlxLl3ZYETBkgWaa9bpg0CfMF0mXPZn61mPkL6zd0IraBmlBZi0jNeC8ETBxp6RBpyXUXpUF1v8E4jragBSq1eXja0b7XVin766E7WJWHF9QutnbHdaRzeuV%2B0xZpD8GIlLWuRsgPSy55niCeIc47U8w0N%2F8mvZxhwvdETs54RNOL%2FVMnrppz%2F2YYfDePn81wiOtotPIvdsARu4tLydOEdtbCkl3rFwPjN5ibsg0LE2DiK%2FKCeUpf6JALPjUKB9Pyh8EAp7xWDIz8Fb1eMokinZovD%2BZMcCpy8QojJTVABqY6EBInzV851MgYCzkeZulHuyCDLGaKdK8DDwVaXLYw0Km6pQY6nwFfHh4MfRPiAQs2euDmQMR41x7MYred35tJEhaSgHoECqGAIhEZkR4YgabY5FREk5AFOya%2FgLdLC%2F4EyM65Fq5BU4B1nkRX8awb3uEQ6Kl2m3Xdp%2Br2CM3w28mRkF1fMxADNcjNTULp4ZiLNfRXdKWK%2Fy5zt8CerCtfIizKxr5pfLlCJ2whdb5ICs8KujA3h%2F4b2fsYqxVeYNALi5nlGGI%3D&Expires=1689163759',
+                    imageExtent: [117.1595, 21.2646, 123.9804, 26.5353],
+                    projection: 'EPSG:4326',
+                }),
+            })
+            // switch (figureType){
+            //     case 'Surface':
+            //         console.log(layer)
+            //         // TODO: 雨量站 失效
+            //         if (url){
+            //             const api = new URL(url)
+            //             const { origin, pathname, searchParams } = api
+            //             const searchParamsObject = {}
+            //             for (const [key, value] of searchParams.entries()){
+            //                 searchParamsObject[key] = value
+            //             }
+            //             request[0] = origin + pathname
+            //             request[1] = searchParamsObject
+            //         }
+            //         layerSource = new TileWMS({
+            //             maxzoom: 18,
+            //             minzoom: 3,
+            //             url: request[0],
+            //             params: request[1],
+            //             serverType: 'mapserver'
+            //         })
+            //         result = new TileLayer({
+            //             source: layerSource,
+            //         })
+            //         break
+            //     default:
+            //         console.log('error-otherWMSLayer:', figureType)
+            // }
+            // result = new VectorLayer({
+            //     source: new VectorSource({
+            //         url: layerSource.getUrls()[0],
+            //         params: layerSource.getParams(),
+            //         serverType: 'geoserver',
+            //         crossOrigin: 'anonymous',
+            //         projection: layerSource.getParams()?.SRS,
+            //     }),
+            // })
+        }
         return result
     },
     getLayerIndex: (layeredIndex) => {
