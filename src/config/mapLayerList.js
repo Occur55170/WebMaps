@@ -345,8 +345,6 @@ export default {
                         label: `${layer.title} ${tileTitle}`,
                         preload: Infinity,
                         extent: layer.image_options.image_extent,
-                        minZoom: 4,
-                        maxZoom: 18,
                         source: new ImageWMS({
                             url: layer.tiles_url,
                             imageExtent: layer.image_options.image_extent,

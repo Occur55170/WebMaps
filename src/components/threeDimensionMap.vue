@@ -18,7 +18,7 @@ export default {
 </script>
 
 <template>
-        <div id="cesiumContainer" class="fullSize"></div>
+    <div id="cesiumContainer" class="fullSize"></div>
 </template>
 
 <style>

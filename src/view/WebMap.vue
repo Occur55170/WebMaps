@@ -567,7 +567,7 @@ export default {
                     }
                 }
                 mapControl(obj)
-            }x
+            }
         }
 
         function getBaseData() {
