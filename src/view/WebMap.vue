@@ -53,8 +53,9 @@ export default {
         const baseMaps = baseMapList
         const state = reactive({
             // defaultCenter: [120.971859, 24.801583],
+            // defaultCenterZoom: 14,
             defaultCenter: [121.326776, 24.655499],
-            defaultCenterZoom: 14,
+            defaultCenterZoom: 9,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: false,
@@ -692,9 +693,11 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;" :ref="(e) => {
+                <div class="mb-4" style="max-height: 50%;"
+                :ref="(e) => {
                     state.comSize.conditionCom = e
-                }" v-if="state.conditionWrap">
+                }"
+                v-if="state.conditionWrap">
                     <condition v-bind="{
                         selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
@@ -708,8 +711,9 @@ export default {
                         moveToMap: (val) => {
                             moveToMap(val)
                         }
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -815,20 +819,23 @@ export default {
                         state.deleteLightbox = true
                     },
                 }" :setOpacity="({ action, value }) => {
-    layerControl({ action, value })
-}" />
+                    layerControl({ action, value })
+                }" />
             </div>
 
             <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" :openConditionWrap="() => {
                     state.conditionWrap = !state.conditionWrap
                     state.layerSelect = false
-                }" :openLayerSelect="() => {
-    state.layerSelect = !state.layerSelect
-    state.conditionWrap = false
-}" :onLayerControl="({ action, value }) => {
-    layerControl({ action, value })
-}" :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                }"
+                :openLayerSelect="() => {
+                    state.layerSelect = !state.layerSelect
+                    state.conditionWrap = false
+                }"
+                :onLayerControl="({ action, value }) => {
+                    layerControl({ action, value })
+                }"
+                :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
     </div>
 </template>

@@ -52,47 +52,44 @@ const map = new Map({
     ],
     target: 'map',
     view: new View({
-        // center: transform(getCenter(imageExtent), 'EPSG:3826', 'EPSG:3857'),
-        // center: transform( getCenter(area.Taiwan) , 'EPSG:3826'),
         center: [120.41670777208755, 24.197957034875305],
         zoom: 4,
     }),
-});
+})
 
-// const interpolate = document.getElementById('interpolate');
-
-function setSource(e) {
-    // const source = new Static({
-    //     url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/' + 'British_National_Grid.svg/2000px-British_National_Grid.svg.png',
-    //     projection: 'EPSG:3826',
-    //     crossOrigin: '',
-    //     imageExtent: imageExtent,
-    //     // interpolate: interpolate.checked,
-    // });
-
-    const source = new TileWMS({
-        // projection: 'EPSG:3857', // here is the source projection
-        url: 'https://ahocevar.com/geoserver/wms',
-        params: {
-            'LAYERS': 'ne:NE1_HR_LC_SR_W_DR',
-        },
-    })
-    map.addLayer(source);
-}
-setSource();
-
-// interpolate.addEventListener('change', setSource);
+// {
+//     group_title: "即時預測",
+//     group_icon: null,
+//     group_class: null,
+//     group_layers: [
+//         {
+//             title: "雷達回波預測",
+//             help_btn_display: false,
+//             help_memo: "",
+//             minzoom: 4,
+//             maxzoom: 18,
+//             layer_type: "Image",
+//             figure_type: "Surface",
+//             single_tiles: true,
+//             tiles_url: "https://s3.ap-northeast-1.amazonaws.com/common.cwb.images/ncdr/forecast.png?AWSAccessKeyId=ASIAU6XV5PTRDZMDPUXB&Signature=KCx%2BU6HxCmMHcslpU2Epbd7fpug%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEJ7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDmFwLW5vcnRoZWFzdC0xIkcwRQIhAOfUJKB%2B0XKZdWPNmuknzVlrAYjAvjk8i4qK7pTKxxEQAiBuGZCkssBgtviyEAVBORaortxdP2gOKIjtmqCeUKHICir5AggnEAAaDDM0MDg5MTg5Mjk2MiIMB2YP5hVKFfBSei0WKtYCkFKH8ICWeVfSTZ4UJRrsJHaDWzCgW1rFFqqB7ovoeJJb5cbWglmM1BFTDU7iecL2t%2Fl2cRSgwDE9nC4KBkRKUOUrgzQdzQS66t9vSTmDtgMwXr%2F7MbTfWauX37VO3XPUbPoW0ico3yY73Im07hXyfzKNajgEkxqm%2BQiNi%2Fy6aiC22E9LbvqZoPWsKXFb16dW%2F5Uo3xfWc3P0W%2B8suEjHS7QBflSaI0bYP2jzt6Da%2BeXBvZg8l9RGp9me%2FGYfwf1WMWohoTfh9qgHYq8XS3FXLz%2BAiQx34XVRHvfMXGl%2Fq8dA9s6gOSVSOGTARYveZ%2B0HJwUJARbnZvRJAaeba0bWNTYiHnf2%2BEyeWJ68bLUNJq6GKYBtoyBtgDLcyKzzntlVKAGlWnXGZcmdhXttWnV5MWUg2MMRJO8e2aAd0Z8CK89X5m86UQUimKWSRNJfVmlt03Zp%2Fl4OMNDsyKUGOp4BHRpdUY18O5lPk2lGe92aIeT3EEV%2FPznNtcAeoRnhIjYeNJ92GpjkpYEbuKxAOSJsUHLFjaAv4yXaR72h9Om2emdh399NH54XOhI%2BR6qRvwfn927aefjE7iCcpxhkexyagNcn03DnGOPkwBQjTfJOllwGUkUDT6pU5pPTuNh6CzgaclpBPPoypWJ%2FciBtBPcc3Nn%2BQV6kJIn9GSOsa%2Bs%3D&Expires=1689401702",
+//             tiles_list_description: "",
+//             image_options: {
+//                 image_extent: [
+//                     117.1595,
+//                     21.2646,
+//                     123.9804,
+//                     26.5353
+//                 ]
+//             }
+//         }
+//     ]
+// }
 </script>
 
 <template>
     921
 
     <div id="map" class="map"></div>
-    <div>
-        <button @click="setSource()">999</button>
-        <input type="checkbox" id="interpolate" checked />
-        <label for="interpolate">Interpolate</label>
-    </div>
 </template>
 <style>
 .map {
