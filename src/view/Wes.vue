@@ -25,7 +25,6 @@ export default {
     props: {
     },
     setup(props, { emit }) {
-        const imgSrc = ''
         let map
         onMounted(async () => {
             console.log(1)
