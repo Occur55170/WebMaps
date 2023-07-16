@@ -124,6 +124,66 @@ export default {
                 view: defaultView,
                 controls: [],
             })
+            const extent = [117.1595, 21.2646, 123.9804, 26.5353];
+            const xCenter = (extent[2] + extent[0]) / 2;
+            const yCenter = (extent[3] + extent[1]) / 2;
+
+
+            const iconFeature = new Feature({
+                geometry: new Point([xCenter, yCenter]),
+            });
+
+            const vectorLayer = new VectorLayer({
+                source: new VectorSource({
+                    features: [iconFeature]
+                }),
+                minzoom: 4,
+                maxZoom: 18,
+            });
+
+            state.map1.addLayer(vectorLayer)
+
+
+            const gifUrl = 'http://localhost:5173/Map_Demo/forecast.gif';
+            const gif = gifler(gifUrl);
+
+
+
+            const extentWidth = extent[2] - extent[0];
+            const extentHeight = extent[3] - extent[1];
+
+            gif.frames(
+                document.createElement('canvas'),
+                function (ctx, frame) {
+                    
+                    const scaleX = extentWidth / frame.width;
+                    const scaleY = extentHeight / frame.height;
+                    const baseScale = Math.min(scaleX, scaleY);
+
+
+                    // 獲取當前地圖的解析度
+                    const currentResolution = state.map1.getView().getResolution();
+
+                    iconFeature.setStyle(
+                        new Style({
+                            image: new Icon({
+                                img: ctx.canvas,
+                                imgSize: [frame.width, frame.height],
+                                opacity: 0.8,
+                                scale: baseScale / currentResolution
+                            }),
+                        })
+                    );
+
+                    ctx.clearRect(0, 0, frame.width, frame.height);
+                    ctx.drawImage(frame.buffer, frame.x, frame.y);
+
+                    state.map1.render();
+                },
+                true
+            );
+
+
         }
 
         function addPoint(targetLng, targetLat) {
