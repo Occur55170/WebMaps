@@ -124,65 +124,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-            const extent = [117.1595, 21.2646, 123.9804, 26.5353];
-            const xCenter = (extent[2] + extent[0]) / 2;
-            const yCenter = (extent[3] + extent[1]) / 2;
-
-
-            const iconFeature = new Feature({
-                geometry: new Point([xCenter, yCenter]),
-            });
-
-            const vectorLayer = new VectorLayer({
-                source: new VectorSource({
-                    features: [iconFeature]
-                }),
-                minzoom: 4,
-                maxZoom: 18,
-            });
-
-            state.map1.addLayer(vectorLayer)
-
-
-            const gifUrl = 'http://localhost:5173/Map_Demo/forecast.gif';
-            const gif = gifler(gifUrl);
-
-
-
-            const extentWidth = extent[2] - extent[0];
-            const extentHeight = extent[3] - extent[1];
-
-            gif.frames(
-                document.createElement('canvas'),
-                function (ctx, frame) {
-                    
-                    const scaleX = extentWidth / frame.width;
-                    const scaleY = extentHeight / frame.height;
-                    const baseScale = Math.min(scaleX, scaleY);
-
-
-                    // 獲取當前地圖的解析度
-                    const currentResolution = state.map1.getView().getResolution();
-
-                    iconFeature.setStyle(
-                        new Style({
-                            image: new Icon({
-                                img: ctx.canvas,
-                                imgSize: [frame.width, frame.height],
-                                opacity: 0.8,
-                                scale: baseScale / currentResolution
-                            }),
-                        })
-                    );
-
-                    ctx.clearRect(0, 0, frame.width, frame.height);
-                    ctx.drawImage(frame.buffer, frame.x, frame.y);
-
-                    state.map1.render();
-                },
-                true
-            );
-
 
         }
 
@@ -266,10 +207,9 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            // console.log(action, value)
+            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
-            console.log(value.id)
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
@@ -285,9 +225,49 @@ export default {
                             onMapLayerStatus('delete', target.getTarget(), value.id)
                         }
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
-                        console.log(state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
                         let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
+                        if(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title === '雷達回波預測') {
+                            var source = targetLayer.getSource();
+                            var iconFeature = source.getFeatures()[0]
+                        // TODO: 優化內容，看是否可以從選擇當前有的雷達圖層中撈資料
+                            const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
+
+                            const gifUrl = 'http://localhost:5173/Map_Demo/forecast.gif';
+                            const gif = gifler(gifUrl);
+
+                            const extentWidth = extent[2] - extent[0];
+                            const extentHeight = extent[3] - extent[1];
+
+                            gif.frames(
+                                document.createElement('canvas'),
+                                function (ctx, frame) {
+                                    const scaleX = extentWidth / frame.width;
+                                    const scaleY = extentHeight / frame.height;
+                                    const baseScale = Math.min(scaleX, scaleY);
+
+                                    // 獲取當前地圖的解析度
+                                    const currentResolution = state.map1.getView().getResolution();
+
+                                    iconFeature.setStyle(
+                                        new Style({
+                                            image: new Icon({
+                                                img: ctx.canvas,
+                                                imgSize: [frame.width, frame.height],
+                                                opacity: 0.8,
+                                                scale: baseScale / currentResolution
+                                            }),
+                                        })
+                                    );
+
+                                    ctx.clearRect(0, 0, frame.width, frame.height);
+                                    ctx.drawImage(frame.buffer, frame.x, frame.y);
+
+                                    target.render();
+                                },
+                                true
+                            );
+                        }
 
                         if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
                             // FIXME: 結構優化
@@ -295,6 +275,7 @@ export default {
                             addSelectElement(value)
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
+
                     } else {
                         let layersAry = targetLayers.getArray()
                         function removeLayersById(id) {
@@ -303,6 +284,7 @@ export default {
                                 target.removeLayer(node);
                             });
                         }
+                        // FIXME: 盡量不要抓id
                         if (value.id.includes('node9_subNode0_nestedSubNode')) {
                             removeLayersById('node9_subNode0_nestedSubNode');
                         } else if (value.id.includes('node12_subNode1_nestedSubNode')) {
@@ -911,7 +893,7 @@ export default {
     width: 100vw
 .asideTool
     z-index: 220
-    left: 5px
+    left: 20px
 .SearchBar
     top: 20px
     left: 20px

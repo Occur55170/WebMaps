@@ -340,19 +340,25 @@ export default {
         if (layerType === 'Image'){
             switch (figureType){
                 case 'Surface':
-                    result = new ImageLayer({
-                        id,
-                        label: `${layer.title} ${tileTitle}`,
-                        preload: Infinity,
-                        extent: layer.image_options.image_extent,
-                        source: new ImageWMS({
-                            url: layer.tiles_url,
-                            imageExtent: layer.image_options.image_extent,
-                            minzoom: layer.minzoom,
-                            maxZoom: layer.maxzoom,
-                            projection: 'EPSG:3857',
-                        }),
+                    const extent = layer.image_options.image_extent
+                    const xCenter = (extent[2] + extent[0]) / 2
+                    const yCenter = (extent[3] + extent[1]) / 2
+
+                    const iconFeature = new Feature({
+                        geometry: new Point([xCenter, yCenter]),
                     })
+
+                    result = new VectorLayer({
+                        name: layer.title,
+                        source: new VectorSource({
+                            name: layer.title,
+                            features: [iconFeature],
+                        }),
+                        minzoom: 4,
+                        maxZoom: 18,
+                    })
+
+                    // console.log('mapLayerList', layer)
                     break
                 default:
                     console.log('error-otherWMSLayer:', figureType)
