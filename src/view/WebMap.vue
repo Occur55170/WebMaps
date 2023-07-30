@@ -207,7 +207,6 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -227,10 +226,9 @@ export default {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title === '雷達回波預測') {
+                        if (targetLayer.get('label').includes('雷達回波預測')) {
                             var source = targetLayer.getSource();
                             var iconFeature = source.getFeatures()[0]
-                            // TODO: 優化內容，看是否可以從選擇當前有的雷達圖層中撈資料
                             const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
 
                             const gifUrl = 'http://localhost:5173/Map_Demo/forecast.gif';
@@ -275,7 +273,6 @@ export default {
                             addSelectElement(value)
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
-
                     } else {
                         let layersAry = targetLayers.getArray()
                         function removeLayersById(id) {
@@ -515,6 +512,7 @@ export default {
         function getCurrentMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
+            console.log(layers)
             state.currentLayers = layers?.map(layer => {
                 return {
                     label: layer.get('label'),

@@ -50,121 +50,6 @@ export async function getTribeData(tribeId){
 }
 
 export default {
-    // getLayerChatGPT: (layer, nestedSubNodeIndex, id) => {
-    //     let result, layerSource
-    //     const layerType = layer.layer_type
-    //     const figureType = layer.figure_type
-    //     const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
-    //     const request = []
-
-    //     const getUrlAndSearchParams = (url) => {
-    //         const api = new URL(url)
-    //         const origin = api.origin
-    //         const pathname = api.pathname
-    //         const searchParams = api.searchParams
-    //         const searchParamsObject = Object.fromEntries(searchParams.entries())
-    //         return [origin + pathname, searchParamsObject]
-    //     }
-
-    //     switch (layerType){
-    //         case 'WMS':
-    //             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex]?.tile_url
-    //             if (url){
-    //                 [request[0], request[1]] = getUrlAndSearchParams(url)
-    //             }
-
-    //             layerSource = new TileWMS({
-    //                 maxzoom: 18,
-    //                 minzoom: 3,
-    //                 url: request[0],
-    //                 params: request[1],
-    //                 serverType: 'mapserver',
-    //                 crossOrigin: 'anonymous',
-    //             })
-
-    //             result = new TileLayer({
-    //                 id,
-    //                 label: `${layer.title} ${tileTitle}`,
-    //                 source: new TileWMS({
-    //                     name: layer.title,
-    //                     url: layerSource.getUrls()[0],
-    //                     params: layerSource.getParams(),
-    //                     serverType: 'geoserver',
-    //                     crossOrigin: 'anonymous',
-    //                     projection: layerSource.getParams()?.SRS,
-    //                 }),
-    //             })
-    //             break
-
-    //         case 'WFS':
-    //             const vectorSource = new VectorSource({
-    //                 format: new GeoJSON(),
-    //                 url: layer.tiles_url,
-    //                 strategy: bbox,
-    //             })
-
-    //             result = new Vector({
-    //                 id,
-    //                 label: `${layer.title} ${tileTitle}`,
-    //                 source: vectorSource,
-    //             })
-    //             break
-
-    //         case 'GeoJson':
-    //             const geoJsonUrl = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex]?.tile_url
-    //             if (geoJsonUrl){
-    //                 [request[0], request[1]] = getUrlAndSearchParams(geoJsonUrl)
-    //             }
-
-    //             layerSource = new TileWMS({
-    //                 maxzoom: 18,
-    //                 minzoom: 3,
-    //                 url: request[0],
-    //                 params: request[1],
-    //                 serverType: 'mapserver',
-    //             })
-
-    //             result = new VectorLayer({
-    //                 source: new VectorSource({
-    //                     url: layerSource.getUrls()[0],
-    //                     params: layerSource.getParams(),
-    //                     serverType: 'geoserver',
-    //                     crossOrigin: 'anonymous',
-    //                     projection: layerSource.getParams()?.SRS,
-    //                 }),
-    //             })
-    //             break
-
-    //         case 'Image':
-    //             const imageUrl = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex]?.tile_url
-    //             if (imageUrl){
-    //                 [request[0], request[1]] = getUrlAndSearchParams(imageUrl)
-    //             }
-
-    //             layerSource = new TileWMS({
-    //                 maxzoom: 18,
-    //                 minzoom: 3,
-    //                 url: request[0],
-    //                 params: request[1],
-    //                 serverType: 'mapserver',
-    //             })
-
-    //             result = new VectorLayer({
-    //                 source: new VectorSource({
-    //                     url: layerSource.getUrls()[0],
-    //                     params: layerSource.getParams(),
-    //                     serverType: 'geoserver',
-    //                     crossOrigin: 'anonymous',
-    //                     projection: layerSource.getParams()?.SRS,
-    //                 }),
-    //             })
-    //             break
-
-    //         default:
-    //             console.log('error-otherWMSLayer:', figureType)
-    //     }
-    //     return result
-    // },
     getLayer: (layer, nestedSubNodeIndex, id) => {
         let result, layerSource
         const layerType = layer.layer_type
@@ -328,6 +213,9 @@ export default {
                     console.log('error-otherWMSLayer:', figureType)
             }
             result = new VectorLayer({
+                name: layer.title,
+                id,
+                label: `${layer.title} ${tileTitle}`,
                 source: new VectorSource({
                     url: layerSource.getUrls()[0],
                     params: layerSource.getParams(),
@@ -350,6 +238,8 @@ export default {
 
                     result = new VectorLayer({
                         name: layer.title,
+                        id,
+                        label: `${layer.title} ${tileTitle}`,
                         source: new VectorSource({
                             name: layer.title,
                             features: [iconFeature],
@@ -357,8 +247,6 @@ export default {
                         minzoom: 4,
                         maxZoom: 18,
                     })
-
-                    // console.log('mapLayerList', layer)
                     break
                 default:
                     console.log('error-otherWMSLayer:', figureType)
