@@ -456,11 +456,7 @@ export default {
                     }
                     break;
                 case 'setOpacity':
-                    if (targetLayers.getArray()[value.key].getOpacity() !== 1) {
-                        targetLayers.getArray()[value.key].setOpacity(1)
-                    } else {
-                        targetLayers.getArray()[value.key].setOpacity(0.5)
-                    }
+                    targetLayers.getArray()[value.key].setOpacity(Number(value.value))
                     break;
             }
             getCurrentMapData()
