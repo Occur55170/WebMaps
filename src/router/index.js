@@ -1,22 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
     {
-        path: '/Map_Demo/',
+        path: '/',
         name: 'index',
         component: () => import('@/view/index.vue'),
     },
     {
-        path: '/Map_Demo/map',
+        path: '/map',
         name: 'map',
         component: () => import('@/view/WebMap.vue'),
     },
     {
-        path: '/Map_Demo/mapDetails/:id',
+        path: '/mapDetails/:id',
         name: 'detail',
         component: () => import('@/view/mapDetails.vue')
     },
     {
-        path: '/Map_Demo/Wes',
+        path: '/Wes',
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
@@ -40,3 +40,4 @@ router.beforeEach((to, from, next) => {
 })
 
 export default router
+
