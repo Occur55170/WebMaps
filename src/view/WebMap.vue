@@ -49,7 +49,7 @@ import { toPng } from "html-to-image";
 export default {
     props: {},
     setup(props, { emit }) {
-        const mapLayers = mapLayerList
+        const getMapLayers = mapLayerList
         const baseMaps = baseMapList
         const state = reactive({
             // defaultCenter: [120.971859, 24.801583],
@@ -124,6 +124,7 @@ export default {
                 view: defaultView,
                 controls: [],
             })
+
         }
 
         function addPoint(targetLng, targetLat) {
@@ -206,10 +207,8 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            // console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
-            console.log(value.id)
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
@@ -225,11 +224,50 @@ export default {
                             onMapLayerStatus('delete', target.getTarget(), value.id)
                         }
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
-                        console.log(state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
-                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                        let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
+                        if (targetLayer.get('label').includes('雷達回波預測')) {
+                            var source = targetLayer.getSource();
+                            var iconFeature = source.getFeatures()[0]
+                            const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
+                            // TODO: 等待api 確定後切換成api路徑
+                            const gifUrl = 'https://occur55170.github.io/Map_Demo/forecast.gif';
+                            const gif = gifler(gifUrl);
 
-                        if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
+                            const extentWidth = extent[2] - extent[0];
+                            const extentHeight = extent[3] - extent[1];
+
+                            gif.frames(
+                                document.createElement('canvas'),
+                                function (ctx, frame) {
+                                    const scaleX = extentWidth / frame.width;
+                                    const scaleY = extentHeight / frame.height;
+                                    const baseScale = Math.min(scaleX, scaleY);
+
+                                    // 獲取當前地圖的解析度
+                                    const currentResolution = state.map1.getView().getResolution();
+
+                                    iconFeature.setStyle(
+                                        new Style({
+                                            image: new Icon({
+                                                img: ctx.canvas,
+                                                imgSize: [frame.width, frame.height],
+                                                opacity: 0.8,
+                                                scale: baseScale / currentResolution
+                                            }),
+                                        })
+                                    );
+
+                                    ctx.clearRect(0, 0, frame.width, frame.height);
+                                    ctx.drawImage(frame.buffer, frame.x, frame.y);
+
+                                    target.render();
+                                },
+                                true
+                            );
+                        }
+
+                        if (state.layers[value.nodeIndex].group_layers.some(node => node.layer_type === "WFS")) {
                             // FIXME: 結構優化
                             mapClickEvent(target, value.id)
                             addSelectElement(value)
@@ -243,6 +281,7 @@ export default {
                                 target.removeLayer(node);
                             });
                         }
+                        // FIXME: 盡量不要抓id
                         if (value.id.includes('node9_subNode0_nestedSubNode')) {
                             removeLayersById('node9_subNode0_nestedSubNode');
                         } else if (value.id.includes('node12_subNode1_nestedSubNode')) {
@@ -254,7 +293,7 @@ export default {
                             }
                         }
 
-                        if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
+                        if (state.layers[value.nodeIndex].group_layers.some(node => node.layer_type === "WFS")) {
                             // FIXME: 結構優化
                             addSelectElement(value)
 
@@ -285,18 +324,30 @@ export default {
                     break;
                 case 'changeOrder':
                     if (state.selectLock) { return }
-                    let layeredIndex = mapLayerList.getLayerIndex(value.id)
-                    let nowTileLayer = mapLayers.getLayer(state.layers[layeredIndex.nodeIndex].group_layers[layeredIndex.subNodeIndex], layeredIndex.nestedSubNodeIndex, value.id)
+                    let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(value.id)
+                    let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
                     if (value.movement === 'up') {
                         if (value.key + 1 == targetLayers.getArray().length) { return }
-                        value.checked = false
-                        layerControl({ action: 'layerMode', value: value })
+                        let obj = {
+                            checked: false,
+                            nodeIndex: nodeIndex,
+                            subNodeIndex: subNodeIndex,
+                            nestedSubNodeIndex: nestedSubNodeIndex,
+                            id: value.id
+                        }
+                        layerControl({ action: 'layerMode', value: obj })
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
                         if (value.key - 1 == 0) { return }
-                        value.checked = false
-                        layerControl({ action: 'layerMode', value: value })
+                        let obj = {
+                            checked: false,
+                            nodeIndex: nodeIndex,
+                            subNodeIndex: subNodeIndex,
+                            nestedSubNodeIndex: nestedSubNodeIndex,
+                            id: value.id
+                        }
+                        layerControl({ action: 'layerMode', value: obj })
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
                     break;
@@ -339,7 +390,7 @@ export default {
                             target: otherMap,
                             layers: [
                                 baseMapList.getBaseMapData(0),
-                                ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                                ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
                             ],
                             view: defaultView,
                             controls: [],
@@ -366,6 +417,12 @@ export default {
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta] = value
                     if (value === '3D') {
+                        // 先移除82處部落，後面補回
+                        let layersArray = targetLayers.getArray()
+                        const layerToRemove = layersArray.find(element => element.get('label').includes('近年歷史災害82處部落點位'))
+                        if (layerToRemove) {
+                            state[`map${state.targetNum}`].removeLayer(layerToRemove);
+                        }
                         ol3d = new OLCesium({
                             map: target,
                         })
@@ -377,14 +434,26 @@ export default {
                     } else {
                         ol3d.setEnabled(false)
                         state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
+                        state[`map${state.targetNum}LayerStatus`].forEach(node => {
+                            let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(node)
+                            let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
+                            if (nowTileLayer.get('label').includes('近年歷史災害82處部落點位')) {
+                                layerControl({
+                                    action: 'layerMode', value: {
+                                        checked: true,
+                                        nodeIndex: nodeIndex,
+                                        subNodeIndex: subNodeIndex,
+                                        nestedSubNodeIndex: nestedSubNodeIndex,
+                                        id: node
+                                    }
+                                })
+                            }
+                            return node
+                        })
                     }
                     break;
                 case 'setOpacity':
-                    if (targetLayers.getArray()[value.key].getOpacity() !== 1) {
-                        targetLayers.getArray()[value.key].setOpacity(1)
-                    } else {
-                        targetLayers.getArray()[value.key].setOpacity(0.5)
-                    }
+                    targetLayers.getArray()[value.key].setOpacity(Number(value.value))
                     break;
             }
             getCurrentMapData()
@@ -409,7 +478,7 @@ export default {
                         target: `map${value}`,
                         layers: [
                             baseMapList.getBaseMapData(state.temp[`map${state.targetNum}BaseStatus`]),
-                            ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
+                            ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
                         ],
                         view: defaultView,
                         controls: [],
@@ -443,6 +512,7 @@ export default {
         function getCurrentMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
+            console.log(layers)
             state.currentLayers = layers?.map(layer => {
                 return {
                     label: layer.get('label'),
@@ -693,11 +763,9 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;"
-                :ref="(e) => {
+                <div class="mb-4" style="max-height: 50%;" :ref="(e) => {
                     state.comSize.conditionCom = e
-                }"
-                v-if="state.conditionWrap">
+                }" v-if="state.conditionWrap">
                     <condition v-bind="{
                         selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
@@ -711,9 +779,8 @@ export default {
                         moveToMap: (val) => {
                             moveToMap(val)
                         }
-                    }"
-                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -819,23 +886,21 @@ export default {
                         state.deleteLightbox = true
                     },
                 }" :setOpacity="({ action, value }) => {
-                    layerControl({ action, value })
-                }" />
+    layerControl({ action, value })
+}" />
             </div>
 
             <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" :openConditionWrap="() => {
                     state.conditionWrap = !state.conditionWrap
                     state.layerSelect = false
-                }"
-                :openLayerSelect="() => {
-                    state.layerSelect = !state.layerSelect
-                    state.conditionWrap = false
-                }"
-                :onLayerControl="({ action, value }) => {
-                    layerControl({ action, value })
-                }"
-                :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                }" :openLayerSelect="() => {
+    state.layerSelect = !state.layerSelect
+    state.conditionWrap = false
+}" :onLayerControl="({ action, value }) => {
+    layerControl({ action, value })
+}" :onChangeTarget="(value) => { changeTarget(value) }"
+                @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
     </div>
 </template>
@@ -851,7 +916,7 @@ export default {
     width: 100vw
 .asideTool
     z-index: 220
-    left: 5px
+    left: 20px
 .SearchBar
     top: 20px
     left: 20px
