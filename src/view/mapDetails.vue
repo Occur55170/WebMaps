@@ -207,7 +207,7 @@ export default {
             </div>
         </div>
         <div class="position-fixed bottom-0 end-0 w-auto m-2 m-sm-5">
-            <div class="goBack mb-4 cursor-pointer" @click="router.push({ name: 'index' })">
+            <div class="goBack mb-4 cursor-pointer" @click="router.push({ name: 'map' })">
                 <img src="@/assets/mapDetail/back.svg">
             </div>
             <div class="goTop cursor-pointer" @click="goTop()">
@@ -220,8 +220,7 @@ export default {
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
 .detail
-    // TODO: 連結底圖
-    // background-image: url('src/assets/mapDetail/background.svg')
+    background-image: url('@/assets/mapDetail/background.svg')
     box-sizing: border-box
 .detailCon
     padding: 0 calc((100% - 1460px)/2)

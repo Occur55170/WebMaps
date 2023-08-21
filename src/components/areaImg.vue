@@ -10,6 +10,7 @@ import VectorSource from 'ol/source/Vector.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
 import { toPng } from "html-to-image";
+import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
 
 export default {
     props: {
@@ -63,8 +64,10 @@ export default {
             })
             map.once('loadend', function () {
                 toPng(map.getTargetElement()).then(function (dataURL) {
-                    document.getElementById('imgMap').remove()
-                    state.imgSrc = dataURL
+                    if(document.getElementById('imgMap') !== null ) {
+                        document.getElementById('imgMap').remove()
+                        state.imgSrc = dataURL
+                    }
                 })
             })
         })

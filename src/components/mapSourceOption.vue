@@ -18,16 +18,12 @@ export default {
             selectMap: 0,
             mapSourceList: []
         })
-        // TODO: 優化
+
         function onChangeBaseMaps(){
             let action = 'baseMap'
             let value = props.baseMapList.find(node=> node.baseId === state.selectMap)
             props.onChangeBaseMaps({ action, value })
         }
-
-        onMounted(async ()=>{
-            state.selectMap = 0
-        })
 
         return {
             state,

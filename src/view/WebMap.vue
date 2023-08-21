@@ -42,9 +42,7 @@ import * as olTilecoord from 'ol/tilecoord'
 import { get as getProjection } from 'ol/proj'
 import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
 import Overlay from 'ol/Overlay.js'
-
-
-import { toPng } from "html-to-image";
+import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
 
 export default {
     props: {},
@@ -143,8 +141,7 @@ export default {
                         anchor: [0.5, 100],
                         anchorXUnits: 'fraction',
                         anchorYUnits: 'pixels',
-                        // FIXME: 圖片連結需修改
-                        src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
+                        src: currentPositionImg,
                     }),
                 })
             })
@@ -267,8 +264,7 @@ export default {
                             );
                         }
 
-                        if (state.layers[value.nodeIndex].group_layers.some(node => node.layer_type === "WFS")) {
-                            // FIXME: 結構優化
+                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
                             mapClickEvent(target, value.id)
                             addSelectElement(value)
                         }
@@ -281,25 +277,23 @@ export default {
                                 target.removeLayer(node);
                             });
                         }
-                        // FIXME: 盡量不要抓id
-                        if (value.id.includes('node9_subNode0_nestedSubNode')) {
-                            removeLayersById('node9_subNode0_nestedSubNode');
-                        } else if (value.id.includes('node12_subNode1_nestedSubNode')) {
-                            removeLayersById('node12_subNode1_nestedSubNode');
-                        } else {
-                            const layerToRemove = layersAry.find(element => element.get('id') === value.id);
-                            if (layerToRemove) {
-                                target.removeLayer(layerToRemove);
+
+                        const idMappings = {
+                            'node9_subNode0_nestedSubNode': 'node9_subNode0_nestedSubNode',
+                            'node12_subNode1_nestedSubNode': 'node12_subNode1_nestedSubNode',
+                        };
+                        const idToRemove = idMappings[value.id] || value.id;
+                        removeLayersById(idToRemove);
+
+                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
+                            // TODO: 結構優化
+                            addSelectElement(value);
+
+                            state.areaData.tribeAreaData = {};
+                            if (state.areaData.overlay) {
+                                target.removeOverlay(state.areaData.overlay);
+                                state.areaData.overlay = null;
                             }
-                        }
-
-                        if (state.layers[value.nodeIndex].group_layers.some(node => node.layer_type === "WFS")) {
-                            // FIXME: 結構優化
-                            addSelectElement(value)
-
-                            state.areaData.tribeAreaData = {}
-                            target.removeOverlay(state.areaData.overlay)
-                            state.areaData.overlay = null
                         }
 
                         onMapLayerStatus('delete', target.getTarget(), value.id)
@@ -485,8 +479,6 @@ export default {
                     })
 
                     mapClickEvent(state[`map${value}`])
-
-                    // FIXME: 切換3D會有問題跳回平面
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
@@ -512,7 +504,6 @@ export default {
         function getCurrentMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
-            console.log(layers)
             state.currentLayers = layers?.map(layer => {
                 return {
                     label: layer.get('label'),
@@ -556,7 +547,6 @@ export default {
                     });
                     target.addOverlay(state.areaData.overlay);
                     state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
-                    // TODO: 重置area小地圖id
                     state.areaData.tribeAreaData = {}
                     // TODO: 優化結構，獲取state.areaData.overlay方式修正，考慮整包selectedFeatures放進去
                     if (selectedFeatures[0].get('編號') === undefined) {
@@ -584,8 +574,7 @@ export default {
             state.areaData.overlay = null
         }
 
-        // FIXME: 優化
-        // FIXME: 加入下拉式選單
+        // TODO: 優化 移除id判斷?
         function addSelectElement(value) {
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
@@ -616,8 +605,7 @@ export default {
         }
 
         function moveToMap(val) {
-            // FIXME: node7_subNode0_nestedSubNodeundefined 改成判斷id
-            // FIXME: 優化
+            // TODO: 優化 移除id判斷?，node7_subNode0_nestedSubNodeundefined 改成判斷id
             if (Object.keys(state.selectLayerOption)[0] === 'node4_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84 !== null) {
                 let obj = {
                     action: 'moveTo',
@@ -663,7 +651,7 @@ export default {
             let a = getBaseData()
             let b = getLayerData()
             Promise.all([a, b]).then((value) => {
-                // TODO: pref
+                // TODO: 優化
                 let result = value[0].data.map((node, nodeIndex) => {
                     return {
                         mapType: 'base',

@@ -136,7 +136,7 @@ export default {
                                 })
                             }">
                             {{ subNode.title }}
-                            <!-- // FIXME: 優化 -->
+                            <!-- TODO: 優化 -->
                             <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node4_subNode0_nestedSubNodeundefined' ">
                                 <select name="" id="" @change="props.moveToMap">
                                     <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
