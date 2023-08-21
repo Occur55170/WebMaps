@@ -45,7 +45,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
         // 輸出路徑設定
         // base: env.VITE_BASE, //不同模式設定不同路徑
         // base: './mapDemo',
-        base: '/Map_Demo/',
+        base: '/',
         build: {
             sourcemap: true
         },
@@ -54,6 +54,11 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
                 '@': path.resolve(__dirname, 'src')
             }
         },
-        envDir: path.resolve(__dirname, './env')
+        envDir: path.resolve(__dirname, './env'),
+        server: {
+            host: '0.0.0.0', // 允許來自任何主機的連接
+            port: 5173 // 設定端口為 5137
+        }
     }
 })
+
