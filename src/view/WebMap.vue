@@ -230,7 +230,7 @@ export default {
                             var source = targetLayer.getSource();
                             var iconFeature = source.getFeatures()[0]
                             const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
-                            // TODO: 切換成相對路徑 or api路徑
+                            // TODO: 等待api 確定後切換成api路徑
                             const gifUrl = 'https://occur55170.github.io/Map_Demo/forecast.gif';
                             const gif = gifler(gifUrl);
 
