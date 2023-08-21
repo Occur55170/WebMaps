@@ -22,6 +22,7 @@ module.exports = {
         'space-before-blocks': ['error', 'never'],
         'no-unused-vars': ['warn'],
         'no-new': ['warn'],
+        'no-case-declarations': 'off',
         'space-before-function-paren': ['error', {
             anonymous: 'never',
             named: 'never',

@@ -22,7 +22,7 @@ export default {
         <!-- w-100 w-sm-50 -->
         <div class="content">
             <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
-            <p class="fs-6">保護您與家人，防範災害。提供最新安全資訊、防護措施和應對指南。建立安全居住環境，增強防災能力。攜手合作，共築安全明天！</p>
+            <p class="fs-sm-6 fs-5">保護您與家人，防範災害。提供最新安全資訊、防護措施和應對指南。建立安全居住環境，增強防災能力。攜手合作，共築安全明天！</p>
             <a href="" class="d-inline-block" @click.prevent="route.push({name: 'map'})">
                 <img src="@/assets/img/enterMapBtn.svg" alt="">
             </a>
@@ -67,7 +67,7 @@ export default {
         background-position: right
 @media (max-width: 1700px)
     .startCon
-        max-width: 70%
+        max-width: 60%
         padding: 30px
 
 @media (max-width: 600px)
@@ -82,11 +82,11 @@ export default {
             margin-bottom: 0
         .content
             box-sizing: border-box
-            padding: 0 0 0 20%
-            margin: 50px 0
+            padding: 0
+            margin: 30px 0
             text-align: center
             &>p
-                margin: 30px 0
+                margin: 40px 0
                 text-align: left
                 line-height: 1.6
         &::before
