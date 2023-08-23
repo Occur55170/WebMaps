@@ -32,10 +32,22 @@ export default {
     },
     setup(props, { emit }) {
         const state = reactive({})
+        function updateOpacity(e){
+            props.onLayerControl({
+                action: 'setOpacity',
+                value: {
+                    key: e.target.getAttribute('nodeindex'),
+                    value: e.target.value,
+                }
+            })
+            const opacity = parseFloat(Number(e.target.value))
+            document.getElementById(`opacityControl${ e.target.getAttribute('nodeindex') }`).innerText = opacity.toFixed(2)
+        }
 
         return {
             props,
             state,
+            updateOpacity
         }
     }
 }
@@ -82,20 +94,11 @@ export default {
             </div>
             <ul class="list-unstyled d-flex flex-wrap flex-column-reverse">
                 <li v-for="(node, nodeIndex) in props.currentLayers">
-                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" v-if="node.id">
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2 flex-wrap" v-if="node.id">
                         <div>
                             {{ node?.label }}
                         </div>
                         <div class="tool">
-                            <a href=""
-                            @click.prevent="props.onLayerControl({
-                                action: 'setOpacity',
-                                value: {
-                                    key: nodeIndex,
-                                }
-                            })">
-                                <img src="@/assets/img/icon/vectorOpacity.svg" alt="">
-                            </a>
                             <a href=""
                             @click.prevent="props.onLayerControl({
                                 action: 'changeOrder',
@@ -150,6 +153,10 @@ export default {
                                 </svg>
                             </a>
                         </div>
+                        <label class="w-100 mt-2 d-flex align-items-center">
+                            <input id="opacity-input" class="w-75 me-2" type="range" min="0" max="1" step="0.01" value="1" :nodeIndex="nodeIndex" @input="updateOpacity" />
+                            <span :id="`opacityControl${ nodeIndex }`">1</span>
+                        </label>
                     </div>
                 </li>
             </ul>
