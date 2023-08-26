@@ -2,26 +2,62 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
 
-import { Map, View } from 'ol'
-import 'ol/ol.css'
-import { OSM } from 'ol/source.js'
-import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Map, View, Feature } from 'ol'
+import Select from 'ol/interaction/Select';
+import { click } from 'ol/events/condition';
+import {ScaleLine} from 'ol/control.js';
 
-import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
-import { toPng } from "html-to-image"
+import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
-import ImageWMS from 'ol/source/ImageWMS';
-import ImageStatic from 'ol/source/ImageStatic'
+import { IGC, WFS, } from 'ol/format'
+import * as ol from 'ol';
+import { TileArcGISRest } from 'ol/source.js'
 
-import proj4 from 'proj4'
-import { register } from 'ol/proj/proj4.js'
+import XYZ from 'ol/source/XYZ'
+import VectorSource from 'ol/source/Vector.js'
+import { Icon, Fill, Stroke, Style } from 'ol/style.js'
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import ImageWMS from 'ol/source/ImageWMS.js';
+import TileGrid from 'ol/layer/Tile.js';
+
+import PerspectiveMap from "ol-ext/map/PerspectiveMap"
+
+import EsriJSON from 'ol/format/EsriJSON.js'
+import { createXYZ } from 'ol/tilegrid.js'
+import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { Circle, Polygon, Point } from 'ol/geom.js'
+import Projection from 'ol/proj/Projection.js'
+import GeoJSON from 'ol/format/GeoJSON.js'
+
+import OLCesium from 'olcs/OLCesium.js';
+import VectorImageLayer from 'ol/layer/VectorImage.js';
+import TileState from 'ol/TileState.js';
+
+import 'ol/ol.css'
+
+import mapLayerList from '@/config/mapLayerList'
+import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
+
+import 'ol-ext/dist/ol-ext.css'
+import * as olTilecoord from 'ol/tilecoord'
+import { get as getProjection } from 'ol/proj'
+import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
+import Overlay from 'ol/Overlay.js'
+import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
 proj4.defs(
-    'EPSG:3826',
-    '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs'
-)
-proj4.defs("ESRI:54032", "+proj=aeqd +lat_0=52.346900 +lon_0=19.092600 +x_0=800 +y_0=800 +ellps=sphere +datum=WGS84 +units=m +no_defs");
+  'Indiana-East',
+  'PROJCS["IN83-EF",GEOGCS["LL83",DATUM["NAD83",' +
+    'SPHEROID["GRS1980",6378137.000,298.25722210]],PRIMEM["Greenwich",0],' +
+    'UNIT["Degree",0.017453292519943295]],PROJECTION["Transverse_Mercator"],' +
+    'PARAMETER["false_easting",328083.333],' +
+    'PARAMETER["false_northing",820208.333],' +
+    'PARAMETER["scale_factor",0.999966666667],' +
+    'PARAMETER["central_meridian",-85.66666666666670],' +
+    'PARAMETER["latitude_of_origin",37.50000000000000],' +
+    'UNIT["Foot_US",0.30480060960122]]'
+);
+register(proj4);
 
-register(proj4)
 export default {
     props: {
     },
@@ -31,20 +67,33 @@ export default {
         })
         let map
         onMounted(async () => {
-            console.log(1)
             map = new Map({
                 target: 'imgMap',
                 layers: [
                     new TileLayer({
+                        preload: Infinity,
+                        crossOrigin: "Anonymous",
                         source: new OSM(),
                     }),
                 ],
                 view: new View({
-                    center: [120.971859, 24.801583], // 地圖中心點
-                    zoom: 10, // 初始縮放級別
-                    projection: 'EPSG:4326'
-                })
+                    projection: 'Indiana-East',
+                    center: fromLonLat([-85.685, 39.891], 'Indiana-East'),
+                    // center: [120.971859, 24.801583],
+                    zoom: 7,
+                    extent: transformExtent(
+                        [-172.54, 23.81, -47.74, 86.46],
+                        'EPSG:4326',
+                        'Indiana-East'
+                    ),
+                    // minZoom: 6,
+                }),
             })
+            map.addControl(new ScaleLine({
+                units: 'metric', // 比例尺單位
+                // className: 'aa',
+                // target: 'bb',
+            }));
         })
 
 
@@ -102,15 +151,14 @@ export default {
 
 <template>
     <div>
+        1
         <div id="imgMap"></div>
-        <button @click="adLayer()">adLayer</button>
-        <button @click="showCurrentLayer()">showCurrentLayer</button>
     </div>
 </template>
 
 <style lang="sass" scoped>
 #imgMap
-    width: 100vw
+    width: 100%
     height: 1000px
 </style>
 

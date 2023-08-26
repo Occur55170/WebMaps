@@ -2,29 +2,13 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
-
-import { TileArcGISRest } from 'ol/source.js'
-
-import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 import VectorSource from 'ol/source/Vector.js'
-import { Fill, Stroke, Style, Icon } from 'ol/style.js'
 import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import TileWMS from 'ol/source/TileWMS.js'
-import ImageWMS from 'ol/source/ImageWMS.js'
-import TileGrid from 'ol/tilegrid/TileGrid.js'
-import * as olTilegrid from 'ol/tilegrid'
-import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import Projection from 'ol/proj/Projection.js'
+import { bbox, tile } from 'ol/loadingstrategy.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 
 import 'ol/ol.css' // ol提供的css样式
-import { format } from 'ol/coordinate'
-import { get as getProjection, transformExtent, fromLonLat } from 'ol/proj.js'
-import { getTopLeft, getWidth } from 'ol/extent.js'
-import Select from 'ol/interaction/Select'
-import { click } from 'ol/events/condition'
-import Static from 'ol/source/ImageStatic.js'
 
 import proj4 from 'proj4'
 import { register } from 'ol/proj/proj4.js'
@@ -51,6 +35,7 @@ export async function getTribeData(tribeId){
 
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
+        console.log(layer)
         let result, layerSource
         const layerType = layer.layer_type
         const figureType = layer.figure_type
@@ -139,6 +124,8 @@ export default {
             result = new TileLayer({
                 id,
                 label: `${layer.title} ${tileTitle}`,
+                // minZoom: 4,
+                // maxZoom: 18,
                 source: new TileWMS({
                     name: layer.title,
                     url: layerSource.getUrls()[0],

@@ -5,44 +5,22 @@ import $ from 'jquery'
 import { Map, View, Feature } from 'ol'
 import Select from 'ol/interaction/Select';
 import { click } from 'ol/events/condition';
-
-import { ImageArcGISRest, OSM } from 'ol/source.js'
-import TileWMS from 'ol/source/TileWMS'
-import { IGC, WFS, } from 'ol/format'
-import * as ol from 'ol';
-import { TileArcGISRest } from 'ol/source.js'
-
+import {ScaleLine} from 'ol/control.js';
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS.js';
-import TileGrid from 'ol/layer/Tile.js';
-
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
-
-import EsriJSON from 'ol/format/EsriJSON.js'
-import { createXYZ } from 'ol/tilegrid.js'
-import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import Projection from 'ol/proj/Projection.js'
-import GeoJSON from 'ol/format/GeoJSON.js'
+import { Icon, Style } from 'ol/style.js'
+import { Tile, Vector } from 'ol/layer.js'
+import { Point } from 'ol/geom.js'
 
 import OLCesium from 'olcs/OLCesium.js';
-import VectorImageLayer from 'ol/layer/VectorImage.js';
-import TileState from 'ol/TileState.js';
 
 import 'ol/ol.css'
+import 'ol-ext/dist/ol-ext.css'
+import Overlay from 'ol/Overlay.js'
+import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
 
 import mapLayerList from '@/config/mapLayerList'
 import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
-
-import 'ol-ext/dist/ol-ext.css'
-import * as olTilecoord from 'ol/tilecoord'
-import { get as getProjection } from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
-import Overlay from 'ol/Overlay.js'
-import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
 
 export default {
     props: {},
@@ -123,6 +101,11 @@ export default {
                 controls: [],
             })
 
+            state.map1.addControl(new ScaleLine({
+                units: 'metric', // 比例尺單位
+                // className: 'aa',
+                // target: 'bb',
+            }));
         }
 
         function addPoint(targetLng, targetLat) {
@@ -461,7 +444,7 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，把node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
@@ -583,6 +566,7 @@ export default {
                     url: "https://api.edtest.site/tribes",
                     method: 'GET',
                     success: (res) => {
+                        // console.error(res)
                         state.selectLayerOption[id] = res
                     },
                     error: (res) => {
@@ -751,9 +735,11 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;" :ref="(e) => {
+                <div class="mb-4" style="max-height: 50%;"
+                :ref="(e) => {
                     state.comSize.conditionCom = e
-                }" v-if="state.conditionWrap">
+                }"
+                v-if="state.conditionWrap">
                     <condition v-bind="{
                         selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
