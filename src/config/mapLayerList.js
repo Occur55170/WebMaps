@@ -7,6 +7,8 @@ import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorL
 import TileWMS from 'ol/source/TileWMS.js'
 import { bbox, tile } from 'ol/loadingstrategy.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
+import { Circle, Polygon, Point } from 'ol/geom.js'
+import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 
 import 'ol/ol.css' // ol提供的css样式
 
@@ -144,10 +146,31 @@ export default {
                 url: layer.tiles_url,
                 strategy: bbox
             })
-            result = new Vector({
+
+            result = new VectorLayer({
                 id,
                 label: `${layer.title} ${tileTitle}`,
-                source: vectorSource
+                source: vectorSource,
+                style: function(feature){
+                    const bgColors = [
+                        '#261F03',
+                        '#F49AAF',
+                        '#A9C4F6',
+                        '#A5A751',
+                        '#9C7B37',
+                        '#f00',
+                        '#6FB7B7',
+                        '#117800'
+                    ]
+                    const parts = feature.id_.split('.')
+                    const lastPart = parts[parts.length - 1]
+                    const style = new Style({
+                        fill: new Fill({
+                            color: bgColors[lastPart] !== undefined ? bgColors[lastPart] : '#FF0000',
+                        }),
+                    })
+                    return style
+                },
             })
         }
         if (layerType === 'GeoJson'){

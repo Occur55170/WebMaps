@@ -33,6 +33,10 @@ export default {
             type: Object,
             default: {}
         },
+        tribeQuery: {
+            type: Object,
+            default: {}
+        },
         moveToMap: {
             type: Function,
             default: () => {}
@@ -116,6 +120,10 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
+                    <!-- 1
+                    {{ props.tribeQuery }}
+                    2
+                    {{ props.selectLayerOption }} -->
                     <div class="ms-3 mb-1" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <div v-if="subNode.single_tiles">
                             <input type="checkbox"
@@ -132,14 +140,14 @@ export default {
                             }">
                             {{ subNode.title }}
                             <!-- TODO: 優化 -->
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node4_subNode0_nestedSubNodeundefined' ">
+                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
                                 <select name="" id="" @change="props.moveToMap">
                                     <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
                                         {{ item.tribeName }}
                                     </option>
                                 </select>
                             </div>
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node7_subNode0_nestedSubNodeundefined' ">
+                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
                                 <select name="" id="" @change="props.moveToMap">
                                     <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
                                         {{ item.properties['事件'] }}
