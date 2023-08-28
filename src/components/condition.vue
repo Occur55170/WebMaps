@@ -140,19 +140,21 @@ export default {
                             }">
                             {{ subNode.title }}
                             <!-- TODO: 優化 -->
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
-                                <select name="" id="" @change="props.moveToMap">
-                                    <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
-                                        {{ item.tribeName }}
-                                    </option>
-                                </select>
-                            </div>
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
-                                <select name="" id="" @change="props.moveToMap">
-                                    <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
-                                        {{ item.properties['事件'] }}
-                                    </option>
-                                </select>
+                            <div v-if="props.selectLayerOption[subNode.id] !== undefined">
+                                <div v-if="subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
+                                    <select name="" id="" @change="props.moveToMap">
+                                        <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
+                                            {{ item.tribeName }}
+                                        </option>
+                                    </select>
+                                </div>
+                                <div v-if="subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
+                                    <select name="" id="" @change="props.moveToMap">
+                                        <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
+                                            {{ item.properties['事件'] }}
+                                        </option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div v-else>

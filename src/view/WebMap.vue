@@ -775,7 +775,7 @@ export default {
                     已選擇的圖層
                 </button>
                 <div v-if="state.layerSelect">
-                    <layerSelect v-bind="{
+                    <LayerSelector v-bind="{
                         selectLock: state.selectLock,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -849,7 +849,7 @@ export default {
             @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
 
             <div v-if="state.layerSelect">
-                <layerSelect class="position-absolute bottom-100 w-100" v-bind="{
+                <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
                     selectLock: state.selectLock,
                     currentLayers: state.currentLayers,
                     onClose: () => {

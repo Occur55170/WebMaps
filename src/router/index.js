@@ -3,7 +3,7 @@ const routes = [
     {
         path: '/Map_Demo/',
         name: 'index',
-        component: () => import('@/view/index.vue'),
+        component: () => import('@/view/Index.vue'),
     },
     {
         path: '/Map_Demo/map',
@@ -13,7 +13,7 @@ const routes = [
     {
         path: '/Map_Demo/mapDetails/:id',
         name: 'detail',
-        component: () => import('@/view/mapDetails.vue')
+        component: () => import('@/view/MapDetails.vue')
     },
     {
         path: '/Map_Demo/Wes',
