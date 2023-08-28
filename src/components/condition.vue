@@ -33,6 +33,10 @@ export default {
             type: Object,
             default: {}
         },
+        tribeQuery: {
+            type: Object,
+            default: {}
+        },
         moveToMap: {
             type: Function,
             default: () => {}
@@ -103,12 +107,7 @@ export default {
     <div class="condition bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
-            <div class="closeBtn position-absolute col-auto" @click.prevent="props.onClose">
-                <svg width="32" height="32" viewBox="0 0 24 24">
-                    <path fill="currentColor"
-                        d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z" />
-                </svg>
-            </div>
+            <a href="#" class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center" @click.prevent="props.onClose"></a>
         </div>
         <div class="py-3 px-4 content">
             <div class="mb-2 landBoundary">
@@ -121,6 +120,10 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
+                    <!-- 1
+                    {{ props.tribeQuery }}
+                    2
+                    {{ props.selectLayerOption }} -->
                     <div class="ms-3 mb-1" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <div v-if="subNode.single_tiles">
                             <input type="checkbox"
@@ -137,14 +140,14 @@ export default {
                             }">
                             {{ subNode.title }}
                             <!-- TODO: 優化 -->
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node4_subNode0_nestedSubNodeundefined' ">
+                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
                                 <select name="" id="" @change="props.moveToMap">
                                     <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
                                         {{ item.tribeName }}
                                     </option>
                                 </select>
                             </div>
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node7_subNode0_nestedSubNodeundefined' ">
+                            <div v-if="props.selectLayerOption[subNode.id] !== undefined && subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
                                 <select name="" id="" @change="props.moveToMap">
                                     <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
                                         {{ item.properties['事件'] }}
@@ -196,9 +199,15 @@ export default {
     border-radius: 10px
 .closeBtn
     right:10px
-    svg
-        width: 20px
-        height: 20px
+    width: 20px
+    height: 20px
+    padding: 0
+    &::after
+        content: ''
+        background: #fff
+        height: 2px
+        width: 60%
+        display: block
 .content
     overflow-y: scroll
     background: #fff

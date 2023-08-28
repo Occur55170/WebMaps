@@ -3,46 +3,24 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 
 import { Map, View, Feature } from 'ol'
-import Select from 'ol/interaction/Select';
-import { click } from 'ol/events/condition';
-
-import { ImageArcGISRest, OSM } from 'ol/source.js'
-import TileWMS from 'ol/source/TileWMS'
-import { IGC, WFS, } from 'ol/format'
-import * as ol from 'ol';
-import { TileArcGISRest } from 'ol/source.js'
-
+import Select from 'ol/interaction/Select'
+import { click } from 'ol/events/condition'
+import {ScaleLine} from 'ol/control.js'
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS.js';
-import TileGrid from 'ol/layer/Tile.js';
-
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
-
-import EsriJSON from 'ol/format/EsriJSON.js'
-import { createXYZ } from 'ol/tilegrid.js'
-import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { Tile, Vector } from 'ol/layer.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
-import Projection from 'ol/proj/Projection.js'
-import GeoJSON from 'ol/format/GeoJSON.js'
+import {Icon, Fill, Stroke, Style} from 'ol/style.js'
 
-import OLCesium from 'olcs/OLCesium.js';
-import VectorImageLayer from 'ol/layer/VectorImage.js';
-import TileState from 'ol/TileState.js';
+import OLCesium from 'olcs/OLCesium.js'
 
 import 'ol/ol.css'
+import 'ol-ext/dist/ol-ext.css'
+import Overlay from 'ol/Overlay.js'
+import currentPositionImg from '@/assets/img/icon/currentPosition.svg'
 
 import mapLayerList from '@/config/mapLayerList'
 import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
-
-import 'ol-ext/dist/ol-ext.css'
-import * as olTilecoord from 'ol/tilecoord'
-import { get as getProjection } from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
-import Overlay from 'ol/Overlay.js'
-import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
 
 export default {
     props: {},
@@ -101,7 +79,8 @@ export default {
                 wrapWidth: '',
                 conditionCom: {},
             },
-            selectLayerOption: {}
+            selectLayerOption: {},
+            tribeQuery: {}
         })
 
         let ol3d = null
@@ -123,6 +102,9 @@ export default {
                 controls: [],
             })
 
+            state.map1.addControl(new ScaleLine({
+                units: 'metric', // 比例尺單位
+            }));
         }
 
         function addPoint(targetLng, targetLat) {
@@ -284,7 +266,6 @@ export default {
                         };
                         const idToRemove = idMappings[value.id] || value.id;
                         removeLayersById(idToRemove);
-
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
                             // TODO: 結構優化
                             addSelectElement(value);
@@ -461,7 +442,7 @@ export default {
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
 
-                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，把node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
@@ -528,10 +509,10 @@ export default {
             }
         }
 
-        function mapClickEvent(target, vid = 'node0_subNode4_nestedSubNodeundefined') {
+        function mapClickEvent(target) {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
-                condition: click
+                condition: click,
             })
             target.addInteraction(selector)
             selector.on('select', (event) => {
@@ -583,7 +564,9 @@ export default {
                     url: "https://api.edtest.site/tribes",
                     method: 'GET',
                     success: (res) => {
-                        state.selectLayerOption[id] = res
+                        // TODO del
+                        console.log('res', res)
+                        state.selectLayerOption[id] = res.map((node, nodeIndex)=> node)
                     },
                     error: (res) => {
                         console.log(res)
@@ -628,29 +611,29 @@ export default {
             }
         }
 
-        function getBaseData() {
-            return $.ajax({
+        onMounted(async () => {
+            let getBaseData = $.ajax({
                 url: 'https://api.edtest.site/underLayers',
-                method: 'GET'
+                method: 'GET',
             }).done(res => {
                 return res
             })
-        }
 
-        function getLayerData() {
-            return $.ajax({
+            let getLayerData = $.ajax({
                 url: 'https://api.edtest.site/layers',
-                method: "GET"
+                method: 'GET',
             }).done(res => {
-                return (res)
+                return res
             })
-        }
 
+            let getTribeQuery = $.ajax({
+                url: 'https://api.edtest.site/tribeQuery',
+                method: 'GET',
+            }).done(res => {
+                return res
+            })
 
-        onMounted(async () => {
-            let a = getBaseData()
-            let b = getLayerData()
-            Promise.all([a, b]).then((value) => {
+            Promise.all([getBaseData, getLayerData, getTribeQuery]).then((value) => {
                 // TODO: 優化
                 let result = value[0].data.map((node, nodeIndex) => {
                     return {
@@ -681,12 +664,16 @@ export default {
                         value: index,
                     }
                 })
+
+                // TODO del
+                console.log('value', value[2])
+                state.tribeQuery = value[2]
+
                 nextTick(() => {
                     initMap()
                     getCurrentMapData()
                 })
             })
-
             state.comSize.wrapHeight = window.innerHeight
             state.comSize.wrapWidth = window.innerWidth
             window.onresize = (e) => {
@@ -704,7 +691,6 @@ export default {
             changeTarget,
             conditionWrap,
             closeMapData,
-            addSelectElement,
             moveToMap,
         }
     }
@@ -738,11 +724,17 @@ export default {
                     </li>
                 </ul>
             </div>
-            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" :onChangeBaseMaps="({ action, value }) => {
+            <SearchBar
+            v-bind="{
+                dimensionMapStatus: state.toSearchDimensionStatus,
+                currentLayers: state.currentLayers,
+                mapCount: state.mapCount,
+                onChangeBaseMaps:({ action, value }) => {
                     layerControl({ action, value })
-                }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                }
+            }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+            @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -751,10 +743,14 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;" :ref="(e) => {
+                <div class="mb-4" style="max-height: 50%;"
+                :ref="(e) => {
                     state.comSize.conditionCom = e
-                }" v-if="state.conditionWrap">
-                    <condition v-bind="{
+                }"
+                v-if="state.conditionWrap">
+                    <condition
+                    v-bind="{
+                        tribeQuery: state.tribeQuery,
                         selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
@@ -767,8 +763,9 @@ export default {
                         moveToMap: (val) => {
                             moveToMap(val)
                         }
-                    }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -825,13 +822,16 @@ export default {
             </div>
         </div>
 
-        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
+        <div id="popup" class="position-absolute bottom-0"
+        :ref="(e) => {
             state.areaData.nodeRef = e
         }">
-            <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
+            <areaData class="areaData" v-if="state.areaData?.overlay"
+            :closeMapData="() => {
                 closeMapData()
-            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500"
-                :coordinate="state.areaData.overlay.get('position')" />
+            }"
+            :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500"
+            :coordinate="state.areaData.overlay.get('position')" />
         </div>
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
@@ -844,8 +844,9 @@ export default {
                 showSelectLayerValue: (val) => {
                     state.selectValueTemp = val
                 }
-            }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
-                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+            }"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
 
             <div v-if="state.layerSelect">
                 <layerSelect class="position-absolute bottom-100 w-100" v-bind="{
