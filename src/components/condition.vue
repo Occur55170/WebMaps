@@ -48,11 +48,11 @@ export default {
         const state = reactive({
             DropDown: null,
             TilesListValue: 0,
+            conditionYear: '',
+            conditionTown: '',
+            selectLayerOption: []
+            // tribes: computed()
         })
-
-        function onMapControl(action, value) {
-            emit('onMapControl', { action, value })
-        }
 
         function onLayerControl(action, value) {
             emit('onLayerControl', { action, value })
@@ -65,7 +65,7 @@ export default {
             }
         }
         function LayerCheckBoxChange(e, item) {
-            let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
+            let defaultChecked = e.target.checked || ((typeof e.target.checked == ' ') ? true : false )
             onLayerControl('layerMode', {
                 checked: defaultChecked,
                 nodeIndex: item.nodeIndex,
@@ -76,41 +76,43 @@ export default {
             })
         }
 
-        function checkTribe(e) {
-            let defaultChecked = e.target.checked || ((typeof e.target.checked == 'undefined') ? true : false )
-            onLayerControl('layerMode', {
-                checked: defaultChecked,
-            })
+        function tribeYear(event) {
+            state.conditionYear = event.target.value
+            getTribes()
         }
 
-        function getTribes(params) {
-                $.ajax({
-                    url: "https://api.edtest.site/tribes",
-                    method: 'GET',
-                    success: (res) => {
-                        state.selectLayerOption[id] = res.map((node, nodeIndex)=> node)
-                    },
-                    error: (res) => {
-                        console.log(res)
-                    }
-                })
+        function tribeTown(event) {
+            state.conditionTown = event.target.value
+            getTribes()
+        }
+
+        async function getTribes() {
+            const result = await $.ajax(`https://api.edtest.site/tribes?${ 'years=' + state.conditionYear }&${ 'township=' + state.conditionTown }`, 'GET')
+            state.selectLayerOption = result
+        }
+
+        function moveMap(params) {
+            console.log(1, 2, params.target.value)
+            let selectValue = state.selectLayerOption.find(node=>node.tribeCode === params.target.value)
+            props.moveToMap(selectValue.coordinates)
+            console.log(selectValue.coordinates)
         }
 
         watch(()=>state.TilesListValue, (newVal , oldVal)=>{
             props.showSelectLayerValue(newVal)
         })
 
-
         return {
             props,
             state,
             router,
             mapList,
-            onMapControl,
             onLayerControl,
             openLayerList,
             LayerCheckBoxChange,
-            checkTribe,
+            tribeYear,
+            tribeTown,
+            moveMap
         }
     }
 }
@@ -133,10 +135,6 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
-                    <!-- 1
-                    {{ props.tribeQuery }}
-                    2
-                    {{ props.selectLayerOption }} -->
                     <div class="ms-3 mb-1" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <div v-if="subNode.single_tiles">
                             <input type="checkbox"
@@ -153,31 +151,34 @@ export default {
                             }">
                             {{ subNode.title }}
                             <!-- TODO: 優化 -->
-                            <div v-if="props.selectLayerOption[subNode.id] !== undefined">
+                            <div v-if="true">
                                 <div v-if="subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
-                                    <select name="" id="" @change="props.moveToMap">
-                                        <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
+                                    <select class="me-2"
+                                    v-if="props.tribeQuery['years'] !== undefined" @change="tribeYear" placeholder="請選擇年度">
+                                        <option :value="item" v-for="(item, key) in props.tribeQuery['years']">
+                                            {{ item }}
+                                        </option>
+                                    </select>
+                                    <select class="me-2"
+                                    v-if="props.tribeQuery['township'] !== undefined" @change="tribeTown" placeholder="請選擇鄉鎮">
+                                        <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
+                                            {{ item }}
+                                        </option>
+                                    </select>
+                                    <select class="me-2"
+                                    v-if="state.selectLayerOption.length !== 0" @change="moveMap">
+                                        <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
                                             {{ item.tribeName }}
                                         </option>
                                     </select>
-                                    <select name="" id="" @change="props.moveToMap">
-                                        <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
-                                            {{ item.tribeName }}
-                                        </option>
-                                    </select>
-                                    <!-- <select name="" id="" @change="props.moveToMap">
-                                        <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
-                                            {{ item.tribeName }}
-                                        </option>
-                                    </select> -->
                                 </div>
-                                <div v-if="subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
+                                <!-- <div v-if="subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
                                     <select name="" id="" @change="props.moveToMap">
                                         <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
                                             {{ item.properties['事件'] }}
                                         </option>
                                     </select>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div v-else>

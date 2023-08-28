@@ -559,20 +559,10 @@ export default {
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
             if (id === 'node4_subNode0_nestedSubNodeundefined') {
-                // let getTribeQuery = $.ajax({
-                //     url: 'https://api.edtest.site/tribeQuery',
-                //     method: 'GET',
-                // }).done(res => {
-                //     // state.tribeQuery = value[2]
-                //     return res
-                // })
                 $.ajax({
                     url: 'https://api.edtest.site/tribeQuery',
                     method: 'GET',
                     success: (res) => {
-                        // TODO del
-                        console.log('res', res)
-                        // state.selectLayerOption[id] = res.map((node, nodeIndex)=> node)
                         state.tribeQuery = res
                     },
                     error: (res) => {
@@ -581,6 +571,8 @@ export default {
                 })
             }
             if (id === 'node7_subNode0_nestedSubNodeundefined') {
+                // TODO del
+                console.log('11', 99)
                 $.ajax({
                     url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default",
                     method: 'GET',
@@ -595,27 +587,16 @@ export default {
         }
 
         function moveToMap(val) {
-            // TODO: 優化 移除id判斷?，node7_subNode0_nestedSubNodeundefined 改成判斷id
-            // if (Object.keys(state.selectLayerOption)[0] === 'node4_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84 !== null) {
-            //     let obj = {
-            //         action: 'moveTo',
-            //         value: {
-            //             xAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lng,
-            //             yAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lat
-            //         }
-            //     }
-            //     mapControl(obj)
-            // }
-            if (Object.keys(state.selectLayerOption)[0] === 'node7_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
+            // TODO del
+            console.log('val', val)
                 let obj = {
                     action: 'moveTo',
                     value: {
-                        xAxis: state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0],
-                        yAxis: state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[1]
+                        xAxis: val.WGS84.lng,
+                        yAxis: val.WGS84.lat
                     }
                 }
                 mapControl(obj)
-            }
         }
 
         onMounted(async () => {
@@ -633,7 +614,7 @@ export default {
                 return res
             })
 
-            Promise.all([getBaseData, getLayerData, getTribeQuery]).then((value) => {
+            Promise.all([getBaseData, getLayerData]).then((value) => {
                 // TODO: 優化
                 let result = value[0].data.map((node, nodeIndex) => {
                     return {
@@ -756,10 +737,10 @@ export default {
                             state.selectValueTemp = val
                         },
                         moveToMap: (val) => {
+                            // TODO del
                             moveToMap(val)
                         }
                     }"
-                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
                     @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
@@ -840,7 +821,6 @@ export default {
                     state.selectValueTemp = val
                 }
             }"
-            @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
             @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
 
             <div v-if="state.layerSelect">
