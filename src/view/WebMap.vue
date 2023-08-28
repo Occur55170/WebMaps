@@ -79,7 +79,6 @@ export default {
                 wrapWidth: '',
                 conditionCom: {},
             },
-            selectLayerOption: {},
             tribeQuery: {}
         })
 
@@ -560,13 +559,21 @@ export default {
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
             if (id === 'node4_subNode0_nestedSubNodeundefined') {
+                // let getTribeQuery = $.ajax({
+                //     url: 'https://api.edtest.site/tribeQuery',
+                //     method: 'GET',
+                // }).done(res => {
+                //     // state.tribeQuery = value[2]
+                //     return res
+                // })
                 $.ajax({
-                    url: "https://api.edtest.site/tribes",
+                    url: 'https://api.edtest.site/tribeQuery',
                     method: 'GET',
                     success: (res) => {
                         // TODO del
                         console.log('res', res)
-                        state.selectLayerOption[id] = res.map((node, nodeIndex)=> node)
+                        // state.selectLayerOption[id] = res.map((node, nodeIndex)=> node)
+                        state.tribeQuery = res
                     },
                     error: (res) => {
                         console.log(res)
@@ -589,16 +596,16 @@ export default {
 
         function moveToMap(val) {
             // TODO: 優化 移除id判斷?，node7_subNode0_nestedSubNodeundefined 改成判斷id
-            if (Object.keys(state.selectLayerOption)[0] === 'node4_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84 !== null) {
-                let obj = {
-                    action: 'moveTo',
-                    value: {
-                        xAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lng,
-                        yAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lat
-                    }
-                }
-                mapControl(obj)
-            }
+            // if (Object.keys(state.selectLayerOption)[0] === 'node4_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84 !== null) {
+            //     let obj = {
+            //         action: 'moveTo',
+            //         value: {
+            //             xAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lng,
+            //             yAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lat
+            //         }
+            //     }
+            //     mapControl(obj)
+            // }
             if (Object.keys(state.selectLayerOption)[0] === 'node7_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
                 let obj = {
                     action: 'moveTo',
@@ -621,13 +628,6 @@ export default {
 
             let getLayerData = $.ajax({
                 url: 'https://api.edtest.site/layers',
-                method: 'GET',
-            }).done(res => {
-                return res
-            })
-
-            let getTribeQuery = $.ajax({
-                url: 'https://api.edtest.site/tribeQuery',
                 method: 'GET',
             }).done(res => {
                 return res
@@ -664,10 +664,6 @@ export default {
                         value: index,
                     }
                 })
-
-                // TODO del
-                console.log('value', value[2])
-                state.tribeQuery = value[2]
 
                 nextTick(() => {
                     initMap()
@@ -751,7 +747,6 @@ export default {
                     <condition
                     v-bind="{
                         tribeQuery: state.tribeQuery,
-                        selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {

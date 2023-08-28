@@ -83,6 +83,19 @@ export default {
             })
         }
 
+        function getTribes(params) {
+                $.ajax({
+                    url: "https://api.edtest.site/tribes",
+                    method: 'GET',
+                    success: (res) => {
+                        state.selectLayerOption[id] = res.map((node, nodeIndex)=> node)
+                    },
+                    error: (res) => {
+                        console.log(res)
+                    }
+                })
+        }
+
         watch(()=>state.TilesListValue, (newVal , oldVal)=>{
             props.showSelectLayerValue(newVal)
         })
@@ -147,6 +160,16 @@ export default {
                                             {{ item.tribeName }}
                                         </option>
                                     </select>
+                                    <select name="" id="" @change="props.moveToMap">
+                                        <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
+                                            {{ item.tribeName }}
+                                        </option>
+                                    </select>
+                                    <!-- <select name="" id="" @change="props.moveToMap">
+                                        <option :value="key" :data-coordinates="item.tribeCode" v-for="(item, key) in props.selectLayerOption[subNode.id]">
+                                            {{ item.tribeName }}
+                                        </option>
+                                    </select> -->
                                 </div>
                                 <div v-if="subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
                                     <select name="" id="" @change="props.moveToMap">
