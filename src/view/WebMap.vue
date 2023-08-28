@@ -5,12 +5,12 @@ import $ from 'jquery'
 import { Map, View, Feature } from 'ol'
 import Select from 'ol/interaction/Select'
 import { click } from 'ol/events/condition'
-import {ScaleLine} from 'ol/control.js'
+import { ScaleLine } from 'ol/control.js'
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
 import { Tile, Vector } from 'ol/layer.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
-import {Icon, Fill, Stroke, Style} from 'ol/style.js'
+import { Icon, Fill, Stroke, Style } from 'ol/style.js'
 
 import OLCesium from 'olcs/OLCesium.js'
 
@@ -570,33 +570,17 @@ export default {
                     }
                 })
             }
-            if (id === 'node7_subNode0_nestedSubNodeundefined') {
-                // TODO del
-                console.log('11', 99)
-                $.ajax({
-                    url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default",
-                    method: 'GET',
-                    success: (res) => {
-                        state.selectLayerOption[id] = res.features
-                    },
-                    error: (res) => {
-                        console.log(res.features)
-                    }
-                })
-            }
         }
 
         function moveToMap(val) {
-            // TODO del
-            console.log('val', val)
-                let obj = {
-                    action: 'moveTo',
-                    value: {
-                        xAxis: val.WGS84.lng,
-                        yAxis: val.WGS84.lat
-                    }
+            let obj = {
+                action: 'moveTo',
+                value: {
+                    xAxis: val.WGS84.lng,
+                    yAxis: val.WGS84.lat
                 }
-                mapControl(obj)
+            }
+            mapControl(obj)
         }
 
         onMounted(async () => {
@@ -701,17 +685,15 @@ export default {
                     </li>
                 </ul>
             </div>
-            <SearchBar
-            v-bind="{
+            <SearchBar v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
-                onChangeBaseMaps:({ action, value }) => {
+                onChangeBaseMaps: ({ action, value }) => {
                     layerControl({ action, value })
                 }
-            }"
-            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-            @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -720,13 +702,10 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;"
-                :ref="(e) => {
+                <div class="mb-4" style="max-height: 50%;" :ref="(e) => {
                     state.comSize.conditionCom = e
-                }"
-                v-if="state.conditionWrap">
-                    <condition
-                    v-bind="{
+                }" v-if="state.conditionWrap">
+                    <condition v-bind="{
                         tribeQuery: state.tribeQuery,
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
@@ -740,8 +719,7 @@ export default {
                             // TODO del
                             moveToMap(val)
                         }
-                    }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
             </div>
 
@@ -798,16 +776,13 @@ export default {
             </div>
         </div>
 
-        <div id="popup" class="position-absolute bottom-0"
-        :ref="(e) => {
+        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
             state.areaData.nodeRef = e
         }">
-            <areaData class="areaData" v-if="state.areaData?.overlay"
-            :closeMapData="() => {
+            <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
                 closeMapData()
-            }"
-            :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500"
-            :coordinate="state.areaData.overlay.get('position')" />
+            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500"
+                :coordinate="state.areaData.overlay.get('position')" />
         </div>
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
@@ -820,8 +795,7 @@ export default {
                 showSelectLayerValue: (val) => {
                     state.selectValueTemp = val
                 }
-            }"
-            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+            }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
 
             <div v-if="state.layerSelect">
                 <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
@@ -863,8 +837,7 @@ export default {
     state.conditionWrap = false
 }" :onLayerControl="({ action, value }) => {
     layerControl({ action, value })
-}" :onChangeTarget="(value) => { changeTarget(value) }"
-                @conditionWrap="(value) => { conditionWrap(value) }" />
+}" :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
     </div>
 </template>

@@ -43,6 +43,8 @@ export default {
         const figureType = layer.figure_type
         const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
         const request = []
+        // TODO del
+        console.log('layer', layer)
         if (layerType === 'WMS'){
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType){
@@ -139,38 +141,37 @@ export default {
             })
         }
         // only 部落圖層點擊用layer
-        // TODO: 加入背景顏色
         if (layerType === 'WFS'){
             const vectorSource = new VectorSource({
                 format: new GeoJSON(),
                 url: layer.tiles_url,
                 strategy: bbox
             })
-
             result = new VectorLayer({
                 id,
                 label: `${layer.title} ${tileTitle}`,
                 source: vectorSource,
-                style: function(feature){
-                    const bgColors = [
-                        '#261F03',
-                        '#F49AAF',
-                        '#A9C4F6',
-                        '#A5A751',
-                        '#9C7B37',
-                        '#f00',
-                        '#6FB7B7',
-                        '#117800'
-                    ]
-                    const parts = feature.id_.split('.')
-                    const lastPart = parts[parts.length - 1]
-                    const style = new Style({
-                        fill: new Fill({
-                            color: bgColors[lastPart] !== undefined ? bgColors[lastPart] : '#FF0000',
-                        }),
-                    })
-                    return style
-                },
+                // FIXME: 部落需要style，82災害不用
+                // style: function(feature){
+                //     const bgColors = [
+                //         '#261F03',
+                //         '#F49AAF',
+                //         '#A9C4F6',
+                //         '#A5A751',
+                //         '#9C7B37',
+                //         '#f00',
+                //         '#6FB7B7',
+                //         '#117800'
+                //     ]
+                //     const parts = feature.id_.split('.')
+                //     const lastPart = parts[parts.length - 1]
+                //     const style = new Style({
+                //         fill: new Fill({
+                //             color: bgColors[lastPart] !== undefined ? bgColors[lastPart] : '#FF0000',
+                //         }),
+                //     })
+                //     return style
+                // },
             })
         }
         if (layerType === 'GeoJson'){

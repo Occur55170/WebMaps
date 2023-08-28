@@ -58,18 +58,29 @@ export default {
         }
 
         //TODO: 結構優化[xxx, ]加入歷史災害
-        watch(() => [props.tribeAreaData['編號'], props.tribeAreaData.id_], async (newVal)=>{
-            if (newVal[1] !== undefined) {
-                state.type = 2
+        watch(() => [props.tribeAreaData.id_], async (newVal)=>{
+            if (newVal !== undefined) {
                 await getDisasterData(newVal[1]).then((result)=>{
                     state.tribeData = result.data
-                })
-            } else {
-                state.type = 1
-                await getTribeData(newVal[0]).then((result)=>{
-                    state.tribeData = result
+                    state.type = 2
                 })
             }
+            // TODO del
+            // state.tribeData = {}
+            // if (newVal[1] !== undefined) {
+            //     await getDisasterData(newVal[1]).then((result)=>{
+            //         state.tribeData = result.data
+            //         if (state.tribeData.data.event) {
+            //         state.type = 2
+
+            //         }
+            //     })
+            // } else {
+            //     await getTribeData(newVal[0]).then((result)=>{
+            //         state.tribeData = result
+            //         state.type = 1
+            //     })
+            // }
         })
 
 
@@ -137,36 +148,38 @@ export default {
             </div>
         </div>
     </div>
-    <div class="bg-white rounded py-2" v-else>
+    <div class="bg-white rounded py-2" v-if="state.type === 2">
         <div class="row mx-0 align-items-center px-2 py-4 position-relative">
-            <div class="row mx-0 mb-2">
+        <!-- FIXME: 紅字黃字 -->
+        {{ state.tribeData }}
+            <!-- <div class="row mx-0 mb-2" v-if="state.tribeData.data.event">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">事件:</div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.event }}</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.event }}</div>
             </div>
-            <div class="row mx-0 mb-2">
+            <div class="row mx-0 mb-2" v-if="state.tribeData.data.date">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">發生時間:</div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.date }}</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.date }}</div>
             </div>
-            <div class="row mx-0 mb-2">
+            <div class="row mx-0 mb-2" v-if="state.tribeData.data.township">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">鄉鎮: </div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.township }}</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.township }}</div>
             </div>
-            <div class="row mx-0 mb-2">
+            <div class="row mx-0 mb-2" v-if="state.tribeData.data.village">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">地方: </div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.village }}</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.village }}</div>
             </div>
-            <div class="row mx-0 mb-2">
+            <div class="row mx-0 mb-2" v-if="state.tribeData.data.place">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">村落: </div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.place }}</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.place }}</div>
             </div>
-            <div class="row mx-0 mb-2">
+            <div class="row mx-0 mb-2" v-if="state.tribeData.data.category">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">災害種類: </div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.category }}</div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.category }}</div>
             </div>
-            <div class="row mx-0 mb-2">
+            <div class="row mx-0 mb-2" v-if="state.tribeData.data.description">
                 <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">描述: </div>
-                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state?.tribeData?.data.description }}</div>
-            </div>
+                <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.data.description }}</div>
+            </div> -->
         </div>
     </div>
 </template>
