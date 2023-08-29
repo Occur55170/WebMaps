@@ -2,7 +2,7 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 
-import mapLayerList, { initLayers } from '@/config/mapLayerList'
+import mapLayerList from '@/config/mapLayerList'
 import baseMapList from '@/config/baseMapList'
 import VectorImageLayer from 'ol/layer/VectorImage.js'
 import TileState from 'ol/TileState.js'

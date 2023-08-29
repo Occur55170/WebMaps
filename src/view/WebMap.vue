@@ -31,7 +31,7 @@ export default {
             // defaultCenter: [120.971859, 24.801583],
             // defaultCenterZoom: 14,
             defaultCenter: [121.326776, 24.655499],
-            defaultCenterZoom: 9,
+            defaultCenterZoom: 14,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: false,
@@ -69,10 +69,12 @@ export default {
             }),
             ol3d: null,
             selectValueTemp: 0,
-            areaData: {
+            popup: {
                 nodeRef: null,
                 overlay: null,
-                tribeAreaData: {},
+                popupId: 0,
+                coordinate: [],
+                popupData: '',
             },
             comSize: {
                 wrapHeight: '',
@@ -246,7 +248,7 @@ export default {
                         }
 
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
-                            mapClickEvent(target, value.id)
+                            mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
@@ -266,13 +268,14 @@ export default {
                         const idToRemove = idMappings[value.id] || value.id;
                         removeLayersById(idToRemove);
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
+                            // FIXME: popup 修改
                             // TODO: 結構優化
                             addSelectElement(value);
-
-                            state.areaData.tribeAreaData = {};
-                            if (state.areaData.overlay) {
-                                target.removeOverlay(state.areaData.overlay);
-                                state.areaData.overlay = null;
+                            state.popup.popupId = 0
+                            state.popup.popupData = '';
+                            if (state.popup.overlay) {
+                                target.removeOverlay(state.popup.overlay);
+                                state.popup.overlay = null;
                             }
                         }
 
@@ -507,7 +510,6 @@ export default {
                 console.log('error')
             }
         }
-
         function mapClickEvent(target) {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
@@ -515,43 +517,47 @@ export default {
             })
             target.addInteraction(selector)
             selector.on('select', (event) => {
-                // TODO: 截圖結構修改
-                let selectedFeatures = event.selected
-                if (event.selected[0]) {
-                    state.areaData.overlay = new Overlay({
-                        element: state.areaData.nodeRef,
+                let selectedFeatures = event.selected[0]
+                if (selectedFeatures) {
+                    state.popup.overlay = new Overlay({
+                        element: state.popup.nodeRef,
                         autoPan: true,
                         autoPanAnimation: {
                             duration: 250
                         }
-                    });
-                    target.addOverlay(state.areaData.overlay);
-                    state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
-                    state.areaData.tribeAreaData = {}
-                    // TODO: 優化結構，獲取state.areaData.overlay方式修正，考慮整包selectedFeatures放進去
-                    if (selectedFeatures[0].get('編號') === undefined) {
-                        state.areaData.tribeAreaData = selectedFeatures[0]
-                    } else {
-                        selectedFeatures.forEach((feature) => {
-                            let properties = feature.getProperties()
-                            Object.entries(properties).forEach(node => {
-                                const key = node[0], value = node[1]
-                                state.areaData.tribeAreaData[key] = value
-                            })
-                        })
+                    })
+                    state.popup.overlay.setPosition(event.mapBrowserEvent.coordinate)
+                    target.addOverlay(state.popup.overlay)
+                    // TODO: 截圖結構修改
+                    // TODO: 優化結構，獲取state.popupId.overlay方式修正，考慮整包selectedFeatures放進去
+                    let selectIds = selectedFeatures.getId().split('.')
+                    state.popup.popupData = selectIds[0]
+                    state.popup.coordinate = event.mapBrowserEvent.coordinate
+                    if (selectIds[0] === '新竹縣原住民部落範圍') {
+                        state.popup.popupId = selectedFeatures.get('編號')
+                    }
+                    if (selectIds[0] === '近年歷史災害82處部落點位') {
+                        state.popup.popupId = selectIds[1]
                     }
                 } else {
-                    state.areaData.tribeAreaData = {}
-                    target.removeOverlay(state.areaData.overlay)
-                    state.areaData.overlay = null
+                    target.removeOverlay(state.popup.overlay)
+                    state.popup.overlay = null
+                    state.popup = {
+                        nodeRef: null,
+                        overlay: null,
+                        popupId: 0,
+                        coordinate: [],
+                        popupData: '',
+                    }
                 }
             })
+            // TODO del
         }
 
         function closeMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            target.removeOverlay(state.areaData.overlay)
-            state.areaData.overlay = null
+            target.removeOverlay(state.popup.overlay)
+            state.popup.overlay = null
         }
 
         // TODO: 優化 移除id判斷?
@@ -647,6 +653,7 @@ export default {
         return {
             state,
             props,
+            // state.popup.overlay,
             mapControl,
             layerControl,
             changeTarget,
@@ -692,8 +699,9 @@ export default {
                 onChangeBaseMaps: ({ action, value }) => {
                     layerControl({ action, value })
                 }
-            }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            }"
+            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+            @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -776,13 +784,17 @@ export default {
             </div>
         </div>
 
-        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
-            state.areaData.nodeRef = e
+        <div id="popup" class="position-absolute bottom-0"
+        :ref="(e) => {
+            state.popup.nodeRef = e
         }">
-            <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
+            <areaData class="areaData"
+            v-if="state.popup.popupId !== 0"
+            :closeMapData="() => {
                 closeMapData()
-            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500"
-                :coordinate="state.areaData.overlay.get('position')" />
+            }"
+            :popup="state.popup"
+            :maxHeight="500" />
         </div>
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
@@ -823,9 +835,10 @@ export default {
                     onDeleteLayerAll: () => {
                         state.deleteLightbox = true
                     },
-                }" :setOpacity="({ action, value }) => {
-    layerControl({ action, value })
-}" />
+                }"
+                :setOpacity="({ action, value }) => {
+                    layerControl({ action, value })
+                }" />
             </div>
 
             <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
@@ -833,11 +846,13 @@ export default {
                     state.conditionWrap = !state.conditionWrap
                     state.layerSelect = false
                 }" :openLayerSelect="() => {
-    state.layerSelect = !state.layerSelect
-    state.conditionWrap = false
-}" :onLayerControl="({ action, value }) => {
-    layerControl({ action, value })
-}" :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                state.layerSelect = !state.layerSelect
+                state.conditionWrap = false
+            }"
+            :onLayerControl="({ action, value }) => {
+                layerControl({ action, value })
+            }"
+            :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
     </div>
 </template>

@@ -20,31 +20,24 @@ proj4.defs(
 )
 register(proj4)
 
-export const initLayers = async function(){
-    const obj = await $.ajax({
-        url: 'https://api.edtest.site/layers',
-        method: 'GET'
-    })
-    return obj
-}
-
-export async function getTribeData(tribeId){
-    return await $.ajax({
-        url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
-        method: 'GET'
-    })
-}
+export const tribeSelectorColors = [
+    '#261F03',
+    '#F49AAF',
+    '#A9C4F6',
+    '#A5A751',
+    '#9C7B37',
+    '#f00',
+    '#6FB7B7',
+    '#117800'
+]
 
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
-        console.log(layer)
         let result, layerSource
         const layerType = layer.layer_type
         const figureType = layer.figure_type
         const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
         const request = []
-        // TODO del
-        console.log('layer', layer)
         if (layerType === 'WMS'){
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType){
@@ -147,31 +140,25 @@ export default {
                 url: layer.tiles_url,
                 strategy: bbox
             })
+            // TODO: 加入82災害樣式
+            const defaultStyles = new Vector().getStyleFunction()()
+            const layerStyle = (layer.title === '新竹縣原住民部落範圍')
+                ? function(feature){
+                    const parts = feature.id_.split('.')
+                    const lastPart = parts[parts.length - 1]
+                    const style = new Style({
+                        fill: new Fill({
+                            color: tribeSelectorColors[lastPart] !== undefined ? tribeSelectorColors[lastPart] : '#FF0000',
+                        }),
+                    })
+                    return style
+                }
+                : defaultStyles
             result = new VectorLayer({
                 id,
                 label: `${layer.title} ${tileTitle}`,
                 source: vectorSource,
-                // FIXME: 部落需要style，82災害不用
-                // style: function(feature){
-                //     const bgColors = [
-                //         '#261F03',
-                //         '#F49AAF',
-                //         '#A9C4F6',
-                //         '#A5A751',
-                //         '#9C7B37',
-                //         '#f00',
-                //         '#6FB7B7',
-                //         '#117800'
-                //     ]
-                //     const parts = feature.id_.split('.')
-                //     const lastPart = parts[parts.length - 1]
-                //     const style = new Style({
-                //         fill: new Fill({
-                //             color: bgColors[lastPart] !== undefined ? bgColors[lastPart] : '#FF0000',
-                //         }),
-                //     })
-                //     return style
-                // },
+                style: layerStyle,
             })
         }
         if (layerType === 'GeoJson'){
