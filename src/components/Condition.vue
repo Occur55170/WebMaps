@@ -92,10 +92,8 @@ export default {
         }
 
         function moveMap(params) {
-            console.log(1, 2, params.target.value)
             let selectValue = state.selectLayerOption.find(node=>node.tribeCode === params.target.value)
             props.moveToMap(selectValue.coordinates)
-            console.log(selectValue.coordinates)
         }
 
         watch(()=>state.TilesListValue, (newVal , oldVal)=>{
