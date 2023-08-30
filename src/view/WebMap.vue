@@ -551,7 +551,6 @@ export default {
                     }
                 }
             })
-            // TODO del
         }
 
         function closeMapData() {
@@ -682,17 +681,16 @@ export default {
 
         <div class="SearchBar d-none d-sm-block position-absolute">
             <div class="d-flex align-items-center">
-                <img src="@/assets/logo.svg" alt="" class="mb-2">
-                <ul>
-                    <li class="me-2 d-flex align-items-center">
-                        <mapSourceOption class="mapSourceOption d-none d-sm-block" :baseMapList="state.temp.baseMapList"
-                            :onChangeBaseMaps="({ action, value }) => {
-                                layerControl({ action, value })
-                            }" />
-                    </li>
-                </ul>
+                <img src="@/assets/logo.svg" alt="" class="me-5">
+                <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                :baseMapList="state.temp.baseMapList"
+                :onChangeBaseMaps="({ action, value }) => {
+                    layerControl({ action, value })
+                }" />
             </div>
-            <SearchBar v-bind="{
+            <SearchBar
+            class="mt-4"
+            v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
@@ -710,9 +708,12 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;" :ref="(e) => {
+                <div class="mb-4" style="max-height: 50%;"
+                :ref="(e) => {
                     state.comSize.conditionCom = e
-                }" v-if="state.conditionWrap">
+                }"
+                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                v-if="state.conditionWrap">
                     <condition v-bind="{
                         tribeQuery: state.tribeQuery,
                         mapLayers: state.mapLayers,
@@ -724,10 +725,9 @@ export default {
                             state.selectValueTemp = val
                         },
                         moveToMap: (val) => {
-                            // TODO del
                             moveToMap(val)
                         }
-                    }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                }" />
                 </div>
             </div>
 

@@ -40,11 +40,10 @@ export default defineConfig(({ mode }) => {
                     '@': fileURLToPath(new URL('./src', import.meta.url)),
                     vue: '@vue/runtime-dom'
                 }
-            }
+            },
         },
-        // 輸出路徑設定
+        // FIXME:設定 build時 輸出路徑設定為 ./mapDemo
         // base: env.VITE_BASE, //不同模式設定不同路徑
-        // base: './mapDemo',
         base: '/',
         build: {
             sourcemap: true

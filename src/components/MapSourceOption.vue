@@ -36,6 +36,7 @@ export default {
 
 <template>
     <div>
+        <OverLayer />
         <select name="" id="" v-model="state.selectMap"
         @change="(e) => {
             onChangeBaseMaps(e)
