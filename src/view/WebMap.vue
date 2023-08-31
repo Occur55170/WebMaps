@@ -189,6 +189,8 @@ export default {
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
+            // TODO del
+            console.log('22', action, value)
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
@@ -714,7 +716,8 @@ export default {
                 }"
                  @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                 v-if="state.conditionWrap">
-                    <condition v-bind="{
+                    <condition
+                    v-bind="{
                         tribeQuery: state.tribeQuery,
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
@@ -727,7 +730,9 @@ export default {
                         moveToMap: (val) => {
                             moveToMap(val)
                         }
-                }" />
+                    }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                     />
                 </div>
             </div>
 
