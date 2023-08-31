@@ -81,7 +81,8 @@ export default {
                 wrapWidth: '',
                 conditionCom: {},
             },
-            tribeQuery: {}
+            tribeQuery: {},
+            initStatus: true
         })
 
         let ol3d = null
@@ -189,8 +190,6 @@ export default {
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
-            // TODO del
-            console.log('22', action, value)
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
@@ -650,17 +649,21 @@ export default {
             }
 
         })
+        // TODO: del
+        function test(params) {
+            window.initStatus = false
+        }
 
         return {
             state,
             props,
-            // state.popup.overlay,
             mapControl,
             layerControl,
             changeTarget,
             conditionWrap,
             closeMapData,
             moveToMap,
+            test
         }
     }
 }
@@ -709,13 +712,14 @@ export default {
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
+                    <OverLayer />
                 </button>
                 <div class="mb-4" style="max-height: 50%;"
+                v-if="state.conditionWrap"
                 :ref="(e) => {
                     state.comSize.conditionCom = e
                 }"
-                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                v-if="state.conditionWrap">
+                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
                     <condition
                     v-bind="{
                         tribeQuery: state.tribeQuery,
@@ -740,6 +744,7 @@ export default {
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.layerSelect" @click="state.layerSelect = true">
                     已選擇的圖層
+                    <OverLayer />
                 </button>
                 <div v-if="state.layerSelect">
                     <LayerSelector v-bind="{
@@ -767,39 +772,6 @@ export default {
                     }" />
                 </div>
             </div>
-        </div>
-
-        <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
-            <div class="p-4 rounded bg-white" style="width: 250px;">
-                <p class="text-center fw-bold">是否要刪除全部圖層</p>
-                <div class=" d-flex justify-content-around">
-                    <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
-                        layerControl({
-                            action: 'selectLayerMode',
-                            value: {
-                                layerName: 'all'
-                            }
-                        })
-                        state.deleteLightbox = false
-                    }">確定</button>
-                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
-                        state.deleteLightbox = false
-                    }">取消</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="popup" class="position-absolute bottom-0"
-        :ref="(e) => {
-            state.popup.nodeRef = e
-        }">
-            <areaData class="areaData"
-            v-if="state.popup.popupId !== 0"
-            :closeMapData="() => {
-                closeMapData()
-            }"
-            :popup="state.popup"
-            :maxHeight="500" />
         </div>
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
@@ -859,6 +831,45 @@ export default {
             }"
             :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
+
+        <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
+            <div class="p-4 rounded bg-white" style="width: 250px;">
+                <p class="text-center fw-bold">是否要刪除全部圖層</p>
+                <div class=" d-flex justify-content-around">
+                    <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
+                        layerControl({
+                            action: 'selectLayerMode',
+                            value: {
+                                layerName: 'all'
+                            }
+                        })
+                        state.deleteLightbox = false
+                    }">確定</button>
+                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
+                        state.deleteLightbox = false
+                    }">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="popup" class="position-absolute bottom-0"
+        :ref="(e) => {
+            state.popup.nodeRef = e
+        }">
+            <areaData class="areaData"
+            v-if="state.popup.popupId !== 0"
+            :closeMapData="() => {
+                closeMapData()
+            }"
+            :popup="state.popup"
+            :maxHeight="500" />
+        </div>
+
+        <div v-if="state.initStatus" class="stepOverLayer" id="firstEnter" @click="()=>{
+            // TODO del
+            test()
+            state.initStatus = false
+        }"></div>
     </div>
 </template>
 
@@ -867,6 +878,15 @@ export default {
 .mapWrap
     justify-content: space-between
     height: 100vh
+.stepOverLayer
+    content: ''
+    position: absolute
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    background: black
+    opacity: 0.5
 
 .mapWrap .ol-viewport
     height: 100vh

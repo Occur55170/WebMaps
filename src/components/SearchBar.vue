@@ -71,7 +71,8 @@ export default {
 
 <template>
     <div>
-        <ul class="list-unstyled d-flex align-items-center flex-nowrap w-full">
+        <ul class="list-unstyled d-inline-flex align-items-center flex-nowrap w-full">
+            <OverLayer />
             <li class="me-4 position-relative">
                 <div class="MapFeatureBtn text-white">
                     <a href="" v-if="props.dimensionMapStatus"
@@ -90,7 +91,7 @@ export default {
                     <img src="@/assets/img/icon/baseLayer.svg" alt="">
                 </a>
             </li>
-            <li class="me-4 position-relative">
+            <li class="position-relative">
                 <a href="" class="MapFeatureBtn text-white" @click.prevent="toolSwitch('splitWindowBtn')">
                     <img src="@/assets/img/icon/singleWindow.svg" alt="" v-if="props.mapCount === 1">
                     <img src="@/assets/img/icon/doubleWindows.svg" alt="" v-if="props.mapCount === 2">
@@ -111,6 +112,7 @@ export default {
         </ul>
 
         <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">
+            <OverLayer />
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
                 onChangeTarget(1)
             }">左</div>
