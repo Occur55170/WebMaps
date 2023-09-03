@@ -6,10 +6,6 @@ export default {
             Type: String,
             default: 0
         },
-        initStatus: {
-            type: Boolean,
-            default: true
-        },
         map:{}
     },
     setup(props, { emit }){
@@ -29,7 +25,7 @@ export default {
 
 <template>
     <div class="d-flex flex-nowrap flex-column">
-        <OverLayer :status="props.initStatus" />
+        <OverLayer :text="'地圖操控工具'" />
         <a href="#" class="d-none d-sm-block order-1 mb-0" @click.prevent="onMapControl('In')">
             <img src="@/assets/img/icon/zoomIn.svg" alt="zoomIn">
         </a>

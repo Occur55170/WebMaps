@@ -1,14 +1,16 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-import router from '@/router/index.js'
 import $ from 'jquery'
+import router from '@/router/index.js'
+import { useStore } from 'vuex'
+
 export default {
     props: {
         text: {
             type: String,
             default: '測試'
         },
-        textDirection: {
+        styles: {
             type: String,
             default: ''
         },
@@ -18,6 +20,8 @@ export default {
         }
     },
     setup(props, { emit }) {
+        const store = useStore()
+        const route = router
         const overLayCom = ref(null)
 
         const state = reactive({
@@ -47,6 +51,8 @@ export default {
         return {
             state,
             props,
+            store,
+            route,
             overLayCom,
             showClick
         }
@@ -55,7 +61,8 @@ export default {
 </script>
 <template>
     <div class="initOverLay"
-    v-if="props.status"
+    v-if="store.state.isInit"
+    @click="store.dispatch('updateLayerStatus', false)"
     :style="{
         height: state.overLayerHeight + 'px',
         width: state.overLayerWidth + 'px',
@@ -64,7 +71,7 @@ export default {
         state.accordionListRef = e
     }">
         <div class="tipText text-white fw-bold fs-3"
-        :class="props.textDirection"
+        :style="props.styles"
         >{{ props.text }}</div>
     </div>
 </template>
@@ -80,6 +87,5 @@ export default {
 .tipText
     position: absolute
     top: 100%
-    left: 0px
-    width: 200px
+    width: 300px
 </style>

@@ -12,10 +12,6 @@ export default {
             type: Function,
             default: ()=>{}
         },
-        initStatus: {
-            type: Boolean,
-            default: true
-        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -40,7 +36,7 @@ export default {
 
 <template>
     <div>
-        <OverLayer :status="props.initStatus" />
+        <OverLayer :text="'底圖切換工具'" />
         <select name="" id="" v-model="state.selectMap"
         @change="(e) => {
             onChangeBaseMaps(e)

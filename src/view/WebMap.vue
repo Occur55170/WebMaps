@@ -84,7 +84,6 @@ export default {
                 conditionCom: {},
             },
             tribeQuery: {},
-            initStatus: true
         })
 
         let ol3d = null
@@ -669,7 +668,6 @@ export default {
 
 <template>
     <div>
-        {{ store.state.test }}
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
@@ -681,7 +679,6 @@ export default {
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-        :initStatus="state.initStatus"
         @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
 
         <div class="SearchBar d-none d-sm-block position-absolute">
@@ -689,7 +686,6 @@ export default {
                 <img src="@/assets/logo.svg" alt="" class="me-5">
                 <mapSourceOption class="mapSourceOption d-none d-sm-block"
                 :baseMapList="state.temp.baseMapList"
-                :initStatus="state.initStatus"
                 :onChangeBaseMaps="({ action, value }) => {
                     layerControl({ action, value })
                 }" />
@@ -700,7 +696,6 @@ export default {
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
-                initStatus: state.initStatus,
                 onChangeBaseMaps: ({ action, value }) => {
                     layerControl({ action, value })
                 }
@@ -739,7 +734,7 @@ export default {
                     @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
                     />
                 </div>
-                <OverLayer :status="state.initStatus" />
+                <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
 
             <div>
@@ -772,7 +767,7 @@ export default {
                         },
                     }" />
                 </div>
-                <OverLayer :status="state.initStatus" />
+                <OverLayer :text="'顯示已經選擇的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
         </div>
 
@@ -867,8 +862,8 @@ export default {
             :maxHeight="500" />
         </div>
 
-        <div v-if="state.initStatus" class="stepOverLayer" id="firstEnter" @click="()=>{
-            state.initStatus = false
+        <div v-if="store.state.isInit" class="stepOverLayer" id="firstEnter" @click="()=>{
+            store.dispatch('updateLayerStatus', false)
         }"></div>
     </div>
 </template>

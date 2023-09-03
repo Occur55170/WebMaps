@@ -8,7 +8,7 @@ export default createStore({
         isInit: true
     },
     actions: {
-        updateLoad(context, status){
+        updateLayerStatus(context, status){
             context.commit('SetOverLayerStatus', status)
         },
     },
