@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:mapDemo": "cross-env BUILD_TARGET=mapDemo vite build",
+    "build:test": "cross-env BUILD_TARGET=test vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -27,6 +29,7 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.1.0",
     "cesium": "^1.103.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.42.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.27.5",
