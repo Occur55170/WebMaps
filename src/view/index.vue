@@ -31,7 +31,7 @@ export default {
             <img src="@/assets/img/indexOverlay.svg" class="d-block w-100" alt="">
         </div>
     </div>
-    <div class="tip d-flex justify-content-around py-3 fixed-bottom" style="background: rgb(255, 255, 255, 0.5);">
+    <div class="tip d-flex flex-sm-nowrap flex-wrap justify-content-sm-around justify-content-start px-2 px-sm-0 py-3 fixed-bottom" style="background: rgb(255, 255, 255, 0.5);">
         <span>台灣整合防災工程技術顧問有限公司</span>
         <span>公司地址：236新北市土城區中央路三段281巷15弄14號</span>
         <span>E-mail：salahayo3192@gmail.com</span>
@@ -84,6 +84,8 @@ export default {
             bottom: 0
     .overLay
         transform: scale(1.1)
+.tip
+    font-size: 16px
 @media (max-width: 1700px)
     .wrap
         background-size: 100% auto
@@ -140,9 +142,12 @@ export default {
             &::after
                 display: none
             &>a
-                width: 90%
+                width: 50%
                 img
                     width: 100%
         .overLay
             display: none
+
+.tip
+    font-size: 14px
 </style>

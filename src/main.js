@@ -10,9 +10,11 @@ import './assets/styles/all.module.scss'
 import router from '@/router/index.js'
 
 import VueCarousel from 'vue-carousel'
+import store from '@/store/index.js'
 
 createApp(App)
 .use(router)
 .use(VueCarousel)
 .use(componentRegister)
+.use(store)
 .mount('#app')

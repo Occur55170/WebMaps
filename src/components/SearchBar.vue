@@ -16,6 +16,10 @@ export default {
             type: Boolean,
             default: false
         },
+        initStatus: {
+            type: Boolean,
+            default: true
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -72,7 +76,7 @@ export default {
 <template>
     <div>
         <ul class="list-unstyled d-inline-flex align-items-center flex-nowrap w-full">
-            <OverLayer />
+            <OverLayer :status="props.initStatus" />
             <li class="me-4 position-relative">
                 <div class="MapFeatureBtn text-white">
                     <a href="" v-if="props.dimensionMapStatus"
@@ -112,7 +116,7 @@ export default {
         </ul>
 
         <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">
-            <OverLayer />
+            <OverLayer :status="props.initStatus" />
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
                 onChangeTarget(1)
             }">左</div>

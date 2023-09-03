@@ -12,6 +12,10 @@ export default {
             type: Function,
             default: ()=>{}
         },
+        initStatus: {
+            type: Boolean,
+            default: true
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -36,7 +40,7 @@ export default {
 
 <template>
     <div>
-        <OverLayer />
+        <OverLayer :status="props.initStatus" />
         <select name="" id="" v-model="state.selectMap"
         @change="(e) => {
             onChangeBaseMaps(e)

@@ -6,8 +6,16 @@ export default {
     props: {
         text: {
             type: String,
+            default: '測試'
+        },
+        textDirection: {
+            type: String,
             default: ''
         },
+        status: {
+            type: Boolean,
+            default: true
+        }
     },
     setup(props, { emit }) {
         const overLayCom = ref(null)
@@ -18,10 +26,6 @@ export default {
             }),
             overLayerWidth: computed(()=>{
                 return overLayCom?.value?.offsetWidth + 10
-            }),
-            windowStatus: computed(()=>{
-                // FIXME: 關閉方塊
-                return window.initStatus == false ? 10 : 9
             }),
             accordionListRef: null,
             accordionListRefHeight: computed(()=>{
@@ -49,9 +53,9 @@ export default {
     }
 }
 </script>
-
 <template>
     <div class="initOverLay"
+    v-if="props.status"
     :style="{
         height: state.overLayerHeight + 'px',
         width: state.overLayerWidth + 'px',
@@ -59,17 +63,23 @@ export default {
     :ref="(e) => {
         state.accordionListRef = e
     }">
-        <!-- <div class="text-white">{{ props.text }}</div> -->
+        <div class="tipText text-white fw-bold fs-3"
+        :class="props.textDirection"
+        >{{ props.text }}</div>
     </div>
 </template>
-
 <style lang="sass">
 .initOverLay
     position: absolute
-    top: 0
-    left: 0
-    width: 100%
-    height: 100%
+    top: -5px
+    left: -5px
+    width: calc(100% + 10px)
+    height: calc(100% + 10px)
     border: 3px solid #fff
     z-index: 99999
+.tipText
+    position: absolute
+    top: 100%
+    left: 0px
+    width: 200px
 </style>

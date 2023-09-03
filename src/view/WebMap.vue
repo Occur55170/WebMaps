@@ -1,6 +1,7 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
+import { useStore } from 'vuex'
 
 import { Map, View, Feature } from 'ol'
 import Select from 'ol/interaction/Select'
@@ -27,6 +28,7 @@ export default {
     setup(props, { emit }) {
         const getMapLayers = mapLayerList
         const baseMaps = baseMapList
+        const store = useStore()
         const state = reactive({
             // defaultCenter: [120.971859, 24.801583],
             // defaultCenterZoom: 14,
@@ -649,21 +651,17 @@ export default {
             }
 
         })
-        // TODO: del
-        function test(params) {
-            window.initStatus = false
-        }
 
         return {
             state,
             props,
+            store,
             mapControl,
             layerControl,
             changeTarget,
             conditionWrap,
             closeMapData,
             moveToMap,
-            test
         }
     }
 }
@@ -671,7 +669,8 @@ export default {
 
 <template>
     <div>
-        <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
+        {{ store.state.test }}
+        <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
                 :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100': state.mapCount === 1, 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600) }">
@@ -682,13 +681,15 @@ export default {
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
+        :initStatus="state.initStatus"
+        @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
 
         <div class="SearchBar d-none d-sm-block position-absolute">
             <div class="d-flex align-items-center">
                 <img src="@/assets/logo.svg" alt="" class="me-5">
                 <mapSourceOption class="mapSourceOption d-none d-sm-block"
                 :baseMapList="state.temp.baseMapList"
+                :initStatus="state.initStatus"
                 :onChangeBaseMaps="({ action, value }) => {
                     layerControl({ action, value })
                 }" />
@@ -699,6 +700,7 @@ export default {
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
+                initStatus: state.initStatus,
                 onChangeBaseMaps: ({ action, value }) => {
                     layerControl({ action, value })
                 }
@@ -708,11 +710,10 @@ export default {
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
-            <div class="mb-2">
+            <div class="mb-4">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
-                    <OverLayer />
                 </button>
                 <div class="mb-4" style="max-height: 50%;"
                 v-if="state.conditionWrap"
@@ -736,15 +737,15 @@ export default {
                         }
                     }"
                     @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                     />
+                    />
                 </div>
+                <OverLayer :status="state.initStatus" />
             </div>
 
             <div>
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.layerSelect" @click="state.layerSelect = true">
                     已選擇的圖層
-                    <OverLayer />
                 </button>
                 <div v-if="state.layerSelect">
                     <LayerSelector v-bind="{
@@ -771,6 +772,7 @@ export default {
                         },
                     }" />
                 </div>
+                <OverLayer :status="state.initStatus" />
             </div>
         </div>
 
@@ -866,8 +868,6 @@ export default {
         </div>
 
         <div v-if="state.initStatus" class="stepOverLayer" id="firstEnter" @click="()=>{
-            // TODO del
-            test()
             state.initStatus = false
         }"></div>
     </div>
@@ -876,7 +876,6 @@ export default {
 <style lang="sass">
 @import '@/assets/styles/all.module.scss'
 .mapWrap
-    justify-content: space-between
     height: 100vh
 .stepOverLayer
     content: ''

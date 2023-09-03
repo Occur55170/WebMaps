@@ -6,6 +6,10 @@ export default {
             Type: String,
             default: 0
         },
+        initStatus: {
+            type: Boolean,
+            default: true
+        },
         map:{}
     },
     setup(props, { emit }){
@@ -15,6 +19,7 @@ export default {
         }
 
         return {
+            props,
             onMapControl
         }
     }
@@ -24,7 +29,7 @@ export default {
 
 <template>
     <div class="d-flex flex-nowrap flex-column">
-        <OverLayer />
+        <OverLayer :status="props.initStatus" />
         <a href="#" class="d-none d-sm-block order-1 mb-0" @click.prevent="onMapControl('In')">
             <img src="@/assets/img/icon/zoomIn.svg" alt="zoomIn">
         </a>
@@ -37,7 +42,7 @@ export default {
         <a href="#" class="order-1 mb-2" @click.prevent="onMapControl('moveTo')">
             <img src="@/assets/img/icon/location.svg" alt="location">
         </a>
-        <a href="#" class="order-1 mb-2" @click.prevent="onMapControl('fullScreen')">
+        <a href="#" class="order-1" @click.prevent="onMapControl('fullScreen')">
             <img src="@/assets/img/icon/zoom.svg" alt="zoom">
         </a>
     </div>
