@@ -81,7 +81,6 @@ export default {
             comSize: {
                 wrapHeight: '',
                 wrapWidth: '',
-                conditionCom: {},
             },
             tribeQuery: {},
         })
@@ -712,9 +711,6 @@ export default {
                 </button>
                 <div class="mb-4" style="max-height: 50%;"
                 v-if="state.conditionWrap"
-                :ref="(e) => {
-                    state.comSize.conditionCom = e
-                }"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
                     <condition
                     v-bind="{
@@ -742,8 +738,10 @@ export default {
                     v-if="!state.layerSelect" @click="state.layerSelect = true">
                     已選擇的圖層
                 </button>
-                <div v-if="state.layerSelect">
-                    <LayerSelector v-bind="{
+                <div
+                v-if="state.layerSelect">
+                    <LayerSelector
+                    v-bind="{
                         selectLock: state.selectLock,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -772,17 +770,21 @@ export default {
         </div>
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
-            <condition class="position-absolute bottom-100 w-100" v-if="state.conditionWrap" v-bind="{
-                mapLayers: state.mapLayers,
-                currentLayers: state.currentLayers,
-                onClose: () => {
-                    state.conditionWrap = false
-                },
-                showSelectLayerValue: (val) => {
-                    state.selectValueTemp = val
-                }
-            }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
-
+            <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
+                <condition class="w-100"
+                v-if="state.conditionWrap"
+                v-bind="{
+                    mapLayers: state.mapLayers,
+                    currentLayers: state.currentLayers,
+                    onClose: () => {
+                        state.conditionWrap = false
+                    },
+                    showSelectLayerValue: (val) => {
+                        state.selectValueTemp = val
+                    }
+                }"
+                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+            </div>
             <div v-if="state.layerSelect">
                 <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
                     selectLock: state.selectLock,
@@ -873,7 +875,6 @@ export default {
 .mapWrap
     height: 100vh
 .stepOverLayer
-    content: ''
     position: absolute
     top: 0
     left: 0
@@ -881,7 +882,6 @@ export default {
     height: 100%
     background: black
     opacity: 0.5
-
 .mapWrap .ol-viewport
     height: 100vh
     width: 100vw

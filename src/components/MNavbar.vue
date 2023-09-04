@@ -68,6 +68,8 @@ export default {
             emit('conditionWrap')
         }
 
+        // FIXME: 手機板打開燈箱點擊燈箱外關閉
+
         return {
             props,
             state,
@@ -81,9 +83,9 @@ export default {
 
 <template>
     <div class="w-100">
-        <div class="position-fixed top-0 w-100 d-flex justify-content-end flex-wrap">
-            <img src="@/assets/logo.svg" class="w-100">
-            <div class="switchControl me-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
+        <div class="position-fixed top-0 w-100 px-3 d-flex justify-content-between justify-content-sm-end flex-wrap">
+            <img src="@/assets/logo.svg" class="w-50 w-lg-100">
+            <div class="switchControl mt-2 me-0 me-sm-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
                 <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }"
                 @click="() => {
                     state.targetNum = 1

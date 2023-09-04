@@ -60,7 +60,7 @@ export default {
             <a href="#" class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center" @click.prevent="props.onClose"></a>
         </div>
         <hr class="my-0">
-        <div class="py-3 px-4 content">
+        <div class="py-3 px-4 content" style="overflow-y: scroll;max-height: 40vh;">
             <div class="allControl d-flex align-items-center justify-content-end mb-0">
                 <a href="" class="d-flex align-items-center text-decoration-none me-4"
                 :class="{'lockUp': props.selectLock, 'unlock': !props.selectLock}"

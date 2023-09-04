@@ -151,5 +151,9 @@ export default {
         box-sizing: border-box
     .active
         background: #247BA0
+@media (max-width: 1300px)
+    .switchControl
+        top: 10px
+        left: 80%
 
 </style>

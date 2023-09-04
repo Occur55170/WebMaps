@@ -137,7 +137,11 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section2">
-                        <div class="fw-bold" :class="state.mainTextColor">部落地標</div>
+                        <div class="fw-bold" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            部落地標
+                        </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="d-flex flex-wrap flex-sm-nowrap mx-0 align-items-center">
                             <img src="@/assets/mapDetail/3-1.png" class="me-sm-4 w-100 w-sm-10">
@@ -151,14 +155,22 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section3">
-                        <div class="fw-bold" :class="state.mainTextColor">自然環境</div>
+                        <div class="fw-bold" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            自然環境
+                        </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div>
                             <p>{{ state.tribeData?.naturalEnvironment }}</p>
                         </div>
                     </div>
                     <div class="section mb-5" id="section4">
-                        <div class="fw-bold" :class="state.mainTextColor">人文環境</div>
+                        <div class="fw-bold" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            人文環境
+                        </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div>石磊部落範圍內之文化地景分佈如下圖所示。地標地物包括石磊國小、石磊天主堂、石磊文化健康站和石磊教會等。部落產業以農業為主，種植椴木香菇及有機農業，以高冷蔬菜為主。</div>
                         <div class="my-5">
@@ -176,7 +188,11 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5 history" id="section5">
-                        <div class="fw-bold" :class="state.mainTextColor">歷史災害</div>
+                        <div class="fw-bold" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            歷史災害
+                        </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="mb-4">
                             依據111年尖石鄉公所地區災害防救計畫及查詢災害復建工程經費審議及執行資訊系統後，將發生於石磊部落範圍內(及鄰近)之災害事件彙整如下表，並於111年12月22日進行現場調查。災害原因多為降雨及颱風事件，主要的災害類型為土石崩落及邊坡災害。
