@@ -709,7 +709,7 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" style="max-height: 50%;"
+                <div class="mb-4"
                 v-if="state.conditionWrap"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
                     <condition

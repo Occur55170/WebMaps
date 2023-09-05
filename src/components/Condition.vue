@@ -122,7 +122,7 @@ export default {
             <p class="mb-0 fs-5">圖層選項</p>
             <a href="#" class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center" @click.prevent="props.onClose"></a>
         </div>
-        <div class="py-3 px-4 content">
+        <div class="py-3 px-4 content" style="max-height: 40vh;overflow-y: scroll;">
             <div class="mb-2 landBoundary">
                 <div v-for="(node, nodeIndex) in props.mapLayers" class="mb-2">
                     <div class="title d-flex align-items-center fw-bold text-black order-1 mb-1 text-decoration-none"
