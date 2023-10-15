@@ -20,6 +20,11 @@ const routes = [
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
+    {
+        path: '/projectPlane/:id',
+        name: 'projectPlane',
+        component: () => import('@/view/projectPlane.vue')
+    },
     // {
     //     path: '/Map_Demo/opp',
     //     name: 'opp',
