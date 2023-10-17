@@ -3,6 +3,18 @@ import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, com
 import $ from 'jquery'
 import { useRoute, useRouter } from 'vue-router'
 import download from 'downloadjs';
+import axios from 'axios';
+import JSZip from 'JSZip';
+import FileSaver from 'file-saver';
+
+export function batchDownload(url, parameter) {
+    return axios({
+        url: url,
+        params: parameter,
+        method: 'get',
+        responseType: 'text'
+    })
+}
 
 export default {
     props: {
@@ -32,42 +44,42 @@ export default {
             planObj: {}
         })
 
-        function onMapControl(action) {
-            emit('onMapControl', { action })
-        }
-
         const tableFilter = function (name) {
             const stringArray = name.split(":");
             return stringArray
         }
 
+        function old(url = 'https://drive.google.com/file/d/1oWnI0mZwdfVCWwha2mdEK0rm_GYt8Tfy/view?usp=drive_link') {
+            const iframe = document.createElement('iframe')
+            iframe.style.display = "none"
+            iframe.style.height = 0
+            iframe.src = url
 
+        }
+        // downloadFile
         function downloadPdf(url) {
-            download(url, "dlDataUrlText.pdf");
+            axios.request({
+                    url: url,
+                    // method,
+                    responseType: "blob"
+                }).then(response => {
+                    console.log(response)
+                    let blob = new Blob([response.data], { type: 'application/pdf' }),
+                    url = window.URL.createObjectURL(blob)
+                    window.open(url)
+                })
+        }
+
+        function goBack() {
+            router.push({ path: `/mapDetails/${route.params?.id}` })
         }
 
         onMounted(async () => {
-            console.log(route.params?.id)
             await $.ajax({
                 url: `https://api.edtest.site/engineering_plan?tribeCode=${route.params?.id}`,
                 method: "GET"
             }).done(res => {
                 state.planObj = res
-                console.log(state.planObj.engineeringPlanInfo)
-                state.planObj.engineeringPlanInfo[7] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[8] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[9] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[10] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[11] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[12] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[13] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[14] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[15] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[16] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[17] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[18] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[19] = state.planObj.engineeringPlanInfo[0]
-                state.planObj.engineeringPlanInfo[20] = state.planObj.engineeringPlanInfo[0]
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
             })
@@ -76,9 +88,9 @@ export default {
         return {
             router,
             state,
-            onMapControl,
             tableFilter,
-            downloadPdf
+            downloadPdf,
+            goBack
         }
     }
 }
@@ -96,33 +108,37 @@ export default {
                     聚落座標
                 </h1>
 
-                <div class="d-flex justify-content-end">
-                    <Button class="btn text-white me-2" style="background: rgba(30, 30, 30, 0.9);">全部下載</Button>
-                    <Button class="btn text-white" style="background: rgba(30, 30, 30, 0.9);">下載勾選項目</Button>
+                <div class="d-flex justify-content-end" style="visibility: hidden;">
+                    <button class="btn text-white me-2" style="background: rgba(30, 30, 30, 0.9);">全部下載</button>
+                    <button class="btn text-white" style="background: rgba(30, 30, 30, 0.9);">下載勾選項目</button>
                 </div>
             </div>
             <div class="row mb-4">
                 <div class="col-6">
                     <img :src="state.planObj.engineeringPlan" class="w-100" alt="">
                 </div>
-                <div class="col-6 position-relative" style="overflow-y: scroll;">
-                    <!--  -->
+                <div class="col-6 position-relative" style="overflow-y: auto;">
                     <div class="position-absolute d-flex flex-wrap table" style="width: 95%;">
                         <div class="thead d-flex shrink-1 flex-nowrap justify-content-between w-100">
-                            <div class="p-1 col-2 text-white" :class="state.mainBgColor">記號</div>
+                            <div class="p-1 col-3 text-white" :class="state.mainBgColor">記號</div>
                             <div class="p-1 col-6 text-white" :class="state.mainBgColor">名稱</div>
-                            <div class="p-1 col-2 text-white" :class="state.mainBgColor">下載</div>
-                            <div class="p-1 col-2 text-white" :class="state.mainBgColor">選取</div>
+                            <div class="p-1 col-3 text-white" :class="state.mainBgColor">下載</div>
+                            <!-- <div class="p-1 col-2 text-white" :class="state.mainBgColor">選取</div> -->
                         </div>
                         <div class="tbody w-100">
                             <div class="d-flex shrink-0 flex-nowrap justify-content-between w-100"
                                 v-for="(item, itemKey) in state.planObj.engineeringPlanInfo" :key="itemKey">
-                                <div class="col-2 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
+                                <div class="col-3 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
                                 <div class="col-6 bg-grey-light fw-bold">{{ tableFilter(item.name)[1] }}</div>
-                                <div class="col-2 bg-grey-light">
-                                    <a :href="item.url" class="btn py-1 text-white bg-grey" download>下載</a>
+                                <div class="col-3 bg-grey-light">
+                                    <a :href="item.url" class="btn py-1 text-white bg-grey" target="_blank">
+                                        <img src="@/assets/img/icon/download.svg" class="">
+                                    </a>
+                                    <!-- <a href="#" @click="downloadPdf(item.url)">
+                                        <img src="@/assets/img/icon/download.svg" class="">
+                                    </a> -->
                                 </div>
-                                <div class="col-2 bg-grey-light"><input type="checkbox"></div>
+                                <!-- <div class="col-2 bg-grey-light"><input type="checkbox"></div> -->
                             </div>
                         </div>
                     </div>
@@ -130,7 +146,7 @@ export default {
             </div>
             <div class="d-flex justify-content-center">
                 <a href="#" class="goBack btn bg-black text-white d-inline-block mb-4 cursor-pointer"
-                    @click="router.push({ name: 'map' })">
+                    @click="goBack()">
                     返回上頁
                 </a>
             </div>
@@ -145,7 +161,7 @@ export default {
     background-image: url('@/assets/mapDetail/background.svg')
     background-repeat: repeat
     box-sizing: border-box
-    min-height: 100
+    min-height: 100vh
 .redTotem
     height: 135px
     background-image: url('@/assets/mapDetail/redTotem.svg')
@@ -160,8 +176,6 @@ export default {
     .thead>div, .tbody>div>div
         margin: 0 5px 5px 0
         padding: 5px
-        // padding: 0 5px 5px 0
-        // box-sizing: border-box
         display: flex
         justify-content: center
         align-items: center

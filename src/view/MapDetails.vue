@@ -96,7 +96,7 @@ export default {
                         <li class="text-center mb-5" v-if="state.tribeData.visionVideo">
                             <a href="#section6" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">動畫影片</a>
                         </li>
-                        <li class="text-center mb-5">
+                        <li class="text-center mb-5" v-if="state.tribeData.engineeringVisionPosterThumbnail">
                             <a href="#section7" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">願景海報</a>
                         </li>
                         <li class="text-center mb-5">
@@ -249,7 +249,7 @@ export default {
                             <iframe src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe>
                         </div>
                     </div>
-                    <div class="section mb-5" id="section7" v-if="state.tribeData.visionVideo">
+                    <div class="section mb-5" id="section7" v-if="state.tribeData.engineeringVisionPosterThumbnail">
                         <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>

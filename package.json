@@ -12,10 +12,13 @@
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",
+    "axios": "^1.5.1",
     "bootstrap": "^5.2.3",
     "downloadjs": "^1.4.7",
+    "file-saver": "^2.0.5",
     "html-to-image": "^1.11.11",
     "jquery": "^3.6.3",
+    "jszip": "^3.10.1",
     "ol": "^7.2.2",
     "ol-cesium": "^2.13.1",
     "ol-ext": "^4.0.4",
