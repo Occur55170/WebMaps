@@ -1,22 +1,22 @@
 import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
     {
-        path: '/',
+        path: '/Map_Demo/',
         name: 'index',
         component: () => import('@/view/Index.vue'),
     },
     {
-        path: '/map',
+        path: '/Map_Demo/map',
         name: 'map',
         component: () => import('@/view/WebMap.vue'),
     },
     {
-        path: '/mapDetails/:id',
+        path: '/Map_Demo/mapDetails/:id',
         name: 'detail',
         component: () => import('@/view/MapDetails.vue')
     },
     {
-        path: '/Wes',
+        path: '/Map_Demo/Wes',
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
