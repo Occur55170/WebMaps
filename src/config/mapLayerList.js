@@ -244,6 +244,9 @@ export default {
                         }),
                         minzoom: 4,
                         maxZoom: 18,
+                        extra: {
+                            url: layer.tiles_url
+                        }
                     })
                     break
                 default:

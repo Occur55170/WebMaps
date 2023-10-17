@@ -61,7 +61,6 @@ export default {
             })
             // 'https://openlayers.org/en/latest/examples/data/globe.gif'
             // let url = 'https://openlayers.org/en/latest/examples/data/globe.gif'
-            let url = 'https://s3.ap-northeast-1.amazonaws.com/common.cwb.images/ncdr/forecast.png?AWSAccessKeyId=ASIAU6XV5PTRE2KIBH4U&Signature=RcnrEKAGbyjgQ3fPd603Ka9m3dk%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEKv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDmFwLW5vcnRoZWFzdC0xIkcwRQIgNI3dIZR9iY6vHTC8hZo%2FPiW%2FzTUY4%2F3gVpw43zzom8ICIQDPWXFI8%2BxBtv9uLs4GAfK%2B9jbMr2BJjUFfUJnXjfGImCr5Agg0EAAaDDM0MDg5MTg5Mjk2MiIMSZroc7%2F2rZ%2BU5BjoKtYCfkvoSF5CQc2o8AYjfYDSb1wOzy9vAlu4heZCKlkE3R%2Bme8i2fQ2GOu%2Ftu02shIxbfnECm%2Fq0RqZHYsJmR%2BGUyYblZIyRQwkY3PCrN8ZmY0iiilDXJdr5xILEwSFS05bFntZk6VSYaZXpKW1buf8uGnT2wAR9uJ6525PH2HUSxI8t%2B6Ydlg%2BL9CFjlsjHPggp4mel4M2oCapWIEPybU0jreqd5Tq08mD9wGQyuDqNxTrnA8WGG56Jnpat2aKFgo9OrpV4ToLm2aiWkiQcBBFa4OZY8ImLEbLRn4wDC%2BM9cd%2BPzXh%2BB8K2%2F37bbD7OpwAbd%2BPuWP55nUTz1CXyjOJ0A5s3Mw0szPW2A6R%2FM%2BOKI1In%2B1A2LWxfcqQ6qJV5fhQGqiXj1GvladK8WA74oNZdXfMve0lE53R%2FTrrPbtkR5ox6WRcZvvPVqG7S%2BRhFIa2XpEY%2F%2BDSKMI%2Fcy6UGOp4BtdQiqoKXWK3mmCaZnHXgv8aw81%2BYRTmZBTXiKyLmHNkmIJrIh2bL1z5td14d0nmmItwv5Son%2FOtLRAWbctsPtvt8Vm9N938G3CL%2F5tL58iAt9me97s45jK6KHCqA2ob4TB1VXms%2BjhQMdOwY9fzQtSgVvkEESCVbfa27dsN9HvnB2toE4w4wj%2BZmBb6nfb6Yk9EGLDN3zA8URaUW0lI%3D&Expires=1689448552'
             gifler(url).frames(
                 document.createElement('canvas'),
                 (ctx, frame) => {
