@@ -1,17 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
+console.log(VITE_URL)
 const routes = [
     {
-        path: '/',
+        path: `${VITE_URL}`,
         name: 'index',
         component: () => import('@/view/Index.vue'),
     },
     {
-        path: '/map',
+        path: `${VITE_URL}/map`,
         name: 'map',
         component: () => import('@/view/WebMap.vue'),
     },
     {
-        path: '/mapDetails/:id',
+        path: `${VITE_URL}/mapDetails/:id`,
         name: 'detail',
         component: () => import('@/view/MapDetails.vue')
     },
@@ -21,7 +22,7 @@ const routes = [
         component: () => import('@/view/Wes.vue')
     },
     {
-        path: '/projectPlane/:id',
+        path: `${VITE_URL}/projectPlane/:id`,
         name: 'projectPlane',
         component: () => import('@/view/projectPlane.vue')
     },

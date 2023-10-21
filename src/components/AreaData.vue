@@ -123,13 +123,14 @@ export default {
                     </svg>
                 </div> -->
             </div>
+            123 {{ VITE_URL }} 456
             <areaImg :coordinate="props.popup.coordinate" :type="state.type" />
             <div class="row mx-0 align-items-center p-2 position-relative">
                 <div class="d-flex flex-nowrap align-items-center justify-content-between my-2">
                     <span class="">{{ state?.tribeData?.basicInformation?.tribeName }} </span>
                     <div class="p-2 bg-steel w-auto text-white d-inline-block rounded-2 cursor-pointer"
                     @click="()=>{
-                        router.push({ path: `/mapDetails/${props.popup.popupId}` })
+                        router.push({ path: `/Map_Demo/mapDetails/${props.popup.popupId}` })
                     }">更多資訊</div>
                 </div>
                 <p>描述: {{ state?.tribeData?.basicInformation?.description }}</p>

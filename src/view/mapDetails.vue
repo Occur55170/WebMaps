@@ -55,7 +55,7 @@ export default {
         })
 
         function goPlanePage() {
-            router.push(`/projectPlane/${route.params?.id}`)
+            router.push(`/Map_Demo/projectPlane/${route.params?.id}`)
         }
 
         return {

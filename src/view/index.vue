@@ -7,7 +7,6 @@ export default {
     const state=reactive({
     })
     const route = router
-    const name = ref()
     return {
       state,
       route,
@@ -19,7 +18,6 @@ export default {
 <template>
   <div class="wrap">
     <div class="startCon d-flex justify-content-between">
-        <!-- w-100 w-sm-50 -->
         <div class="content px-0 px-sm-5 position-relative">
             <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
             <p class="fs-sm-6 fs-5">保護您與家人，防範災害。提供最新安全資訊、防護措施和應對指南。建立安全居住環境，增強防災能力。攜手合作，共築安全明天！</p>
