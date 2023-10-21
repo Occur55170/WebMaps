@@ -25,11 +25,6 @@ const routes = [
         name: 'projectPlane',
         component: () => import('@/view/projectPlane.vue')
     },
-    // {
-    //     path: '/Map_Demo/opp',
-    //     name: 'opp',
-    //     component: () => import('@/components/opp.vue')
-    // },
 ]
 
 const router = createRouter({
@@ -38,9 +33,9 @@ const router = createRouter({
 })
 router.beforeEach((to, from, next) => {
     if (!to.name){
-        next({ name: 'map' }) // 重定向到特定页面
+        next({ name: 'map' })
     } else {
-        next() // 继续导航
+        next()
     }
 })
 

@@ -22,7 +22,6 @@ export default {
     setup(props, { emit }) {
         let map
         onMounted(async () => {
-            console.log(1)
             map = new Map({
                 target: 'map',
                 layers: [
