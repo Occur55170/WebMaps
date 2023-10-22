@@ -63,7 +63,6 @@ export default {
                     // method,
                     responseType: "blob"
                 }).then(response => {
-                    console.log(response)
                     let blob = new Blob([response.data], { type: 'application/pdf' }),
                     url = window.URL.createObjectURL(blob)
                     window.open(url)
