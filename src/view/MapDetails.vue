@@ -55,7 +55,8 @@ export default {
         })
 
         function goPlanePage() {
-            router.push(`/projectPlane/${route.params?.id}`)
+            // FIXME: 動態push
+            router.push(`/Map_Demo/projectPlane/${route.params?.id}`)
         }
 
         return {
