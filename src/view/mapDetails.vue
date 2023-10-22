@@ -55,7 +55,7 @@ export default {
         })
 
         function goPlanePage() {
-            router.push(`/Map_Demo/projectPlane/${route.params?.id}`)
+            router.push(`/projectPlane/${route.params?.id}`)
         }
 
         return {
@@ -107,7 +107,7 @@ export default {
                         </li>
                     </ul>
                 </div>
-                <div class="detailMain col-9">
+                <div class="detailMain col-12 col-sm-9">
                     <h2 class="text-center fw-bold fs-1">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
                     <div class="section mb-5 mx-0 row flex-wrap align-items-center" id="section1">
                         <div class="fs-5 text-brown fw-bold col-12 col-sm-3 mb-4 mb-sm-0 text-center d-flex align-items-center"
@@ -198,7 +198,7 @@ export default {
                         <div>
                             <div class="fw-bold mb-2" :class="state.mainTextColor">文化地景點</div>
                             <ul class="list-unstyled d-flex flex-wrap justify-content-around">
-                                <li class="col-5 col-sm-3 px-2" v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
+                                <li class="col-12 col-sm-3 px-2" v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
                                     <img :src="item.image" class="w-100">
                                     <p>{{ item.name }}</p>
                                 </li>
@@ -245,8 +245,8 @@ export default {
                             動畫影片
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
-                        <div class="mb-4">
-                            <iframe src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe>
+                        <div class="iframeCon mb-4 w-100 h-0 position-relative">
+                            <iframe class="position-absolute top-0 start-0 w-100 h-100" src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe>
                         </div>
                     </div>
                     <div class="section mb-5" id="section7" v-if="state.tribeData.engineeringVisionPosterThumbnail">
@@ -259,6 +259,13 @@ export default {
                         <div class="mb-4">
                             <img class="mx-auto mt-4 d-block" style="width: 80%;" :src="state.tribeData.engineeringVisionPosterThumbnail" alt="">
                         </div>
+                    </div>
+                    <div class="mb-5" id="section8">
+                        <button class="border-0 fs-5 bg-black px-3 py-2 mx-auto text-white fw-bold rounded text-decoration-none"
+                        style="display: block;"
+                                :class="state.mainTextColor"
+                                @click="goPlanePage()"
+                                >工程計畫圖</button>
                     </div>
                 </div>
             </div>
@@ -324,6 +331,8 @@ export default {
     border-radius: 5px
     padding: 30px 50px
     box-sizing: border-box
+.iframeCon
+    padding-bottom: 56.25%
 .history
     .table
         text-align: center
@@ -348,10 +357,12 @@ export default {
                 text-align: left
 
 @media (max-width: 600px)
+    .detailCon
+        padding: 0 1%
     .section
         background: #fff
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)
         border-radius: 5px
-        padding: 30px 10px
+        padding: 30px
         box-sizing: border-box
 </style>
