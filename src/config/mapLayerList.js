@@ -186,6 +186,7 @@ export default {
                     break
                 case 'Point':
                     // FIXME: 雨量站 失效
+                    console.log(layer)
                     if (url){
                         const api = new URL(url)
                         const { origin, pathname, searchParams } = api

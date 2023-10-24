@@ -22,9 +22,9 @@ const routes = [
         component: () => import('@/view/Wes.vue')
     },
     {
-        path: `${VITE_URL}/projectPlane/:id`,
-        name: 'projectPlane',
-        component: () => import('@/view/projectPlane.vue')
+        path: `${VITE_URL}/Plane/:id`,
+        name: 'Plane',
+        component: () => import('@/view/Plane.vue')
     },
     // {
     //     path: '/opp',
