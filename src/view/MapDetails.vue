@@ -111,7 +111,7 @@ export default {
                                 }"
                                 @click="() => {
                                     router.push({
-                                        name: 'projectPlane',
+                                        name: 'plane',
                                         params: {
                                             id: route.params?.id
                                         },
@@ -277,7 +277,7 @@ export default {
                         <div class="d-inline-block cursor-pointer border-0 fs-5 bg-black px-3 py-2 mx-auto text-white fw-bold rounded text-decoration-none"
                             :class="state.mainTextColor" @click="() => {
                                 router.push({
-                                    name: 'projectPlane',
+                                    name: 'plane',
                                     params: {
                                         id: route.params?.id
                                     },
