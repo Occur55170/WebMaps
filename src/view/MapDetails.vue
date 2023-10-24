@@ -55,8 +55,12 @@ export default {
         })
 
         function goPlanePage() {
-            // FIXME: 動態push
-            router.push(`/Map_Demo/projectPlane/${route.params?.id}`)
+            router.push({
+                name: 'projectPlane',
+                params: {
+                    id: route.params?.id
+                },
+            })
         }
 
         return {
@@ -64,7 +68,7 @@ export default {
             state,
             onMapControl,
             goTop,
-            goPlanePage
+            goPlanePage,
         }
     }
 }
