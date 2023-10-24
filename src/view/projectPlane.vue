@@ -70,7 +70,12 @@ export default {
         }
 
         function goBack() {
-            router.push({ path: `/mapDetails/${route.params?.id}` })
+            router.push({
+                name: 'detail',
+                params: {
+                    id: route.params?.id
+                },
+            })
         }
 
         onMounted(async () => {
@@ -145,7 +150,7 @@ export default {
             </div>
             <div class="d-flex justify-content-center">
                 <a href="#" class="goBack btn bg-black text-white d-inline-block mb-4 cursor-pointer"
-                    @click="goBack()">
+                    @click.prevent="goBack()">
                     返回上頁
                 </a>
             </div>

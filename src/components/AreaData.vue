@@ -132,7 +132,6 @@ export default {
                     <span class="">{{ state?.tribeData?.basicInformation?.tribeName }} </span>
                     <div class="p-2 bg-steel w-auto text-white d-inline-block rounded-2 cursor-pointer"
                     @click="()=>{
-                        // FIXME: 動態push
                         router.push({
                             name: 'detail',
                             params: {
