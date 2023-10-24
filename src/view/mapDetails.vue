@@ -16,16 +16,16 @@ export default {
         const route = useRoute()
         const state = reactive({
             redArray: [134],
-            mainTextColor: computed(()=>{
+            mainTextColor: computed(() => {
                 return state.redArray.includes(Number(route.params.id)) ? 'text-brown' : 'text-steel'
             }),
-            mainBgColor: computed(()=>{
+            mainBgColor: computed(() => {
                 return state.redArray.includes(Number(route.params.id)) ? 'bg-brown' : 'bg-steel'
             }),
-            type: computed(()=>{
+            type: computed(() => {
                 return state.redArray.includes(Number(route.params.id)) ? 1 : 2
             }),
-            coordinates: computed(()=>{
+            coordinates: computed(() => {
                 return (state.tribeData?.basicInformation?.coordinates) ? Object.entries(state.tribeData?.basicInformation?.coordinates) : null
             }),
             tribeData: {}
@@ -35,7 +35,7 @@ export default {
             emit('onMapControl', { action })
         }
 
-        function goTop () {
+        function goTop() {
             window.scrollTo({
                 top: 0,
                 behavior: "smooth"
@@ -54,21 +54,13 @@ export default {
             })
         })
 
-        function goPlanePage() {
-            router.push({
-                name: 'projectPlane',
-                params: {
-                    id: route.params?.id
-                },
-            })
-        }
 
         return {
+            route,
             router,
             state,
             onMapControl,
             goTop,
-            goPlanePage,
         }
     }
 }
@@ -83,32 +75,48 @@ export default {
                 <div class="aside col-2 px-0 d-none d-sm-block">
                     <ul class="ps-0 list-unstyled">
                         <li class="text-center mb-5">
-                            <a href="#section1" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">基本資料</a>
+                            <a href="#section1" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">基本資料</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section2" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">部落地標</a>
+                            <a href="#section2" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">部落地標</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section3" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">自然環境</a>
+                            <a href="#section3" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">自然環境</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section4" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">人文環境</a>
+                            <a href="#section4" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">人文環境</a>
                         </li>
                         <!-- FIXME: state.tribeData?.historicalDisasters.length > 0 -->
                         <li class="text-center mb-5" v-if="true">
-                            <a href="#section5" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">歷史災害</a>
+                            <a href="#section5" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">歷史災害</a>
                         </li>
                         <li class="text-center mb-5" v-if="state.tribeData.visionVideo">
-                            <a href="#section6" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">動畫影片</a>
+                            <a href="#section6" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">動畫影片</a>
                         </li>
                         <li class="text-center mb-5" v-if="state.tribeData.engineeringVisionPosterThumbnail">
-                            <a href="#section7" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">願景海報</a>
+                            <a href="#section7" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">願景海報</a>
                         </li>
                         <li class="text-center mb-5">
-                            <button class="border-0 fs-5 bg-white py-3 fw-bold rounded text-decoration-none w-100"
-                            :class="state.mainTextColor"
-                            @click="goPlanePage()"
-                            >工程計畫圖</button>
+                            <div class="fs-5 cursor-pointer bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor"
+                                :style="{
+                                    boxShadow: '0 0 4px rgba(0, 0, 0, 0.25)'
+                                }"
+                                @click="() => {
+                                    router.push({
+                                        name: 'projectPlane',
+                                        params: {
+                                            id: route.params?.id
+                                        },
+                                    })
+                                }">工程計畫圖</div>
                         </li>
                     </ul>
                 </div>
@@ -116,8 +124,8 @@ export default {
                     <h2 class="text-center fw-bold fs-1">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
                     <div class="section mb-5 mx-0 row flex-wrap align-items-center" id="section1">
                         <div class="fs-5 text-brown fw-bold col-12 col-sm-3 mb-4 mb-sm-0 text-center d-flex align-items-center"
-                        :class="state.mainTextColor">
-                            <img src="@/assets/mapDetail/frame-1.png" class="d-block d-sm-none"  v-if="state.type == 1"/>
+                            :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" class="d-block d-sm-none" v-if="state.type == 1" />
                             <img src="@/assets/mapDetail/frame-2.png" class="d-block d-sm-none" v-else>
                             聚落座標
                         </div>
@@ -125,11 +133,12 @@ export default {
                             <p>聚落坐標(97TM2,WGS84)</p>
                             <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
                             <p v-for="(item, itemKey) in state.coordinates">
-                                <p>
-                                    【 {{ item[0] }}座標 】
-                                    <br class="d-block d-sm-none">
-                                    經度：{{ item[1]?.lng || item[1]?.x }}，緯度：{{ item[1]?.lat || item[1]?.y }}</p>
-                                </p>
+                            <p>
+                                【 {{ item[0] }}座標 】
+                                <br class="d-block d-sm-none">
+                                經度：{{ item[1]?.lng || item[1]?.x }}，緯度：{{ item[1]?.lat || item[1]?.y }}
+                            </p>
+                            </p>
                         </div>
                     </div>
                     <div class="row flex-wrap flex-sm-nowrap mx-0 mb-5 justify-content-between d-flex">
@@ -203,7 +212,8 @@ export default {
                         <div>
                             <div class="fw-bold mb-2" :class="state.mainTextColor">文化地景點</div>
                             <ul class="list-unstyled d-flex flex-wrap justify-content-around">
-                                <li class="col-12 col-sm-3 px-2" v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
+                                <li class="col-12 col-sm-3 px-2"
+                                    v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
                                     <img :src="item.image" class="w-100">
                                     <p>{{ item.name }}</p>
                                 </li>
@@ -229,19 +239,15 @@ export default {
                                 <div class="col-4 text-white" :class="state.mainBgColor">災害描述</div>
                             </div>
                             <div class="d-flex flex-nowrap justify-content-between"
-                            v-for="(item, itemKey) in state.tribeData?.historicalDisasters" :key="itemKey">
-                                <div class="col-1 bg-grey-light">{{ itemKey+1 }}</div>
+                                v-for="(item, itemKey) in state.tribeData?.historicalDisasters" :key="itemKey">
+                                <div class="col-1 bg-grey-light">{{ itemKey + 1 }}</div>
                                 <div class="col-2 bg-grey-light">{{ item.date }}</div>
                                 <div class="col-3 bg-grey-light">{{ item.cause }}</div>
                                 <div class="col-4 bg-grey-light">{{ item.description }}</div>
                             </div>
                         </div>
-                        <Carousel class="mb-5 history table w-100 d-block d-sm-none"
-                        style="padding:0"
-                        :items-to-show="1"
-                        :autoplay="2000"
-                        :wrap-around="true"
-                        :carouselList="state.tribeData?.historicalDisasters" />
+                        <Carousel class="mb-5 history table w-100 d-block d-sm-none" style="padding:0" :items-to-show="1"
+                            :autoplay="2000" :wrap-around="true" :carouselList="state.tribeData?.historicalDisasters" />
                     </div>
                     <div class="section mb-5" id="section6" v-if="state.tribeData.visionVideo">
                         <div class="fw-bold fs-5" :class="state.mainTextColor">
@@ -251,7 +257,8 @@ export default {
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="iframeCon mb-4 w-100 h-0 position-relative">
-                            <iframe class="position-absolute top-0 start-0 w-100 h-100" src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe>
+                            <iframe class="position-absolute top-0 start-0 w-100 h-100"
+                                src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe>
                         </div>
                     </div>
                     <div class="section mb-5" id="section7" v-if="state.tribeData.engineeringVisionPosterThumbnail">
@@ -262,15 +269,21 @@ export default {
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="mb-4">
-                            <img class="mx-auto mt-4 d-block" style="width: 80%;" :src="state.tribeData.engineeringVisionPosterThumbnail" alt="">
+                            <img class="mx-auto mt-4 d-block" style="width: 80%;"
+                                :src="state.tribeData.engineeringVisionPosterThumbnail" alt="">
                         </div>
                     </div>
-                    <div class="mb-5" id="section8">
-                        <button class="border-0 fs-5 bg-black px-3 py-2 mx-auto text-white fw-bold rounded text-decoration-none"
-                        style="display: block;"
-                                :class="state.mainTextColor"
-                                @click="goPlanePage()"
-                                >工程計畫圖</button>
+                    <div class="mb-5 text-center" id="section8">
+                        <div class="d-inline-block cursor-pointer border-0 fs-5 bg-black px-3 py-2 mx-auto text-white fw-bold rounded text-decoration-none"
+                            :class="state.mainTextColor" @click="() => {
+                                router.push({
+                                    name: 'projectPlane',
+                                    params: {
+                                        id: route.params?.id
+                                    },
+                                })
+                            }">工程計畫圖
+                            </div>
                     </div>
                 </div>
             </div>
