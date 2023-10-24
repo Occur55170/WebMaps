@@ -120,7 +120,7 @@ export default {
             }
             result = new TileLayer({
                 id,
-                label: `${layer.title} ${tileTitle}`,
+                label: `${layer.title}${tileTitle}`,
                 // minZoom: 4,
                 // maxZoom: 18,
                 source: new TileWMS({
@@ -156,7 +156,7 @@ export default {
                 : defaultStyles
             result = new VectorLayer({
                 id,
-                label: `${layer.title} ${tileTitle}`,
+                label: `${layer.title}${tileTitle}`,
                 source: vectorSource,
                 style: layerStyle,
             })
@@ -165,7 +165,6 @@ export default {
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType){
                 case 'Line':
-                    // FIXME: 土石流潛勢溪流 失效
                     if (url){
                         const api = new URL(url)
                         const { origin, pathname, searchParams } = api
@@ -176,17 +175,13 @@ export default {
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
                     }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver'
+                    layerSource = new VectorSource({
+                        url: layer.tiles_url,
+                        format: new GeoJSON(),
                     })
                     break
                 case 'Point':
                     // FIXME: 雨量站 失效
-                    console.log(layer)
                     if (url){
                         const api = new URL(url)
                         const { origin, pathname, searchParams } = api
@@ -197,31 +192,18 @@ export default {
                         request[0] = origin + pathname
                         request[1] = searchParamsObject
                     }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver'
-                    })
-                    result = new TileLayer({
-                        source: layerSource,
+                    layerSource = new VectorSource({
+                        url: layer.tiles_url,
+                        format: new GeoJSON(),
                     })
                     break
                 default:
                     console.log('error-otherWMSLayer:', figureType)
             }
             result = new VectorLayer({
-                name: layer.title,
                 id,
-                label: `${layer.title} ${tileTitle}`,
-                source: new VectorSource({
-                    url: layerSource.getUrls()[0],
-                    params: layerSource.getParams(),
-                    serverType: 'geoserver',
-                    crossOrigin: 'anonymous',
-                    projection: layerSource.getParams()?.SRS,
-                }),
+                label: `${layer.title}${tileTitle}`,
+                source: layerSource
             })
         }
         if (layerType === 'Image'){

@@ -207,7 +207,7 @@ export default {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                        if (targetLayer.get('label').includes('雷達回波預測')) {
+                        if (targetLayer.get('label')?.includes('雷達回波預測')) {
                             var source = targetLayer.getSource();
                             var iconFeature = source.getFeatures()[0]
                             const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent

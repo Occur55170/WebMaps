@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-console.log(VITE_URL)
 const routes = [
     {
         path: `${VITE_URL}`,
@@ -23,7 +22,7 @@ const routes = [
     },
     {
         path: `${VITE_URL}/Plane/:id`,
-        name: 'Plane',
+        name: 'plane',
         component: () => import('@/view/Plane.vue')
     },
     // {
