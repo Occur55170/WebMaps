@@ -31,6 +31,11 @@ export default {
             tribeData: {
                 data: {}
             },
+            currentWindowWidth: computed(()=>{
+                console.log(document)
+                return 1
+                // window.body.clientWidth
+            })
         })
 
         async function getTribeData (tribeId) {
@@ -76,8 +81,6 @@ export default {
                 return
             }
         })
-
-
 
         onMounted(async ()=>{
             if (props.popup.popupData == "新竹縣原住民部落範圍"){
@@ -129,7 +132,13 @@ export default {
                     <span class="">{{ state?.tribeData?.basicInformation?.tribeName }} </span>
                     <div class="p-2 bg-steel w-auto text-white d-inline-block rounded-2 cursor-pointer"
                     @click="()=>{
-                        router.push({ path: `/mapDetails/${props.popup.popupId}` })
+                        // FIXME: 動態push
+                        router.push({
+                            name: 'detail',
+                            params: {
+                                id: props.popup.popupId
+                            },
+                        })
                     }">更多資訊</div>
                 </div>
                 <p>描述: {{ state?.tribeData?.basicInformation?.description }}</p>

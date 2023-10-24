@@ -1,17 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
+console.log(VITE_URL)
 const routes = [
     {
-        path: '/',
+        path: `${VITE_URL}`,
         name: 'index',
         component: () => import('@/view/Index.vue'),
     },
     {
-        path: '/map',
+        path: `${VITE_URL}/map`,
         name: 'map',
         component: () => import('@/view/WebMap.vue'),
     },
     {
-        path: '/mapDetails/:id',
+        path: `${VITE_URL}/mapDetails/:id`,
         name: 'detail',
         component: () => import('@/view/MapDetails.vue')
     },
@@ -20,8 +21,13 @@ const routes = [
         name: 'Wes',
         component: () => import('@/view/Wes.vue')
     },
+    {
+        path: `${VITE_URL}/projectPlane/:id`,
+        name: 'projectPlane',
+        component: () => import('@/view/projectPlane.vue')
+    },
     // {
-    //     path: '/Map_Demo/opp',
+    //     path: '/opp',
     //     name: 'opp',
     //     component: () => import('@/components/opp.vue')
     // },
@@ -33,9 +39,9 @@ const router = createRouter({
 })
 router.beforeEach((to, from, next) => {
     if (!to.name){
-        next({ name: 'map' }) // 重定向到特定页面
+        next({ name: 'map' })
     } else {
-        next() // 继续导航
+        next()
     }
 })
 

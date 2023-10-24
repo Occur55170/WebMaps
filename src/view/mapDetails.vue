@@ -54,11 +54,21 @@ export default {
             })
         })
 
+        function goPlanePage() {
+            router.push({
+                name: 'projectPlane',
+                params: {
+                    id: route.params?.id
+                },
+            })
+        }
+
         return {
             router,
             state,
             onMapControl,
             goTop,
+            goPlanePage,
         }
     }
 }
@@ -70,29 +80,42 @@ export default {
         <div class="redTotem" :class="state.type == 1 ? 'redTotem' : 'blueTotem'"></div>
         <div class="detailCon">
             <div class="row mx-0">
-                <div class="aside px-0 d-none d-sm-block">
-                    <ul class="ps-0">
+                <div class="aside col-2 px-0 d-none d-sm-block">
+                    <ul class="ps-0 list-unstyled">
                         <li class="text-center mb-5">
-                            <a href="#section1" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">基本資料</a>
+                            <a href="#section1" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">基本資料</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section2" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">部落地標</a>
+                            <a href="#section2" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">部落地標</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section3" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">自然環境</a>
+                            <a href="#section3" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">自然環境</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section4" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">人文環境</a>
+                            <a href="#section4" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">人文環境</a>
+                        </li>
+                        <!-- FIXME: state.tribeData?.historicalDisasters.length > 0 -->
+                        <li class="text-center mb-5" v-if="true">
+                            <a href="#section5" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">歷史災害</a>
+                        </li>
+                        <li class="text-center mb-5" v-if="state.tribeData.visionVideo">
+                            <a href="#section6" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">動畫影片</a>
+                        </li>
+                        <li class="text-center mb-5" v-if="state.tribeData.engineeringVisionPosterThumbnail">
+                            <a href="#section7" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none" :class="state.mainTextColor">願景海報</a>
                         </li>
                         <li class="text-center mb-5">
-                            <a href="#section5" class="bg-white fw-bold rounded text-decoration-none" :class="state.mainTextColor">歷史災害</a>
+                            <button class="border-0 fs-5 bg-white py-3 fw-bold rounded text-decoration-none w-100"
+                            :class="state.mainTextColor"
+                            @click="goPlanePage()"
+                            >工程計畫圖</button>
                         </li>
                     </ul>
                 </div>
-                <div class="detailMain">
-                    <h2 class="text-center">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
+                <div class="detailMain col-12 col-sm-9">
+                    <h2 class="text-center fw-bold fs-1">{{ state.tribeData?.basicInformation?.tribeName }}</h2>
                     <div class="section mb-5 mx-0 row flex-wrap align-items-center" id="section1">
-                        <div class="text-brown fw-bold col-12 col-sm-3 mb-4 mb-sm-0 text-center d-flex align-items-center"
+                        <div class="fs-5 text-brown fw-bold col-12 col-sm-3 mb-4 mb-sm-0 text-center d-flex align-items-center"
                         :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" class="d-block d-sm-none"  v-if="state.type == 1"/>
                             <img src="@/assets/mapDetail/frame-2.png" class="d-block d-sm-none" v-else>
@@ -137,7 +160,7 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section2">
-                        <div class="fw-bold" :class="state.mainTextColor">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>
                             部落地標
@@ -155,7 +178,7 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section3">
-                        <div class="fw-bold" :class="state.mainTextColor">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>
                             自然環境
@@ -166,7 +189,7 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section4">
-                        <div class="fw-bold" :class="state.mainTextColor">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>
                             人文環境
@@ -180,15 +203,16 @@ export default {
                         <div>
                             <div class="fw-bold mb-2" :class="state.mainTextColor">文化地景點</div>
                             <ul class="list-unstyled d-flex flex-wrap justify-content-around">
-                                <li class="col-5 col-sm-3 px-2" v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
+                                <li class="col-12 col-sm-3 px-2" v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
                                     <img :src="item.image" class="w-100">
                                     <p>{{ item.name }}</p>
                                 </li>
                             </ul>
                         </div>
                     </div>
-                    <div class="section mb-5 history" id="section5">
-                        <div class="fw-bold" :class="state.mainTextColor">
+                    <!-- FIXME: state.tribeData?.historicalDisasters.length > 0 -->
+                    <div class="section mb-5 history" id="section5" v-if="true">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>
                             歷史災害
@@ -219,11 +243,40 @@ export default {
                         :wrap-around="true"
                         :carouselList="state.tribeData?.historicalDisasters" />
                     </div>
+                    <div class="section mb-5" id="section6" v-if="state.tribeData.visionVideo">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            動畫影片
+                        </div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
+                        <div class="iframeCon mb-4 w-100 h-0 position-relative">
+                            <iframe class="position-absolute top-0 start-0 w-100 h-100" src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe>
+                        </div>
+                    </div>
+                    <div class="section mb-5" id="section7" v-if="state.tribeData.engineeringVisionPosterThumbnail">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            願景海報
+                        </div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
+                        <div class="mb-4">
+                            <img class="mx-auto mt-4 d-block" style="width: 80%;" :src="state.tribeData.engineeringVisionPosterThumbnail" alt="">
+                        </div>
+                    </div>
+                    <div class="mb-5" id="section8">
+                        <button class="border-0 fs-5 bg-black px-3 py-2 mx-auto text-white fw-bold rounded text-decoration-none"
+                        style="display: block;"
+                                :class="state.mainTextColor"
+                                @click="goPlanePage()"
+                                >工程計畫圖</button>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="position-fixed bottom-0 end-0 w-auto m-2 m-sm-5">
-            <div class="goBack mb-4 cursor-pointer" @click="router.push({ name: 'map' })">
+            <div class="mb-4 cursor-pointer" @click="router.push({ name: 'map' })">
                 <img src="@/assets/mapDetail/back.svg">
             </div>
             <div class="goTop cursor-pointer" @click="goTop()">
@@ -270,25 +323,21 @@ export default {
     height: 135px
     background-image: url('@/assets/mapDetail/blueTotem.svg')
 .aside
-    width: 200px
-    margin-top: 140px
-    margin-right: 60px
+    margin:150px 20px 0 20px
     ul li
-        list-style: none
         color: #841613
         font-weight: bold
-    a
+    a, button
         display: block
-        padding: 15px 60px
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)
-.detailMain
-    width: calc(100% - 300px)
 .section
     background: #fff
     box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)
     border-radius: 5px
     padding: 30px 50px
     box-sizing: border-box
+.iframeCon
+    padding-bottom: 56.25%
 .history
     .table
         text-align: center
@@ -313,12 +362,12 @@ export default {
                 text-align: left
 
 @media (max-width: 600px)
-    .detailMain
-        width: 100%
+    .detailCon
+        padding: 0 1%
     .section
         background: #fff
         box-shadow: 0 0 4px rgba(0, 0, 0, 0.25)
         border-radius: 5px
-        padding: 30px 10px
+        padding: 30px
         box-sizing: border-box
 </style>

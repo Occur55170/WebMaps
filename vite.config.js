@@ -9,18 +9,24 @@ import path from 'path' // 需安装此模块
 
 function getBasePath(){
     if (process.env.BUILD_TARGET === 'mapDemo'){
-        return '/Map_Demo/'
+        return '/Map_Demo'
     } else if (process.env.BUILD_TARGET === 'test'){
-        return '/test/'
+        return '/test'
     } else {
-        return '/'
+        return ''
     }
 }
 export default defineConfig(({ mode }) => {
     // 根據當前工作目錄中的 `mode` 加載 .env 文件
-    // 設置第三個參數為 '' 來加載所有環境變量，而不管是否有 `VITE_` 前綴。
-    const ENV = loadEnv(mode, process.cwd(), '')
+    // 設置第三個參數為 '' 來加載所有環境變量，而不管是否有 `VITE_` 前綴。const config = getEnvConfig()
+
+    const env = loadEnv(mode, process.cwd(), '')
+    console.log(env.NODE_ENV)
     return {
+        define: {
+            VITE_UPLOAD_URL: '"https://img.jgbsmart.com"',
+            VITE_URL: `"${getBasePath()}"`,
+        },
         plugins: [
             vue(),
             Icons(),
@@ -51,7 +57,7 @@ export default defineConfig(({ mode }) => {
                 }
             },
         },
-        base: process.env.NODE_ENV === 'production' ? getBasePath() : '/',
+        base: `${process.env.BUILD_TARGET === 'mapDemo' ? '/Map_Demo' : '/'}`,
         build: {
             sourcemap: true
         },
