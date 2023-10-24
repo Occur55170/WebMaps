@@ -25,11 +25,6 @@ const routes = [
         name: 'plane',
         component: () => import('@/view/Plane.vue')
     },
-    // {
-    //     path: '/opp',
-    //     name: 'opp',
-    //     component: () => import('@/components/opp.vue')
-    // },
 ]
 
 const router = createRouter({

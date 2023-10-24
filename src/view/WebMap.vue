@@ -10,8 +10,8 @@ import { ScaleLine } from 'ol/control.js'
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
 import { Tile, Vector } from 'ol/layer.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
+import { Point } from 'ol/geom.js'
+import { Icon, Style } from 'ol/style.js'
 
 import OLCesium from 'olcs/OLCesium.js'
 

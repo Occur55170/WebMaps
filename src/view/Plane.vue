@@ -2,10 +2,7 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 import { useRoute, useRouter } from 'vue-router'
-import download from 'downloadjs';
 import axios from 'axios';
-import JSZip from 'JSZip';
-import FileSaver from 'file-saver';
 
 export function batchDownload(url, parameter) {
     return axios({
@@ -47,26 +44,6 @@ export default {
         const tableFilter = function (name) {
             const stringArray = name.split(":");
             return stringArray
-        }
-
-        function old(url = 'https://drive.google.com/file/d/1oWnI0mZwdfVCWwha2mdEK0rm_GYt8Tfy/view?usp=drive_link') {
-            const iframe = document.createElement('iframe')
-            iframe.style.display = "none"
-            iframe.style.height = 0
-            iframe.src = url
-
-        }
-        // downloadFile
-        function downloadPdf(url) {
-            axios.request({
-                    url: url,
-                    // method,
-                    responseType: "blob"
-                }).then(response => {
-                    let blob = new Blob([response.data], { type: 'application/pdf' }),
-                    url = window.URL.createObjectURL(blob)
-                    window.open(url)
-                })
         }
 
         function goBack() {
@@ -127,8 +104,7 @@ export default {
                             <div class="p-1 col-3 text-white" :class="state.mainBgColor">記號</div>
                             <div class="p-1 col-6 text-white" :class="state.mainBgColor">名稱</div>
                             <div class="p-1 col-3 text-white" :class="state.mainBgColor">下載</div>
-                            <!-- <div class="p-1 col-2 text-white" :class="state.mainBgColor">選取</div> -->
-                        </div>
+                            </div>
                         <div class="tbody w-100">
                             <div class="d-flex shrink-0 flex-nowrap justify-content-between w-100"
                                 v-for="(item, itemKey) in state.planObj.engineeringPlanInfo" :key="itemKey">
@@ -138,11 +114,7 @@ export default {
                                     <a :href="item.url" class="btn py-1 text-white bg-grey" target="_blank">
                                         <img src="@/assets/img/icon/download.svg" class="">
                                     </a>
-                                    <!-- <a href="#" @click="downloadPdf(item.url)">
-                                        <img src="@/assets/img/icon/download.svg" class="">
-                                    </a> -->
                                 </div>
-                                <!-- <div class="col-2 bg-grey-light"><input type="checkbox"></div> -->
                             </div>
                         </div>
                     </div>

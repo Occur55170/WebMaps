@@ -183,9 +183,6 @@ export default {
                 }
             };
 
-            /**
-             * onchange callback on the select element.
-             */
             selectElement.onchange = changeInteraction;
             changeInteraction();
         })
