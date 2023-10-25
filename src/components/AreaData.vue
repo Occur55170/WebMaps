@@ -21,6 +21,10 @@ export default {
             type: Object,
             default: {}
         },
+        screenSizeWidth: {
+            Type: Number,
+            default: 0
+        }
     },
     setup(props, { emit }){
         const router = useRouter()
@@ -31,11 +35,6 @@ export default {
             tribeData: {
                 data: {}
             },
-            currentWindowWidth: computed(()=>{
-                console.log(document)
-                return 1
-                // window.body.clientWidth
-            })
         })
 
         async function getTribeData (tribeId) {
@@ -113,8 +112,6 @@ export default {
     <div class="bg-white rounded py-2" style="overflow-y: auto;"
     :style="{
         'max-height': props.maxHeight + 'px',
-        // FIXME: RWD window.body.clientWidth >= 600
-        'width': true ? `480px` : auto
     }">
         <div v-if="state.type === 1">
             <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">

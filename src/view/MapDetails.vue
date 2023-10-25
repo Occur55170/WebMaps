@@ -2,6 +2,8 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 import { useRoute, useRouter } from 'vue-router'
+import frame1 from '@/assets/mapDetail/frame-1.png';
+import frame2 from '@/assets/mapDetail/frame-2.png';
 
 export default {
     props: {
@@ -61,6 +63,8 @@ export default {
             state,
             onMapControl,
             goTop,
+            frame1,
+            frame2
         }
     }
 }
@@ -82,7 +86,7 @@ export default {
                             <a href="#section2" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">部落地標</a>
                         </li>
-                        <li class="text-center mb-5">
+                        <li class="text-center mb-5" v-if="state.tribeData?.naturalEnvironment">
                             <a href="#section3" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">自然環境</a>
                         </li>
@@ -90,8 +94,7 @@ export default {
                             <a href="#section4" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">人文環境</a>
                         </li>
-                        <!-- FIXME: state.tribeData?.historicalDisasters.length > 0 -->
-                        <li class="text-center mb-5" v-if="true">
+                        <li class="text-center mb-5" v-if="state.tribeData?.historicalDisasters?.length">
                             <a href="#section5" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">歷史災害</a>
                         </li>
@@ -141,17 +144,18 @@ export default {
                             </p>
                         </div>
                     </div>
-                    <div class="row flex-wrap flex-sm-nowrap mx-0 mb-5 justify-content-between d-flex">
-                        <div class="section col-5 col-sm-3 py-4 px-0 col-3 text-center">
+                    <div class="tribeBaseData d-flex flex-wrap flex-sm-nowrap mx-0 mb-5 justify-content-between d-flex">
+                        <div class="section py-4 px-0 text-center">
                             <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
                                 <!-- TODO: <img :src="`@/assets/mapDetail/frame-${2}.png`"> -->
-                                <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
-                                <img src="@/assets/mapDetail/frame-2.png" v-else>
+                                <!-- <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1"> -->
+                                <!-- <img src="@/assets/mapDetail/frame-2.png" v-else> -->
+                                <img :src="state.type === 1 ? frame1 : frame2" />
                                 人口戶數
                             </p>
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.totalHouseholds }}</p>
                         </div>
-                        <div class="section col-5 col-sm-3 py-4 px-0 col-3 text-center">
+                        <div class="section py-4 px-0 mt-5 mt-sm-0 text-center">
                             <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
                                 <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                                 <img src="@/assets/mapDetail/frame-2.png" v-else>
@@ -159,7 +163,7 @@ export default {
                             </p>
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.scale }}</p>
                         </div>
-                        <div class="section col-12 col-sm-3 py-4 px-0 mt-5 mt-sm-0 text-center">
+                        <div class="section py-4 px-0 mt-5 mt-sm-0 text-center">
                             <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
                                 <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                                 <img src="@/assets/mapDetail/frame-2.png" v-else>
@@ -186,7 +190,7 @@ export default {
                             </div>
                         </div>
                     </div>
-                    <div class="section mb-5" id="section3">
+                    <div class="section mb-5" id="section3" v-if="state.tribeData?.naturalEnvironment">
                         <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>
@@ -211,7 +215,7 @@ export default {
                         </div>
                         <div>
                             <div class="fw-bold mb-2" :class="state.mainTextColor">文化地景點</div>
-                            <ul class="list-unstyled d-flex flex-wrap justify-content-around">
+                            <ul class="list-unstyled d-flex flex-wrap">
                                 <li class="col-12 col-sm-3 px-2"
                                     v-for="(item, itemIndex) in state.tribeData.culturalLandscape">
                                     <img :src="item.image" class="w-100">
@@ -220,8 +224,7 @@ export default {
                             </ul>
                         </div>
                     </div>
-                    <!-- FIXME: state.tribeData?.historicalDisasters.length > 0 -->
-                    <div class="section mb-5 history" id="section5" v-if="true">
+                    <div class="section mb-5 history" id="section5" v-if="state.tribeData?.historicalDisasters?.length">
                         <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>
@@ -306,6 +309,9 @@ export default {
     background-image: url('@/assets/mapDetail/background.svg')
     background-repeat: repeat
     box-sizing: border-box
+.tribeBaseData
+    &>div
+        width: 32%
 .detailCon
     padding: 0 calc((100% - 1460px)/2)
     h2
@@ -383,4 +389,7 @@ export default {
         border-radius: 5px
         padding: 30px
         box-sizing: border-box
+    .tribeBaseData
+        &>div
+            width: 100%
 </style>

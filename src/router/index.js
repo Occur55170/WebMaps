@@ -31,12 +31,5 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 })
-router.beforeEach((to, from, next) => {
-    if (!to.name){
-        next({ name: 'map' })
-    } else {
-        next()
-    }
-})
 
 export default router

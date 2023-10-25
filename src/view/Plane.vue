@@ -70,7 +70,6 @@ export default {
             router,
             state,
             tableFilter,
-            downloadPdf,
             goBack
         }
     }

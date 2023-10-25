@@ -649,6 +649,7 @@ export default {
                 state.comSize.wrapWidth = e.target.innerWidth
             }
 
+            state.screenSizeWidth = window.innerWidth
         })
 
         return {
@@ -861,6 +862,7 @@ export default {
             :closeMapData="() => {
                 closeMapData()
             }"
+            :screenSizeWidth="state.screenSizeWidth"
             :popup="state.popup"
             :maxHeight="500" />
         </div>
@@ -913,4 +915,6 @@ export default {
     .middleLine
         height: 1px
         width: 100%
+    .areaData
+        width: 90vw
 </style>
