@@ -193,7 +193,7 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // 避免加到有群組的母層
+                        // 避免加到群組的母層
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
@@ -648,8 +648,6 @@ export default {
                 state.comSize.wrapHeight = e.target.innerHeight
                 state.comSize.wrapWidth = e.target.innerWidth
             }
-
-            state.screenSizeWidth = window.innerWidth
         })
 
         return {
@@ -788,7 +786,8 @@ export default {
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
-                <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
+                <LayerSelector class="position-absolute bottom-100 w-100"
+                v-bind="{
                     selectLock: state.selectLock,
                     currentLayers: state.currentLayers,
                     onClose: () => {
@@ -862,7 +861,6 @@ export default {
             :closeMapData="() => {
                 closeMapData()
             }"
-            :screenSizeWidth="state.screenSizeWidth"
             :popup="state.popup"
             :maxHeight="500" />
         </div>

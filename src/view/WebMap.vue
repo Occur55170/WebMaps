@@ -648,8 +648,6 @@ export default {
                 state.comSize.wrapHeight = e.target.innerHeight
                 state.comSize.wrapWidth = e.target.innerWidth
             }
-
-            state.screenSizeWidth = window.innerWidth
         })
 
         return {
@@ -873,7 +871,6 @@ export default {
             :closeMapData="() => {
                 closeMapData()
             }"
-            :screenSizeWidth="state.screenSizeWidth"
             :popup="state.popup"
             :maxHeight="500" />
         </div>
