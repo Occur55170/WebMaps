@@ -51,7 +51,6 @@ export default {
             conditionYear: '',
             conditionTown: '',
             selectLayerOption: []
-            // tribes: computed()
         })
 
         function onLayerControl(action, value) {

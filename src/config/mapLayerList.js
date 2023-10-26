@@ -256,4 +256,208 @@ export default {
         })
         return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex }
     },
+    exampleGetLayer: (layer, nestedSubNodeIndex, id) => {
+        let result, layerSource
+        const layerType = layer.layer_type
+        const figureType = layer.figure_type
+        const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
+        const request = []
+        if (layerType === 'WMS'){
+            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+            switch (figureType){
+                case 'Point':
+                    if (url){
+                        const api = new URL(url)
+                        // 取得網址部分
+                        const origin = api.origin
+                        const pathname = api.pathname
+
+                        // 取得query參數
+                        const searchParams = api.searchParams
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: request[0],
+                        params: request[1],
+                        serverType: 'mapserver',
+                        crossOrigin: 'anonymous',
+                    })
+                    break
+                case 'Surface':
+                    if (url){
+                        const api = new URL(url)
+                        // 取得網址部分
+                        const origin = api.origin
+                        const pathname = api.pathname
+
+                        // 取得query參數
+                        const searchParams = api.searchParams
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: request[0],
+                        params: request[1],
+                        serverType: 'mapserver'
+                    })
+                    break
+                case 'Line':
+                    // 活動斷層
+                    if (url){
+                        const api = new URL(url)
+                        // 取得網址部分
+                        const origin = api.origin
+                        const pathname = api.pathname
+
+                        // 取得query參數
+                        const searchParams = api.searchParams
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new TileWMS({
+                        maxzoom: 18,
+                        minzoom: 3,
+                        url: request[0],
+                        params: request[1],
+                        serverType: 'mapserver'
+                    })
+                    break
+                default:
+                    console.log('error-otherWMSLayer:', figureType)
+            }
+            result = new TileLayer({
+                id,
+                label: `${layer.title}${tileTitle}`,
+                source: new TileWMS({
+                    name: layer.title,
+                    url: layerSource.getUrls()[0],
+                    params: layerSource.getParams(),
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous',
+                    projection: layerSource.getParams()?.SRS,
+                }),
+            })
+        }
+        // only 部落圖層點擊用layer
+        if (layerType === 'WFS'){
+            const vectorSource = new VectorSource({
+                format: new GeoJSON(),
+                url: layer.tiles_url,
+                strategy: bbox
+            })
+            // TODO: 加入82災害樣式
+            const defaultStyles = new Vector().getStyleFunction()()
+            const layerStyle = (layer.title === '新竹縣原住民部落範圍')
+                ? function(feature){
+                    const parts = feature.id_.split('.')
+                    const lastPart = parts[parts.length - 1]
+                    const style = new Style({
+                        fill: new Fill({
+                            color: tribeSelectorColors[lastPart] !== undefined ? tribeSelectorColors[lastPart] : '#FF0000',
+                        }),
+                    })
+                    return style
+                }
+                : defaultStyles
+            result = new VectorLayer({
+                id,
+                label: `${layer.title}${tileTitle}`,
+                source: vectorSource,
+                style: layerStyle,
+            })
+        }
+        if (layerType === 'GeoJson'){
+            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+            switch (figureType){
+                case 'Line':
+                    if (url){
+                        const api = new URL(url)
+                        const { origin, pathname, searchParams } = api
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new VectorSource({
+                        url: layer.tiles_url,
+                        format: new GeoJSON(),
+                    })
+                    break
+                case 'Point':
+                    // TODO: icon優化
+                    if (url){
+                        const api = new URL(url)
+                        const { origin, pathname, searchParams } = api
+                        const searchParamsObject = {}
+                        for (const [key, value] of searchParams.entries()){
+                            searchParamsObject[key] = value
+                        }
+                        request[0] = origin + pathname
+                        request[1] = searchParamsObject
+                    }
+                    layerSource = new VectorSource({
+                        url: layer.tiles_url,
+                        format: new GeoJSON(),
+                    })
+                    break
+                default:
+                    console.log('error-otherWMSLayer:', figureType)
+            }
+            result = new VectorLayer({
+                id,
+                label: `${layer.title}${tileTitle}`,
+                source: layerSource
+            })
+        }
+        if (layerType === 'Image'){
+            switch (figureType){
+                case 'Surface':
+                    const extent = layer.image_options.image_extent
+                    const xCenter = (extent[2] + extent[0]) / 2
+                    const yCenter = (extent[3] + extent[1]) / 2
+
+                    const iconFeature = new Feature({
+                        geometry: new Point([xCenter, yCenter]),
+                    })
+
+                    result = new VectorLayer({
+                        name: layer.title,
+                        id,
+                        label: `${layer.title} ${tileTitle}`,
+                        source: new VectorSource({
+                            name: layer.title,
+                            features: [iconFeature],
+                        }),
+                        minzoom: 4,
+                        maxZoom: 18,
+                        extra: {
+                            url: layer.tiles_url
+                        }
+                    })
+                    break
+                default:
+                    console.log('error-otherWMSLayer:', figureType)
+            }
+        }
+        return result
+    },
 }

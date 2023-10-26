@@ -1,12 +1,12 @@
-import { Tile, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Tile, Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
-import OSM from 'ol/source/OSM'
 
 let baseMapDataList = []
 
 export default {
-    getBaseMapData: (value) => {
+    getBaseMapData: (value) => { // 可能傳入底圖的key值
         let layer
+        console.log(value)
         if (Number.isInteger(value)){
             layer = baseMapDataList[value]
         } else {

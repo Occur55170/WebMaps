@@ -669,14 +669,22 @@ export default {
 
 <template>
     <div>
+        <!-- TODO: 寬度設定是否調整 -->
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
-            <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
-                :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100': state.mapCount === 1, 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600) }">
+            :class="{
+                'w-100': state.map1?.getTarget() == 'map1',
+                'h-100': state.mapCount === 1,
+                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600)
+            }">
             </div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2"
-                :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100': state.mapCount === 1, 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600) }">
+            :class="{
+                'w-100': state.map2?.getTarget() == 'map2',
+                'h-100': state.mapCount === 1,
+                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600)
+            }">
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
@@ -691,8 +699,7 @@ export default {
                     layerControl({ action, value })
                 }" />
             </div>
-            <SearchBar
-            class="mt-4"
+            <SearchBar class="mt-4"
             v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
@@ -714,7 +721,7 @@ export default {
                 <div class="mb-4"
                 v-if="state.conditionWrap"
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
-                    <condition
+                    <Condition
                     v-bind="{
                         tribeQuery: state.tribeQuery,
                         mapLayers: state.mapLayers,
@@ -773,7 +780,7 @@ export default {
 
         <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
             <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
-                <condition class="w-100"
+                <Condition class="w-100"
                 v-if="state.conditionWrap"
                 v-bind="{
                     mapLayers: state.mapLayers,
@@ -819,11 +826,15 @@ export default {
                 }" />
             </div>
 
-            <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" :openConditionWrap="() => {
-                    state.conditionWrap = !state.conditionWrap
-                    state.layerSelect = false
-                }" :openLayerSelect="() => {
+            <mNavbar
+            :dimensionMapStatus="state.toSearchDimensionStatus"
+            :currentLayers="state.currentLayers"
+            :mapCount="state.mapCount"
+            :openConditionWrap="() => {
+                state.conditionWrap = !state.conditionWrap
+                state.layerSelect = false
+            }"
+            :openLayerSelect="() => {
                 state.layerSelect = !state.layerSelect
                 state.conditionWrap = false
             }"
@@ -867,7 +878,9 @@ export default {
             :maxHeight="500" />
         </div>
 
-        <div v-if="store.state.isInit" class="stepOverLayer" id="firstEnter" @click="()=>{
+        <div class="stepOverLayer position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" id="firstEnter"
+        v-if="store.state.isInit"
+        @click="()=>{
             store.dispatch('updateLayerStatus', false)
         }"></div>
     </div>
@@ -877,14 +890,6 @@ export default {
 @import '@/assets/styles/all.module.scss'
 .mapWrap
     height: 100vh
-.stepOverLayer
-    position: absolute
-    top: 0
-    left: 0
-    width: 100%
-    height: 100%
-    background: black
-    opacity: 0.5
 .mapWrap .ol-viewport
     height: 100vh
     width: 100vw

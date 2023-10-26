@@ -4,8 +4,7 @@ import router from '@/router/index.js'
 
 export default {
   setup(props, { emit }){
-    const state=reactive({
-    })
+    const state=reactive({})
     const route = router
     return {
       state,

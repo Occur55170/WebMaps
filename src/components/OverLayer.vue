@@ -22,6 +22,8 @@ export default {
     setup(props, { emit }) {
         const store = useStore()
         const route = router
+
+        // 透過ref綁定此元件，元件再以position的方式黏貼在父層上，在抓取此元件寬高做出白邊線效果
         const overLayCom = ref(null)
 
         const state = reactive({
@@ -39,11 +41,6 @@ export default {
                 return state.accordionListRef?.offsetWidth
             })
         })
-        function showClick(params) {
-            console.log($('.initOverLay').parent())
-            console.log(state.accordionListRefHeight)
-            console.log(state.accordionListRefWidth)
-        }
 
         onMounted(()=>{
             $('.initOverLay').parent().addClass('position-relative')
@@ -54,7 +51,6 @@ export default {
             store,
             route,
             overLayCom,
-            showClick
         }
     }
 }
