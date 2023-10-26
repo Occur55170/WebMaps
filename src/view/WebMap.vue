@@ -818,9 +818,9 @@ export default {
                     onDeleteLayerAll: () => {
                         state.deleteLightbox = true
                     },
-                }"
-                :setOpacity="({ action, value }) => {
-                    layerControl({ action, value })
+                    setOpacity: ({ action, value }) => {
+                        layerControl({ action, value })
+                    }
                 }" />
             </div>
 
