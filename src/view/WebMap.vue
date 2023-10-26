@@ -56,6 +56,7 @@ export default {
             map1LayerStatus: [],
             map2LayerStatus: [],
             temp: {
+                // 紀錄底圖預設索引值
                 map1BaseStatus: 0,
                 map2BaseStatus: 0,
             },
@@ -107,6 +108,18 @@ export default {
             state.map1.addControl(new ScaleLine({
                 units: 'metric', // 比例尺單位
             }));
+        }
+
+        function getCurrentMapData() {
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            const layers = target?.getLayers()?.getArray()
+            state.currentLayers = layers?.map(layer => {
+                return {
+                    label: layer.get('label'),
+                    id: layer.get('id'),
+                    visible: layer.getVisible(),
+                }
+            })
         }
 
         function addPoint(targetLng, targetLat) {
@@ -193,7 +206,7 @@ export default {
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // 避免加到有群組的母層
+                        // 避免加到群組的母層
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
@@ -435,6 +448,7 @@ export default {
                     targetLayers.getArray()[value.key].setOpacity(Number(value.value))
                     break;
             }
+
             getCurrentMapData()
         }
 
@@ -486,18 +500,6 @@ export default {
             })
         }
 
-        function getCurrentMapData() {
-            let target = state.targetNum == 1 ? state.map1 : state.map2
-            const layers = target?.getLayers()?.getArray()
-            state.currentLayers = layers?.map(layer => {
-                return {
-                    label: layer.get('label'),
-                    id: layer.get('id'),
-                    visible: layer.getVisible(),
-                }
-            })
-        }
-
         function conditionWrap() {
             state.conditionWrap = !state.conditionWrap
         }
@@ -512,6 +514,7 @@ export default {
                 console.log('error')
             }
         }
+
         function mapClickEvent(target) {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
@@ -619,6 +622,7 @@ export default {
                 state.temp.map1BaseStatus = 0
                 state.temp.baseMapList = getBaseMapAll()
 
+                // 各圖層帶入id
                 state.layers = value[1].map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
@@ -637,19 +641,20 @@ export default {
                     }
                 })
 
+                // console.log(state.layers)
+
                 nextTick(() => {
                     initMap()
                     getCurrentMapData()
                 })
             })
+
             state.comSize.wrapHeight = window.innerHeight
             state.comSize.wrapWidth = window.innerWidth
             window.onresize = (e) => {
                 state.comSize.wrapHeight = e.target.innerHeight
                 state.comSize.wrapWidth = e.target.innerWidth
             }
-
-            state.screenSizeWidth = window.innerWidth
         })
 
         return {
@@ -693,7 +698,7 @@ export default {
         <div class="SearchBar d-none d-sm-block position-absolute">
             <div class="d-flex align-items-center">
                 <img src="@/assets/logo.svg" alt="" class="me-5">
-                <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                <MapSourceOption class="mapSourceOption d-none d-sm-block"
                 :baseMapList="state.temp.baseMapList"
                 :onChangeBaseMaps="({ action, value }) => {
                     layerControl({ action, value })
@@ -795,7 +800,8 @@ export default {
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
-                <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
+                <LayerSelector class="position-absolute bottom-100 w-100"
+                v-bind="{
                     selectLock: state.selectLock,
                     currentLayers: state.currentLayers,
                     onClose: () => {
@@ -873,7 +879,6 @@ export default {
             :closeMapData="() => {
                 closeMapData()
             }"
-            :screenSizeWidth="state.screenSizeWidth"
             :popup="state.popup"
             :maxHeight="500" />
         </div>

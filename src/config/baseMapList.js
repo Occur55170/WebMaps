@@ -4,9 +4,9 @@ import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
 let baseMapDataList = []
 
 export default {
-    getBaseMapData: (value) => { // 可能傳入底圖的key值
+    // 傳入的是整數的話，表獲取某特定圖層，如果不是則是初始化帶入ajax獲取的底圖群組
+    getBaseMapData: (value) => {
         let layer
-        console.log(value)
         if (Number.isInteger(value)){
             layer = baseMapDataList[value]
         } else {

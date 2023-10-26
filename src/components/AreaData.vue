@@ -21,10 +21,6 @@ export default {
             type: Object,
             default: {}
         },
-        screenSizeWidth: {
-            Type: Number,
-            default: 0
-        }
     },
     setup(props, { emit }){
         const router = useRouter()

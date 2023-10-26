@@ -6,8 +6,8 @@ const routes = [
         component: () => import('@/view/Index.vue'),
     },
     {
-        path: `${VITE_URL}/map`,
-        name: 'map',
+        path: '/Wes',
+        name: 'Wes',
         component: () => import('@/view/WebMap.vue'),
     },
     {
@@ -16,8 +16,8 @@ const routes = [
         component: () => import('@/view/MapDetails.vue')
     },
     {
-        path: '/Wes',
-        name: 'Wes',
+        path: `${VITE_URL}/map`,
+        name: 'map',
         component: () => import('@/view/Wes.vue')
     },
     {
