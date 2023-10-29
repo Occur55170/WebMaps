@@ -188,7 +188,6 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            console.log(action)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -407,37 +406,37 @@ export default {
 
         function changeMapCount(qty) {
             if (state.mapCount === qty) { return }
-                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
-                    state.mapCount = qty
-                    let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
-                    let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    if (qty === 2) {
-                        state[otherMap] = new Map({
-                            target: otherMap,
-                            layers: [
-                                baseMapList.getBaseMapData(0),
-                                ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
-                            ],
-                            view: defaultView,
-                            controls: [],
-                        })
-                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
-                            ol3d = new OLCesium({
-                                map: state[otherMap],
-                            })
-                            ol3d.setEnabled(true)
-                            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
-                            let scene = ol3d.getCesiumScene({})
-                            scene.terrainProvider = Cesium.createWorldTerrain({})
-                        }
-                    }
-                    if (qty === 1) {
-                        state[otherMap] = null
-                        const element = document.getElementById(otherMap)
-                        while (element.firstChild) {
-                            element.removeChild(element.firstChild)
-                        }
-                    }
+            let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
+            state.mapCount = qty
+            let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
+            let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
+            if (qty === 2) {
+                state[otherMap] = new Map({
+                    target: otherMap,
+                    layers: [
+                        baseMapList.getBaseMapData(0),
+                        ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                    ],
+                    view: defaultView,
+                    controls: [],
+                })
+                if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
+                    ol3d = new OLCesium({
+                        map: state[otherMap],
+                    })
+                    ol3d.setEnabled(true)
+                    Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
+                    let scene = ol3d.getCesiumScene({})
+                    scene.terrainProvider = Cesium.createWorldTerrain({})
+                }
+            }
+            if (qty === 1) {
+                state[otherMap] = null
+                const element = document.getElementById(otherMap)
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild)
+                }
+            }
         }
 
         function changeTarget(value) {
@@ -802,17 +801,12 @@ export default {
                 @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
-                <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
+                <LayerSelector class="position-absolute bottom-100 w-100"
+                v-bind="{
                     selectLock: state.selectLock,
                     currentLayers: state.currentLayers,
                     onClose: () => {
                         state.layerSelect = false
-                    },
-                    onChangLayerVisible: (action) => {
-                        layerControl(action)
-                    },
-                    onChangeOrderLayer: ({ action, value }) => {
-                        layerControl({ action, value })
                     },
                     onLockLayer: () => {
                         state.selectLock = !state.selectLock
@@ -827,28 +821,41 @@ export default {
                     onDeleteLayerAll: () => {
                         state.deleteLightbox = true
                     },
-                    setOpacity: ({ action, value }) => {
+                    onChangLayerVisible: (action) => {
+                        layerControl(action)
+                    },
+                    onChangeOrderLayer: ({ action, value }) => {
                         layerControl({ action, value })
-                    }
+                    },
+                    onLayerControl: ({ action, value }) => {
+                        layerControl({ action, value })
+                    },
                 }" />
             </div>
-
             <mNavbar
-            :dimensionMapStatus="state.toSearchDimensionStatus"
-            :currentLayers="state.currentLayers"
-            :mapCount="state.mapCount"
-            :openConditionWrap="() => {
-                state.conditionWrap = !state.conditionWrap
-                state.layerSelect = false
+            v-bind="{
+                dimensionMapStatus: state.toSearchDimensionStatus,
+                currentLayers: state.currentLayers,
+                mapCount: state.mapCount,
+                openConditionWrap: () => {
+                    state.conditionWrap = !state.conditionWrap
+                    state.layerSelect = false
+                },
+                openLayerSelect: () => {
+                    state.layerSelect = !state.layerSelect
+                    state.conditionWrap = false
+                },
+                onLayerControl: ({ action, value }) => {
+                    layerControl({ action, value })
+                },
+                onChangeMapCount: (qty) => {
+                    changeMapCount(qty)
+                },
+                onChangeTarget:(value) => {
+                    changeTarget(value)
+                }
             }"
-            :openLayerSelect="() => {
-                state.layerSelect = !state.layerSelect
-                state.conditionWrap = false
-            }"
-            :onLayerControl="({ action, value }) => {
-                layerControl({ action, value })
-            }"
-            :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">

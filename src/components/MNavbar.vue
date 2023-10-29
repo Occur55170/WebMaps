@@ -32,6 +32,10 @@ export default {
             type: Function,
             default: () => {}
         },
+        onChangeMapCount: {
+            type: Function,
+            default: ()=>{}
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -124,10 +128,10 @@ export default {
             </li>
             <li>
                 <div class="text-white">
-                    <div class="navbarBtn" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
+                    <div class="navbarBtn" v-if="props.mapCount === 1" @click.prevent="props.onChangeMapCount(2)">
                         <img src="@/assets/img/icon/singleWindow-m.svg">
                     </div>
-                    <div class="navbarBtn" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
+                    <div class="navbarBtn" v-if="props.mapCount === 2" @click.prevent="props.onChangeMapCount(1)">
                         <img src="@/assets/img/icon/doubleWindow-m.svg">
                     </div>
                 </div>
