@@ -28,11 +28,11 @@ export default {
             <img src="@/assets/img/indexOverlay.png" class="d-block w-100" alt="">
         </div>
     </div>
-    <div class="tip d-flex flex-sm-nowrap flex-wrap justify-content-sm-around justify-content-start px-2 px-sm-0 py-3 fixed-bottom">
-        <span>台灣整合防災工程技術顧問有限公司</span>
-        <span>公司地址：236新北市土城區中央路三段281巷15弄14號</span>
-        <span>E-mail：salahayo3192@gmail.com</span>
-        <span>Copyright © 2023 台灣整合防災工程技術顧問有限公司</span>
+    <div class="tip d-flex flex-xl-nowrap flex-wrap justify-content-sm-around justify-content-start px-2 px-sm-0 py-3 fixed-bottom">
+        <span class="mb-2 mb-lg-0">管理單位：台灣整合防災工程技術顧問有限公司</span>
+        <span class="mb-2 mb-lg-0">公司地址：236新北市土城區中央路三段281巷15弄14號</span>
+        <span class="mb-2 mb-lg-0">E-mail：salahayo3192@gmail.com</span>
+        <span class="mb-2 mb-lg-0">Copyright © 2023 台灣整合防災工程技術顧問有限公司</span>
     </div>
   </div>
 </template>

@@ -85,7 +85,7 @@ export default {
                 <h1 class="text-brown fw-bold d-flex align-items-center" :class="state.mainTextColor">
                     <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1" />
                     <img src="@/assets/mapDetail/frame-2.png" v-else>
-                    聚落座標
+                    工程計畫
                 </h1>
 
                 <div class="d-flex justify-content-end" style="visibility: hidden;">
