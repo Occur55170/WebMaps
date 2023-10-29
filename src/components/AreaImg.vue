@@ -33,28 +33,25 @@ export default {
                         crossOrigin: "Anonymous",
                         source: new OSM(),
                     }),
-                    // FIXME: 加入座標icon
-                    // new Vector({
-                    //     source: new VectorSource({
-                    //         features: [
-                    //             new Feature({
-                    //                 geometry: new Point(props.coordinate),
-                    //                 name: 'Null Island',
-                    //                 population: 4000,
-                    //                 rainfall: 500,
-                    //             })
-                    //         ]
-                    //     }),
-                    //     style: new Style({
-                    //         image: new Icon({
-                    //             anchor: [0.5, 100],
-                    //             anchorXUnits: 'fraction',
-                    //             anchorYUnits: 'pixels',
-                    //             // 圖片連結需修改
-                    //             src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
-                    //         }),
-                    //     })
-                    // })
+                    new Vector({
+                        source: new VectorSource({
+                            features: [
+                                new Feature({
+                                    geometry: new Point(props.coordinate),
+                                    population: 4000,
+                                    rainfall: 500,
+                                })
+                            ]
+                        }),
+                        style: new Style({
+                            image: new Icon({
+                                anchor: [0.5, 100],
+                                anchorXUnits: 'fraction',
+                                anchorYUnits: 'pixels',
+                                src: currentPositionImg,
+                            }),
+                        })
+                    })
                 ],
                 view: new View({
                     projection: 'EPSG:4326',
