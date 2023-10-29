@@ -260,9 +260,7 @@ export default {
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="iframeCon mb-4 w-100 h-0 position-relative">
-                            {{ state.tribeData }}
-                            <!-- <iframe class="position-absolute top-0 start-0 w-100 h-100"
-                                src="https://www.youtube.com/embed/-a0EqPzXe34?si=KzHgUYaHk7sa2TIr"></iframe> -->
+                            <!-- {{ state.tribeData }} -->
                             <iframe class="position-absolute top-0 start-0 w-100 h-100" src="https://www.youtube.com/embed/-a0EqPzXe34?si=7OR7fBYwrucztVO0" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
                         </div>
                     </div>

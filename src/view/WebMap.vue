@@ -188,6 +188,7 @@ export default {
         }
 
         function layerControl({ action, value }) {
+            console.log(action)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -358,40 +359,6 @@ export default {
                         return true
                     })
                     break;
-                case 'changeMapCount':
-                    if (state.mapCount === value.qty) { return }
-                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
-                    state.mapCount = value.qty
-                    let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
-                    let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    if (value.qty === 2) {
-                        state[otherMap] = new Map({
-                            target: otherMap,
-                            layers: [
-                                baseMapList.getBaseMapData(0),
-                                ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
-                            ],
-                            view: defaultView,
-                            controls: [],
-                        })
-                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
-                            ol3d = new OLCesium({
-                                map: state[otherMap],
-                            })
-                            ol3d.setEnabled(true)
-                            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
-                            let scene = ol3d.getCesiumScene({})
-                            scene.terrainProvider = Cesium.createWorldTerrain({})
-                        }
-                    }
-                    if (value.qty === 1) {
-                        state[otherMap] = null
-                        const element = document.getElementById(otherMap)
-                        while (element.firstChild) {
-                            element.removeChild(element.firstChild)
-                        }
-                    }
-                    break;
                 case 'changeDimensionMap':
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta] = value
@@ -436,6 +403,41 @@ export default {
                     break;
             }
             getCurrentMapData()
+        }
+
+        function changeMapCount(qty) {
+            if (state.mapCount === qty) { return }
+                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
+                    state.mapCount = qty
+                    let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
+                    let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
+                    if (qty === 2) {
+                        state[otherMap] = new Map({
+                            target: otherMap,
+                            layers: [
+                                baseMapList.getBaseMapData(0),
+                                ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                            ],
+                            view: defaultView,
+                            controls: [],
+                        })
+                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
+                            ol3d = new OLCesium({
+                                map: state[otherMap],
+                            })
+                            ol3d.setEnabled(true)
+                            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
+                            let scene = ol3d.getCesiumScene({})
+                            scene.terrainProvider = Cesium.createWorldTerrain({})
+                        }
+                    }
+                    if (qty === 1) {
+                        state[otherMap] = null
+                        const element = document.getElementById(otherMap)
+                        while (element.firstChild) {
+                            element.removeChild(element.firstChild)
+                        }
+                    }
         }
 
         function changeTarget(value) {
@@ -512,6 +514,7 @@ export default {
                 console.log('error')
             }
         }
+
         function mapClickEvent(target) {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
@@ -660,6 +663,7 @@ export default {
             conditionWrap,
             closeMapData,
             moveToMap,
+            changeMapCount
         }
     }
 }
@@ -673,7 +677,8 @@ export default {
             :class="{
                 'w-100': state.map1?.getTarget() == 'map1',
                 'h-100': state.mapCount === 1,
-                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600)
+                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+                'middleMap': state.mapCount === 2
             }">
             </div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
@@ -681,7 +686,8 @@ export default {
             :class="{
                 'w-100': state.map2?.getTarget() == 'map2',
                 'h-100': state.mapCount === 1,
-                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600)
+                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+                'middleMap': state.mapCount === 2
             }">
             </div>
         </div>
@@ -704,9 +710,12 @@ export default {
                 mapCount: state.mapCount,
                 onChangeBaseMaps: ({ action, value }) => {
                     layerControl({ action, value })
+                },
+                onChangeMapCount: (qty) => {
+                    changeMapCount(qty)
                 }
             }"
-            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+            @onLayerControl="({ action, value }) => { layerControl(action, value) }"
             @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
@@ -911,6 +920,17 @@ export default {
     box-sizing: border-box
     border-radius: 10px
     border: 1px solid #088
+.middleMap
+    position: relative
+    &::after
+        content: ''
+        position: absolute
+        display: block
+        border: 2px solid #000
+        width: 40px
+        height: 40px
+        top: calc((100% - 40px)/2)
+        left: calc((100% - 40px)/2)
 @media (max-width: 600px)
     .m-Navbar
         z-index: 222
