@@ -72,7 +72,7 @@ export default {
             emit('conditionWrap')
         }
 
-        // FIXME: 手機板打開燈箱點擊燈箱外關閉
+        // TODO: 手機板打開燈箱點擊燈箱外關閉
 
         return {
             props,

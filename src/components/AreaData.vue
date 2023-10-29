@@ -41,6 +41,7 @@ export default {
                 return res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
+                state.type = 0
                 return false
             })
             return result
@@ -54,13 +55,15 @@ export default {
                 return res
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
+                state.type = 0
                 return false
             })
             return result
         }
 
         watch(props.popup, async (newVal)=>{
-            //FIXME: 結構優化
+            console.log(newVal)
+            //TODO: 結構優化
             if (newVal.popupData == "新竹縣原住民部落範圍"){
                 getTribeData(newVal.popupId).then((result)=>{
                     state.type = 1
@@ -163,7 +166,6 @@ export default {
         </div>
         <div v-if="state.type === 2">
             <div class="row mx-0 align-items-center px-2 py-4 position-relative">
-            <!-- FIXME: 紅字黃字 -->
                 <div class="row mx-0 mb-2" v-if="state.tribeData.event">
                     <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">事件:</div>
                     <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.tribeData.event }}</div>
