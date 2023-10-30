@@ -45,7 +45,7 @@ export default {
         }
 
         function downloadPassword() {
-            if(state.currentText === import.meta.env.VITE_APP_TEST){
+            if(state.currentText === 'EDJOEJOANNA'){
                 state.lightSwitch = false
                 window.open(state.targetUrl, '_blank')
             } else {
