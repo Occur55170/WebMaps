@@ -14,13 +14,7 @@ export function batchDownload(url, parameter) {
 }
 
 export default {
-    props: {
-        tribeId: {
-            Type: String,
-            default: 0
-        },
-        map: {}
-    },
+    props: {},
     setup(props, { emit }) {
         const router = useRouter()
         const route = useRoute()
@@ -38,7 +32,11 @@ export default {
             coordinates: computed(() => {
                 return (state.tribeData?.basicInformation?.coordinates) ? Object.entries(state.tribeData?.basicInformation?.coordinates) : null
             }),
-            planObj: {}
+            planObj: {},
+            lightSwitch: false,
+            currentText: '',
+            targetUrl: '',
+            loginFailed: false
         })
 
         const tableFilter = function (name) {
@@ -46,14 +44,23 @@ export default {
             return stringArray
         }
 
-        function goBack() {
-            router.push({
-                name: 'detail',
-                params: {
-                    id: route.params?.id
-                },
-            })
+        function downloadPassword() {
+            if(state.currentText === import.meta.env.VITE_APP_TEST){
+                state.lightSwitch = false
+                window.open(state.targetUrl, '_blank')
+            } else {
+                alert('密碼錯誤')
+                state.loginFailed = true
+            }
         }
+
+        function openLightBox(item) {
+            state.lightSwitch = true
+            state.targetUrl= item.url
+            state.currentText= ''
+            state.loginFailed = false
+        }
+
 
         onMounted(async () => {
             await $.ajax({
@@ -67,10 +74,12 @@ export default {
         })
 
         return {
+            route,
             router,
             state,
             tableFilter,
-            goBack
+            downloadPassword,
+            openLightBox
         }
     }
 }
@@ -89,8 +98,8 @@ export default {
                 </h1>
 
                 <div class="d-flex justify-content-end" style="visibility: hidden;">
-                    <button class="btn text-white me-2" style="background: rgba(30, 30, 30, 0.9);">全部下載</button>
-                    <button class="btn text-white" style="background: rgba(30, 30, 30, 0.9);">下載勾選項目</button>
+                    <button class="btn text-white me-2 black-deep">全部下載</button>
+                    <button class="btn text-white black-deep">下載勾選項目</button>
                 </div>
             </div>
             <div class="row mb-4">
@@ -110,8 +119,9 @@ export default {
                                 <div class="col-3 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
                                 <div class="col-6 bg-grey-light fw-bold">{{ tableFilter(item.name)[1] }}</div>
                                 <div class="col-3 bg-grey-light">
-                                    <a :href="item.url" class="btn py-1 text-white bg-grey" target="_blank">
-                                        <img src="@/assets/img/icon/download.svg" class="">
+                                    <a href="" class="btn py-1 text-white bg-grey" target="_blank"
+                                    @click.prevent="openLightBox(item)">
+                                        <img src="@/assets/img/icon/download.svg">
                                     </a>
                                 </div>
                             </div>
@@ -121,9 +131,29 @@ export default {
             </div>
             <div class="d-flex justify-content-center">
                 <a href="#" class="goBack btn bg-black text-white d-inline-block mb-4 cursor-pointer"
-                    @click.prevent="goBack()">
+                    @click.prevent="router.push({
+                        name: 'detail',
+                        params: {
+                            id: route.params?.id
+                        },
+                    })">
                     返回上頁
                 </a>
+            </div>
+        </div>
+        <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center"
+        v-if="state.lightSwitch"
+        @click.prevent="state.lightSwitch = false">
+            <div class="p-4 rounded bg-white d-flex align-items-center" @click.stop>
+                <span>密碼：</span>
+                <div class="mx-2" style="width: 300px;"
+                :class="{'error': state.loginFailed}">
+                    <input class="me-2 w-100 px-2 py-1" type="text" name="password" placeholder="請輸入下載密碼"
+                    v-model="state.currentText"
+                    @input="state.loginFailed = false">
+                </div>
+                <button class="btn bg-steel text-white"
+                @click.prevent="downloadPassword()">輸入</button>
             </div>
         </div>
     </div>
@@ -154,6 +184,16 @@ export default {
         display: flex
         justify-content: center
         align-items: center
-
+.error
+    position: relative
+    input
+        border: 1px solid red
+    &::after
+        content: '帳號或密碼錯誤；或使用者不存在。'
+        color: red
+        position: absolute
+        top: 100%
+        left: 0
+        font-size: 12px
 @media (max-width: 600px)
 </style>
