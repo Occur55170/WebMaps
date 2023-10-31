@@ -227,7 +227,7 @@ export default {
                                     const baseScale = Math.min(scaleX, scaleY);
 
                                     // 獲取當前地圖的解析度
-                                    const currentResolution = state.map1.getView().getResolution();
+                                    const currentResolution = state.map1.getView().getResolution()
 
                                     iconFeature.setStyle(
                                         new Style({
@@ -248,8 +248,7 @@ export default {
                                 true
                             );
                         }
-
-                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
+                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)
                         }
@@ -677,7 +676,7 @@ export default {
                 'w-100': state.map1?.getTarget() == 'map1',
                 'h-100': state.mapCount === 1,
                 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
-                'middleMap': state.mapCount === 2
+                'middleMap': state.map1?.getTarget()
             }">
             </div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
@@ -686,7 +685,7 @@ export default {
                 'w-100': state.map2?.getTarget() == 'map2',
                 'h-100': state.mapCount === 1,
                 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
-                'middleMap': state.mapCount === 2
+                'middleMap': state.map2?.getTarget()
             }">
             </div>
         </div>

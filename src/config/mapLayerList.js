@@ -224,9 +224,9 @@ export default {
                         source: new VectorSource({
                             name: layer.title,
                             features: [iconFeature],
+                            minzoom: 4,
+                            maxZoom: 18,
                         }),
-                        minzoom: 4,
-                        maxZoom: 18,
                         extra: {
                             url: layer.tiles_url
                         }

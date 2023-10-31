@@ -6,7 +6,6 @@ let baseMapDataList = []
 export default {
     getBaseMapData: (value) => { // 可能傳入底圖的key值
         let layer
-        console.log(value)
         if (Number.isInteger(value)){
             layer = baseMapDataList[value]
         } else {
