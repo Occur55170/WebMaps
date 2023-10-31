@@ -1,5 +1,6 @@
 import { Tile, Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
+import OSM from 'ol/source/OSM.js'
 
 let baseMapDataList = []
 

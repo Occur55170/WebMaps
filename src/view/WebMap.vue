@@ -248,7 +248,7 @@ export default {
                                 true
                             );
                         }
-                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位'].includes(targetLayer.get('label'))) {
+                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)
                         }
@@ -538,9 +538,16 @@ export default {
                     state.popup.coordinate = event.mapBrowserEvent.coordinate
                     if (selectIds[0] === '新竹縣原住民部落範圍') {
                         state.popup.popupId = selectedFeatures.get('編號')
+                        return
                     }
                     if (selectIds[0] === '近年歷史災害82處部落點位') {
                         state.popup.popupId = selectIds[1]
+                        return
+                    }
+                    if (selectIds[0] === '雨量站') {
+                        // FIXME:
+                        state.popup.popupId = selectIds[1]
+                        return
                     }
                 } else {
                     target.removeOverlay(state.popup.overlay)
@@ -877,7 +884,7 @@ export default {
             </div>
         </div>
 
-        <div id="popup" class="position-absolute bottom-0"
+        <div id="popup" class="popup position-absolute bottom-0"
         :ref="(e) => {
             state.popup.nodeRef = e
         }">
@@ -919,6 +926,8 @@ export default {
 .middleLine
     width: 5px
     background: $blue-steel
+.popup
+    z-index: 9999
 .areaData
     width: 450px
     max-height: 550px

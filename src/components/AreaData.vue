@@ -61,6 +61,20 @@ export default {
             return result
         }
 
+        async function getRainfallStation (stationName) {
+            const result = await $.ajax({
+                url: `https://api.edtest.site/rainData?stationName=${stationName}`,
+                method: "GET"
+            }).done(res => {
+                return res
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+                state.type = 0
+                return false
+            })
+            return result
+        }
+
         watch(props.popup, async (newVal)=>{
             console.log(newVal)
             //TODO: 結構優化
@@ -78,6 +92,15 @@ export default {
                 })
                 return
             }
+            if (props.popup.popupData == "雨量站"){
+                getDisasterData(`雨量站.${ props.popup.popupId }`).then((result)=>{
+                    state.type = 3
+                    if (result.data !== null) {
+                        state.tribeData = result.data
+                    }
+                })
+                return
+            }
         })
 
         onMounted(async ()=>{
@@ -92,6 +115,15 @@ export default {
                 getDisasterData(`近年歷史災害82處部落點位.${ props.popup.popupId }`).then((result)=>{
                     state.type = 2
                     state.tribeData = result.data
+                })
+                return
+            }
+            if (props.popup.popupData == "雨量站"){
+                getRainfallStation(`雨量站.${ props.popup.popupId }`).then((result)=>{
+                    state.type = 3
+                    if (result.data !== null) {
+                        state.tribeData = result.data
+                    }
                 })
                 return
             }
@@ -197,39 +229,45 @@ export default {
             </div>
         </div>
         <div v-if="state.type === 3">
-            <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
-                <p>雨量站</p>
+            <div class="p-2 p-sm-3">
+                <p class="text-start px-0 fw-bold">雨量站</p>
+                <!-- {{ state.tribeData.viewStation }} -->
+                <hr>
+                <div class="p-0 p-sm-2">
+                    <p>觀測時間: {{ state.tribeData?.viewDatetime }}</p>
+                    <p>單位:mm </p>
+                    <table class="rainfall border-bottom border-grey w-100">
+                        <thead>
+                            <tr class="text-center">
+                                <td class="bg-blueDeep text-white border border-white p-2">10分鐘</td>
+                                <td class="bg-blueDeep text-white border border-white p-2">時雨量</td>
+                                <td class="bg-blueDeep text-white border border-white p-2">3小時</td>
+                                <td class="bg-blueDeep text-white border border-white p-2">6小時</td>
+                                <td class="bg-blueDeep text-white border border-white p-2">12小時</td>
+                                <td class="bg-blueDeep text-white border border-white p-2">24小時</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center">
+                                <td class="p-2">{{ state.tribeData?.min_10 }}</td>
+                                <td class="p-2">{{ state.tribeData?.hour_1 }}</td>
+                                <td class="p-2">{{ state.tribeData?.hour_3 }}</td>
+                                <td class="p-2">{{ state.tribeData?.hour_6 }}</td>
+                                <td class="p-2">{{ state.tribeData?.hour_12 }}</td>
+                                <td class="p-2">{{ state.tribeData?.hour_24 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <p>觀測時間: 2023-10-31 12:18:00</p>
-            <p>單位:mm </p>
-            <table>
-                <thead>
-                    <th>
-                        <tr>
-                            <td>10分鐘</td>
-                            <td>時雨量</td>
-                            <td>3小時</td>
-                            <td>6小時</td>
-                            <td>9小時</td>
-                            <td>12小時</td>
-                        </tr>
-                    </th>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 </template>
 
 <style lang="sass" scoped>
 @import '@/assets/styles/all.module.scss'
+@media (max-width:600px)
+    .rainfall
+        td
+            font-size: 12px
 </style>
