@@ -6,13 +6,7 @@ import frame1 from '@/assets/mapDetail/frame-1.png';
 import frame2 from '@/assets/mapDetail/frame-2.png';
 
 export default {
-    props: {
-        tribeId: {
-            Type: String,
-            default: 0
-        },
-        map: {}
-    },
+    props: {},
     setup(props, { emit }) {
         const router = useRouter()
         const route = useRoute()
@@ -104,6 +98,10 @@ export default {
                         </li>
                         <li class="text-center mb-5" v-if="state.tribeData.engineeringVisionPosterThumbnail">
                             <a href="#section7" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
+                                :class="state.mainTextColor">文化地景圖</a>
+                        </li>
+                        <li class="text-center mb-5" v-if="state.tribeData.engineeringVisionPosterThumbnail">
+                            <a href="#section8" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">願景海報</a>
                         </li>
                         <li class="text-center mb-5">
@@ -147,9 +145,6 @@ export default {
                     <div class="tribeBaseData d-flex flex-wrap flex-sm-nowrap mx-0 mb-5 justify-content-between d-flex">
                         <div class="section py-4 px-0 text-center">
                             <p class="mb-2 fs-5 fw-bold" :class="state.mainTextColor">
-                                <!-- TODO: <img :src="`@/assets/mapDetail/frame-${2}.png`"> -->
-                                <!-- <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1"> -->
-                                <!-- <img src="@/assets/mapDetail/frame-2.png" v-else> -->
                                 <img :src="state.type === 1 ? frame1 : frame2" />
                                 人口戶數
                             </p>
@@ -265,6 +260,17 @@ export default {
                         </div>
                     </div>
                     <div class="section mb-5" id="section7" v-if="state.tribeData.engineeringVisionPosterThumbnail">
+                        <div class="fw-bold fs-5" :class="state.mainTextColor">
+                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
+                            <img src="@/assets/mapDetail/frame-2.png" v-else>
+                            文化地景圖
+                        </div>
+                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
+                        <div class="mb-4">
+                            <img class="mx-auto mt-4 d-block" style="width: 80%;" :src="state.tribeData.culturalLandscapeOrigin" alt="">
+                        </div>
+                    </div>
+                    <div class="section mb-5" id="section8" v-if="state.tribeData.engineeringVisionPosterThumbnail">
                         <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
                             <img src="@/assets/mapDetail/frame-2.png" v-else>

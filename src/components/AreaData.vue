@@ -196,6 +196,37 @@ export default {
                 </div>
             </div>
         </div>
+        <div v-if="state.type === 3">
+            <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
+                <p>雨量站</p>
+            </div>
+            <p>觀測時間: 2023-10-31 12:18:00</p>
+            <p>單位:mm </p>
+            <table>
+                <thead>
+                    <th>
+                        <tr>
+                            <td>10分鐘</td>
+                            <td>時雨量</td>
+                            <td>3小時</td>
+                            <td>6小時</td>
+                            <td>9小時</td>
+                            <td>12小時</td>
+                        </tr>
+                    </th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td>0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </template>
 

@@ -1,39 +1,30 @@
 <script>
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
 import $ from 'jquery'
-import { useStore } from 'vuex'
-
 import { Map, View, Feature } from 'ol'
-import Select from 'ol/interaction/Select'
-import { click } from 'ol/events/condition'
-import { ScaleLine } from 'ol/control.js'
+import Select from 'ol/interaction/Select';
+import { click } from 'ol/events/condition';
 import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
-import { Tile, Vector } from 'ol/layer.js'
-import { Point } from 'ol/geom.js'
 import { Icon, Style } from 'ol/style.js'
-
-import OLCesium from 'olcs/OLCesium.js'
-
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { Point } from 'ol/geom.js'
+import OLCesium from 'olcs/OLCesium.js';
 import 'ol/ol.css'
-import 'ol-ext/dist/ol-ext.css'
-import Overlay from 'ol/Overlay.js'
-import currentPositionImg from '@/assets/img/icon/currentPosition.svg'
-
 import mapLayerList from '@/config/mapLayerList'
 import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
-
+import 'ol-ext/dist/ol-ext.css'
+import * as olTilecoord from 'ol/tilecoord'
+import { get as getProjection } from 'ol/proj'
+import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
+import Overlay from 'ol/Overlay.js'
 export default {
     props: {},
     setup(props, { emit }) {
-        const getMapLayers = mapLayerList
-        const baseMaps = baseMapList
-        const store = useStore()
+        const mapLayers = mapLayerList
         const state = reactive({
-            // defaultCenter: [120.971859, 24.801583],
-            // defaultCenterZoom: 14,
             defaultCenter: [121.326776, 24.655499],
-            defaultCenterZoom: 14,
+            defaultCenterZoom: 9,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: false,
@@ -71,28 +62,24 @@ export default {
             }),
             ol3d: null,
             selectValueTemp: 0,
-            popup: {
+            areaData: {
                 nodeRef: null,
                 overlay: null,
-                popupId: 0,
-                coordinate: [],
-                popupData: '',
+                tribeAreaData: {},
             },
             comSize: {
                 wrapHeight: '',
                 wrapWidth: '',
+                conditionCom: {},
             },
-            tribeQuery: {},
+            selectLayerOption: {}
         })
-
         let ol3d = null
-
         const defaultView = new View({
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
         })
-
         // 初始化地圖
         function initMap() {
             state.map1 = new Map({
@@ -103,12 +90,48 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-
-            state.map1.addControl(new ScaleLine({
-                units: 'metric', // 比例尺單位
-            }));
+            const extent = [117.1595, 21.2646, 123.9804, 26.5353];
+            const xCenter = (extent[2] + extent[0]) / 2;
+            const yCenter = (extent[3] + extent[1]) / 2;
+            const iconFeature = new Feature({
+                geometry: new Point([xCenter, yCenter]),
+            });
+            const vectorLayer = new VectorLayer({
+                source: new VectorSource({
+                    features: [iconFeature]
+                }),
+                minZoom: 0,
+                maxZoom: 18,
+            });
+            state.map1.addLayer(vectorLayer)
+            const gifUrl = 'http://localhost:5173/forecast.gif';
+            const gif = gifler(gifUrl);
+            const extentWidth = extent[2] - extent[0];
+            const extentHeight = extent[3] - extent[1];
+            gif.frames(
+                document.createElement('canvas'),
+                function (ctx, frame) {
+                    const scaleX = extentWidth / frame.width;
+                    const scaleY = extentHeight / frame.height;
+                    const baseScale = Math.min(scaleX, scaleY);
+                    console.log(baseScale)
+                    // 獲取當前地圖的解析度
+                    const currentResolution = state.map1.getView().getResolution();
+                    iconFeature.setStyle(
+                        new Style({
+                            image: new Icon({
+                                img: ctx.canvas,
+                                imgSize: [frame.width, frame.height],
+                            }),
+                        })
+                    );
+                    ctx.clearRect(0, 0, frame.width, frame.height);
+                    ctx.drawImage(frame.buffer, frame.x, frame.y);
+                    // state.map1.render();
+                },
+                true
+            );
         }
-
         function addPoint(targetLng, targetLat) {
             const marker = new Vector({
                 source: new VectorSource({
@@ -125,15 +148,14 @@ export default {
                         anchor: [0.5, 100],
                         anchorXUnits: 'fraction',
                         anchorYUnits: 'pixels',
-                        src: currentPositionImg,
+                        // FIXME: 圖片連結需修改
+                        src: 'https://www.ockert-cnc.de/wp-content/uploads/2016/12/map-marker-icon-100x100.png',
                     }),
                 })
             })
-
             let target = state.targetNum == 1 ? 'map1' : 'map2'
             state[target].addLayer(marker)
         }
-
         function mapControl({ action, value }) {
             let mainMap = state.map1?.getTarget() == null ? 'map2' : 'map1'
             let View = state[mainMap].getView()
@@ -186,14 +208,15 @@ export default {
                     break;
             }
         }
-
         function layerControl({ action, value }) {
+            // console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
+            console.log(value.id)
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // 避免加到群組的母層
+                        // 避免加到有群組的母層
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
@@ -205,52 +228,12 @@ export default {
                             onMapLayerStatus('delete', target.getTarget(), value.id)
                         }
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
-                        let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                        console.log(state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
+                        let targetLayer = mapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                        if (targetLayer.get('label')?.includes('雷達回波預測')) {
-                            var source = targetLayer.getSource();
-                            var iconFeature = source.getFeatures()[0]
-                            const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
-
-                            // TODO: 等待api 確定後切換成api路徑
-                            const gifUrl = targetLayer.get('extra').url;
-                            const gif = gifler(gifUrl);
-
-                            const extentWidth = extent[2] - extent[0];
-                            const extentHeight = extent[3] - extent[1];
-
-                            gif.frames(
-                                document.createElement('canvas'),
-                                function (ctx, frame) {
-                                    const scaleX = extentWidth / frame.width;
-                                    const scaleY = extentHeight / frame.height;
-                                    const baseScale = Math.min(scaleX, scaleY);
-
-                                    // 獲取當前地圖的解析度
-                                    const currentResolution = state.map1.getView().getResolution();
-
-                                    iconFeature.setStyle(
-                                        new Style({
-                                            image: new Icon({
-                                                img: ctx.canvas,
-                                                imgSize: [frame.width, frame.height],
-                                                opacity: 0.8,
-                                                scale: baseScale / currentResolution
-                                            }),
-                                        })
-                                    );
-
-                                    ctx.clearRect(0, 0, frame.width, frame.height);
-                                    ctx.drawImage(frame.buffer, frame.x, frame.y);
-
-                                    target.render();
-                                },
-                                true
-                            );
-                        }
-
-                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
-                            mapClickEvent(target, targetLayer.label)
+                        if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
+                            // FIXME: 結構優化
+                            mapClickEvent(target, value.id)
                             addSelectElement(value)
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
@@ -262,25 +245,23 @@ export default {
                                 target.removeLayer(node);
                             });
                         }
-
-                        const idMappings = {
-                            'node9_subNode0_nestedSubNode': 'node9_subNode0_nestedSubNode',
-                            'node12_subNode1_nestedSubNode': 'node12_subNode1_nestedSubNode',
-                        };
-                        const idToRemove = idMappings[value.id] || value.id;
-                        removeLayersById(idToRemove);
-                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
-                            // FIXME: popup 修改
-                            // TODO: 結構優化
-                            addSelectElement(value);
-                            state.popup.popupId = 0
-                            state.popup.popupData = '';
-                            if (state.popup.overlay) {
-                                target.removeOverlay(state.popup.overlay);
-                                state.popup.overlay = null;
+                        if (value.id.includes('node9_subNode0_nestedSubNode')) {
+                            removeLayersById('node9_subNode0_nestedSubNode');
+                        } else if (value.id.includes('node12_subNode1_nestedSubNode')) {
+                            removeLayersById('node12_subNode1_nestedSubNode');
+                        } else {
+                            const layerToRemove = layersAry.find(element => element.get('id') === value.id);
+                            if (layerToRemove) {
+                                target.removeLayer(layerToRemove);
                             }
                         }
-
+                        if (state.layers[value.nodeIndex].group_layers.some(node=> node.layer_type === "WFS")) {
+                            // FIXME: 結構優化
+                            addSelectElement(value)
+                            state.areaData.tribeAreaData = {}
+                            target.removeOverlay(state.areaData.overlay)
+                            state.areaData.overlay = null
+                        }
                         onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
                     break;
@@ -303,30 +284,18 @@ export default {
                     break;
                 case 'changeOrder':
                     if (state.selectLock) { return }
-                    let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(value.id)
-                    let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
+                    let layeredIndex = mapLayerList.getLayerIndex(value.id)
+                    let nowTileLayer = mapLayers.getLayer(state.layers[layeredIndex.nodeIndex].group_layers[layeredIndex.subNodeIndex], layeredIndex.nestedSubNodeIndex, value.id)
                     if (value.movement === 'up') {
                         if (value.key + 1 == targetLayers.getArray().length) { return }
-                        let obj = {
-                            checked: false,
-                            nodeIndex: nodeIndex,
-                            subNodeIndex: subNodeIndex,
-                            nestedSubNodeIndex: nestedSubNodeIndex,
-                            id: value.id
-                        }
-                        layerControl({ action: 'layerMode', value: obj })
+                        value.checked = false
+                        layerControl({ action: 'layerMode', value: value })
                         targetLayers.insertAt(value.key + 1, nowTileLayer)
                     }
                     if (value.movement === 'down') {
                         if (value.key - 1 == 0) { return }
-                        let obj = {
-                            checked: false,
-                            nodeIndex: nodeIndex,
-                            subNodeIndex: subNodeIndex,
-                            nestedSubNodeIndex: nestedSubNodeIndex,
-                            id: value.id
-                        }
-                        layerControl({ action: 'layerMode', value: obj })
+                        value.checked = false
+                        layerControl({ action: 'layerMode', value: value })
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
                     break;
@@ -350,7 +319,6 @@ export default {
                     })
                     let layersAry = target?.getLayers().getArray()
                     targetLayers.insertAt(0, newTileLayer)
-
                     layersAry.forEach(element => {
                         if (element.get('type') == 'base' && element.get('baseId') !== value.baseId) {
                             target.removeLayer(element)
@@ -369,7 +337,7 @@ export default {
                             target: otherMap,
                             layers: [
                                 baseMapList.getBaseMapData(0),
-                                ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                                ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
                             ],
                             view: defaultView,
                             controls: [],
@@ -396,12 +364,6 @@ export default {
                     let ta = state.targetNum == 1 ? 'map1' : 'map2'
                     state.dimensionMap[ta] = value
                     if (value === '3D') {
-                        // 先移除82處部落，後面補回
-                        let layersArray = targetLayers.getArray()
-                        const layerToRemove = layersArray.find(element => element.get('label').includes('近年歷史災害82處部落點位'))
-                        if (layerToRemove) {
-                            state[`map${state.targetNum}`].removeLayer(layerToRemove);
-                        }
                         ol3d = new OLCesium({
                             map: target,
                         })
@@ -413,31 +375,18 @@ export default {
                     } else {
                         ol3d.setEnabled(false)
                         state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
-                        state[`map${state.targetNum}LayerStatus`].forEach(node => {
-                            let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(node)
-                            let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
-                            if (nowTileLayer.get('label').includes('近年歷史災害82處部落點位')) {
-                                layerControl({
-                                    action: 'layerMode', value: {
-                                        checked: true,
-                                        nodeIndex: nodeIndex,
-                                        subNodeIndex: subNodeIndex,
-                                        nestedSubNodeIndex: nestedSubNodeIndex,
-                                        id: node
-                                    }
-                                })
-                            }
-                            return node
-                        })
                     }
                     break;
                 case 'setOpacity':
-                    targetLayers.getArray()[value.key].setOpacity(Number(value.value))
+                    if (targetLayers.getArray()[value.key].getOpacity() !== 1) {
+                        targetLayers.getArray()[value.key].setOpacity(1)
+                    } else {
+                        targetLayers.getArray()[value.key].setOpacity(0.5)
+                    }
                     break;
             }
             getCurrentMapData()
         }
-
         function changeTarget(value) {
             state.targetNum = value
             let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
@@ -445,32 +394,29 @@ export default {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
-
-                    // TODO: 優化，把node0_subNode4_nestedSubNodeundefined移到最後面
+                    // TODO: 優化，靶node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
                         otherLayers = [...a, 'node0_subNode4_nestedSubNodeundefined']
                     }
-
                     let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
                     state[`map${value}`] = new Map({
                         target: `map${value}`,
                         layers: [
                             baseMapList.getBaseMapData(state.temp[`map${state.targetNum}BaseStatus`]),
-                            ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
+                            ...otherLayersData.map(node => mapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
                         ],
                         view: defaultView,
                         controls: [],
                     })
-
                     mapClickEvent(state[`map${value}`])
+                    // FIXME: 切換3D會有問題跳回平面
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
                         })
                         ol3d.setEnabled(true)
                     }
-
                 }
                 // 非目標地圖的刪除
                 if (state[delToMap]) {
@@ -485,7 +431,6 @@ export default {
                 getCurrentMapData()
             })
         }
-
         function getCurrentMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             const layers = target?.getLayers()?.getArray()
@@ -497,11 +442,9 @@ export default {
                 }
             })
         }
-
         function conditionWrap() {
             state.conditionWrap = !state.conditionWrap
         }
-
         function onMapLayerStatus(action, target, id) {
             if (action === 'add') {
                 state[`${target}LayerStatus`].push(id)
@@ -512,101 +455,126 @@ export default {
                 console.log('error')
             }
         }
-        function mapClickEvent(target) {
+        function mapClickEvent(target, vid = 'node0_subNode4_nestedSubNodeundefined') {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
-                condition: click,
+                condition: click
             })
             target.addInteraction(selector)
             selector.on('select', (event) => {
-                let selectedFeatures = event.selected[0]
-                if (selectedFeatures) {
-                    state.popup.overlay = new Overlay({
-                        element: state.popup.nodeRef,
+                // TODO: 截圖結構修改
+                let selectedFeatures = event.selected
+                if (event.selected[0]) {
+                    state.areaData.overlay = new Overlay({
+                        element: state.areaData.nodeRef,
                         autoPan: true,
                         autoPanAnimation: {
                             duration: 250
                         }
-                    })
-                    state.popup.overlay.setPosition(event.mapBrowserEvent.coordinate)
-                    target.addOverlay(state.popup.overlay)
-                    // TODO: 截圖結構修改
-                    // TODO: 優化結構，獲取state.popupId.overlay方式修正，考慮整包selectedFeatures放進去
-                    let selectIds = selectedFeatures.getId().split('.')
-                    state.popup.popupData = selectIds[0]
-                    state.popup.coordinate = event.mapBrowserEvent.coordinate
-                    if (selectIds[0] === '新竹縣原住民部落範圍') {
-                        state.popup.popupId = selectedFeatures.get('編號')
-                    }
-                    if (selectIds[0] === '近年歷史災害82處部落點位') {
-                        state.popup.popupId = selectIds[1]
+                    });
+                    target.addOverlay(state.areaData.overlay);
+                    state.areaData.overlay.setPosition(event.mapBrowserEvent.coordinate)
+                    // TODO: 重置area小地圖id
+                    state.areaData.tribeAreaData = {}
+                    // TODO: 優化結構，獲取state.areaData.overlay方式修正，考慮整包selectedFeatures放進去
+                    if (selectedFeatures[0].get('編號') === undefined) {
+                        state.areaData.tribeAreaData = selectedFeatures[0]
+                    } else {
+                        selectedFeatures.forEach((feature) => {
+                            let properties = feature.getProperties()
+                            Object.entries(properties).forEach(node => {
+                                const key = node[0], value = node[1]
+                                state.areaData.tribeAreaData[key] = value
+                            })
+                        })
                     }
                 } else {
-                    target.removeOverlay(state.popup.overlay)
-                    state.popup.overlay = null
-                    state.popup = {
-                        nodeRef: null,
-                        overlay: null,
-                        popupId: 0,
-                        coordinate: [],
-                        popupData: '',
-                    }
+                    state.areaData.tribeAreaData = {}
+                    target.removeOverlay(state.areaData.overlay)
+                    state.areaData.overlay = null
                 }
             })
         }
-
         function closeMapData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
-            target.removeOverlay(state.popup.overlay)
-            state.popup.overlay = null
+            target.removeOverlay(state.areaData.overlay)
+            state.areaData.overlay = null
         }
-
-        // TODO: 優化 移除id判斷?
+        // FIXME: 優化
+        // FIXME: 加入下拉式選單
         function addSelectElement(value) {
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
             if (id === 'node4_subNode0_nestedSubNodeundefined') {
                 $.ajax({
-                    url: 'https://api.edtest.site/tribeQuery',
+                    url: "https://api.edtest.site/tribes",
                     method: 'GET',
                     success: (res) => {
-                        state.tribeQuery = res
+                        state.selectLayerOption[id] = res
                     },
                     error: (res) => {
                         console.log(res)
                     }
                 })
             }
-        }
-
-        function moveToMap(val) {
-            let obj = {
-                action: 'moveTo',
-                value: {
-                    xAxis: val.WGS84.lng,
-                    yAxis: val.WGS84.lat
-                }
+            if (id === 'node7_subNode0_nestedSubNodeundefined') {
+                $.ajax({
+                    url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=近年歷史災害82處部落點位&STYLE=default",
+                    method: 'GET',
+                    success: (res) => {
+                        state.selectLayerOption[id] = res.features
+                    },
+                    error: (res) => {
+                        console.log(res.features)
+                    }
+                })
             }
-            mapControl(obj)
         }
-
-        onMounted(async () => {
-            let getBaseData = $.ajax({
+        function moveToMap(val) {
+            // FIXME: node7_subNode0_nestedSubNodeundefined 改成判斷id
+            // FIXME: 優化
+            if (Object.keys(state.selectLayerOption)[0] === 'node4_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84 !== null) {
+                let obj = {
+                    action: 'moveTo',
+                    value: {
+                        xAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lng,
+                        yAxis: state.selectLayerOption['node4_subNode0_nestedSubNodeundefined'][Number(val.target.value)].coordinates.WGS84.lat
+                    }
+                }
+                mapControl(obj)
+            }
+            if (Object.keys(state.selectLayerOption)[0] === 'node7_subNode0_nestedSubNodeundefined' && state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0] !== null) {
+                let obj = {
+                    action: 'moveTo',
+                    value: {
+                        xAxis: state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[0],
+                        yAxis: state.selectLayerOption['node7_subNode0_nestedSubNodeundefined'][val.target.value].geometry.coordinates[1]
+                    }
+                }
+                mapControl(obj)
+            }
+        }
+        function getBaseData() {
+            return $.ajax({
                 url: 'https://api.edtest.site/underLayers',
-                method: 'GET',
+                method: 'GET'
             }).done(res => {
                 return res
             })
-
-            let getLayerData = $.ajax({
+        }
+        function getLayerData() {
+            return $.ajax({
                 url: 'https://api.edtest.site/layers',
-                method: 'GET',
+                method: "GET"
             }).done(res => {
-                return res
+                return (res)
             })
-
-            Promise.all([getBaseData, getLayerData]).then((value) => {
-                // TODO: 優化
+        }
+        onMounted(async () => {
+            let a = getBaseData()
+            let b = getLayerData()
+            Promise.all([a, b]).then((value) => {
+                // TODO: pref
                 let result = value[0].data.map((node, nodeIndex) => {
                     return {
                         mapType: 'base',
@@ -618,12 +586,10 @@ export default {
                 baseMapList.setBaseMapData(result)
                 state.temp.map1BaseStatus = 0
                 state.temp.baseMapList = getBaseMapAll()
-
                 state.layers = value[1].map((node, index) => {
                     node.group_layers.forEach((sub, subIndex) => {
                         let subNodeIndex = subIndex, nestedSubNodeIndex = undefined
                         sub.id = `node${index}_subNode${subNodeIndex}_nestedSubNode${nestedSubNodeIndex}`
-
                         if (!(sub.single_tiles)) {
                             sub.tiles_list.forEach((nestedSub, nestedSubIndex) => {
                                 nestedSubNodeIndex = nestedSubIndex
@@ -636,7 +602,6 @@ export default {
                         value: index,
                     }
                 })
-
                 nextTick(() => {
                     initMap()
                     getCurrentMapData()
@@ -649,25 +614,23 @@ export default {
                 state.comSize.wrapWidth = e.target.innerWidth
             }
         })
-
         return {
             state,
             props,
-            store,
             mapControl,
             layerControl,
             changeTarget,
             conditionWrap,
             closeMapData,
+            addSelectElement,
             moveToMap,
         }
     }
 }
 </script>
-
 <template>
     <div>
-        <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
+        <div class="w-100 d-flex flex flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <!-- TODO: 寬度設定是否調整 -->
             <div id="map1"
                 :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100': state.mapCount === 1, 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600) }">
@@ -678,43 +641,38 @@ export default {
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-        @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
         <div class="SearchBar d-none d-sm-block position-absolute">
             <div class="d-flex align-items-center">
-                <img src="@/assets/logo.svg" alt="" class="me-5">
-                <mapSourceOption class="mapSourceOption d-none d-sm-block"
-                :baseMapList="state.temp.baseMapList"
-                :onChangeBaseMaps="({ action, value }) => {
-                    layerControl({ action, value })
-                }" />
+                <img src="@/assets/logo.svg" alt="" class="mb-2">
+                <ul>
+                    <li class="me-2 d-flex align-items-center">
+                        <mapSourceOption class="mapSourceOption d-none d-sm-block" :baseMapList="state.temp.baseMapList"
+                            :onChangeBaseMaps="({ action, value }) => {
+                                layerControl({ action, value })
+                            }" />
+                    </li>
+                </ul>
             </div>
-            <SearchBar
-            class="mt-4"
-            v-bind="{
-                dimensionMapStatus: state.toSearchDimensionStatus,
-                currentLayers: state.currentLayers,
-                mapCount: state.mapCount,
-                onChangeBaseMaps: ({ action, value }) => {
+            <SearchBar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
+                :mapCount="state.mapCount" :onChangeBaseMaps="({ action, value }) => {
                     layerControl({ action, value })
-                }
-            }"
-            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-            @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
+                @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
-
         <div class="conditionCom d-none d-sm-block position-absolute">
-            <div class="mb-4">
+            <div class="mb-2">
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4"
-                v-if="state.conditionWrap"
-                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
-                    <condition
-                    v-bind="{
-                        tribeQuery: state.tribeQuery,
+                <div class="mb-4" style="max-height: 50%;"
+                :ref="(e) => {
+                    state.comSize.conditionCom = e
+                }"
+                v-if="state.conditionWrap">
+                    <condition v-bind="{
+                        selectLayerOption: state.selectLayerOption,
                         mapLayers: state.mapLayers,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -727,21 +685,17 @@ export default {
                             moveToMap(val)
                         }
                     }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                    />
+                    @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
-                <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
-
             <div>
                 <button class="border-0 w-100 rounded-4 bg-steel text-white text-center p-2 fw-bold fs-5"
                     v-if="!state.layerSelect" @click="state.layerSelect = true">
                     已選擇的圖層
                 </button>
-                <div
-                v-if="state.layerSelect">
-                    <LayerSelector
-                    v-bind="{
+                <div v-if="state.layerSelect">
+                    <layerSelect v-bind="{
                         selectLock: state.selectLock,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -765,29 +719,49 @@ export default {
                         },
                     }" />
                 </div>
-                <OverLayer :text="'顯示已經選擇的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
         </div>
-
-        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
-            <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
-                <condition class="w-100"
-                v-if="state.conditionWrap"
-                v-bind="{
-                    mapLayers: state.mapLayers,
-                    currentLayers: state.currentLayers,
-                    onClose: () => {
-                        state.conditionWrap = false
-                    },
-                    showSelectLayerValue: (val) => {
-                        state.selectValueTemp = val
-                    }
-                }"
-                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+        <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
+            <div class="p-4 rounded bg-white" style="width: 250px;">
+                <p class="text-center fw-bold">是否要刪除全部圖層</p>
+                <div class=" d-flex justify-content-around">
+                    <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
+                        layerControl({
+                            action: 'selectLayerMode',
+                            value: {
+                                layerName: 'all'
+                            }
+                        })
+                        state.deleteLightbox = false
+                    }">確定</button>
+                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
+                        state.deleteLightbox = false
+                    }">取消</button>
+                </div>
             </div>
+        </div>
+        <div id="popup" class="position-absolute bottom-0" :ref="(e) => {
+            state.areaData.nodeRef = e
+        }">
+            <areaData class="areaData" v-if="state.areaData?.overlay" :closeMapData="() => {
+                closeMapData()
+            }" :tribeAreaData="state.areaData.tribeAreaData" :maxHeight="500"
+                :coordinate="state.areaData.overlay.get('position')" />
+        </div>
+        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
+            <condition class="position-absolute bottom-100 w-100" v-if="state.conditionWrap" v-bind="{
+                mapLayers: state.mapLayers,
+                currentLayers: state.currentLayers,
+                onClose: () => {
+                    state.conditionWrap = false
+                },
+                showSelectLayerValue: (val) => {
+                    state.selectValueTemp = val
+                }
+            }" @onMapControl="({ action, value }) => { mapControl({ action, value }) }"
+                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             <div v-if="state.layerSelect">
-                <LayerSelector class="position-absolute bottom-100 w-100"
-                v-bind="{
+                <layerSelect class="position-absolute bottom-100 w-100" v-bind="{
                     selectLock: state.selectLock,
                     currentLayers: state.currentLayers,
                     onClose: () => {
@@ -812,75 +786,37 @@ export default {
                     onDeleteLayerAll: () => {
                         state.deleteLightbox = true
                     },
-                    setOpacity: ({ action, value }) => {
-                        layerControl({ action, value })
-                    }
+                }" :setOpacity="({ action, value }) => {
+                    layerControl({ action, value })
                 }" />
             </div>
-
             <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
                 :mapCount="state.mapCount" :openConditionWrap="() => {
                     state.conditionWrap = !state.conditionWrap
                     state.layerSelect = false
-                }" :openLayerSelect="() => {
-                state.layerSelect = !state.layerSelect
-                state.conditionWrap = false
-            }"
-            :onLayerControl="({ action, value }) => {
-                layerControl({ action, value })
-            }"
-            :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                }"
+                :openLayerSelect="() => {
+                    state.layerSelect = !state.layerSelect
+                    state.conditionWrap = false
+                }"
+                :onLayerControl="({ action, value }) => {
+                    layerControl({ action, value })
+                }"
+                :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
-
-        <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
-            <div class="p-4 rounded bg-white" style="width: 250px;">
-                <p class="text-center fw-bold">是否要刪除全部圖層</p>
-                <div class=" d-flex justify-content-around">
-                    <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
-                        layerControl({
-                            action: 'selectLayerMode',
-                            value: {
-                                layerName: 'all'
-                            }
-                        })
-                        state.deleteLightbox = false
-                    }">確定</button>
-                    <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
-                        state.deleteLightbox = false
-                    }">取消</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="popup" class="position-absolute bottom-0"
-        :ref="(e) => {
-            state.popup.nodeRef = e
-        }">
-            <areaData class="areaData"
-            v-if="state.popup.popupId !== 0"
-            :closeMapData="() => {
-                closeMapData()
-            }"
-            :popup="state.popup"
-            :maxHeight="500" />
-        </div>
-
-        <div v-if="store.state.isInit" class="stepOverLayer position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" id="firstEnter" @click="()=>{
-            store.dispatch('updateLayerStatus', false)
-        }"></div>
     </div>
 </template>
-
 <style lang="sass">
 @import '@/assets/styles/all.module.scss'
 .mapWrap
+    justify-content: space-between
     height: 100vh
 .mapWrap .ol-viewport
     height: 100vh
     width: 100vw
 .asideTool
     z-index: 220
-    left: 20px
+    left: 5px
 .SearchBar
     top: 20px
     left: 20px
@@ -905,6 +841,4 @@ export default {
     .middleLine
         height: 1px
         width: 100%
-    .areaData
-        width: 90vw
 </style>

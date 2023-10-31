@@ -94,7 +94,7 @@ export default {
                 <h1 class="text-brown fw-bold d-flex align-items-center" :class="state.mainTextColor">
                     <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1" />
                     <img src="@/assets/mapDetail/frame-2.png" v-else>
-                    工程計畫
+                    永續藍圖計畫工程
                 </h1>
 
                 <div class="d-flex justify-content-end" style="visibility: hidden;">
@@ -102,7 +102,7 @@ export default {
                     <button class="btn text-white black-deep">下載勾選項目</button>
                 </div>
             </div>
-            <div class="row mb-4">
+            <div class="row">
                 <div class="col-6">
                     <img :src="state.planObj.engineeringPlan" class="w-100" alt="">
                 </div>
@@ -129,6 +129,7 @@ export default {
                     </div>
                 </div>
             </div>
+            <p class="fs-6 mb-4">*本永續藍圖計畫項目由新竹縣政府與各管轄之公所提案，並由原民會核定後執行，故本資料為規劃成果，僅供地方政府參考，非實際執行之在建工程**。</p>
             <div class="d-flex justify-content-center">
                 <a href="#" class="goBack btn bg-black text-white d-inline-block mb-4 cursor-pointer"
                     @click.prevent="router.push({
