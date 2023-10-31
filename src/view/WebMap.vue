@@ -563,7 +563,7 @@ export default {
             })
         }
 
-        function closeMapData() {
+        function closeAreaData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             target.removeOverlay(state.popup.overlay)
             state.popup.overlay = null
@@ -666,9 +666,9 @@ export default {
             layerControl,
             changeTarget,
             conditionWrap,
-            closeMapData,
+            closeAreaData,
             moveToMap,
-            changeMapCount
+            changeMapCount,
         }
     }
 }
@@ -890,8 +890,8 @@ export default {
         }">
             <areaData class="areaData"
             v-if="state.popup.popupId !== 0"
-            :closeMapData="() => {
-                closeMapData()
+            :closeAreaData="() => {
+                closeAreaData()
             }"
             :popup="state.popup"
             :maxHeight="500" />
