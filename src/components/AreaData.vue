@@ -75,6 +75,58 @@ export default {
             })
             return result
         }
+        async function getHarvestDrill(projNo) {
+            const result = await $.ajax({
+                url: `https://api.edtest.site/harvestDrill?projNo=${projNo}`,
+                method: "GET"
+            }).done(res => {
+                return res
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+                state.type = 0
+                return false
+            })
+            return result
+        }
+
+        function getPotentialDebrisFlowTorrent(data) {
+            // Basin -> 頭前溪流域
+            // Full -> 新竹縣尖石鄉新樂村
+            // Risk -> 中
+            // Note01 -> 95年易致災因子調查成果
+            // Note02 -> 111年土石流潛勢溪流調查評估與資料更新
+            // Stra_1 -> 新第三紀沉積岩
+            // Stra_2 -> 砂頁岩互層、砂岩、頁岩
+            return {
+                basic: data.get('Basin'),
+                full: data.get('Full'),
+                risk: data.get('Risk'),
+                note01: data.get('Note01'),
+                note02: data.get('Note02'),
+                stra_1: data.get('Stra_1'),
+                stra_2: data.get('Stra_2'),
+                link: `https://246.swcb.gov.tw/Content/Debris/${data.get('Debrisno')}.jpg`
+            }
+
+        }
+
+        function getRockfall(data) {
+            // ACTIVITY -> B2舊崩塌地再活動(部分)
+            // SLIDE_KIND -> A落石
+            // SLOPE_TYPE -> C斜交坡
+            // SLUMP_ANG -> C極陡(41-60度)
+            // IDENTIFIER -> 施國偉
+            return {
+                activity: data.get('ACTIVITY'),
+                slideKind: data.get('SLIDE_KIND'),
+                slideType: data.get('SLOPE_TYPE'),
+                slideAng: data.get('SLUMP_ANG'),
+                identifier: data.get('IDENTIFIER')
+            }
+
+        }
+
+
         var oldPopupData = "";
         var oldPopupId = ""
 
@@ -116,7 +168,33 @@ export default {
                 })
                 return
             }
+            if (props.popup.popupData == "工程鑽井") {
+                getHarvestDrill(props.popup.popupId).then((result) => {
+                    state.type = 4
+                    if (result.data !== null) {
+                        state.harvestDrill = result.data
+                    }
+                    console.log(result.data)
+                }).then(() => {
+                    state.showAreaDataWindow = true
+                })
+                return
+            }
+            if (props.popup.popupData == "土石流潛勢溪流") {
+                state.type = 5
+                state.potentialDebrisFlowTorrent = getPotentialDebrisFlowTorrent(props.popup.temp)
+                state.showAreaDataWindow = true
+                return
+            }
+
+            if (props.popup.popupData == "落石分布") {
+                state.type = 6
+                state.rockfall = getRockfall(props.popup.temp)
+                state.showAreaDataWindow = true
+                return
+            }
         })
+
 
         return {
             router,
@@ -254,6 +332,111 @@ export default {
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+        <div v-if="state.type === 4">
+            <div class="row mx-0 align-items-center px-2 py-4 position-relative">
+                <div class="row mx-0 mb-2" v-if="state.harvestDrill.projNo">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">計畫編號:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.harvestDrill.projNo }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.harvestDrill.projName">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">計畫名稱:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.harvestDrill.projName }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.harvestDrill.exename">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">執行單位:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.harvestDrill.exename }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.harvestDrill.orgname">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">委託單位:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.harvestDrill.orgname }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.harvestDrill.drillHoleCount">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">孔:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.harvestDrill.drillHoleCount }}</div>
+                </div>
+                <div class="row mx-0 mb-2">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">連結:
+                    </div>
+                    <a href="https://geotech.gsmma.gov.tw/imoeagis/Home/Map" class="col-8 py-1 px-2 bg-grey-light text-start">
+                        網址鏈接
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+        <div v-if="state.type === 5">
+            <div class="row mx-0 align-items-center px-2 py-4 position-relative">
+                <div class="row mx-0 mb-2" v-if="state.potentialDebrisFlowTorrent.basic">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">主流:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.potentialDebrisFlowTorrent.basic }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.potentialDebrisFlowTorrent.full">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">位置:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.potentialDebrisFlowTorrent.full }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.potentialDebrisFlowTorrent.risk">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">風險程度:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.potentialDebrisFlowTorrent.risk }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.potentialDebrisFlowTorrent.note01">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">筆記1:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.potentialDebrisFlowTorrent.note01 }}
+                    </div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.potentialDebrisFlowTorrent.note02">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">筆記2:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.potentialDebrisFlowTorrent.note02 }}
+                    </div>
+                </div>
+
+                <div class="row mx-0 mb-2" v-if="state.potentialDebrisFlowTorrent.link">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">連結:
+                    </div>
+                    <a :href="state.potentialDebrisFlowTorrent.link" class="col-8 py-1 px-2 bg-grey-light text-start">
+                        網址鏈接
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div v-if="state.type === 6">
+            <div class="row mx-0 align-items-center px-2 py-4 position-relative">
+                <div class="row mx-0 mb-2" v-if="state.rockfall.activity">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">活動:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.rockfall.activity }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.rockfall.slideKind">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">種類:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.rockfall.slideKind }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.rockfall.slideType">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">類型:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.rockfall.slideType }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.rockfall.slideAng">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">坡度:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.rockfall.slideAng }}</div>
+                </div>
+                <div class="row mx-0 mb-2" v-if="state.rockfall.identifier">
+                    <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">記錄者:
+                    </div>
+                    <div class="col-8 py-1 px-2 bg-grey-light text-start">{{ state.rockfall.identifier }}</div>
                 </div>
             </div>
         </div>
