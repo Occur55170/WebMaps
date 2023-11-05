@@ -533,6 +533,8 @@ export default {
                     target.addOverlay(state.popup.overlay)
                     // TODO: 截圖結構修改
                     // TODO: 優化結構，獲取state.popupId.overlay方式修正，考慮整包selectedFeatures放進去
+                    
+                    
                     let selectIds = selectedFeatures.getId().split('.')
                     state.popup.popupData = selectIds[0]
                     state.popup.coordinate = event.mapBrowserEvent.coordinate
@@ -545,8 +547,7 @@ export default {
                         return
                     }
                     if (selectIds[0] === '雨量站') {
-                        // FIXME:
-                        state.popup.popupId = selectIds[1]
+                        state.popup.popupId = selectedFeatures.get('Name')
                         return
                     }
                 } else {
