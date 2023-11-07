@@ -218,35 +218,51 @@ export default {
 
                             const extentWidth = extent[2] - extent[0];
                             const extentHeight = extent[3] - extent[1];
+                            
+                            // 创建一个单独的 Canvas 来处理 GIF 帧
+                            const gifCanvas = document.createElement('canvas');
+                            let giflerContext = null; // 用于存储 gifler 的上下文
 
-                            gif.frames(
-                                document.createElement('canvas'),
-                                function (ctx, frame) {
-                                    const scaleX = extentWidth / frame.width;
-                                    const scaleY = extentHeight / frame.height;
-                                    const baseScale = Math.min(scaleX, scaleY);
+                            gifler(gifUrl).frames(gifCanvas, function (ctx, frame) {
+                                // 只在第一次时设置 gifler 的上下文
+                                if (!giflerContext) {
+                                    giflerContext = ctx;
+                                }
 
-                                    // 獲取當前地圖的解析度
-                                    const currentResolution = state.map1.getView().getResolution()
+                                const scaleX = extentWidth / frame.width;
+                                const scaleY = extentHeight / frame.height;
+                                const baseScale = Math.min(scaleX, scaleY);
 
-                                    iconFeature.setStyle(
-                                        new Style({
-                                            image: new Icon({
-                                                img: ctx.canvas,
-                                                imgSize: [frame.width, frame.height],
-                                                opacity: 0.8,
-                                                scale: baseScale / currentResolution
-                                            }),
-                                        })
-                                    );
+                                const currentResolution = state.map1.getView().getResolution();
 
-                                    ctx.clearRect(0, 0, frame.width, frame.height);
-                                    ctx.drawImage(frame.buffer, frame.x, frame.y);
+                                // 动态样式函数
+                                iconFeature.setStyle(function (feature, resolution) {
+                                    let scale = baseScale / resolution;
+                                    // 你可以根据需要设置一个最小的缩放值，以确保图标在所有分辨率下都可见
+                                    scale = Math.max(scale, 0.0000001);
 
-                                    target.render();
-                                },
-                                true
-                            );
+                                    return new Style({
+                                        image: new Icon({
+                                            img: giflerContext.canvas,
+                                            imgSize: [frame.width, frame.height],
+                                            opacity: 0.8,
+                                            scale: scale
+                                        }),
+                                    });
+                                });
+
+                                // 清除并绘制新一帧
+                                giflerContext.clearRect(0, 0, frame.width, frame.height);
+                                giflerContext.drawImage(frame.buffer, frame.x, frame.y);
+
+                                // 可能不需要在这里调用 render，OpenLayers 可能会自动处理
+                                // state.map1.renderSync();
+                            }, true);
+
+                            // 将特征和图层添加到地图的代码...
+
+
+
                         }
                         console.log(targetLayer.get('label'));
                         if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
@@ -536,7 +552,7 @@ export default {
                     // TODO: 截圖結構修改
                     // TODO: 優化結構，獲取state.popupId.overlay方式修正，考慮整包selectedFeatures放進去
                     // selectedFeatures.getKeys().forEach(key => console.log(`${key} -> ${selectedFeatures.get(key)}`))
-                    
+
                     let selectIds = (selectedFeatures.getId() ?? selectedFeatures.getGeometryName()).split('.')
 
                     console.log('id :' + selectIds[0])
