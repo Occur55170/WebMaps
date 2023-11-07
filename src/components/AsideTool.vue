@@ -35,7 +35,7 @@ export default {
 <template>
     <div class="d-flex flex-nowrap flex-column">
         <OverLayer :text="'地圖操控工具'" />
-        <div class="switchControl d-block rounded-4 p-2 mb-2" id="switchControl" style="z-index: 99;">
+        <div class="switchControl d-block  d-sm-none rounded-4 p-2 mb-2" id="switchControl" style="z-index: 99;">
             <div class="text-white text-center rounded"
             :class="{ 'active': state.targetNum === 1 }"
                 @click="() => {

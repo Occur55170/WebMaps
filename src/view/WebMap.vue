@@ -793,7 +793,7 @@ export default {
             </div>
         </div>
 
-        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
+        <div class="m-Navbar d-flex d-sm-none position-relative w-100">
             <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
                 <Condition class="w-100"
                 v-if="state.conditionWrap"
@@ -950,6 +950,8 @@ export default {
         top: calc((100% - 40px)/2)
         left: calc((100% - 40px)/2)
 @media (max-width: 600px)
+    .mapWrap
+        height: 92vh
     .m-Navbar
         z-index: 222
     .SearchBar
@@ -958,9 +960,11 @@ export default {
         .logo
             width: 180px
 
+    .asideTool
+        left: 5px
     .middleLine
         height: 1px
         width: 100%
     .areaData
-        width: 90vw
+        width: 85vw
 </style>
