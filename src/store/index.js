@@ -5,16 +5,23 @@ export default createStore({
     namespaced: false,
     state: {
         test: 'store',
-        isInit: true
+        isInit: true,
+        currentWidth: 0
     },
     actions: {
         updateLayerStatus(context, status){
-            context.commit('SetOverLayerStatus', status)
+            context.commit('SETOVERLAYERSTATUS', status)
+        },
+        updateWindowWidth(context, status){
+            context.commit('SETWINDOWSWIDTH', status)
         },
     },
     mutations: {
-        SetOverLayerStatus(state, payload){
+        SETOVERLAYERSTATUS(state, payload){
             state.isInit = payload
+        },
+        SETWINDOWSWIDTH(state, payload){
+            state.currentWidth = payload
         }
     },
     getters: {

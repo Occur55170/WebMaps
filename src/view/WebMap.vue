@@ -439,6 +439,7 @@ export default {
         }
 
         function changeTarget(value) {
+            console.log(value)
             state.targetNum = value
             let delToMap = state.targetNum !== 1 ? 'map1' : 'map2'
             if (state.mapCount === 1) {
@@ -652,9 +653,11 @@ export default {
             })
             state.comSize.wrapHeight = window.innerHeight
             state.comSize.wrapWidth = window.innerWidth
+            store.dispatch('updateWindowWidth', window.innerWidth)
             window.onresize = (e) => {
                 state.comSize.wrapHeight = e.target.innerHeight
                 state.comSize.wrapWidth = e.target.innerWidth
+                store.dispatch('updateWindowWidth', window.innerWidth)
             }
         })
 
@@ -697,18 +700,19 @@ export default {
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
+        :onChangeTarget="(value) => { changeTarget(value) }"
         @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
 
-        <div class="SearchBar d-none d-sm-block position-absolute">
-            <div class="d-flex align-items-center">
-                <img src="@/assets/logo.svg" alt="" class="me-5">
-                <mapSourceOption class="mapSourceOption d-none d-sm-block"
+        <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
+            <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
+                <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
+                <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
                 :baseMapList="state.temp.baseMapList"
                 :onChangeBaseMaps="({ action, value }) => {
                     layerControl({ action, value })
                 }" />
             </div>
-            <SearchBar class="mt-4"
+            <SearchBar class="mt-4 d-none d-sm-block"
             v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
@@ -721,7 +725,7 @@ export default {
                 }
             }"
             @onLayerControl="({ action, value }) => { layerControl(action, value) }"
-            @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -949,6 +953,12 @@ export default {
 @media (max-width: 600px)
     .m-Navbar
         z-index: 222
+    .SearchBar
+        top: 0
+        left: 0
+        .logo
+            width: 180px
+
     .middleLine
         height: 1px
         width: 100%

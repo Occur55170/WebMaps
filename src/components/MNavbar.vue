@@ -28,10 +28,6 @@ export default {
             type: Function,
             default: () => {}
         },
-        onChangeTarget: {
-            type: Function,
-            default: () => {}
-        },
         onChangeMapCount: {
             type: Function,
             default: ()=>{}
@@ -87,21 +83,14 @@ export default {
 
 <template>
     <div class="w-100">
-        <div class="position-fixed top-0 w-100 px-3 d-flex justify-content-between justify-content-sm-end flex-wrap">
-            <img src="@/assets/logo.svg" class="w-50 w-lg-100">
-            <div class="switchControl mt-2 me-0 me-sm-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
-                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }"
-                @click="() => {
-                    state.targetNum = 1
-                    props.onChangeTarget(1)
-                }">上</div>
-                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }"
-                @click="() => {
-                    state.targetNum = 2
-                    props.onChangeTarget(2)
-                }">下</div>
-            </div>
-        </div>
+        <!-- <div class="position-fixed top-0 w-100 px-3 mt-3 d-flex justify-content-between justify-content-sm-end flex-wrap"> -->
+            <!-- <img src="@/assets/logo.svg" class="w-50 w-lg-100"> -->
+            <!-- <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                :baseMapList="state.temp.baseMapList"
+                :onChangeBaseMaps="({ action, value }) => {
+                    layerControl({ action, value })
+                }" /> -->
+        <!-- </div> -->
 
         <ul class="list-unstyled d-flex align-items-center justify-content-around py-2 flex-nowrap w-100 bg-white mb-0">
             <li>
@@ -141,16 +130,6 @@ export default {
 </template>
 
 <style lang="sass">
-.switchControl
-    background: rgba(30, 30, 30, 0.9)
-    box-sizing: border-box
-    div
-        padding:5px
-        cursor: pointer
-        box-sizing: border-box
-    .active
-        background: #247BA0
-
 ul
     li
         .navbarBtn
