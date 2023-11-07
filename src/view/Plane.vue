@@ -45,7 +45,7 @@ export default {
         }
 
         function downloadPassword() {
-            if(state.currentText === 'EDJOEJOANNA'){
+            if(state.currentText === '28368864'){
                 state.lightSwitch = false
                 window.open(state.targetUrl, '_blank')
             } else {
@@ -90,34 +90,30 @@ export default {
     <div class="detail">
         <div class="redTotem" :class="state.type == 1 ? 'redTotem' : 'blueTotem'"></div>
         <div class="p-4">
-            <div class="d-flex align-items-center justify-content-between">
-                <h1 class="text-brown fw-bold d-flex align-items-center" :class="state.mainTextColor">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <h1 class="text-brown fw-bold d-flex align-items-center w-100"
+                :class="state.mainTextColor">
                     <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1" />
                     <img src="@/assets/mapDetail/frame-2.png" v-else>
                     永續藍圖計畫工程
                 </h1>
-
-                <div class="d-flex justify-content-end" style="visibility: hidden;">
-                    <button class="btn text-white me-2 black-deep">全部下載</button>
-                    <button class="btn text-white black-deep">下載勾選項目</button>
-                </div>
             </div>
             <div class="row">
-                <div class="col-6">
+                <div class="col-12 col-lg-6 mb-4 mb-lg-0">
                     <img :src="state.planObj.engineeringPlan" class="w-100" alt="">
                 </div>
-                <div class="col-6 position-relative" style="overflow-y: auto;">
-                    <div class="position-absolute d-flex flex-wrap table" style="width: 95%;">
+                <div class="col-12 col-lg-6 position-relative" style="overflow-y: auto;">
+                    <div class="downloadList position-static position-lg-absolute d-flex flex-wrap table">
                         <div class="thead d-flex shrink-1 flex-nowrap justify-content-between w-100">
-                            <div class="p-1 col-3 text-white" :class="state.mainBgColor">記號</div>
-                            <div class="p-1 col-6 text-white" :class="state.mainBgColor">名稱</div>
+                            <div class="p-1 col-2 col-lg-3 text-white" :class="state.mainBgColor">記號</div>
+                            <div class="p-1 col-7 text-white" :class="state.mainBgColor">名稱</div>
                             <div class="p-1 col-3 text-white" :class="state.mainBgColor">下載</div>
                             </div>
                         <div class="tbody w-100">
                             <div class="d-flex shrink-0 flex-nowrap justify-content-between w-100"
                                 v-for="(item, itemKey) in state.planObj.engineeringPlanInfo" :key="itemKey">
-                                <div class="col-3 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
-                                <div class="col-6 bg-grey-light fw-bold">{{ tableFilter(item.name)[1] }}</div>
+                                <div class=" col-2 col-lg-3 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
+                                <div class="col-7 bg-grey-light fw-bold">{{ tableFilter(item.name)[1] }}</div>
                                 <div class="col-3 bg-grey-light">
                                     <a href="" class="btn py-1 text-white bg-grey" target="_blank"
                                     @click.prevent="openLightBox(item)">
@@ -196,5 +192,10 @@ export default {
         top: 100%
         left: 0
         font-size: 12px
-@media (max-width: 600px)
+.downloadList
+    width: 95%
+@media (max-width: 768px)
+    .downloadList
+        width: 100%
+
 </style>

@@ -117,7 +117,7 @@ export default {
                                             id: route.params?.id
                                         },
                                     })
-                                }">工程計畫圖</div>
+                                }">永續工程計畫圖</div>
                         </li>
                     </ul>
                 </div>
@@ -291,7 +291,8 @@ export default {
                                         id: route.params?.id
                                     },
                                 })
-                            }">工程計畫圖
+                            }">
+                                永續工程計畫圖
                             </div>
                     </div>
                 </div>
