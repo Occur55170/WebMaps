@@ -168,7 +168,7 @@ export default {
                 })
                 return
             }
-            if (props.popup.popupData == "工程鑽井") {
+            if (props.popup.popupData == "工程鑽探") {
                 getHarvestDrill(props.popup.popupId).then((result) => {
                     state.type = 4
                     if (result.data !== null) {

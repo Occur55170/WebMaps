@@ -249,7 +249,7 @@ export default {
                             );
                         }
                         console.log(targetLayer.get('label'));
-                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探','土石流潛勢溪流','落石分布'].includes(targetLayer.get('label'))) {
+                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
                             console.log('匹配');
                             mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)
@@ -535,9 +535,11 @@ export default {
                     target.addOverlay(state.popup.overlay)
                     // TODO: 截圖結構修改
                     // TODO: 優化結構，獲取state.popupId.overlay方式修正，考慮整包selectedFeatures放進去
-                    selectedFeatures.getKeys().forEach(key => console.log(`${key} -> ${selectedFeatures.get(key)}`))
+                    // selectedFeatures.getKeys().forEach(key => console.log(`${key} -> ${selectedFeatures.get(key)}`))
+                    
+                    let selectIds = (selectedFeatures.getId() ?? selectedFeatures.getGeometryName()).split('.')
 
-                    let selectIds = selectedFeatures.getId().split('.')
+                    console.log('id :' + selectIds[0])
                     state.popup.popupData = selectIds[0]
                     state.popup.coordinate = event.mapBrowserEvent.coordinate
                     if (selectIds[0] === '新竹縣原住民部落範圍') {
@@ -552,16 +554,16 @@ export default {
                         state.popup.popupId = selectedFeatures.get('Name')
                         return
                     }
-                    if (selectIds[0] === '工程鑽井') {
+                    if (selectIds[0] === '工程鑽探') {
                         state.popup.popupId = selectedFeatures.get('name').split('_')[0]
                         return
                     }
-                    if(selectIds[0] === '土石流潛勢溪流'){
+                    if (selectIds[0] === '土石流潛勢溪流') {
                         state.popup.popupId = selectedFeatures.get('ID')
                         state.popup.temp = selectedFeatures
                         return
                     }
-                    if(selectIds[0] === '落石分布'){
+                    if (selectIds[0] === '落石分布') {
                         state.popup.popupId = selectedFeatures.get('DATA_ID')
                         state.popup.temp = selectedFeatures
                         return

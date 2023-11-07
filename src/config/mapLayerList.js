@@ -34,6 +34,7 @@ export const tribeSelectorColors = [
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
         let result, layerSource
+        console.log(`getLayer:${id}`)
         const layerType = layer.layer_type
         const figureType = layer.figure_type
         const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
@@ -177,7 +178,9 @@ export default {
                     }
                     layerSource = new VectorSource({
                         url: layer.tiles_url,
-                        format: new GeoJSON(),
+                        format: new GeoJSON({
+                            geometryName: layer.title
+                        }),
                     })
                     break
                 case 'Point':
@@ -194,7 +197,9 @@ export default {
                     }
                     layerSource = new VectorSource({
                         url: layer.tiles_url,
-                        format: new GeoJSON(),
+                        format: new GeoJSON({
+                            geometryName: layer.title
+                        }),
                     })
                     break
                 default:
