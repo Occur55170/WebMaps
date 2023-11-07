@@ -259,9 +259,7 @@ export default {
                                 true
                             );
                         }
-                        console.log(targetLayer.get('label'));
                         if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
-                            console.log('匹配');
                             mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)
                         }

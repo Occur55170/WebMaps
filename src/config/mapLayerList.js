@@ -23,8 +23,8 @@ register(proj4)
 export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
         let result, layerSource
-        console.log(`getLayer:${id}`)
         const layerType = layer.layer_type
+        console.log(layerType)
         const figureType = layer.figure_type
         const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
         const request = []
