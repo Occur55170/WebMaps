@@ -564,6 +564,7 @@ export default {
                         return
                     }
                     if (selectIds[0] === '工程鑽探') {
+                        console.log('選到工程鑽探')
                         state.popup.popupId = selectedFeatures.get('name').split('_')[0]
                         return
                     }

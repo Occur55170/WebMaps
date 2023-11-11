@@ -56,7 +56,7 @@ export default {
             }).fail(FailMethod => {
                 console.log('Fail', FailMethod)
                 state.type = 0
-                props.closeAreaData()
+                // props.closeAreaData()
                 return false
             })
             return result
@@ -127,19 +127,19 @@ export default {
         }
 
 
-        var oldPopupData = "";
+        // var oldPopupData = "";
         var oldPopupId = ""
 
-        watch(props.popup, async (newVal) => {
-            if (oldPopupData == newVal.popupData
-                && oldPopupId == newVal.popupId) {
+        async function initialize(popup){
+            if(popup == null){
+                console.log('empty')
+                state.type = 0
+                this.props?.closeAreaData()
                 return
             }
-            oldPopupData = newVal.popupData
-            oldPopupId = newVal.popupId
-            //TODO: 結構優化
-            if (newVal.popupData == "新竹縣原住民部落範圍") {
-                getTribeData(newVal.popupId).then((result) => {
+
+            if (popup.popupData == "新竹縣原住民部落範圍") {
+                getTribeData(popup.popupId).then((result) => {
                     state.type = 1
                     state.tribeData = result
                 }).then(() => {
@@ -147,8 +147,8 @@ export default {
                 })
                 return
             }
-            if (props.popup.popupData == "近年歷史災害82處部落點位") {
-                getDisasterData(`近年歷史災害82處部落點位.${props.popup.popupId}`).then((result) => {
+            if (popup.popupData == "近年歷史災害82處部落點位") {
+                getDisasterData(`近年歷史災害82處部落點位.${popup.popupId}`).then((result) => {
                     state.type = 2
                     state.tribeData = result.data
                 }).then(() => {
@@ -156,8 +156,8 @@ export default {
                 })
                 return
             }
-            if (props.popup.popupData == "雨量站") {
-                getRainfallStation(props.popup.popupId).then((result) => {
+            if (popup.popupData == "雨量站") {
+                getRainfallStation(popup.popupId).then((result) => {
                     state.type = 3
                     if (result.data !== null) {
                         state.tribeData = result.data
@@ -168,8 +168,9 @@ export default {
                 })
                 return
             }
-            if (props.popup.popupData == "工程鑽探") {
-                getHarvestDrill(props.popup.popupId).then((result) => {
+            if (popup.popupData == "工程鑽探") {
+                console.log('搜尋工程鑽探')
+                getHarvestDrill(popup.popupId).then((result) => {
                     state.type = 4
                     if (result.data !== null) {
                         state.harvestDrill = result.data
@@ -180,19 +181,35 @@ export default {
                 })
                 return
             }
-            if (props.popup.popupData == "土石流潛勢溪流") {
+            if (popup.popupData == "土石流潛勢溪流") {
                 state.type = 5
                 state.potentialDebrisFlowTorrent = getPotentialDebrisFlowTorrent(props.popup.temp)
-                state.showAreaDataWindow = true
+                state.showAreaDataWindow = true   
                 return
             }
 
-            if (props.popup.popupData == "落石分布") {
+            if (popup.popupData == "落石分布") {
                 state.type = 6
-                state.rockfall = getRockfall(props.popup.temp)
+                state.rockfall = getRockfall(popup.temp)
                 state.showAreaDataWindow = true
                 return
             }
+        }
+
+        initialize(props.popup)
+        oldPopupId = props.popup.popupId
+        
+        watch(props.popup, async (newVal) => {
+            //TODO: 結構優化
+
+            if (newVal.popupId == oldPopupId) {
+                    console.log(`data 相同，${newVal.popupId}`)
+                return
+            }
+            oldPopupId = newVal.popupId
+
+
+           initialize(newVal)
         })
 
 
