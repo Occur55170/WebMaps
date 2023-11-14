@@ -726,19 +726,18 @@ export default {
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-        :onChangeTarget="(value) => { changeTarget(value) }"
-        @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
+            :onChangeTarget="(value) => { changeTarget(value) }"
+            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
 
         <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
                 <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
-                <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block" :baseMapList="state.temp.baseMapList"
-                    :onChangeBaseMaps="({ action, value }) => {
+                <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
+                    :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
                         layerControl({ action, value })
                     }" />
             </div>
-            <SearchBar class="mt-4 d-none d-sm-block"
-            v-bind="{
+            <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
@@ -748,9 +747,8 @@ export default {
                 onChangeMapCount: (qty) => {
                     changeMapCount(qty)
                 }
-            }"
-            @onLayerControl="({ action, value }) => { layerControl(action, value) }"
-            @conditionWrap="(value) => { conditionWrap(value) }" />
+            }" @onLayerControl="({ action, value }) => { layerControl(action, value) }"
+                @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
