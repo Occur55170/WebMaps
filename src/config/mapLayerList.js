@@ -1,4 +1,4 @@
-
+// import $ from 'jquery'
 import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
 import VectorSource from 'ol/source/Vector.js'
 import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
@@ -7,7 +7,6 @@ import { bbox, tile } from 'ol/loadingstrategy.js'
 import GeoJSON from 'ol/format/GeoJSON.js'
 import { Circle, Polygon, Point } from 'ol/geom.js'
 import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-
 
 import TilegridWMTS from 'ol/tilegrid/WMTS'
 import { getTopLeft } from 'ol/extent'
@@ -29,7 +28,6 @@ export default {
     getLayer: (layer, nestedSubNodeIndex, id) => {
         let result, layerSource
         const layerType = layer.layer_type
-        console.log(layerType)
         const figureType = layer.figure_type
         const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
         const request = []
@@ -113,35 +111,32 @@ export default {
                 default:
                     console.log('error-otherWMSLayer:', figureType)
             }
-
-            const layers = [
-                {
-                    name: 'DMAPS',
-                    title: '地籍圖',
-                    url: 'https://landmaps.nlsc.gov.tw/S_Maps/wmts/DMAPS/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
-                    layer: 'DMAPS'
-                },
-                // {
-                //     name: 'PARK',
-                //     title: '國家公園',
-                //     url: 'https://wmts.nlsc.gov.tw/wmts/PARK/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
-                //     layer: 'PARK'
-                // },
-                // {
-                //     name: 'URBAN',
-                //     title: '都市計畫使用分區圖(112年2月)',
-                //     url: 'https://wmts.nlsc.gov.tw/wmts/URBAN/default/EPSG:3857/{TileMatrix}/{TileRow}/{TileCol}',
-                //     layer: 'URBAN'
-                // }
-
-            ]
+            result = new TileLayer({
+                id,
+                label: `${layer.title}${tileTitle}`,
+                // minZoom: 4,
+                // maxZoom: 18,
+                source: new TileWMS({
+                    name: layer.title,
+                    url: layerSource.getUrls()[0],
+                    params: layerSource.getParams(),
+                    serverType: 'geoserver',
+                    crossOrigin: 'anonymous',
+                    projection: layerSource.getParams()?.SRS,
+                }),
+                style: 'default',
+                maxZoom: 20,
+            })
         }
+
         if (layerType === 'WMTS'){
+            console.log('WMTS')
             const projection = 'EPSG:3857'
             const projectionExtent = [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
             const matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
             const resolutions = [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.29858214173896974, 0.14929107086948487]
 
+            console.log(layer)
             layerSource = new WMTS({
                 url: layer.tiles_url,
                 layer: layer.name,
@@ -161,6 +156,8 @@ export default {
 
             result = new TileLayer({
                 name: layer.name,
+                id,
+                label: `${layer.title}${tileTitle}`,
                 title: layer.title,
                 type: 'overlay',
                 opacity: 1.0,

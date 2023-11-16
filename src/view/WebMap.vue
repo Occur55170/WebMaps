@@ -40,7 +40,7 @@ export default {
             currentLayers: [],
             layers: [],
             mapLayers: computed(() => {
-                return state.layers.map((node, index) => {
+                const result = state.layers.map((node, index) => {
                     return {
                         label: node.group_title,
                         value: node.value,
@@ -48,6 +48,8 @@ export default {
                         groupClass: node.group_class
                     }
                 })
+                console.log(result)
+                return result
             }),
             selectLock: false,
             mapCount: 1,
@@ -218,7 +220,7 @@ export default {
 
                             const extentWidth = extent[2] - extent[0];
                             const extentHeight = extent[3] - extent[1];
-                            
+
                             // 创建一个单独的 Canvas 来处理 GIF 帧
                             const gifCanvas = document.createElement('canvas');
                             let giflerContext = null; // 用于存储 gifler 的上下文
@@ -747,8 +749,9 @@ export default {
                 onChangeMapCount: (qty) => {
                     changeMapCount(qty)
                 }
-            }" @onLayerControl="({ action, value }) => { layerControl(action, value) }"
-                @conditionWrap="(value) => { conditionWrap(value) }" />
+            }"
+            @onLayerControl="({ action, value }) => { layerControl(action, value) }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -757,8 +760,7 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4" v-if="state.conditionWrap"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
+                <div class="mb-4" v-if="state.conditionWrap">
                     <Condition v-bind="{
                         tribeQuery: state.tribeQuery,
                         mapLayers: state.mapLayers,
@@ -772,7 +774,8 @@ export default {
                         moveToMap: (val) => {
                             moveToMap(val)
                         }
-                    }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }"
+                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
                 <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
