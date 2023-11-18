@@ -67,14 +67,18 @@ export default {
                     </ul>
                 </div>
             </div>
-
         </div>
-        <div class="tip d-flex flex-xl-nowrap flex-wrap justify-content-sm-around justify-content-start px-2 px-sm-0 py-3 border-top">
-            <span class="mb-2 mb-lg-0">管理單位：台灣整合防災工程技術顧問有限公司</span>
-            <span class="mb-2 mb-lg-0">公司地址：236新北市土城區中央路三段281巷15弄14號</span>
-            <span class="mb-2 mb-lg-0">E-mail：salahayo3192@gmail.com</span>
-            <span class="mb-2 mb-lg-0">Copyright © 2023 台灣整合防災工程技術顧問有限公司</span>
-        </div>
+        <footer class="border-top px-2 px-sm-0 py-3">
+            <div class="mt-3 mb-4">
+                <p class="mb-1 text-center">圖台系統版權 台灣整合防災工程技術顧問有限公司版權所有。本網站所有資料僅供參考用途，不得作為任何形式證明或主張</p>
+            </div>
+            <div class="tip d-flex flex-xl-nowrap flex-wrap justify-content-sm-around justify-content-start">
+                <span class="mb-2 mb-lg-0">管理單位：台灣整合防災工程技術顧問有限公司</span>
+                <span class="mb-2 mb-lg-0">公司地址：236新北市土城區中央路三段281巷15弄14號</span>
+                <span class="mb-2 mb-lg-0">E-mail：salahayo3192@gmail.com</span>
+                <span class="mb-2 mb-lg-0">Copyright © 2023 台灣整合防災工程技術顧問有限公司</span>
+            </div>
+        </footer>
     </div>
 </template>
 
@@ -141,7 +145,7 @@ export default {
     &>div:nth-Child(2)
         width: 65%
 .tip
-    font-size: 16px
+    font-size: 14px
     background: rgb(255, 255, 255, 0.7)
 @media (max-width: 1700px)
     .wrapCom
