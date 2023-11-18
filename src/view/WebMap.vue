@@ -4,12 +4,17 @@ import $ from 'jquery'
 import { useStore } from 'vuex'
 
 import { Map, View, Feature } from 'ol'
+import XYZ from 'ol/source/XYZ'
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import WMTS from 'ol/source/WMTS'
+import TilegridWMTS from 'ol/tilegrid/WMTS'
+import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
+import {get as getProjection} from 'ol/proj.js'
+import {getTopLeft, getWidth} from 'ol/extent.js'
 import Select from 'ol/interaction/Select'
 import { click } from 'ol/events/condition'
 import { ScaleLine } from 'ol/control.js'
-import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
-import { Tile, Vector } from 'ol/layer.js'
 import { Point } from 'ol/geom.js'
 import { Icon, Style } from 'ol/style.js'
 
@@ -97,10 +102,38 @@ export default {
 
         // 初始化地圖
         function initMap() {
+            const projection = getProjection('EPSG:3857');
+            const projectionExtent = projection.getExtent();
+            const size = getWidth(projectionExtent) / 256;
+            const resolutions = new Array(19);
+            const matrixIds = new Array(19);
+            for (let z = 0; z < 19; ++z) {
+                resolutions[z] = size / Math.pow(2, z);
+                matrixIds[z] = z;
+            }
+            console.log(123)
+
             state.map1 = new Map({
                 target: 'map1',
                 layers: [
-                    baseMapList.getBaseMapData(0)
+                    baseMapList.getBaseMapData(0),
+                    // new TileLayer({
+                    //     opacity: 0.7,
+                    //     source: new WMTS({
+                    //         url: 'https://mrdata.usgs.gov/mapcache/wmts',
+                    //         layer: 'sgmc2',
+                    //         matrixSet: 'GoogleMapsCompatible',
+                    //         format: 'image/png',
+                    //         projection: projection,
+                    //         tileGrid: new WMTSTileGrid({
+                    //         origin: getTopLeft(projectionExtent),
+                    //         resolutions: resolutions,
+                    //         matrixIds: matrixIds,
+                    //         }),
+                    //         style: 'default',
+                    //         wrapX: true,
+                    //     }),
+                    // }),
                 ],
                 view: defaultView,
                 controls: [],
@@ -735,9 +768,10 @@ export default {
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
                 <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
                 <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
-                    :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
-                        layerControl({ action, value })
-                    }" />
+                :baseMapList="state.temp.baseMapList"
+                :onChangeBaseMaps="({ action, value }) => {
+                    layerControl({ action, value })
+                }" />
             </div>
             <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
@@ -750,8 +784,12 @@ export default {
                     changeMapCount(qty)
                 }
             }"
-            @onLayerControl="({ action, value }) => { layerControl(action, value) }"
-            @conditionWrap="(value) => { conditionWrap(value) }" />
+            @onLayerControl="({ action, value }) => {
+                layerControl({action, value})
+            }"
+            @conditionWrap="(value) => {
+                conditionWrap(value)
+            }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
