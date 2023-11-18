@@ -111,7 +111,6 @@ export default {
                 view: defaultView,
                 controls: [],
             })
-            layerControl(layerObj)
 
             state.map1.addControl(new ScaleLine({
                 units: 'metric', // 比例尺單位
@@ -732,8 +731,12 @@ export default {
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-            :onChangeTarget="(value) => { changeTarget(value) }"
-            @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
+            :onChangeTarget="(value) => {
+                changeTarget(value)
+            }"
+            @onMapControl="({ action, value }) => {
+                mapControl({ action, value })
+            }" />
 
         <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
@@ -744,7 +747,8 @@ export default {
                     layerControl({ action, value })
                 }" />
             </div>
-            <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
+            <SearchBar class="mt-4 d-none d-sm-block"
+            v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
@@ -753,7 +757,10 @@ export default {
                 },
                 onChangeMapCount: (qty) => {
                     changeMapCount(qty)
-                }
+                },
+            }"
+            :onChangeTarget="(value) => {
+                changeTarget(value)
             }"
             @onLayerControl="({ action, value }) => {
                 layerControl({action, value})

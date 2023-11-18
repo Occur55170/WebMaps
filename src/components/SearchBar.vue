@@ -20,6 +20,10 @@ export default {
             type: Function,
             default: ()=>{}
         },
+        onChangeTarget: {
+            type: Function,
+            default: ()=>{}
+        }
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -53,18 +57,12 @@ export default {
             emit('conditionWrap')
         }
 
-        function onChangeTarget(value) {
-            state.targetNum = value
-            emit('onChangeTarget', value)
-        }
-
         return {
             props,
             state,
             toolSwitch,
             onLayerControl,
             conditionWrap,
-            onChangeTarget
         }
     }
 }
@@ -116,10 +114,12 @@ export default {
         style="z-index: 99;">
             <OverLayer :text="'左右視窗切換工具'" />
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
-                onChangeTarget(1)
+                state.targetNum = 1
+                props.onChangeTarget(1)
             }">左</div>
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
-                onChangeTarget(2)
+                state.targetNum = 2
+                props.onChangeTarget(2)
             }">右</div>
         </div>
     </div>
