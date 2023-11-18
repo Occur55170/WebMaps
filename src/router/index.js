@@ -18,7 +18,7 @@ const routes = [
     {
         path: '/Wes',
         name: 'Wes',
-        component: () => import('@/view/Wes.vue')
+        component: () => import('@/view/opp.vue')
     },
     {
         path: `${VITE_URL}/Plane/:id`,

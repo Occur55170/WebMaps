@@ -102,7 +102,6 @@ export default {
 
         // 初始化地圖
         function initMap() {
-
             state.map1 = new Map({
                 target: 'map1',
                 layers: [
@@ -222,6 +221,7 @@ export default {
 
                             // TODO: 等待api 確定後切換成api路徑
                             const gifUrl = targetLayer.get('extra').url;
+                            // 待刪
                             const gif = gifler(gifUrl);
                             const extentWidth = extent[2] - extent[0];
                             const extentHeight = extent[3] - extent[1];
@@ -240,6 +240,7 @@ export default {
                                 const scaleY = extentHeight / frame.height;
                                 const baseScale = Math.min(scaleX, scaleY);
 
+                                // 待刪
                                 const currentResolution = state.map1.getView().getResolution();
 
                                 // 动态样式函数
@@ -571,6 +572,7 @@ export default {
                     if (selectIds[0] === '工程鑽探') {
                         console.log('選到工程鑽探')
                         state.popup.popupId = selectedFeatures.get('name').split('_')[0]
+                        // state.popup.temp = selectedFeatures
                         return
                     }
                     if (selectIds[0] === '土石流潛勢溪流') {
