@@ -102,42 +102,16 @@ export default {
 
         // 初始化地圖
         function initMap() {
-            const projection = getProjection('EPSG:3857');
-            const projectionExtent = projection.getExtent();
-            const size = getWidth(projectionExtent) / 256;
-            const resolutions = new Array(19);
-            const matrixIds = new Array(19);
-            for (let z = 0; z < 19; ++z) {
-                resolutions[z] = size / Math.pow(2, z);
-                matrixIds[z] = z;
-            }
-            console.log(123)
 
             state.map1 = new Map({
                 target: 'map1',
                 layers: [
-                    baseMapList.getBaseMapData(0),
-                    // new TileLayer({
-                    //     opacity: 0.7,
-                    //     source: new WMTS({
-                    //         url: 'https://mrdata.usgs.gov/mapcache/wmts',
-                    //         layer: 'sgmc2',
-                    //         matrixSet: 'GoogleMapsCompatible',
-                    //         format: 'image/png',
-                    //         projection: projection,
-                    //         tileGrid: new WMTSTileGrid({
-                    //         origin: getTopLeft(projectionExtent),
-                    //         resolutions: resolutions,
-                    //         matrixIds: matrixIds,
-                    //         }),
-                    //         style: 'default',
-                    //         wrapX: true,
-                    //     }),
-                    // }),
+                    baseMapList.getBaseMapData(0)
                 ],
                 view: defaultView,
                 controls: [],
             })
+            layerControl(layerObj)
 
             state.map1.addControl(new ScaleLine({
                 units: 'metric', // 比例尺單位
@@ -250,7 +224,6 @@ export default {
                             // TODO: 等待api 確定後切換成api路徑
                             const gifUrl = targetLayer.get('extra').url;
                             const gif = gifler(gifUrl);
-
                             const extentWidth = extent[2] - extent[0];
                             const extentHeight = extent[3] - extent[1];
 
@@ -582,8 +555,6 @@ export default {
                     // selectedFeatures.getKeys().forEach(key => console.log(`${key} -> ${selectedFeatures.get(key)}`))
 
                     let selectIds = (selectedFeatures.getId() ?? selectedFeatures.getGeometryName()).split('.')
-
-                    console.log('id :' + selectIds[0])
                     state.popup.popupData = selectIds[0]
                     state.popup.coordinate = event.mapBrowserEvent.coordinate
                     if (selectIds[0] === '新竹縣原住民部落範圍') {
