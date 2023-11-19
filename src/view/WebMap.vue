@@ -19,6 +19,7 @@ import { Point } from 'ol/geom.js'
 import { Icon, Style } from 'ol/style.js'
 
 import OLCesium from 'olcs/OLCesium.js'
+import Static from 'ol/source/ImageStatic.js'
 
 import 'ol/ol.css'
 import 'ol-ext/dist/ol-ext.css'
@@ -193,7 +194,11 @@ export default {
             }
         }
 
+        // FIXME: 計數器安排，圖片次數   雷達計時器
+        let LaydorTimesCount = 0
+        let LaydorTimes
         function layerControl({ action, value }) {
+                    console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -212,7 +217,45 @@ export default {
                         }
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                        target.addLayer(targetLayer)
+                        if (targetLayer.get('label')?.includes('雷達回波預測')) {
+                            // FIXME: 重播功能待修
+                            const specialLayerData = state.layers[value.nodeIndex].group_layers[value.subNodeIndex]
+                            // LaydorTimes = SetTimeInt
+                            target.addLayer(new ImageLayer({
+                                id: value.id,
+                                label: `${specialLayerData.title}`,
+                                source: new Static({
+                                    url: specialLayerData.tiles_image_urls[0],
+                                    projection: 'EPSG:4326',
+                                    imageExtent: false ? specialLayerData.image_options.image_extent : [119.18, 21.45, 124.34, 26.56],
+                                    interpolate: true,
+                                })
+                            }))
+                            setInterval(function() {
+                                let layersAry = targetLayers.getArray()
+                                function removeLayersById(id) {
+                                    const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(id));
+                                    toRemoveLayerId.forEach((node) => {
+                                        target.removeLayer(node);
+                                    });
+                                }
+                                removeLayersById(value.id)
+                                LaydorTimesCount = LaydorTimesCount+1 > 4 ? 0 : LaydorTimesCount+1
+                                let plusI = LaydorTimesCount
+                                target.addLayer(new ImageLayer({
+                                    id: value.id,
+                                    label: `${specialLayerData.title}`,
+                                    source: new Static({
+                                        url: specialLayerData.tiles_image_urls[plusI],
+                                        projection: 'EPSG:4326',
+                                        imageExtent: false ? specialLayerData.image_options.image_extent : [119.18, 21.45, 124.34, 26.56],
+                                        interpolate: true,
+                                    })
+                                }))
+                            }, 1000)
+                        } else {
+                            target.addLayer(targetLayer)
+                        }
                         if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)

@@ -255,7 +255,12 @@ export default {
                     result = new ImageLayer({
                         id,
                         label: `${layer.title}${tileTitle}`,
-                        source: imageLayer
+                        source: imageLayer,
+                        // FIXME: 考慮額外帶值出去
+                        ext: {
+                            currentKey: 0,
+                            imgList: layer.tiles_image_urls
+                        }
                     })
                     break
                 default:
