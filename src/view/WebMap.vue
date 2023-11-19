@@ -53,7 +53,6 @@ export default {
                         groupClass: node.group_class
                     }
                 })
-                console.log(result)
                 return result
             }),
             selectLock: false,
@@ -214,59 +213,59 @@ export default {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         target.addLayer(targetLayer)
-                        if (targetLayer.get('label')?.includes('雷達回波預測')) {
-                            var source = targetLayer.getSource();
-                            var iconFeature = source.getFeatures()[0]
-                            const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
+                        // if (targetLayer.get('label')?.includes('雷達回波預測')) {
+                        //     var source = targetLayer.getSource();
+                        //     var iconFeature = source.getFeatures()[0]
+                        //     const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
 
-                            // TODO: 等待api 確定後切換成api路徑
-                            const gifUrl = targetLayer.get('extra').url;
-                            // 待刪
-                            const gif = gifler(gifUrl);
-                            const extentWidth = extent[2] - extent[0];
-                            const extentHeight = extent[3] - extent[1];
+                        //     // TODO: 等待api 確定後切換成api路徑
+                        //     const gifUrl = targetLayer.get('extra').url;
+                        //     // 待刪
+                        //     const gif = gifler(gifUrl);
+                        //     const extentWidth = extent[2] - extent[0];
+                        //     const extentHeight = extent[3] - extent[1];
 
-                            // 创建一个单独的 Canvas 来处理 GIF 帧
-                            const gifCanvas = document.createElement('canvas');
-                            let giflerContext = null; // 用于存储 gifler 的上下文
+                        //     // 创建一个单独的 Canvas 来处理 GIF 帧
+                        //     const gifCanvas = document.createElement('canvas');
+                        //     let giflerContext = null; // 用于存储 gifler 的上下文
 
-                            gifler(gifUrl).frames(gifCanvas, function (ctx, frame) {
-                                // 只在第一次时设置 gifler 的上下文
-                                if (!giflerContext) {
-                                    giflerContext = ctx;
-                                }
+                        //     gifler(gifUrl).frames(gifCanvas, function (ctx, frame) {
+                        //         // 只在第一次时设置 gifler 的上下文
+                        //         if (!giflerContext) {
+                        //             giflerContext = ctx;
+                        //         }
 
-                                const scaleX = extentWidth / frame.width;
-                                const scaleY = extentHeight / frame.height;
-                                const baseScale = Math.min(scaleX, scaleY);
+                        //         const scaleX = extentWidth / frame.width;
+                        //         const scaleY = extentHeight / frame.height;
+                        //         const baseScale = Math.min(scaleX, scaleY);
 
-                                // 待刪
-                                const currentResolution = state.map1.getView().getResolution();
+                        //         // 待刪
+                        //         const currentResolution = state.map1.getView().getResolution();
 
-                                // 动态样式函数
-                                iconFeature.setStyle(function (feature, resolution) {
-                                    let scale = baseScale / resolution;
-                                    // 你可以根据需要设置一个最小的缩放值，以确保图标在所有分辨率下都可见
-                                    scale = Math.max(scale, 0.0000001);
+                        //         // 动态样式函数
+                        //         iconFeature.setStyle(function (feature, resolution) {
+                        //             let scale = baseScale / resolution;
+                        //             // 你可以根据需要设置一个最小的缩放值，以确保图标在所有分辨率下都可见
+                        //             scale = Math.max(scale, 0.0000001);
 
-                                    return new Style({
-                                        image: new Icon({
-                                            img: giflerContext.canvas,
-                                            imgSize: [frame.width, frame.height],
-                                            opacity: 0.8,
-                                            scale: scale
-                                        }),
-                                    });
-                                });
+                        //             return new Style({
+                        //                 image: new Icon({
+                        //                     img: giflerContext.canvas,
+                        //                     imgSize: [frame.width, frame.height],
+                        //                     opacity: 0.8,
+                        //                     scale: scale
+                        //                 }),
+                        //             });
+                        //         });
 
-                                    ctx.clearRect(0, 0, frame.width, frame.height);
-                                    ctx.drawImage(frame.buffer, frame.x, frame.y);
+                        //             ctx.clearRect(0, 0, frame.width, frame.height);
+                        //             ctx.drawImage(frame.buffer, frame.x, frame.y);
 
-                                    target.render();
-                                },
-                                true
-                            );
-                        }
+                        //             target.render();
+                        //         },
+                        //         true
+                        //     );
+                        // }
                         if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
                             addSelectElement(value)
