@@ -244,11 +244,10 @@ export default {
         if (layerType === 'Image'){
             switch (figureType){
                 case 'Surface':
-                    console.log(layer.tiles_image_urls)
                     const imageLayer = new Static({
                         url: layer.tiles_image_urls[0],
                         projection: 'EPSG:4326',
-                        imageExtent: false ? layer.image_options.image_extent : [119.18, 21.45, 124.34, 26.56],
+                        imageExtent: layer.image_options.image_extent,
                         interpolate: true,
                     })
 
@@ -256,10 +255,10 @@ export default {
                         id,
                         label: `${layer.title}${tileTitle}`,
                         source: imageLayer,
-                        // FIXME: 考慮額外帶值出去
                         ext: {
-                            currentKey: 0,
-                            imgList: layer.tiles_image_urls
+                            currentLayerKey: 0,
+                            tilesImageUrls: layer.tiles_image_urls,
+                            imageExtent: layer.image_options.image_extent,
                         }
                     })
                     break
@@ -269,10 +268,10 @@ export default {
         }
         return result
     },
-    getLayerIndex: (layeredIndex) => {
+    getLayerIndex: (id) => {
         let nodeIndex; let subNodeIndex; let nestedSubNodeIndex
-        if (!(layeredIndex)){ return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex } }
-        layeredIndex.split('_').forEach((element, key) => {
+        if (!(id)){ return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } }
+        id.split('_').forEach((element, key) => {
             switch (key){
                 case 0:
                     nodeIndex = Number(element.split('node')[1])
@@ -285,6 +284,23 @@ export default {
                     break
             }
         })
-        return { nodeIndex, subNodeIndex, nestedSubNodeIndex, layeredIndex }
+        return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id }
+    },
+    resetLayerId: (id, keyName, newVal) => {
+        // FIXME: 使用上面getLayerIndex 做拆解
+        const result = {}
+        id.split('_').forEach(item => {
+            const [key, value] = item.split('ode')
+            result[key + 'ode'] = value
+        })
+
+        result[keyName] = newVal
+
+        let newStr = ''
+        Object.entries(result).forEach((node, key) => {
+            newStr += `${node[0]}${node[1]}`
+            if (key + 1 !== Object.entries(result).length){ newStr += '_' }
+        })
+        return newStr
     },
 }

@@ -193,18 +193,14 @@ export default {
                     break;
             }
         }
-
-        // FIXME: 計數器安排，圖片次數   雷達計時器
-        let LaydorTimesCount = 0
-        let LaydorTimes
         function layerControl({ action, value }) {
-                    console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // 避免加到有群組的母層
+                        let nestedSubNodeIndex = value.nestedSubNodeIndex
+                        // 點選父層後，自動帶入子層群組
                         if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
@@ -213,48 +209,28 @@ export default {
                                     target.removeLayer(element)
                                 }
                             })
-                            onMapLayerStatus('delete', target.getTarget(), value.id)
+                            nestedSubNodeIndex = state.selectValueTemp
+                            // onMapLayerStatus('delete', target.getTarget(), value.id)
+                            value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
-                        let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                        if (targetLayer.get('label')?.includes('雷達回波預測')) {
-                            // FIXME: 重播功能待修
-                            const specialLayerData = state.layers[value.nodeIndex].group_layers[value.subNodeIndex]
-                            // LaydorTimes = SetTimeInt
-                            target.addLayer(new ImageLayer({
-                                id: value.id,
-                                label: `${specialLayerData.title}`,
-                                source: new Static({
-                                    url: specialLayerData.tiles_image_urls[0],
+                        target.addLayer(targetLayer)
+                        if (['雷達回波預測','累積雨量預測','氣溫預測'].includes(targetLayer.get('label'))) {
+                            const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
+                            const timeKey = value.id.split('_nestedSubNode')[0]
+                            if(state.temp?.[`${ timeKey }count`] === undefined) {
+                                state.temp[`${ timeKey }count`] = currentLayerKey
+                            }
+                            state.temp[timeKey] = setInterval(function() {
+                                state.temp[`${ timeKey }count`] = state.temp[`${ timeKey }count`]+1 > 4 ? 0 : state.temp[`${ timeKey }count`]+1
+                                let newSource = new Static({
+                                    url: tilesImageUrls[state.temp[`${ timeKey }count`]],
                                     projection: 'EPSG:4326',
-                                    imageExtent: false ? specialLayerData.image_options.image_extent : [119.18, 21.45, 124.34, 26.56],
+                                    imageExtent: imageExtent,
                                     interpolate: true,
                                 })
-                            }))
-                            setInterval(function() {
-                                let layersAry = targetLayers.getArray()
-                                function removeLayersById(id) {
-                                    const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(id));
-                                    toRemoveLayerId.forEach((node) => {
-                                        target.removeLayer(node);
-                                    });
-                                }
-                                removeLayersById(value.id)
-                                LaydorTimesCount = LaydorTimesCount+1 > 4 ? 0 : LaydorTimesCount+1
-                                let plusI = LaydorTimesCount
-                                target.addLayer(new ImageLayer({
-                                    id: value.id,
-                                    label: `${specialLayerData.title}`,
-                                    source: new Static({
-                                        url: specialLayerData.tiles_image_urls[plusI],
-                                        projection: 'EPSG:4326',
-                                        imageExtent: false ? specialLayerData.image_options.image_extent : [119.18, 21.45, 124.34, 26.56],
-                                        interpolate: true,
-                                    })
-                                }))
+                                targetLayer.setSource(newSource)
                             }, 1000)
-                        } else {
-                            target.addLayer(targetLayer)
                         }
                         if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
@@ -269,13 +245,13 @@ export default {
                                 target.removeLayer(node);
                             });
                         }
-
+                        // FIXME: ????
                         const idMappings = {
                             'node9_subNode0_nestedSubNode': 'node9_subNode0_nestedSubNode',
                             'node12_subNode1_nestedSubNode': 'node12_subNode1_nestedSubNode',
                         };
                         const idToRemove = idMappings[value.id] || value.id;
-                        removeLayersById(idToRemove);
+                        removeLayersById(idToRemove)
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
                             // FIXME: popup 修改
                             // TODO: 結構優化
@@ -287,6 +263,11 @@ export default {
                                 state.popup.overlay = null;
                             }
                         }
+                        if (['雷達回波預測','累積雨量預測','氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
+                            const timeKey = value.id.split('_nestedSubNode')[0]
+                            clearInterval(state.temp[timeKey]);
+                            delete state.temp[`${ timeKey }count`]
+                        }
 
                         onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
@@ -297,15 +278,10 @@ export default {
                         let layersAry = targetLayers.getArray()
                         let layersToRemove = layersAry.filter(node => !(node.get('id') === undefined))
                         layersToRemove.forEach((node) => {
-                            target.removeLayer(node)
+                            layerControl({action: 'layerMode', value:{checked: false,...getMapLayers.getLayerIndex(node.get('id'))}})
                         })
                     } else {
-                        let layersAry = targetLayers.getArray()
-                        layersAry.forEach(element => {
-                            if (element.get('id') == value.id) {
-                                target.removeLayer(element)
-                            }
-                        })
+                        layerControl({action: 'layerMode', value:{checked: false,...getMapLayers.getLayerIndex(value.id)}})
                     }
                     break;
                 case 'changeOrder':
@@ -422,6 +398,7 @@ export default {
                     target: otherMap,
                     layers: [
                         baseMapList.getBaseMapData(0),
+                        // TODO: check
                         ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
                     ],
                     view: defaultView,
@@ -453,7 +430,6 @@ export default {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
-
                     // TODO: 優化，把node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
@@ -465,7 +441,9 @@ export default {
                         target: `map${value}`,
                         layers: [
                             baseMapList.getBaseMapData(state.temp[`map${state.targetNum}BaseStatus`]),
-                            ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
+                            ...otherLayersData.map(node => {
+                                return getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id)
+                            })
                         ],
                         view: defaultView,
                         controls: [],
@@ -685,6 +663,10 @@ export default {
             }
         })
 
+        function show () {
+            console.log(state.map1.getLayers().getArray())
+        }
+
         return {
             state,
             props,
@@ -696,6 +678,7 @@ export default {
             closeAreaData,
             moveToMap,
             changeMapCount,
+            show
         }
     }
 }
