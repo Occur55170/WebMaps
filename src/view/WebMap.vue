@@ -240,18 +240,13 @@ export default {
                     } else {
                         let layersAry = targetLayers.getArray()
                         function removeLayersById(id) {
-                            const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(id));
+                            const deleteKey = value.id.split('_nestedSubNode')[0]
+                            const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(deleteKey))
                             toRemoveLayerId.forEach((node) => {
                                 target.removeLayer(node);
                             });
                         }
-                        // FIXME: ????
-                        const idMappings = {
-                            'node9_subNode0_nestedSubNode': 'node9_subNode0_nestedSubNode',
-                            'node12_subNode1_nestedSubNode': 'node12_subNode1_nestedSubNode',
-                        };
-                        const idToRemove = idMappings[value.id] || value.id;
-                        removeLayersById(idToRemove)
+                        removeLayersById()
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
                             // FIXME: popup 修改
                             // TODO: 結構優化

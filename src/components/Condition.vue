@@ -64,7 +64,7 @@ export default {
             }
         }
         function LayerCheckBoxChange(e, item) {
-            let defaultChecked = e.target.checked || ((typeof e.target.checked == ' ') ? true : false )
+            let defaultChecked = item.single_tiles ? e.target.checked : true
             onLayerControl('layerMode', {
                 checked: defaultChecked,
                 nodeIndex: item.nodeIndex,
@@ -132,9 +132,10 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
-                    <div class="ms-3 mb-1" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
+                    <div class="ms-3 my-2" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
                         <div v-if="subNode.single_tiles">
                             <input type="checkbox"
+                            :id="subNode.id"
                             :checked="props.currentLayers.some(node=> node.id === subNode.id)"
                             @change="(e) => {
                                 LayerCheckBoxChange(e, {
@@ -146,7 +147,12 @@ export default {
                                     id: subNode.id
                                 })
                             }">
-                            {{ subNode.title }}
+                            <label :for="subNode.id">
+                                <span class="me-2">
+                                    {{ subNode.title }}
+                                </span>
+                                <img :src="subNode.icon" alt="">
+                            </label>
                             <!-- TODO: 優化 -->
                             <div v-if="true">
                                 <div v-if="subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
@@ -169,46 +175,49 @@ export default {
                                         </option>
                                     </select>
                                 </div>
-                                <!-- <div v-if="subNode.id === 'node7_subNode0_nestedSubNodeundefined'">
-                                    <select name="" id="" @change="props.moveToMap">
-                                        <option :value="key" :data-coordinates="item.geometry.coordinates" v-for="(item, key) in props.selectLayerOption[subNode.id]">
-                                            {{ item.properties['事件'] }}
-                                        </option>
-                                    </select>
-                                </div> -->
                             </div>
                         </div>
                         <div v-else>
-                            <input type="checkbox"
-                            :checked="props.currentLayers.some(node=> {
-                                let subNodeIds = mapList.getLayerIndex(node.id)
-                                return  subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
-                            })"
-                            @change="(e) => {
-                                LayerCheckBoxChange(e, {
-                                    nodeIndex: nodeIndex,
-                                    subNode: subNode,
-                                    subNodeIndex: subNodeIndex,
-                                    nestedSubNodeIndex: '',
-                                    single_tiles: subNode.single_tiles,
-                                    id: subNode.id
-                                })
-                            }">
-                                {{ subNode.title }}
-                                <select name="" id="" class="ms-3"
-                                v-model="state.TilesListValue"
+                            <div class="my-2">
+                                <input type="checkbox"
+                                :checked="props.currentLayers.some(node=> {
+                                    let subNodeIds = mapList.getLayerIndex(node.id)
+                                    return subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
+                                })"
                                 @change="(e) => {
                                     LayerCheckBoxChange(e, {
                                         nodeIndex: nodeIndex,
                                         subNode: subNode,
                                         subNodeIndex: subNodeIndex,
-                                        nestedSubNodeIndex: state.TilesListValue,
-                                        single_tiles: subNode.single_tiles,
+                                        nestedSubNodeIndex: '',
+                                        single_tiles: true,
                                         id: subNode.id
                                     })
                                 }">
-                                    <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
-                                </select>
+                                    {{ subNode.title }}
+                                    <select name="" id="" class="mx-2"
+                                    v-model="state.TilesListValue"
+                                    @change="(e) => {
+                                        LayerCheckBoxChange(e, {
+                                            nodeIndex: nodeIndex,
+                                            subNode: subNode,
+                                            subNodeIndex: subNodeIndex,
+                                            nestedSubNodeIndex: state.TilesListValue,
+                                            single_tiles: subNode.single_tiles,
+                                            id: subNode.id,
+                                        })
+                                    }">
+                                        <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
+                                    </select>
+                                    <span class="bg-grey text-white py-1 px-2 rounded">說明</span>
+                                </div>
+                                <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
+                                    <span  class="me-2 d-flex flex-wrap align-items-center mb-1"
+                                    v-for="(iconSrc) in subNode.info_box.items_group">
+                                        <img :src="iconSrc.icon" alt="" class="me-1">
+                                        <span class="fw-bold">{{ iconSrc.text }}</span>
+                                    </span>
+                                </div>
                         </div>
                     </div>
                 </div>
