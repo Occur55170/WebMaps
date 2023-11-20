@@ -133,19 +133,44 @@ export default {
         }
 
         if (layerType === 'WMTS'){
-            layerSource = new ImageWMS({
-                url: 'https://ahocevar.com/geoserver/wms',
-                params: { LAYERS: 'topp:states' },
-                serverType: 'geoserver',
-            })
+            switch (figureType){
+                case 'Surface':
+                    // FIX: 匯出會變成gif
+                    const projection = 'EPSG:3857'
+                    const projectionExtent = [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
+                    const matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+                    const resolutions = [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.29858214173896974, 0.14929107086948487]
+                    layerSource = new WMTS({
+                        url: layer.tiles_url,
+                        layer: layer.name,
+                        requestEncoding: 'REST',
+                        matrixSet: 'GoogleMapsCompatible',
+                        format: 'image/png',
+                        transparente: true,
+                        projection,
+                        tileGrid: new TilegridWMTS({
+                            origin: getTopLeft(projectionExtent),
+                            matrixIds,
+                            resolutions
+                        }),
+                        style: 'default',
+                        maxZoom: 20,
+                    })
 
-            result = new ImageWMS({
-                name: layer.name,
-                id,
-                label: `${layer.title}${tileTitle}`,
-                title: layer.title,
-                source: layerSource
-            })
+                    result = new TileLayer({
+                        name: layer.name,
+                        id,
+                        label: `${layer.title}${tileTitle}`,
+                        title: layer.title,
+                        type: 'overlay',
+                        opacity: 1.0,
+                        visible: true,
+                        source: layerSource
+                    })
+                    break
+                default:
+                    console.log('error-otherWMSLayer:', figureType)
+            }
         }
 
         // only 部落圖層點擊用layer
