@@ -184,7 +184,7 @@ export default {
             if (popup.popupData == "土石流潛勢溪流") {
                 state.type = 5
                 state.potentialDebrisFlowTorrent = getPotentialDebrisFlowTorrent(props.popup.temp)
-                state.showAreaDataWindow = true   
+                state.showAreaDataWindow = true
                 return
             }
 
@@ -198,7 +198,7 @@ export default {
 
         initialize(props.popup)
         oldPopupId = props.popup.popupId
-        
+
         watch(props.popup, async (newVal) => {
             //TODO: 結構優化
 

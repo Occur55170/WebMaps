@@ -76,10 +76,6 @@ export default {
                             <a href="#section1" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">基本資料</a>
                         </li>
-                        <li class="text-center mb-5">
-                            <a href="#section2" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
-                                :class="state.mainTextColor">部落地標</a>
-                        </li>
                         <li class="text-center mb-5" v-if="state.tribeData?.naturalEnvironment">
                             <a href="#section3" class="fs-5 bg-white py-3 fw-bold rounded text-decoration-none"
                                 :class="state.mainTextColor">自然環境</a>
@@ -131,8 +127,14 @@ export default {
                             聚落座標
                         </div>
                         <div class="col-12 col-sm-8">
-                            <p>聚落坐標(97TM2,WGS84)</p>
-                            <p>代表性座標名稱：石磊國民小學(疏散避難處所)</p>
+                            <p v-if="state.tribeData?.basicInformation?.coordinates">
+                                聚落坐標(
+                                <span v-for="(coordinates, coordinates_i) in Object.keys(state.tribeData?.basicInformation?.coordinates)" :key="coordinates_i">
+                                    <span v-if="coordinates_i !== 0">,</span>
+                                    {{ coordinates }}
+                                </span>
+                                )
+                            </p>
                             <p v-for="(item, itemKey) in state.coordinates">
                             <p>
                                 【 {{ item[0] }}座標 】
@@ -167,24 +169,6 @@ export default {
                             <p class="mb-0 fw-bold">{{ state.tribeData?.basicInformation?.area }}</p>
                         </div>
                     </div>
-                    <div class="section mb-5" id="section2">
-                        <div class="fw-bold fs-5" :class="state.mainTextColor">
-                            <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
-                            <img src="@/assets/mapDetail/frame-2.png" v-else>
-                            部落地標
-                        </div>
-                        <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
-                        <div class="d-flex flex-wrap flex-sm-nowrap mx-0 align-items-center">
-                            <img src="@/assets/mapDetail/3-1.png" class="me-sm-4 w-100 w-sm-10">
-                            <div>
-                                <p>名稱 : 石磊國小</p>
-                                <p>地址 : 新竹縣尖石鄉49號</p>
-                                <p>簡介 :
-                                    新竹縣尖石鄉石磊國民小學是位於台灣新竹縣尖石鄉玉峰村的一座國民小學，校園無圍牆及操場，為全臺灣腹地最小的國民小學。該學校始建於中華民國四十五年八月，最初名為玉峰國民學校石磊分班。民國五十七年八月改稱新竹縣尖石鄉石磊國民小學
-                                </p>
-                            </div>
-                        </div>
-                    </div>
                     <div class="section mb-5" id="section3" v-if="state.tribeData?.naturalEnvironment">
                         <div class="fw-bold fs-5" :class="state.mainTextColor">
                             <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1">
@@ -203,11 +187,11 @@ export default {
                             人文環境
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
-                        <div>石磊部落範圍內之文化地景分佈如下圖所示。地標地物包括石磊國小、石磊天主堂、石磊文化健康站和石磊教會等。部落產業以農業為主，種植椴木香菇及有機農業，以高冷蔬菜為主。</div>
-                        <div class="my-5">
-                            <p class="mb-2">部落名稱:石磊部落</p>
-                            <p class="mb-2">主要原住民族群:泰雅族</p>
+                        <div class="mb-3">
+                            <p class="mb-1">部落名稱:{{ state.tribeData?.basicInformation?.tribeName }}</p>
+                            <p>主要原住民族群:{{ state.tribeData?.basicInformation?.tribeEthnicity }}</p>
                         </div>
+                        <div class="mb-3">{{ state.tribeData?.industry }}</div>
                         <div>
                             <div class="fw-bold mb-2" :class="state.mainTextColor">文化地景點</div>
                             <ul class="list-unstyled d-flex flex-wrap">
@@ -226,9 +210,6 @@ export default {
                             歷史災害
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
-                        <div class="mb-4">
-                            依據111年尖石鄉公所地區災害防救計畫及查詢災害復建工程經費審議及執行資訊系統後，將發生於石磊部落範圍內(及鄰近)之災害事件彙整如下表，並於111年12月22日進行現場調查。災害原因多為降雨及颱風事件，主要的災害類型為土石崩落及邊坡災害。
-                        </div>
                         <div class="table w-100 d-none d-sm-block">
                             <div class="d-flex flex-nowrap justify-content-between">
                                 <div class="col-1 text-white" :class="state.mainBgColor">編號</div>
@@ -255,8 +236,7 @@ export default {
                         </div>
                         <hr class="border-5 opacity-100 mt-1 mb-3" :class="state.mainTextColor">
                         <div class="iframeCon mb-4 w-100 h-0 position-relative">
-                            <!-- {{ state.tribeData }} -->
-                            <iframe class="position-absolute top-0 start-0 w-100 h-100" src="https://www.youtube.com/embed/-a0EqPzXe34?si=7OR7fBYwrucztVO0" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
+                            <iframe class="position-absolute top-0 start-0 w-100 h-100" :src="state.tribeData.visionVideo" title="YouTube video player" frameborder="0" allowfullscreen></iframe>
                         </div>
                     </div>
                     <div class="section mb-5" id="section7" v-if="state.tribeData.engineeringVisionPosterThumbnail">
