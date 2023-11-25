@@ -170,10 +170,12 @@ export default {
             }
             if (popup.popupData == "工程鑽探") {
                 console.log('搜尋工程鑽探')
+                console.log(popup.coordinate)
                 getHarvestDrill(popup.popupId).then((result) => {
                     state.type = 4
                     if (result.data !== null) {
                         state.harvestDrill = result.data
+                        state.coordinate = popup.coordinate
                     }
                     console.log(result.data)
                 }).then(() => {
@@ -382,7 +384,7 @@ export default {
                 <div class="row mx-0 mb-2">
                     <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">連結:
                     </div>
-                    <a href="https://geotech.gsmma.gov.tw/imoeagis/Home/Map" class="col-8 py-1 px-2 bg-grey-light text-start">
+                    <a  :href="'https://geotech.gsmma.gov.tw/imoeagis/Home/Map?'+'lng='+state.coordinate[0]+'&lat='+ state.coordinate[1]" class="col-8 py-1 px-2 bg-grey-light text-start">
                         網址鏈接
                     </a>
                 </div>
