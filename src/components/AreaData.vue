@@ -29,7 +29,8 @@ export default {
             media: 'photo',
             scrollY: false,
             tribeData: {},
-            showAreaDataWindow: false
+            showAreaDataWindow: false,
+            oldPopupId: ""
         })
 
         async function getTribeData(tribeId) {
@@ -39,7 +40,6 @@ export default {
             }).done(res => {
                 return res
             }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
                 state.type = 0
                 props.closeAreaData()
                 return false
@@ -54,9 +54,8 @@ export default {
             }).done(res => {
                 return res
             }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
                 state.type = 0
-                // props.closeAreaData()
+                props.closeAreaData()
                 return false
             })
             return result
@@ -69,8 +68,8 @@ export default {
             }).done(res => {
                 return res
             }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
                 state.type = 0
+                props.closeAreaData()
                 return false
             })
             return result
@@ -82,21 +81,14 @@ export default {
             }).done(res => {
                 return res
             }).fail(FailMethod => {
-                console.log('Fail', FailMethod)
                 state.type = 0
+                props.closeAreaData()
                 return false
             })
             return result
         }
 
         function getPotentialDebrisFlowTorrent(data) {
-            // Basin -> 頭前溪流域
-            // Full -> 新竹縣尖石鄉新樂村
-            // Risk -> 中
-            // Note01 -> 95年易致災因子調查成果
-            // Note02 -> 111年土石流潛勢溪流調查評估與資料更新
-            // Stra_1 -> 新第三紀沉積岩
-            // Stra_2 -> 砂頁岩互層、砂岩、頁岩
             return {
                 basic: data.get('Basin'),
                 full: data.get('Full'),
@@ -111,11 +103,6 @@ export default {
         }
 
         function getRockfall(data) {
-            // ACTIVITY -> B2舊崩塌地再活動(部分)
-            // SLIDE_KIND -> A落石
-            // SLOPE_TYPE -> C斜交坡
-            // SLUMP_ANG -> C極陡(41-60度)
-            // IDENTIFIER -> 施國偉
             return {
                 activity: data.get('ACTIVITY'),
                 slideKind: data.get('SLIDE_KIND'),
@@ -126,13 +113,8 @@ export default {
 
         }
 
-
-        // var oldPopupData = "";
-        var oldPopupId = ""
-
         async function initialize(popup){
             if(popup == null){
-                console.log('empty')
                 state.type = 0
                 this.props?.closeAreaData()
                 return
@@ -162,7 +144,6 @@ export default {
                     if (result.data !== null) {
                         state.tribeData = result.data
                     }
-                    console.log(result.data)
                 }).then(() => {
                     state.showAreaDataWindow = true
                 })
@@ -177,7 +158,6 @@ export default {
                         state.harvestDrill = result.data
                         state.coordinate = popup.coordinate
                     }
-                    console.log(result.data)
                 }).then(() => {
                     state.showAreaDataWindow = true
                 })
@@ -198,20 +178,20 @@ export default {
             }
         }
 
-        initialize(props.popup)
-        oldPopupId = props.popup.popupId
 
         watch(props.popup, async (newVal) => {
             //TODO: 結構優化
-
-            if (newVal.popupId == oldPopupId) {
-                    console.log(`data 相同，${newVal.popupId}`)
+            if (newVal.popupId == state.oldPopupId) {
+                console.log(`data 相同，${newVal.popupId}`)
                 return
             }
-            oldPopupId = newVal.popupId
-
-
+            state.oldPopupId = newVal.popupId
            initialize(newVal)
+        })
+
+        onMounted(()=>{
+            initialize(props.popup)
+            state.oldPopupId = props.popup.popupId
         })
 
 
@@ -324,7 +304,6 @@ export default {
         <div v-if="state.type === 3">
             <div class="p-2 p-sm-3">
                 <p class="text-start px-0 fw-bold">雨量站</p>
-                <!-- {{ state.tribeData.viewStation }} -->
                 <hr>
                 <div class="p-0 p-sm-2">
                     <p>觀測時間: {{ state.tribeData?.viewDatetime }}</p>
@@ -388,7 +367,6 @@ export default {
                         網址鏈接
                     </a>
                 </div>
-                
             </div>
         </div>
         <div v-if="state.type === 5">
