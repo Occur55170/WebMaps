@@ -201,7 +201,9 @@ export default {
                     if (value.checked) {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex
                         // 點選父層後，自動帶入子層群組
-                        if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
+                        let isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
+                        let haveInfoBox = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box !== null
+                        if (!(isSingleTiles) || haveInfoBox) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
                                 if (!(element.get('id'))) { return }
@@ -210,7 +212,6 @@ export default {
                                 }
                             })
                             nestedSubNodeIndex = state.selectValueTemp
-                            // onMapLayerStatus('delete', target.getTarget(), value.id)
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)

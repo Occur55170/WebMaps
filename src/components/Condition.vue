@@ -60,7 +60,7 @@ export default {
             }
         }
         function LayerCheckBoxChange(e, item) {
-            let defaultChecked = item.single_tiles ? e.target.checked : true
+            let defaultChecked = item.elementSource === 'input' ? e.target.checked : true
             onLayerControl('layerMode', {
                 checked: defaultChecked,
                 nodeIndex: item.nodeIndex,
@@ -129,7 +129,7 @@ export default {
                         </svg>
                     </div>
                     <div class="ms-3 my-2" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
-                        <div v-if="subNode.single_tiles" class="d-flex flex-wrap">
+                        <div v-if="subNode.single_tiles && subNode.info_box == null" class="d-flex flex-wrap">
                             <input type="checkbox" class="me-2"
                             :id="subNode.id"
                             :checked="props.currentLayers.some(node=> node.id === subNode.id)"
@@ -140,6 +140,7 @@ export default {
                                     subNodeIndex: subNodeIndex,
                                     nestedSubNodeIndex: '',
                                     single_tiles: subNode.single_tiles,
+                                    elementSource: 'input',
                                     id: subNode.id
                                 })
                             }">
@@ -184,12 +185,12 @@ export default {
                                         subNodeIndex: subNodeIndex,
                                         nestedSubNodeIndex: '',
                                         single_tiles: true,
+                                        elementSource: 'input',
                                         id: subNode.id
                                     })
                                 }">
                                     {{ subNode.title }}
-                                    <select name="" id="" class="mx-2"
-                                    v-model="state.TilesListValue"
+                                    <select name="" id="" class="mx-2" v-model="state.TilesListValue" v-if="subNode.tiles_list !== null"
                                     @change="(e) => {
                                         LayerCheckBoxChange(e, {
                                             nodeIndex: nodeIndex,
@@ -197,10 +198,25 @@ export default {
                                             subNodeIndex: subNodeIndex,
                                             nestedSubNodeIndex: state.TilesListValue,
                                             single_tiles: subNode.single_tiles,
+                                            elementSource: 'select',
                                             id: subNode.id,
                                         })
                                     }">
                                         <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
+                                    </select>
+                                    <select name="" id="" class="mx-2" v-model="state.TilesListValue" v-else
+                                    @change="(e) => {
+                                        LayerCheckBoxChange(e, {
+                                            nodeIndex: nodeIndex,
+                                            subNode: subNode,
+                                            subNodeIndex: subNodeIndex,
+                                            nestedSubNodeIndex: state.TilesListValue,
+                                            single_tiles: subNode.single_tiles,
+                                            elementSource: 'select',
+                                            id: subNode.id,
+                                        })
+                                    }">
+                                        <option :value="key" :id="item.id" v-for="(item, key) in subNode.info_box.items_group">{{ item.text }}</option>
                                     </select>
                                     <span class="bg-grey text-white py-1 px-2 rounded">說明</span>
                                 </div>
