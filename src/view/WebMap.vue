@@ -234,7 +234,7 @@ export default {
                         }
                         if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
-                            addSelectElement(value)
+                            addSelectElement(value, targetLayer.get('label'))
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
@@ -568,10 +568,10 @@ export default {
         }
 
         // TODO: 優化 移除id判斷?
-        function addSelectElement(value) {
+        function addSelectElement(value, layerName) {
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
-            if (id === 'node4_subNode0_nestedSubNodeundefined') {
+            if (layerName === '新竹縣原住民部落範圍') {
                 $.ajax({
                     url: 'https://api.edtest.site/tribeQuery',
                     method: 'GET',

@@ -29,10 +29,6 @@ export default {
             type: Function,
             default: () => {}
         },
-        selectLayerOption: {
-            type: Object,
-            default: {}
-        },
         tribeQuery: {
             type: Object,
             default: {}
@@ -75,6 +71,11 @@ export default {
             })
         }
 
+        async function getTribes() {
+            const result = await $.ajax(`https://api.edtest.site/tribes?${ 'years=' + state.conditionYear }&${ 'township=' + state.conditionTown }`, 'GET')
+            state.selectLayerOption = result
+        }
+
         function tribeYear(event) {
             state.conditionYear = event.target.value
             getTribes()
@@ -85,13 +86,8 @@ export default {
             getTribes()
         }
 
-        async function getTribes() {
-            const result = await $.ajax(`https://api.edtest.site/tribes?${ 'years=' + state.conditionYear }&${ 'township=' + state.conditionTown }`, 'GET')
-            state.selectLayerOption = result
-        }
-
         function moveMap(params) {
-            let selectValue = state.selectLayerOption.find(node=>node.tribeCode === params.target.value)
+            let selectValue = state.selectLayerOption.find(node=>node.tribeCode == params.target.value)
             props.moveToMap(selectValue.coordinates)
         }
 
@@ -133,8 +129,8 @@ export default {
                         </svg>
                     </div>
                     <div class="ms-3 my-2" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
-                        <div v-if="subNode.single_tiles">
-                            <input type="checkbox"
+                        <div v-if="subNode.single_tiles" class="d-flex flex-wrap">
+                            <input type="checkbox" class="me-2"
                             :id="subNode.id"
                             :checked="props.currentLayers.some(node=> node.id === subNode.id)"
                             @change="(e) => {
@@ -151,30 +147,27 @@ export default {
                                 <span class="me-2">
                                     {{ subNode.title }}
                                 </span>
-                                <img :src="subNode.icon" alt="">
+                                <img alt="" :src="subNode.icon" v-if="subNode.icon">
                             </label>
-                            <!-- TODO: 優化 -->
-                            <div v-if="true">
-                                <div v-if="subNode.id === 'node4_subNode0_nestedSubNodeundefined'">
-                                    <select class="me-2"
-                                    v-if="props.tribeQuery['years'] !== undefined" @change="tribeYear" placeholder="請選擇年度">
-                                        <option :value="item" v-for="(item, key) in props.tribeQuery['years']">
-                                            {{ item }}
-                                        </option>
-                                    </select>
-                                    <select class="me-2"
-                                    v-if="props.tribeQuery['township'] !== undefined" @change="tribeTown" placeholder="請選擇鄉鎮">
-                                        <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
-                                            {{ item }}
-                                        </option>
-                                    </select>
-                                    <select class="me-2"
-                                    v-if="state.selectLayerOption.length !== 0" @change="moveMap">
-                                        <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
-                                            {{ item.tribeName }}
-                                        </option>
-                                    </select>
-                                </div>
+                            <div v-if="subNode.title === '新竹縣原住民部落範圍'" class="w-100">
+                                <select class="me-2" placeholder="請選擇年度"
+                                v-if="props.tribeQuery['years'] !== undefined" @change="tribeYear">
+                                    <option :value="item" v-for="(item, key) in props.tribeQuery['years']">
+                                        {{ item }}
+                                    </option>
+                                </select>
+                                <select class="me-2" placeholder="請選擇鄉鎮"
+                                v-if="props.tribeQuery['township'] !== undefined" @change="tribeTown">
+                                    <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
+                                        {{ item }}
+                                    </option>
+                                </select>
+                                <select class="me-2"
+                                v-if="state.selectLayerOption.length !== 0" @change="moveMap">
+                                    <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
+                                        {{ item.tribeName }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
                         <div v-else>
@@ -214,7 +207,7 @@ export default {
                                 <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
                                     <span  class="me-2 d-flex flex-wrap align-items-center mb-1"
                                     v-for="(iconSrc) in subNode.info_box.items_group">
-                                        <img :src="iconSrc.icon" alt="" class="me-1">
+                                        <img :src="iconSrc.icon" alt="" class="me-1" v-if="iconSrc.icon">
                                         <span class="fw-bold">{{ iconSrc.text }}</span>
                                     </span>
                                 </div>
