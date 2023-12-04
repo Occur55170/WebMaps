@@ -179,15 +179,15 @@ export default {
         }
 
 
-        watch(props.popup, async (newVal) => {
-            //TODO: 結構優化
-            if (newVal.popupId == state.oldPopupId) {
-                console.log(`data 相同，${newVal.popupId}`)
-                return
-            }
-            state.oldPopupId = newVal.popupId
-           initialize(newVal)
-        })
+        // watch(props.popup, async (newVal) => {
+        //     //TODO: 結構優化
+        //     if (newVal.popupId == state.oldPopupId) {
+        //         console.log(`data 相同，${newVal.popupId}`)
+        //         return
+        //     }
+        //     state.oldPopupId = newVal.popupId
+        //    initialize(newVal)
+        // })
 
         onMounted(()=>{
             initialize(props.popup)
