@@ -20,7 +20,7 @@ export default {
             <div class="startCon d-flex justify-content-between">
                 <div class="content px-0 px-sm-5 position-relative">
                     <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
-                    <p class="fs-sm-6 fs-5">保護您與家人，防範災害。提供最新安全資訊、防護措施和應對指南。建立安全居住環境，增強防災能力。攜手合作，共築安全明天！</p>
+                    <p class="fs-sm-6 fs-5">原鄉部落面臨氣候變遷造成環境風險顯著升高，衝擊族人安全與部落居住環境品質，為提供最新安全且優質的居住環境指南，建立部落永續藍圖平台，共築宜居好家園!</p>
                     <a href="" class="d-inline-block" @click.prevent="route.push({name: 'map'})">
                         <img src="@/assets/img/enterMapBtn.svg" alt="">
                     </a>
