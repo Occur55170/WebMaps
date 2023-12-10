@@ -205,6 +205,7 @@ export default {
                         let haveInfoBox = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box !== null
                         if (!(isSingleTiles) || haveInfoBox) {
                             let layersAry = targetLayers.getArray()
+                            
                             layersAry.forEach(element => {
                                 if (!(element.get('id'))) { return }
                                 if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
