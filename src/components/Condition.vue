@@ -178,19 +178,19 @@ export default {
                                     let subNodeIds = mapList.getLayerIndex(node.id)
                                     return subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
                                 })"
-                                @change="(e) => {
-                                    LayerCheckBoxChange(e, {
-                                        nodeIndex: nodeIndex,
-                                        subNode: subNode,
-                                        subNodeIndex: subNodeIndex,
-                                        nestedSubNodeIndex: '',
-                                        single_tiles: true,
-                                        elementSource: 'input',
-                                        id: subNode.id
-                                    })
-                                }">
+                                    @change="(e) => {
+                                        LayerCheckBoxChange(e, {
+                                            nodeIndex: nodeIndex,
+                                            subNode: subNode,
+                                            subNodeIndex: subNodeIndex,
+                                            nestedSubNodeIndex: '',
+                                            single_tiles: true,
+                                            elementSource: 'input',
+                                            id: subNode.id
+                                        })
+                                    }">
                                     {{ subNode.title }}
-                                    <select name="" id="" class="mx-2" v-model="state.TilesListValue" v-if="subNode.tiles_list !== null"
+                                    <select name="" id="" class="mx-2" v-model="state.TilesListValue" v-if="subNode.tiles_list != null"
                                     @change="(e) => {
                                         LayerCheckBoxChange(e, {
                                             nodeIndex: nodeIndex,
@@ -202,27 +202,13 @@ export default {
                                             id: subNode.id,
                                         })
                                     }">
-                                        <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list">{{ item.title }}</option>
+                                        <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list" v-bind:key="key">{{ item.title }}</option>
                                     </select>
-                                    <select name="" id="" class="mx-2" v-model="state.TilesListValue" v-else
-                                    @change="(e) => {
-                                        LayerCheckBoxChange(e, {
-                                            nodeIndex: nodeIndex,
-                                            subNode: subNode,
-                                            subNodeIndex: subNodeIndex,
-                                            nestedSubNodeIndex: state.TilesListValue,
-                                            single_tiles: subNode.single_tiles,
-                                            elementSource: 'select',
-                                            id: subNode.id,
-                                        })
-                                    }">
-                                        <option :value="key" :id="item.id" v-for="(item, key) in subNode.info_box.items_group">{{ item.text }}</option>
-                                    </select>
-                                    <span class="bg-grey text-white py-1 px-2 rounded">說明</span>
+                                    
                                 </div>
                                 <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
                                     <span  class="me-2 d-flex flex-wrap align-items-center mb-1"
-                                    v-for="(iconSrc) in subNode.info_box.items_group">
+                                    v-for="(iconSrc) in subNode.info_box.items_group" v-bind:key="iconSrc">
                                         <img :src="iconSrc.icon" alt="" class="me-1" v-if="iconSrc.icon">
                                         <span class="fw-bold">{{ iconSrc.text }}</span>
                                     </span>
