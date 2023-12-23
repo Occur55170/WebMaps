@@ -9,8 +9,8 @@ import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorL
 import WMTS from 'ol/source/WMTS'
 import TilegridWMTS from 'ol/tilegrid/WMTS'
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
-import {get as getProjection} from 'ol/proj.js'
-import {getTopLeft, getWidth} from 'ol/extent.js'
+import { get as getProjection } from 'ol/proj.js'
+import { getTopLeft, getWidth } from 'ol/extent.js'
 import Select from 'ol/interaction/Select'
 import { click } from 'ol/events/condition'
 import { ScaleLine } from 'ol/control.js'
@@ -98,6 +98,8 @@ export default {
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
+            minZoom: 8,
+            maxZoom: 16
         })
 
         // 初始化地圖
@@ -205,7 +207,7 @@ export default {
                         let haveInfoBox = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box !== null
                         if (!(isSingleTiles) || haveInfoBox) {
                             let layersAry = targetLayers.getArray()
-                            
+
                             layersAry.forEach(element => {
                                 if (!(element.get('id'))) { return }
                                 if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
@@ -216,17 +218,18 @@ export default {
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+
                         target.addLayer(targetLayer)
-                        if (['雷達回波預測','累積雨量預測','氣溫預測'].includes(targetLayer.get('label'))) {
+                        if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                             const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
                             const timeKey = value.id.split('_nestedSubNode')[0]
-                            if(state.temp?.[`${ timeKey }count`] === undefined) {
-                                state.temp[`${ timeKey }count`] = currentLayerKey
+                            if (state.temp?.[`${timeKey}count`] === undefined) {
+                                state.temp[`${timeKey}count`] = currentLayerKey
                             }
-                            state.temp[timeKey] = setInterval(function() {
-                                state.temp[`${ timeKey }count`] = state.temp[`${ timeKey }count`]+1 > 4 ? 0 : state.temp[`${ timeKey }count`]+1
+                            state.temp[timeKey] = setInterval(function () {
+                                state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
                                 let newSource = new Static({
-                                    url: tilesImageUrls[state.temp[`${ timeKey }count`]],
+                                    url: tilesImageUrls[state.temp[`${timeKey}count`]],
                                     projection: 'EPSG:4326',
                                     imageExtent: imageExtent,
                                     interpolate: true,
@@ -260,10 +263,10 @@ export default {
                                 state.popup.overlay = null;
                             }
                         }
-                        if (['雷達回波預測','累積雨量預測','氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
+                        if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
                             const timeKey = value.id.split('_nestedSubNode')[0]
                             clearInterval(state.temp[timeKey]);
-                            delete state.temp[`${ timeKey }count`]
+                            delete state.temp[`${timeKey}count`]
                         }
 
                         onMapLayerStatus('delete', target.getTarget(), value.id)
@@ -275,10 +278,10 @@ export default {
                         let layersAry = targetLayers.getArray()
                         let layersToRemove = layersAry.filter(node => !(node.get('id') === undefined))
                         layersToRemove.forEach((node) => {
-                            layerControl({action: 'layerMode', value:{checked: false,...getMapLayers.getLayerIndex(node.get('id'))}})
+                            layerControl({ action: 'layerMode', value: { checked: false, ...getMapLayers.getLayerIndex(node.get('id')) } })
                         })
                     } else {
-                        layerControl({action: 'layerMode', value:{checked: false,...getMapLayers.getLayerIndex(value.id)}})
+                        layerControl({ action: 'layerMode', value: { checked: false, ...getMapLayers.getLayerIndex(value.id) } })
                     }
                     break;
                 case 'changeOrder':
@@ -660,7 +663,7 @@ export default {
             }
         })
 
-        function show () {
+        function show() {
             console.log(state.map1.getLayers().getArray())
         }
 
@@ -701,25 +704,21 @@ export default {
             }">
             </div>
         </div>
-        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-            :onChangeTarget="(value) => {
-                changeTarget(value)
-            }"
-            @onMapControl="({ action, value }) => {
-                mapControl({ action, value })
-            }" />
+        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool" :onChangeTarget="(value) => {
+            changeTarget(value)
+        }" @onMapControl="({ action, value }) => {
+    mapControl({ action, value })
+}" />
 
         <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
                 <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
                 <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
-                :baseMapList="state.temp.baseMapList"
-                :onChangeBaseMaps="({ action, value }) => {
-                    layerControl({ action, value })
-                }" />
+                    :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
+                        layerControl({ action, value })
+                    }" />
             </div>
-            <SearchBar class="mt-4 d-none d-sm-block"
-            v-bind="{
+            <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
                 dimensionMapStatus: state.toSearchDimensionStatus,
                 currentLayers: state.currentLayers,
                 mapCount: state.mapCount,
@@ -729,16 +728,13 @@ export default {
                 onChangeMapCount: (qty) => {
                     changeMapCount(qty)
                 },
-            }"
-            :onChangeTarget="(value) => {
-                changeTarget(value)
-            }"
-            @onLayerControl="({ action, value }) => {
-                layerControl({action, value})
-            }"
-            @conditionWrap="(value) => {
-                conditionWrap(value)
-            }" />
+            }" :onChangeTarget="(value) => {
+    changeTarget(value)
+}" @onLayerControl="({ action, value }) => {
+    layerControl({ action, value })
+}" @conditionWrap="(value) => {
+    conditionWrap(value)
+}" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -761,8 +757,7 @@ export default {
                         moveToMap: (val) => {
                             moveToMap(val)
                         }
-                    }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
                 <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
