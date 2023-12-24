@@ -15,7 +15,7 @@ export default {
     props: {
         onClose: {
             type: Function,
-            default: () => {}
+            default: () => { }
         },
         mapLayers: {
             type: Array,
@@ -27,7 +27,7 @@ export default {
         },
         showSelectLayerValue: {
             type: Function,
-            default: () => {}
+            default: () => { }
         },
         tribeQuery: {
             type: Object,
@@ -35,7 +35,7 @@ export default {
         },
         moveToMap: {
             type: Function,
-            default: () => {}
+            default: () => { }
         }
     },
     setup(props, { emit }) {
@@ -72,7 +72,7 @@ export default {
         }
 
         async function getTribes() {
-            const result = await $.ajax(`https://api.edtest.site/tribes?${ 'years=' + state.conditionYear }&${ 'township=' + state.conditionTown }`, 'GET')
+            const result = await $.ajax(`https://api.edtest.site/tribes?${'years=' + state.conditionYear}&${'township=' + state.conditionTown}`, 'GET')
             state.selectLayerOption = result
         }
 
@@ -87,11 +87,11 @@ export default {
         }
 
         function moveMap(params) {
-            let selectValue = state.selectLayerOption.find(node=>node.tribeCode == params.target.value)
+            let selectValue = state.selectLayerOption.find(node => node.tribeCode == params.target.value)
             props.moveToMap(selectValue.coordinates)
         }
 
-        watch(()=>state.TilesListValue, (newVal , oldVal)=>{
+        watch(() => state.TilesListValue, (newVal, oldVal) => {
             props.showSelectLayerValue(newVal)
         })
 
@@ -115,7 +115,9 @@ export default {
     <div class="condition bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
-            <a href="#" class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center" @click.prevent="props.onClose"></a>
+            <a href="#"
+                class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center"
+                @click.prevent="props.onClose"></a>
         </div>
         <div class="py-3 px-4 content" style="max-height: 40vh;overflow-y: scroll;">
             <div class="mb-2 landBoundary">
@@ -128,22 +130,21 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
-                    <div class="ms-3 my-2" v-for="(subNode, subNodeIndex) in node.layers" v-if="state.DropDown == nodeIndex">
+                    <div class="ms-3 my-2" v-for="(subNode, subNodeIndex) in node.layers"
+                        v-if="state.DropDown == nodeIndex">
                         <div v-if="subNode.single_tiles && subNode.info_box == null" class="d-flex flex-wrap">
-                            <input type="checkbox" class="me-2"
-                            :id="subNode.id"
-                            :checked="props.currentLayers.some(node=> node.id === subNode.id)"
-                            @change="(e) => {
-                                LayerCheckBoxChange(e, {
-                                    nodeIndex: nodeIndex,
-                                    subNode: subNode,
-                                    subNodeIndex: subNodeIndex,
-                                    nestedSubNodeIndex: '',
-                                    single_tiles: subNode.single_tiles,
-                                    elementSource: 'input',
-                                    id: subNode.id
-                                })
-                            }">
+                            <input type="checkbox" class="me-2" :id="subNode.id"
+                                :checked="props.currentLayers.some(node => node.id === subNode.id)" @change="(e) => {
+                                    LayerCheckBoxChange(e, {
+                                        nodeIndex: nodeIndex,
+                                        subNode: subNode,
+                                        subNodeIndex: subNodeIndex,
+                                        nestedSubNodeIndex: '',
+                                        single_tiles: subNode.single_tiles,
+                                        elementSource: 'input',
+                                        id: subNode.id
+                                    })
+                                }">
                             <label :for="subNode.id">
                                 <span class="me-2">
                                     {{ subNode.title }}
@@ -151,20 +152,19 @@ export default {
                                 <img alt="" :src="subNode.icon" v-if="subNode.icon">
                             </label>
                             <div v-if="subNode.title === '新竹縣原住民部落範圍'" class="w-100">
-                                <select class="me-2" placeholder="請選擇年度"
-                                v-if="props.tribeQuery['years'] !== undefined" @change="tribeYear">
+                                <select class="me-2" placeholder="請選擇年度" v-if="props.tribeQuery['years'] !== undefined"
+                                    @change="tribeYear">
                                     <option :value="item" v-for="(item, key) in props.tribeQuery['years']">
                                         {{ item }}
                                     </option>
                                 </select>
-                                <select class="me-2" placeholder="請選擇鄉鎮"
-                                v-if="props.tribeQuery['township'] !== undefined" @change="tribeTown">
+                                <select class="me-2" placeholder="請選擇鄉鎮" v-if="props.tribeQuery['township'] !== undefined"
+                                    @change="tribeTown">
                                     <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
                                         {{ item }}
                                     </option>
                                 </select>
-                                <select class="me-2"
-                                v-if="state.selectLayerOption.length !== 0" @change="moveMap">
+                                <select class="me-2" v-if="state.selectLayerOption.length !== 0" @change="moveMap">
                                     <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
                                         {{ item.tribeName }}
                                     </option>
@@ -173,25 +173,23 @@ export default {
                         </div>
                         <div v-else>
                             <div class="my-2">
-                                <input type="checkbox"
-                                :checked="props.currentLayers.some(node=> {
+                                <input type="checkbox" :checked="props.currentLayers.some(node => {
                                     let subNodeIds = mapList.getLayerIndex(node.id)
                                     return subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
-                                })"
-                                    @change="(e) => {
-                                        LayerCheckBoxChange(e, {
-                                            nodeIndex: nodeIndex,
-                                            subNode: subNode,
-                                            subNodeIndex: subNodeIndex,
-                                            nestedSubNodeIndex: '',
-                                            single_tiles: true,
-                                            elementSource: 'input',
-                                            id: subNode.id
-                                        })
-                                    }">
-                                    {{ subNode.title }}
-                                    <select name="" id="" class="mx-2" v-model="state.TilesListValue" v-if="subNode.tiles_list != null"
-                                    @change="(e) => {
+                                })" @change="(e) => {
+    LayerCheckBoxChange(e, {
+        nodeIndex: nodeIndex,
+        subNode: subNode,
+        subNodeIndex: subNodeIndex,
+        nestedSubNodeIndex: '',
+        single_tiles: true,
+        elementSource: 'input',
+        id: subNode.id
+    })
+}">
+                                {{ subNode.title }}
+                                <select name="" id="" class="mx-2" v-model="state.TilesListValue"
+                                    v-if="subNode.tiles_list != null" @change="(e) => {
                                         LayerCheckBoxChange(e, {
                                             nodeIndex: nodeIndex,
                                             subNode: subNode,
@@ -202,17 +200,23 @@ export default {
                                             id: subNode.id,
                                         })
                                     }">
-                                        <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list" v-bind:key="key">{{ item.title }}</option>
-                                    </select>
-                                    
-                                </div>
-                                <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
-                                    <span  class="me-2 d-flex flex-wrap align-items-center mb-1"
+                                    <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list"
+                                        v-bind:key="key">{{ item.title }}</option>
+                                </select>
+
+                            </div>
+                            <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
+                                <span class="me-2 d-flex flex-wrap align-items-center mb-1"
                                     v-for="(iconSrc) in subNode.info_box.items_group" v-bind:key="iconSrc">
-                                        <img :src="iconSrc.icon" alt="" class="me-1" v-if="iconSrc.icon">
-                                        <span class="fw-bold">{{ iconSrc.text }}</span>
-                                    </span>
-                                </div>
+                                    <img :src="iconSrc.icon" alt="" class="me-1" v-if="iconSrc.icon">
+                                    <span class="fw-bold">{{ iconSrc.text }}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- TODO 修改樣式 -->
+                        <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;" v-if="subNode.legend">
+                            <a class="me-1" :href="subNode.legend" target="_blank" style="text-decoration: none; color: #a87777;">圖例連結</a>
                         </div>
                     </div>
                 </div>
