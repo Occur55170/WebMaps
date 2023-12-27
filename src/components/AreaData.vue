@@ -113,8 +113,8 @@ export default {
 
         }
 
-        async function initialize(popup){
-            if(popup == null){
+        async function initialize(popup) {
+            if (popup == null) {
                 state.type = 0
                 this.props?.closeAreaData()
                 return
@@ -179,21 +179,15 @@ export default {
         }
 
 
-        // watch(props.popup, async (newVal) => {
-        //     //TODO: 結構優化
-        //     if (newVal.popupId == state.oldPopupId) {
-        //         console.log(`data 相同，${newVal.popupId}`)
-        //         return
-        //     }
-        //     state.oldPopupId = newVal.popupId
-        //    initialize(newVal)
-        // })
-
-        onMounted(()=>{
+        onMounted(() => {
             initialize(props.popup)
             state.oldPopupId = props.popup.popupId
         })
-
+        onUpdated(() => {
+            if (state.oldPopupId === props.popup.popupId) return;
+            initialize(props.popup)
+            state.oldPopupId = props.popup.popupId
+        })
 
         return {
             router,
@@ -363,7 +357,8 @@ export default {
                 <div class="row mx-0 mb-2">
                     <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">連結:
                     </div>
-                    <a  :href="'https://geotech.gsmma.gov.tw/imoeagis/Home/Map?'+'lng='+state.coordinate[0]+'&lat='+ state.coordinate[1]" class="col-8 py-1 px-2 bg-grey-light text-start">
+                    <a :href="'https://geotech.gsmma.gov.tw/imoeagis/Home/Map?' + 'lng=' + state.coordinate[0] + '&lat=' + state.coordinate[1]"
+                        class="col-8 py-1 px-2 bg-grey-light text-start">
                         網址鏈接
                     </a>
                 </div>
