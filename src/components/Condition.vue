@@ -177,16 +177,16 @@ export default {
                                     let subNodeIds = mapList.getLayerIndex(node.id)
                                     return subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
                                 })" @change="(e) => {
-    LayerCheckBoxChange(e, {
-        nodeIndex: nodeIndex,
-        subNode: subNode,
-        subNodeIndex: subNodeIndex,
-        nestedSubNodeIndex: '',
-        single_tiles: true,
-        elementSource: 'input',
-        id: subNode.id
-    })
-}">
+                                    LayerCheckBoxChange(e, {
+                                        nodeIndex: nodeIndex,
+                                        subNode: subNode,
+                                        subNodeIndex: subNodeIndex,
+                                        nestedSubNodeIndex: '',
+                                        single_tiles: true,
+                                        elementSource: 'input',
+                                        id: subNode.id
+                                    })
+                                }">
                                 {{ subNode.title }}
                                 <select name="" id="" class="mx-2" v-model="state.TilesListValue"
                                     v-if="subNode.tiles_list != null" @change="(e) => {

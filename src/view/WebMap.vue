@@ -218,7 +218,7 @@ export default {
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                    
+
                         target.addLayer(targetLayer)
                         if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                             const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
@@ -861,7 +861,8 @@ export default {
                 onChangeTarget: (value) => {
                     changeTarget(value)
                 }
-            }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            }"
+            @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
@@ -945,12 +946,12 @@ export default {
         height: 92vh
     .m-Navbar
         z-index: 222
+        height: 8vh
     .SearchBar
         top: 0
         left: 0
         .logo
             width: 180px
-
     .asideTool
         left: 5px
     .middleLine
