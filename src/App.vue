@@ -6,13 +6,13 @@ export default {
     setup(props, { emit }) {
         const { proxy } = getCurrentInstance();
         const state = reactive({
-            aaa: 0
+            innerHeight: 0
         })
 
         onMounted(()=>{
-            state.aaa = window.innerHeight
+            state.innerHeight = window.innerHeight
             window.addEventListener('resize', (e)=>{
-                state.aaa = e.target.innerHeight
+                state.innerHeight = e.target.innerHeight
             })
         })
 
@@ -27,7 +27,7 @@ export default {
 <template>
     <routerView class="wrap"
     :style="{
-        'height': state.aaa + 'px'
+        'height': state.innerHeight + 'px'
     }" />
 </template>
 
