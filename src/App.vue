@@ -5,9 +5,19 @@ import $ from 'jquery'
 export default {
     setup(props, { emit }) {
         const { proxy } = getCurrentInstance();
-        const state = reactive({})
+        const state = reactive({
+            aaa: 0
+        })
+
+        onMounted(()=>{
+            state.aaa = window.innerHeight
+            window.addEventListener('resize', (e)=>{
+                state.aaa = e.target.innerHeight
+            })
+        })
 
         return {
+            window,
             state,
         }
     }
@@ -15,7 +25,10 @@ export default {
 </script>
 
 <template>
-    <routerView class="wrap" />
+    <routerView class="wrap"
+    :style="{
+        'height': state.aaa + 'px'
+    }" />
 </template>
 
 <style lang="sass">

@@ -92,7 +92,7 @@ export default {
                 }" /> -->
         <!-- </div> -->
 
-        <ul class="list-unstyled d-flex align-items-center justify-content-around py-2 flex-nowrap w-100 bg-white mb-0">
+        <ul class="list-unstyled d-flex align-items-center justify-content-around h-100 flex-nowrap w-100 bg-white mb-0">
             <li>
                 <div>
                     <div class="navbarBtn" v-if="props.dimensionMapStatus"
@@ -133,12 +133,12 @@ export default {
 ul
     li
         .navbarBtn
-            width: 60px
-            height: 60px
+            width: 50px
+            height: 50px
             img
                 width: 100%
                 height: 100%
         &:nth-Child(1) .navbarBtn, &:nth-Child(4) .navbarBtn
-            width: 50px
-            height: 50px
+            width: 40px
+            height: 40px
 </style>
