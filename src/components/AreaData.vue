@@ -97,7 +97,7 @@ export default {
                 note02: data.get('Note02'),
                 stra_1: data.get('Stra_1'),
                 stra_2: data.get('Stra_2'),
-                link: `https://246.swcb.gov.tw/Content/Debris/${data.get('Debrisno')}.jpg`
+                link: `https://246.ardswc.gov.tw/Content/Debris/${data.get('Debrisno')}.jpg`
             }
 
         }
