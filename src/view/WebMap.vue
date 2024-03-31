@@ -76,7 +76,6 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            ol3d: null,
             selectValueTemp: 0,
             popup: {
                 nodeRef: null,
@@ -196,6 +195,7 @@ export default {
             }
         }
         function layerControl({ action, value }) {
+            window.console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -217,7 +217,21 @@ export default {
                             nestedSubNodeIndex = state.selectValueTemp
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
+                        // TODO: 有3D圖層的話，先移除 加入圖層後，再換回3D狀態
+                        window.console.log(4, state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`])
+                        if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
+                            window.console.log(1, ol3d)
+                            ol3d.setEnabled(false)
+                        }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                        if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
+                            targetLayer.getSource().on('change', () => {
+                                ol3d = new OLCesium({
+                                    map: target,
+                                })
+                                ol3d.setEnabled(true)
+                            })
+                        }
                         target.addLayer(targetLayer)
                         if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                             const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
@@ -351,7 +365,6 @@ export default {
         }
 
         function onChangeDimensionMap(value) {
-            window.console.log(value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             let ta = state.targetNum == 1 ? 'map1' : 'map2'
@@ -379,7 +392,8 @@ export default {
                     let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
                     if (nowTileLayer.get('label').includes('近年歷史災害82處部落點位')) {
                         layerControl({
-                            action: 'layerMode', value: {
+                            action: 'layerMode',
+                            value: {
                                 checked: true,
                                 nodeIndex: nodeIndex,
                                 subNodeIndex: subNodeIndex,
@@ -684,7 +698,7 @@ export default {
             closeAreaData,
             moveToMap,
             changeMapCount,
-            show
+            show,
         }
     }
 }
@@ -695,56 +709,51 @@ export default {
         <!-- TODO: 寬度設定是否調整 -->
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <div id="map1" :class="{
-                'w-100': state.map1?.getTarget() == 'map1',
-                'h-100': state.mapCount === 1,
-                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
-                'middleMap': state.map1?.getTarget()
-            }">
+            'w-100': state.map1?.getTarget() == 'map1',
+            'h-100': state.mapCount === 1,
+            'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+            'middleMap': state.map1?.getTarget()
+        }">
             </div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{
-                'w-100': state.map2?.getTarget() == 'map2',
-                'h-100': state.mapCount === 1,
-                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
-                'middleMap': state.map2?.getTarget()
-            }">
+            'w-100': state.map2?.getTarget() == 'map2',
+            'h-100': state.mapCount === 1,
+            'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+            'middleMap': state.map2?.getTarget()
+        }">
             </div>
         </div>
-        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-        :onChangeTarget="(value) => {
-                changeTarget(value)
-            }"
-            @onMapControl="({ action, value }) => {
-                mapControl({ action, value })
-            }" />
-
+        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool" :onChangeTarget="(value) => {
+            changeTarget(value)
+        }" @onMapControl="({ action, value }) => {
+            mapControl({ action, value })
+        }" />
         <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
                 <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
                 <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
                     :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
-                layerControl({ action, value })
-            }" />
+            layerControl({ action, value })
+        }" />
             </div>
-            <SearchBar class="mt-4 d-none d-sm-block"
-            v-bind="{
-                dimensionMapStatus: state.toSearchDimensionStatus,
-                currentLayers: state.currentLayers,
-                mapCount: state.mapCount,
-                onChangeBaseMaps: ({ action, value }) => {
-                    layerControl({ action, value })
-                },
-                onChangeMapCount: (qty) => {
-                    changeMapCount(qty)
-                },
-            }"
-            :onChangeTarget="(value) => {
-                changeTarget(value)
-            }" @onLayerControl="({ action, value }) => {
+            <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
+            dimensionMapStatus: state.toSearchDimensionStatus,
+            currentLayers: state.currentLayers,
+            mapCount: state.mapCount,
+            onChangeBaseMaps: ({ action, value }) => {
                 layerControl({ action, value })
-            }" @conditionWrap="(value) => {
-                conditionWrap(value)
-            }" />
+            },
+            onChangeMapCount: (qty) => {
+                changeMapCount(qty)
+            },
+        }" :onChangeTarget="(value) => {
+            changeTarget(value)
+        }" @onLayerControl="({ action, value }) => {
+            layerControl({ action, value })
+        }" @conditionWrap="(value) => {
+            conditionWrap(value)
+        }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -755,19 +764,19 @@ export default {
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
                     <Condition v-bind="{
-                tribeQuery: state.tribeQuery,
-                mapLayers: state.mapLayers,
-                currentLayers: state.currentLayers,
-                onClose: () => {
-                    state.conditionWrap = false
-                },
-                showSelectLayerValue: (val) => {
-                    state.selectValueTemp = val
-                },
-                moveToMap: (val) => {
-                    moveToMap(val)
-                }
-            }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+            tribeQuery: state.tribeQuery,
+            mapLayers: state.mapLayers,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.conditionWrap = false
+            },
+            showSelectLayerValue: (val) => {
+                state.selectValueTemp = val
+            },
+            moveToMap: (val) => {
+                moveToMap(val)
+            }
+        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
                 <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
@@ -779,25 +788,25 @@ export default {
                 </button>
                 <div v-if="state.layerSelect">
                     <LayerSelector v-bind="{
-                selectLock: state.selectLock,
-                currentLayers: state.currentLayers,
-                onClose: () => {
-                    state.layerSelect = false
-                },
-                onLockLayer: () => {
-                    state.selectLock = !state.selectLock
-                },
-                onDeleteLayer: ({ action, value }) => {
-                    if (value.layerName == 'all') {
-                        state.deleteLightbox = true
-                    } else {
-                        layerControl({ action, value })
-                    }
-                },
-                onLayerControl: ({ action, value }) => {
+            selectLock: state.selectLock,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.layerSelect = false
+            },
+            onLockLayer: () => {
+                state.selectLock = !state.selectLock
+            },
+            onDeleteLayer: ({ action, value }) => {
+                if (value.layerName == 'all') {
+                    state.deleteLightbox = true
+                } else {
                     layerControl({ action, value })
-                },
-            }" />
+                }
+            },
+            onLayerControl: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+        }" />
                 </div>
                 <OverLayer :text="'顯示已經選擇的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
@@ -806,67 +815,66 @@ export default {
         <div class="m-Navbar d-flex d-sm-none position-relative w-100">
             <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
                 <Condition class="w-100" v-if="state.conditionWrap" v-bind="{
-                mapLayers: state.mapLayers,
-                currentLayers: state.currentLayers,
-                onClose: () => {
-                    state.conditionWrap = false
-                },
-                showSelectLayerValue: (val) => {
-                    state.selectValueTemp = val
-                }
-            }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+            mapLayers: state.mapLayers,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.conditionWrap = false
+            },
+            showSelectLayerValue: (val) => {
+                state.selectValueTemp = val
+            }
+        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
                 <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
-                selectLock: state.selectLock,
-                currentLayers: state.currentLayers,
-                onClose: () => {
-                    state.layerSelect = false
-                },
-                onLockLayer: () => {
-                    state.selectLock = !state.selectLock
-                },
-                onDeleteLayer: ({ action, value }) => {
-                    if (value.layerName == 'all') {
-                        state.deleteLightbox = true
-                    } else {
-                        layerControl({ action, value })
-                    }
-                },
-                onChangLayerVisible: (action) => {
-                    layerControl(action)
-                },
-                onChangeOrderLayer: ({ action, value }) => {
+            selectLock: state.selectLock,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.layerSelect = false
+            },
+            onLockLayer: () => {
+                state.selectLock = !state.selectLock
+            },
+            onDeleteLayer: ({ action, value }) => {
+                if (value.layerName == 'all') {
+                    state.deleteLightbox = true
+                } else {
                     layerControl({ action, value })
-                },
-                onLayerControl: ({ action, value }) => {
-                    layerControl({ action, value })
-                },
-            }" />
+                }
+            },
+            onChangLayerVisible: (action) => {
+                layerControl(action)
+            },
+            onChangeOrderLayer: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+            onLayerControl: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+        }" />
             </div>
             <mNavbar v-bind="{
-                dimensionMapStatus: state.toSearchDimensionStatus,
-                currentLayers: state.currentLayers,
-                mapCount: state.mapCount,
-                openConditionWrap: () => {
-                    state.conditionWrap = !state.conditionWrap
-                    state.layerSelect = false
-                },
-                openLayerSelect: () => {
-                    state.layerSelect = !state.layerSelect
-                    state.conditionWrap = false
-                },
-                onLayerControl: ({ action, value }) => {
-                    layerControl({ action, value })
-                },
-                onChangeMapCount: (qty) => {
-                    changeMapCount(qty)
-                },
-                onChangeTarget: (value) => {
-                    changeTarget(value)
-                }
-            }"
-            @conditionWrap="(value) => { conditionWrap(value) }" />
+            dimensionMapStatus: state.toSearchDimensionStatus,
+            currentLayers: state.currentLayers,
+            mapCount: state.mapCount,
+            openConditionWrap: () => {
+                state.conditionWrap = !state.conditionWrap
+                state.layerSelect = false
+            },
+            openLayerSelect: () => {
+                state.layerSelect = !state.layerSelect
+                state.conditionWrap = false
+            },
+            onLayerControl: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+            onChangeMapCount: (qty) => {
+                changeMapCount(qty)
+            },
+            onChangeTarget: (value) => {
+                changeTarget(value)
+            }
+        }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
@@ -874,34 +882,33 @@ export default {
                 <p class="text-center fw-bold">是否要取消全部圖層</p>
                 <div class=" d-flex justify-content-around">
                     <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
-                layerControl({
-                    action: 'selectLayerMode',
-                    value: {
-                        layerName: 'all'
-                    }
-                })
-                state.deleteLightbox = false
-            }">確定</button>
+            layerControl({
+                action: 'selectLayerMode',
+                value: {
+                    layerName: 'all'
+                }
+            })
+            state.deleteLightbox = false
+        }">確定</button>
                     <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
-                state.deleteLightbox = false
-            }">取消</button>
+            state.deleteLightbox = false
+        }">取消</button>
                 </div>
             </div>
         </div>
 
         <div id="popup" class="popup position-absolute bottom-0" :ref="(e) => {
-                state.popup.nodeRef = e
-            }">
+            state.popup.nodeRef = e
+        }">
             <areaData class="areaData" v-if="state.popup.popupId !== 0" :closeAreaData="() => {
-                closeAreaData()
-            }" :popup="state.popup" :maxHeight="500" />
+            closeAreaData()
+        }" :popup="state.popup" :maxHeight="500" />
         </div>
 
         <div class="stepOverLayer position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" id="firstEnter"
-            v-if="store.state.isInit"
-            @click="() => {
-                store.dispatch('updateLayerStatus', false)
-            }"></div>
+            v-if="store.state.isInit" @click="() => {
+            store.dispatch('updateLayerStatus', false)
+        }"></div>
     </div>
 </template>
 
