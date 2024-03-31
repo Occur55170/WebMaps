@@ -60,14 +60,18 @@ export default {
             }
         }
         function LayerCheckBoxChange(e, item) {
-            let defaultChecked = item.elementSource === 'input' ? e.target.checked : true
+            let checked = item.elementSource === 'input' ? e.target.checked : true
+            let nodeIndex= item.nodeIndex
+            let subNodeIndex= item.subNodeIndex
+            let nestedSubNodeIndex = String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined
+            let id = (item.single_tiles || !(e.target.selectedOptions)) ? item.id : e.target.selectedOptions[0].id
             onLayerControl('layerMode', {
-                checked: defaultChecked,
-                nodeIndex: item.nodeIndex,
-                subNodeIndex: item.subNodeIndex,
-                nestedSubNodeIndex: String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined,
+                checked,
+                nodeIndex,
+                subNodeIndex,
+                nestedSubNodeIndex,
                 // 判斷是否有子層即是勾選的還是下拉
-                id: (item.single_tiles || !(e.target.selectedOptions)) ? item.id : e.target.selectedOptions[0].id
+                id
             })
         }
 
@@ -82,13 +86,22 @@ export default {
         }
 
         function tribeTown(event) {
-            state.conditionTown = event.target.value
-            getTribes()
+            if(event.target.value !== 'false') {
+                state.conditionTown = event.target.value
+                getTribes()
+            }
         }
 
         function moveMap(params) {
-            let selectValue = state.selectLayerOption.find(node => node.tribeCode == params.target.value)
-            props.moveToMap(selectValue.coordinates)
+            if(params.target.value !== 'false') {
+                let selectValue = state.selectLayerOption.find(node => node.tribeCode == params.target.value)
+                props.moveToMap(selectValue.coordinates)
+            }
+        }
+
+        function isChecked(subNodeId){
+            let anchorStr = subNodeId.replace(/undefined$/, "0")
+            return props.currentLayers.some(node => node.id === subNodeId || node.id == anchorStr)
         }
 
         watch(() => state.TilesListValue, (newVal, oldVal) => {
@@ -105,7 +118,8 @@ export default {
             LayerCheckBoxChange,
             tribeYear,
             tribeTown,
-            moveMap
+            moveMap,
+            isChecked
         }
     }
 }
@@ -130,21 +144,25 @@ export default {
                             <path fill="currentColor" d="M8 5v14l11-7z" />
                         </svg>
                     </div>
-                    <div class="ms-3 my-2" v-for="(subNode, subNodeIndex) in node.layers"
-                        v-if="state.DropDown == nodeIndex">
-                        <div v-if="subNode.single_tiles && subNode.info_box == null" class="d-flex flex-wrap">
-                            <input type="checkbox" class="me-2" :id="subNode.id"
-                                :checked="props.currentLayers.some(node => node.id === subNode.id)" @change="(e) => {
-                                    LayerCheckBoxChange(e, {
-                                        nodeIndex: nodeIndex,
-                                        subNode: subNode,
-                                        subNodeIndex: subNodeIndex,
-                                        nestedSubNodeIndex: '',
-                                        single_tiles: subNode.single_tiles,
-                                        elementSource: 'input',
-                                        id: subNode.id
-                                    })
-                                }">
+                    <div class="ms-3 my-2"
+                    v-for="(subNode, subNodeIndex) in node.layers"
+                    v-if="state.DropDown == nodeIndex">
+                        <div class="d-flex flex-wrap"
+                        v-if="subNode.single_tiles && subNode.info_box == null">
+                            <input type="checkbox" class="me-2"
+                            :id="subNode.id"
+                            :checked="isChecked(subNode.id)"
+                            @change="(e) => {
+                                LayerCheckBoxChange(e, {
+                                    nodeIndex: nodeIndex,
+                                    subNode: subNode,
+                                    subNodeIndex: subNodeIndex,
+                                    nestedSubNodeIndex: '',
+                                    single_tiles: subNode.single_tiles,
+                                    elementSource: 'input',
+                                    id: subNode.id
+                                })
+                            }" />
                             <label :for="subNode.id">
                                 <span class="me-2">
                                     {{ subNode.title }}
@@ -158,13 +176,16 @@ export default {
                                         {{ item }}
                                     </option>
                                 </select>
-                                <select class="me-2" placeholder="請選擇鄉鎮" v-if="props.tribeQuery['township'] !== undefined"
+                                <select class="me-2" placeholder="請選擇鄉鎮"
+                                    v-if="props.tribeQuery['township'] !== undefined"
                                     @change="tribeTown">
+                                    <option :value="false">請選擇</option>
                                     <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
                                         {{ item }}
                                     </option>
                                 </select>
                                 <select class="me-2" v-if="state.selectLayerOption.length !== 0" @change="moveMap">
+                                    <option :value="false">請選擇</option>
                                     <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
                                         {{ item.tribeName }}
                                     </option>
