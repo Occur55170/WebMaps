@@ -195,7 +195,6 @@ export default {
             }
         }
         function layerControl({ action, value }) {
-            window.console.log(action, value)
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
@@ -218,9 +217,7 @@ export default {
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
                         // TODO: 有3D圖層的話，先移除 加入圖層後，再換回3D狀態
-                        window.console.log(4, state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`])
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                            window.console.log(1, ol3d)
                             ol3d.setEnabled(false)
                         }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
@@ -358,7 +355,7 @@ export default {
                     onChangeDimensionMap(value)
                     break;
                 case 'setOpacity':
-                    targetLayers.getArray()[value.key].setOpacity(Number(value.value))
+                    onSetOpacity(value)
                     break;
             }
             getCurrentMapData()
@@ -405,6 +402,12 @@ export default {
                     return node
                 })
             }
+        }
+
+        function onSetOpacity(value) {
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            let targetLayers = target?.getLayers()
+            targetLayers.getArray()[value.key].setOpacity(Number(value.value))
         }
 
         function changeMapCount(qty) {
