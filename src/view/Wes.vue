@@ -1,222 +1,106 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
-import $ from 'jquery'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import Map from 'ol/Map.js'
+import OSM from 'ol/source/OSM.js'
+import Static from 'ol/source/ImageStatic.js'
+import View from 'ol/View.js'
+import proj4 from 'proj4'
+import { Image as ImageLayer, Tile as TileLayer } from 'ol/layer.js'
+import { getCenter } from 'ol/extent.js'
+import { register } from 'ol/proj/proj4.js'
+import { transform } from 'ol/proj.js'
 
-import { Map, View, Feature } from 'ol'
-import Select from 'ol/interaction/Select';
-import { ScaleLine } from 'ol/control.js';
-
-import { ImageArcGISRest, OSM } from 'ol/source.js'
+// import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
 import TileWMS from 'ol/source/TileWMS'
-import { IGC, WFS, } from 'ol/format'
-import * as ol from 'ol';
-import { TileArcGISRest } from 'ol/source.js'
+proj4.defs(
+    'EPSG:27700',
+    '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 ' +
+    '+x_0=400000 +y_0=-100000 +ellps=airy ' +
+    '+towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 ' +
+    '+units=m +no_defs'
+)
+proj4.defs("EPSG:3826", "+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
+register(proj4);
 
-import XYZ from 'ol/source/XYZ'
-import VectorSource from 'ol/source/Vector.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import ImageWMS from 'ol/source/ImageWMS.js';
-import TileGrid from 'ol/layer/Tile.js';
+const imageExtent = [200000, 200000, 3000000, 5000000];
+const imageLayer = new ImageLayer();
 
-import PerspectiveMap from "ol-ext/map/PerspectiveMap"
+// var EPSG ='EPSG:3031'; // EPSG:3031 - WGS 84 / Antarctic Polar Stereographic
+// proj4.defs([['EPSG:3031','+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs']]);
+// proj4.defs('urn:ogc:def:crs:EPSG::3031', proj4.defs(EPSG)); // add alias
+// var projection = ol.proj.get(EPSG);
+// var extent = ol.proj.transformExtent([-180, -45, 180, -90], 'EPSG:4326', projection);
+// var center = ol.proj.transform([180,-90], 'EPSG:4326', projection);
+// projection.setExtent(extent);
 
-import EsriJSON from 'ol/format/EsriJSON.js'
-import { createXYZ } from 'ol/tilegrid.js'
-import { bbox, tile as tileStrategy } from 'ol/loadingstrategy.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import Projection from 'ol/proj/Projection.js'
-import GeoJSON from 'ol/format/GeoJSON.js'
+const area = reactive({
+    India: [68.17665, 7.96553, 97.40256, 35.49401],
+    Argentina: [-73.41544, -55.25, -53.62835, -21.83231],
+    Nigeria: [2.6917, 4.24059, 14.57718, 13.86592],
+    Sweden: [11.02737, 55.36174, 23.90338, 69.10625],
+    Taiwan: [119.5, 20.5, 124.5, 25.5], // 台湾的 Extent
+})
 
-import OLCesium from 'olcs/OLCesium.js';
-import VectorImageLayer from 'ol/layer/VectorImage.js';
-import TileState from 'ol/TileState.js';
-
-import 'ol/ol.css'
-
-import mapLayerList from '@/config/mapLayerList'
-import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
-
-import 'ol-ext/dist/ol-ext.css'
-import * as olTilecoord from 'ol/tilecoord'
-import { get as getProjection } from 'ol/proj'
-import WMSGetFeatureInfo from 'ol/format/WMSGetFeatureInfo.js'
-import Overlay from 'ol/Overlay.js'
-import currentPositionImg from '@/assets/img/icon/currentPosition.svg';
-
-import { altKeyOnly, click, pointerMove } from 'ol/events/condition.js';
-// proj4.defs(
-//     'Indiana-East',
-//     'PROJCS["IN83-EF",GEOGCS["LL83",DATUM["NAD83",' +
-//     'SPHEROID["GRS1980",6378137.000,298.25722210]],PRIMEM["Greenwich",0],' +
-//     'UNIT["Degree",0.017453292519943295]],PROJECTION["Transverse_Mercator"],' +
-//     'PARAMETER["false_easting",328083.333],' +
-//     'PARAMETER["false_northing",820208.333],' +
-//     'PARAMETER["scale_factor",0.999966666667],' +
-//     'PARAMETER["central_meridian",-85.66666666666670],' +
-//     'PARAMETER["latitude_of_origin",37.50000000000000],' +
-//     'UNIT["Foot_US",0.30480060960122]]'
-// );
-// register(proj4);
-
-export default {
-    props: {
-    },
-    setup(props, { emit }) {
-        let map
-        onMounted(async () => {
-
-            const bgColors = [
-                '#261F03',
-                '#F49AAF',
-                '#A9C4F6',
-                '#A5A751',
-                '#9C7B37',
-                '#ABD172',
-                '#6FB7B7',
-                '#117800'
-            ]
-            const vector = new VectorLayer({
-                source: new VectorSource({
-                    url: 'https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WFS&REQUEST=GetFeature&OUTPUTFORMAT=application/json&TYPENAME=新竹縣原住民部落範圍&STYLE=default',
-                    format: new GeoJSON(),
-                    strategy: bbox
-                }),
-                style: function (feature) {
-                    var parts = feature.id_.split('.'); // 使用点号进行分割
-                    var lastPart = parts[parts.length - 1]; // 获取最后一个部分
-                    const style = new Style({
-                        fill: new Fill({
-                            color: bgColors[lastPart] !== undefined ? bgColors[lastPart] : '#FF0000',
-                        }),
-                    })
-                    return style;
+const map = new Map({
+    target: 'map',
+    layers: [
+        new TileLayer({
+            source: new TileWMS({
+                url: 'https://wms.geo.admin.ch/',
+                crossOrigin: 'anonymous',
+                params: {
+                    'LAYERS': 'ch.swisstopo.pixelkarte-farbe-pk1000.noscale',
+                    'FORMAT': 'image/jpeg',
                 },
-            });
-            const osm = new TileLayer({
-                source: new OSM(),
-            });
+                serverType: 'mapserver',
+            }),
+        }),
+        // imageLayer,
+    ],
+    view: new View({
+        // center: transform(getCenter(imageExtent), 'EPSG:3826', 'EPSG:3857'),
+        // center: transform(getCenter(area.Taiwan), 'EPSG:3826'),
+        center: [-10997148, 4569099],
+        zoom: 4,
+    }),
+});
 
-            map = new Map({
-                layers: [
-                    osm,
-                    vector
-                ],
-                target: 'map',
-                view: new View({
-                    projection: 'EPSG:4326',
-                    center: [121.326776, 24.655499],
-                    zoom: 12,
-                }),
-            });
+// const interpolate = document.getElementById('interpolate');
 
-            let select = null; // ref to currently selected interaction
+function setSource(e) {
+    // const source = new Static({
+    //     url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/' + 'British_National_Grid.svg/2000px-British_National_Grid.svg.png',
+    //     projection: 'EPSG:3826',
+    //     crossOrigin: '',
+    //     imageExtent: imageExtent,
+    //     // interpolate: interpolate.checked,
+    // });
 
-            const selected = new Style({
-                fill: new Fill({
-                    color: '#eeeeee',
-                }),
-                stroke: new Stroke({
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    width: 2,
-                }),
-            });
-
-            function selectStyle(feature) {
-                const color = feature.get('COLOR') || '#eeeeee';
-                selected.getFill().setColor(color);
-                return selected;
-            }
-
-            // select interaction working on "singleclick"
-            const selectSingleClick = new Select({ style: selectStyle });
-
-            // select interaction working on "click"
-            const selectClick = new Select({
-                condition: click,
-                style: selectStyle,
-            });
-
-            // select interaction working on "pointermove"
-            const selectPointerMove = new Select({
-                condition: pointerMove,
-                style: selectStyle,
-            });
-
-            const selectAltClick = new Select({
-                style: selectStyle,
-                condition: function (mapBrowserEvent) {
-                    return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
-                },
-            });
-
-            const selectElement = document.getElementById('type');
-
-            const changeInteraction = function () {
-                if (select !== null) {
-                    map.removeInteraction(select);
-                }
-                const value = selectElement.value;
-                if (value == 'singleclick') {
-                    select = selectSingleClick;
-                } else if (value == 'click') {
-                    select = selectClick;
-                } else if (value == 'pointermove') {
-                    select = selectPointerMove;
-                } else if (value == 'altclick') {
-                    select = selectAltClick;
-                } else {
-                    select = null;
-                }
-                if (select !== null) {
-                    map.addInteraction(select);
-                    select.on('select', function (e) {
-                        document.getElementById('status').innerHTML =
-                            '&nbsp;' +
-                            e.target.getFeatures().getLength() +
-                            ' selected features (last operation selected ' +
-                            e.selected.length +
-                            ' and deselected ' +
-                            e.deselected.length +
-                            ' features)';
-                    });
-                }
-            };
-
-            /**
-             * onchange callback on the select element.
-             */
-            selectElement.onchange = changeInteraction;
-            changeInteraction();
-        })
-
-        return {
-            map,
-        }
-    }
+    const source = new TileWMS({
+        // projection: 'EPSG:3857', // here is the source projection
+        url: 'https://ahocevar.com/geoserver/wms',
+        params: {
+            'LAYERS': 'ne:NE1_HR_LC_SR_W_DR',
+        },
+    })
+    map.addLayer(source);
 }
+// setSource();
+
+// interpolate.addEventListener('change', setSource);
 </script>
 
 <template>
+    <div id="map" class="map"></div>
     <div>
-        <div id="map" class="map"></div>
-        <form>
-            <label for="type">Action type &nbsp;</label>
-            <select id="type">
-                <option value="click" selected>Click</option>
-                <option value="singleclick">Single-click</option>
-                <option value="pointermove">Hover</option>
-                <option value="altclick">Alt+Click</option>
-                <option value="none">None</option>
-            </select>
-            <span id="status">&nbsp;0 selected features</span>
-        </form>
+        <button @click="setSource()">999</button>
+        <input type="checkbox" id="interpolate" checked />
+        <label for="interpolate">Interpolate</label>
     </div>
 </template>
-
-<style lang="sass" scoped>
-#map
-    width: 100%
-    height: 1000px
+<style>
+.map {
+    width: 100%;
+    height: 400px;
+}
 </style>
-

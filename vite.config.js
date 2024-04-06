@@ -21,11 +21,14 @@ export default defineConfig(({ mode }) => {
     // 設置第三個參數為 '' 來加載所有環境變量，而不管是否有 `VITE_` 前綴。const config = getEnvConfig()
 
     const env = loadEnv(mode, process.cwd(), '')
-    console.log(env.NODE_ENV)
+    // console.log(env.NODE_ENV)
+    // import.meta.env.
     return {
         define: {
             VITE_UPLOAD_URL: '"https://img.jgbsmart.com"',
             VITE_URL: `"${getBasePath()}"`,
+            VITE_APP_TITLE: `"${env.VITE_APP_TITLE}"`,
+            VITE_APP_TEST: '"999"'
         },
         plugins: [
             vue(),

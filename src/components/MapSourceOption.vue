@@ -19,16 +19,9 @@ export default {
             mapSourceList: []
         })
 
-        function onChangeBaseMaps(){
-            let action = 'baseMap'
-            let value = props.baseMapList.find(node=> node.baseId === state.selectMap)
-            props.onChangeBaseMaps({ action, value })
-        }
-
         return {
             state,
             props,
-            onChangeBaseMaps
         }
     }
 }
@@ -37,11 +30,12 @@ export default {
 <template>
     <div>
         <OverLayer :text="'底圖切換工具'" />
-        <select name="" id="" v-model="state.selectMap"
+        <select name="" id="" class="w-100 fs-6 fs-sm-5" v-model="state.selectMap"
         @change="(e) => {
-            onChangeBaseMaps(e)
+            let value = props.baseMapList.find(node=> node.baseId === state.selectMap)
+            props.onChangeBaseMaps({ action: 'baseMap', value })
         }">
-            <option v-for="(node, nodeIndex) in props.baseMapList" :key="nodeIndex" :value="node.baseId">{{ node.label }}</option>
+            <option class="w-100" v-for="(node, nodeIndex) in props.baseMapList" :key="nodeIndex" :value="node.baseId">{{ node.label }}</option>
         </select>
     </div>
 </template>
@@ -54,4 +48,9 @@ select
     padding: 8px 20px
     option
         padding: 8px 20px
+@media (max-width: 600px)
+select
+    padding: 8px 4px
+    option
+        padding: 0
 </style>

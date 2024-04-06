@@ -16,6 +16,14 @@ export default {
             type: Boolean,
             default: false
         },
+        onChangeMapCount: {
+            type: Function,
+            default: ()=>{}
+        },
+        onChangeTarget: {
+            type: Function,
+            default: ()=>{}
+        }
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -42,19 +50,11 @@ export default {
             })
         }
         function onLayerControl(action, value) {
-            if (action === 'changeMapCount') {
-                state.toolSwitch['splitWindowBtn'] = false
-            }
             emit('onLayerControl', { action, value })
         }
 
         function conditionWrap() {
             emit('conditionWrap')
-        }
-
-        function onChangeTarget(value) {
-            state.targetNum = value
-            emit('onChangeTarget', value)
         }
 
         return {
@@ -63,7 +63,6 @@ export default {
             toolSwitch,
             onLayerControl,
             conditionWrap,
-            onChangeTarget
         }
     }
 }
@@ -98,12 +97,12 @@ export default {
                 </a>
                 <ul class="list-unstyled position-absolute start-0 top-100 p-0" v-if="state.toolSwitch.splitWindowBtn">
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', {qty: 1})">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="props.onChangeMapCount(1)">
                             <img src="@/assets/img/icon/singleWindow.svg" alt="">
                         </a>
                     </li>
                     <li class="mt-2">
-                        <a href="" class="text-white MapFeatureBtn" @click.prevent="onLayerControl('changeMapCount', {qty: 2})">
+                        <a href="" class="text-white MapFeatureBtn" @click.prevent="props.onChangeMapCount(2)">
                             <img src="@/assets/img/icon/doubleWindows.svg" alt="">
                         </a>
                     </li>
@@ -111,13 +110,16 @@ export default {
             </li>
         </ul>
 
-        <div class="switchControl d-flex position-fixed rounded-pill translate-middle-x p-2" id="switchControl" style="z-index: 99;">
+        <div class="switchControl d-flex position-fixed rounded-pill p-2" id="switchControl"
+        style="z-index: 99;">
             <OverLayer :text="'左右視窗切換工具'" />
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
-                onChangeTarget(1)
+                state.targetNum = 1
+                props.onChangeTarget(1)
             }">左</div>
             <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
-                onChangeTarget(2)
+                state.targetNum = 2
+                props.onChangeTarget(2)
             }">右</div>
         </div>
     </div>
@@ -145,6 +147,7 @@ export default {
     left: 50%
     background: rgba(30, 30, 30, 0.9)
     box-sizing: border-box
+    transform: translateX(-50%)
     div
         padding:5px 28px
         cursor: pointer
@@ -154,6 +157,7 @@ export default {
 @media (max-width: 1300px)
     .switchControl
         top: 10px
-        left: 80%
-
+        left: unset
+        right: 10px
+        transform: unset
 </style>

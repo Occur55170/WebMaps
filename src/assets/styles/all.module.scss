@@ -1,6 +1,7 @@
 @import './_variables.scss';
 
 // bg
+.black-deep {background: $black-deep;}
 .bg-steel {background: $blue-steel}
 .bg-light {background: $blue-light}
 .bg-grey {background: $grey;}
@@ -8,6 +9,7 @@
 .bg-red-light {background: $red-light;}
 .bg-brown {background: $brown;}
 .bg-orange {background: $orange;}
+.bg-blueDeep {background: $blue-deep;}
 .grey-depend {background: $grey-depend;}
 // text
 .text-brown {color: $brown;}

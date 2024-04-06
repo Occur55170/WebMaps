@@ -4,16 +4,22 @@ import $ from 'jquery'
 import { useStore } from 'vuex'
 
 import { Map, View, Feature } from 'ol'
+import XYZ from 'ol/source/XYZ'
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import WMTS from 'ol/source/WMTS'
+import TilegridWMTS from 'ol/tilegrid/WMTS'
+import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
+import { get as getProjection } from 'ol/proj.js'
+import { getTopLeft, getWidth } from 'ol/extent.js'
 import Select from 'ol/interaction/Select'
 import { click } from 'ol/events/condition'
 import { ScaleLine } from 'ol/control.js'
-import XYZ from 'ol/source/XYZ'
 import VectorSource from 'ol/source/Vector.js'
-import { Tile, Vector } from 'ol/layer.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
+import { Point } from 'ol/geom.js'
+import { Icon, Style } from 'ol/style.js'
 
 import OLCesium from 'olcs/OLCesium.js'
+import Static from 'ol/source/ImageStatic.js'
 
 import 'ol/ol.css'
 import 'ol-ext/dist/ol-ext.css'
@@ -40,7 +46,7 @@ export default {
             currentLayers: [],
             layers: [],
             mapLayers: computed(() => {
-                return state.layers.map((node, index) => {
+                const result = state.layers.map((node, index) => {
                     return {
                         label: node.group_title,
                         value: node.value,
@@ -48,6 +54,7 @@ export default {
                         groupClass: node.group_class
                     }
                 })
+                return result
             }),
             selectLock: false,
             mapCount: 1,
@@ -69,7 +76,6 @@ export default {
                 let target = state.targetNum == 1 ? 'map1' : 'map2'
                 return state.dimensionMap[target] === '2D'
             }),
-            ol3d: null,
             selectValueTemp: 0,
             popup: {
                 nodeRef: null,
@@ -91,6 +97,8 @@ export default {
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
+            minZoom: 8,
+            maxZoom: 16
         })
 
         // 初始化地圖
@@ -186,89 +194,74 @@ export default {
                     break;
             }
         }
-
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
-                        // 避免加到有群組的母層
-                        if (!(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles)) {
+                        let nestedSubNodeIndex = value.nestedSubNodeIndex
+                        // 點選父層後，自動帶入子層群組
+                        let isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
+                        let haveInfoBox = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box !== null
+                        if (!(isSingleTiles) || haveInfoBox) {
                             let layersAry = targetLayers.getArray()
+
                             layersAry.forEach(element => {
                                 if (!(element.get('id'))) { return }
                                 if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
                                     target.removeLayer(element)
                                 }
                             })
-                            onMapLayerStatus('delete', target.getTarget(), value.id)
+                            nestedSubNodeIndex = state.selectValueTemp
+                            value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
-                        let nestedSubNodeIndex = value.nestedSubNodeIndex || state.selectValueTemp
+                        // TODO: 有3D圖層的話，先移除 加入圖層後，再換回3D狀態
+                        if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
+                            ol3d.setEnabled(false)
+                        }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                        target.addLayer(targetLayer)
-                        if (targetLayer.get('label').includes('雷達回波預測')) {
-                            var source = targetLayer.getSource();
-                            var iconFeature = source.getFeatures()[0]
-                            const extent = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].image_options.image_extent
-
-                            // TODO: 等待api 確定後切換成api路徑
-                            const gifUrl = targetLayer.get('extra').url;
-                            const gif = gifler(gifUrl);
-
-                            const extentWidth = extent[2] - extent[0];
-                            const extentHeight = extent[3] - extent[1];
-
-                            gif.frames(
-                                document.createElement('canvas'),
-                                function (ctx, frame) {
-                                    const scaleX = extentWidth / frame.width;
-                                    const scaleY = extentHeight / frame.height;
-                                    const baseScale = Math.min(scaleX, scaleY);
-
-                                    // 獲取當前地圖的解析度
-                                    const currentResolution = state.map1.getView().getResolution();
-
-                                    iconFeature.setStyle(
-                                        new Style({
-                                            image: new Icon({
-                                                img: ctx.canvas,
-                                                imgSize: [frame.width, frame.height],
-                                                opacity: 0.8,
-                                                scale: baseScale / currentResolution
-                                            }),
-                                        })
-                                    );
-
-                                    ctx.clearRect(0, 0, frame.width, frame.height);
-                                    ctx.drawImage(frame.buffer, frame.x, frame.y);
-
-                                    target.render();
-                                },
-                                true
-                            );
+                        if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
+                            targetLayer.getSource().on('change', () => {
+                                ol3d = new OLCesium({
+                                    map: target,
+                                })
+                                ol3d.setEnabled(true)
+                            })
                         }
-
-                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
+                        target.addLayer(targetLayer)
+                        if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
+                            const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
+                            const timeKey = value.id.split('_nestedSubNode')[0]
+                            if (state.temp?.[`${timeKey}count`] === undefined) {
+                                state.temp[`${timeKey}count`] = currentLayerKey
+                            }
+                            state.temp[timeKey] = setInterval(function () {
+                                state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
+                                let newSource = new Static({
+                                    url: tilesImageUrls[state.temp[`${timeKey}count`]],
+                                    projection: 'EPSG:4326',
+                                    imageExtent: imageExtent,
+                                    interpolate: true,
+                                })
+                                targetLayer.setSource(newSource)
+                            }, 1000)
+                        }
+                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
                             mapClickEvent(target, targetLayer.label)
-                            addSelectElement(value)
+                            addSelectElement(value, targetLayer.get('label'))
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
                         let layersAry = targetLayers.getArray()
                         function removeLayersById(id) {
-                            const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(id));
+                            const deleteKey = value.id.split('_nestedSubNode')[0]
+                            const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(deleteKey))
                             toRemoveLayerId.forEach((node) => {
                                 target.removeLayer(node);
                             });
                         }
-
-                        const idMappings = {
-                            'node9_subNode0_nestedSubNode': 'node9_subNode0_nestedSubNode',
-                            'node12_subNode1_nestedSubNode': 'node12_subNode1_nestedSubNode',
-                        };
-                        const idToRemove = idMappings[value.id] || value.id;
-                        removeLayersById(idToRemove);
+                        removeLayersById()
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
                             // FIXME: popup 修改
                             // TODO: 結構優化
@@ -280,6 +273,11 @@ export default {
                                 state.popup.overlay = null;
                             }
                         }
+                        if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
+                            const timeKey = value.id.split('_nestedSubNode')[0]
+                            clearInterval(state.temp[timeKey]);
+                            delete state.temp[`${timeKey}count`]
+                        }
 
                         onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
@@ -290,15 +288,10 @@ export default {
                         let layersAry = targetLayers.getArray()
                         let layersToRemove = layersAry.filter(node => !(node.get('id') === undefined))
                         layersToRemove.forEach((node) => {
-                            target.removeLayer(node)
+                            layerControl({ action: 'layerMode', value: { checked: false, ...getMapLayers.getLayerIndex(node.get('id')) } })
                         })
                     } else {
-                        let layersAry = targetLayers.getArray()
-                        layersAry.forEach(element => {
-                            if (element.get('id') == value.id) {
-                                target.removeLayer(element)
-                            }
-                        })
+                        layerControl({ action: 'layerMode', value: { checked: false, ...getMapLayers.getLayerIndex(value.id) } })
                     }
                     break;
                 case 'changeOrder':
@@ -358,84 +351,99 @@ export default {
                         return true
                     })
                     break;
-                case 'changeMapCount':
-                    if (state.mapCount === value.qty) { return }
-                    let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
-                    state.mapCount = value.qty
-                    let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
-                    let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
-                    if (value.qty === 2) {
-                        state[otherMap] = new Map({
-                            target: otherMap,
-                            layers: [
-                                baseMapList.getBaseMapData(0),
-                                ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
-                            ],
-                            view: defaultView,
-                            controls: [],
-                        })
-                        if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
-                            ol3d = new OLCesium({
-                                map: state[otherMap],
-                            })
-                            ol3d.setEnabled(true)
-                            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
-                            let scene = ol3d.getCesiumScene({})
-                            scene.terrainProvider = Cesium.createWorldTerrain({})
-                        }
-                    }
-                    if (value.qty === 1) {
-                        state[otherMap] = null
-                        const element = document.getElementById(otherMap)
-                        while (element.firstChild) {
-                            element.removeChild(element.firstChild)
-                        }
-                    }
-                    break;
                 case 'changeDimensionMap':
-                    let ta = state.targetNum == 1 ? 'map1' : 'map2'
-                    state.dimensionMap[ta] = value
-                    if (value === '3D') {
-                        // 先移除82處部落，後面補回
-                        let layersArray = targetLayers.getArray()
-                        const layerToRemove = layersArray.find(element => element.get('label').includes('近年歷史災害82處部落點位'))
-                        if (layerToRemove) {
-                            state[`map${state.targetNum}`].removeLayer(layerToRemove);
-                        }
-                        ol3d = new OLCesium({
-                            map: target,
-                        })
-                        ol3d.setEnabled(true)
-                        Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
-                        let scene = ol3d.getCesiumScene({})
-                        scene.terrainProvider = Cesium.createWorldTerrain({})
-                        state[`${ta}LayerStatus`].push('3D')
-                    } else {
-                        ol3d.setEnabled(false)
-                        state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
-                        state[`map${state.targetNum}LayerStatus`].forEach(node => {
-                            let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(node)
-                            let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
-                            if (nowTileLayer.get('label').includes('近年歷史災害82處部落點位')) {
-                                layerControl({
-                                    action: 'layerMode', value: {
-                                        checked: true,
-                                        nodeIndex: nodeIndex,
-                                        subNodeIndex: subNodeIndex,
-                                        nestedSubNodeIndex: nestedSubNodeIndex,
-                                        id: node
-                                    }
-                                })
-                            }
-                            return node
-                        })
-                    }
+                    onChangeDimensionMap(value)
                     break;
                 case 'setOpacity':
-                    targetLayers.getArray()[value.key].setOpacity(Number(value.value))
+                    onSetOpacity(value)
                     break;
             }
             getCurrentMapData()
+        }
+
+        function onChangeDimensionMap(value) {
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            let targetLayers = target?.getLayers()
+            let ta = state.targetNum == 1 ? 'map1' : 'map2'
+            state.dimensionMap[ta] = value
+            if (value === '3D') {
+                // 先移除82處部落，後面補回
+                let layersArray = targetLayers.getArray()
+                const layerToRemove = layersArray.find(element => element.get('label').includes('近年歷史災害82處部落點位'))
+                if (layerToRemove) {
+                    state[`map${state.targetNum}`].removeLayer(layerToRemove);
+                }
+                ol3d = new OLCesium({
+                    map: target,
+                })
+                ol3d.setEnabled(true)
+                Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
+                let scene = ol3d.getCesiumScene({})
+                scene.terrainProvider = Cesium.createWorldTerrain({})
+                state[`${ta}LayerStatus`].push('3D')
+            } else {
+                ol3d.setEnabled(false)
+                state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
+                state[`map${state.targetNum}LayerStatus`].forEach(node => {
+                    let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(node)
+                    let nowTileLayer = getMapLayers.getLayer(state.layers[nodeIndex].group_layers[subNodeIndex], nestedSubNodeIndex, value.id)
+                    if (nowTileLayer.get('label').includes('近年歷史災害82處部落點位')) {
+                        layerControl({
+                            action: 'layerMode',
+                            value: {
+                                checked: true,
+                                nodeIndex: nodeIndex,
+                                subNodeIndex: subNodeIndex,
+                                nestedSubNodeIndex: nestedSubNodeIndex,
+                                id: node
+                            }
+                        })
+                    }
+                    return node
+                })
+            }
+        }
+
+        function onSetOpacity(value) {
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            let targetLayers = target?.getLayers()
+            targetLayers.getArray()[value.key].setOpacity(Number(value.value))
+        }
+
+        function changeMapCount(qty) {
+            if (state.mapCount === qty) { return }
+            let otherMap = state.targetNum !== 1 ? 'map1' : 'map2'
+            state.mapCount = qty
+            let otherLayers = state[`${otherMap}LayerStatus`].filter(node => node !== '3D')
+            let otherLayersData = otherLayers.map(item => mapLayerList.getLayerIndex(item))
+            if (qty === 2) {
+                state[otherMap] = new Map({
+                    target: otherMap,
+                    layers: [
+                        baseMapList.getBaseMapData(0),
+                        // TODO: check
+                        ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id))
+                    ],
+                    view: defaultView,
+                    controls: [],
+                })
+                if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
+                    ol3d = new OLCesium({
+                        map: state[otherMap],
+                    })
+                    ol3d.setEnabled(true)
+                    Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
+                    let scene = ol3d.getCesiumScene({})
+                    scene.terrainProvider = Cesium.createWorldTerrain({})
+                }
+            }
+            if (qty === 1) {
+                state[otherMap] = null
+                const element = document.getElementById(otherMap)
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild)
+                }
+            }
         }
 
         function changeTarget(value) {
@@ -445,7 +453,6 @@ export default {
                 // 目標地圖為空
                 if (!state[`map${value}`]) {
                     let otherLayers = state[`map${value}LayerStatus`].filter(node => node !== '3D')
-
                     // TODO: 優化，把node0_subNode4_nestedSubNodeundefined移到最後面
                     if (otherLayers.includes('node0_subNode4_nestedSubNodeundefined')) {
                         let a = otherLayers.filter(node => node !== 'node0_subNode4_nestedSubNodeundefined')
@@ -457,7 +464,9 @@ export default {
                         target: `map${value}`,
                         layers: [
                             baseMapList.getBaseMapData(state.temp[`map${state.targetNum}BaseStatus`]),
-                            ...otherLayersData.map(node => getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.layeredIndex))
+                            ...otherLayersData.map(node => {
+                                return getMapLayers.getLayer(state.layers[node.nodeIndex].group_layers[node.subNodeIndex], node.nestedSubNodeIndex, node.id)
+                            })
                         ],
                         view: defaultView,
                         controls: [],
@@ -512,6 +521,7 @@ export default {
                 console.log('error')
             }
         }
+
         function mapClickEvent(target) {
             let selector = new Select({
                 layers: target?.getLayers()?.getArray(),
@@ -532,14 +542,38 @@ export default {
                     target.addOverlay(state.popup.overlay)
                     // TODO: 截圖結構修改
                     // TODO: 優化結構，獲取state.popupId.overlay方式修正，考慮整包selectedFeatures放進去
-                    let selectIds = selectedFeatures.getId().split('.')
+                    // selectedFeatures.getKeys().forEach(key => console.log(`${key} -> ${selectedFeatures.get(key)}`))
+
+                    let selectIds = (selectedFeatures.getId() ?? selectedFeatures.getGeometryName()).split('.')
                     state.popup.popupData = selectIds[0]
                     state.popup.coordinate = event.mapBrowserEvent.coordinate
                     if (selectIds[0] === '新竹縣原住民部落範圍') {
                         state.popup.popupId = selectedFeatures.get('編號')
+                        return
                     }
                     if (selectIds[0] === '近年歷史災害82處部落點位') {
                         state.popup.popupId = selectIds[1]
+                        return
+                    }
+                    if (selectIds[0] === '雨量站') {
+                        state.popup.popupId = selectedFeatures.get('Name')
+                        return
+                    }
+                    if (selectIds[0] === '工程鑽探') {
+                        console.log('選到工程鑽探')
+                        state.popup.popupId = selectedFeatures.get('name').split('_')[0]
+                        // state.popup.temp = selectedFeatures
+                        return
+                    }
+                    if (selectIds[0] === '土石流潛勢溪流') {
+                        state.popup.popupId = selectedFeatures.get('ID')
+                        state.popup.temp = selectedFeatures
+                        return
+                    }
+                    if (selectIds[0] === '落石分布') {
+                        state.popup.popupId = selectedFeatures.get('DATA_ID')
+                        state.popup.temp = selectedFeatures
+                        return
                     }
                 } else {
                     target.removeOverlay(state.popup.overlay)
@@ -555,17 +589,17 @@ export default {
             })
         }
 
-        function closeMapData() {
+        function closeAreaData() {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             target.removeOverlay(state.popup.overlay)
             state.popup.overlay = null
         }
 
         // TODO: 優化 移除id判斷?
-        function addSelectElement(value) {
+        function addSelectElement(value, layerName) {
             const { checked, id } = value
             if (!checked) { state.selectLayerOption = {}; return }
-            if (id === 'node4_subNode0_nestedSubNodeundefined') {
+            if (layerName === '新竹縣原住民部落範圍') {
                 $.ajax({
                     url: 'https://api.edtest.site/tribeQuery',
                     method: 'GET',
@@ -644,12 +678,17 @@ export default {
             })
             state.comSize.wrapHeight = window.innerHeight
             state.comSize.wrapWidth = window.innerWidth
+            store.dispatch('updateWindowWidth', window.innerWidth)
             window.onresize = (e) => {
                 state.comSize.wrapHeight = e.target.innerHeight
                 state.comSize.wrapWidth = e.target.innerWidth
+                store.dispatch('updateWindowWidth', window.innerWidth)
             }
-
         })
+
+        function show() {
+            console.log(state.map1.getLayers().getArray())
+        }
 
         return {
             state,
@@ -659,8 +698,10 @@ export default {
             layerControl,
             changeTarget,
             conditionWrap,
-            closeMapData,
+            closeAreaData,
             moveToMap,
+            changeMapCount,
+            show,
         }
     }
 }
@@ -668,40 +709,54 @@ export default {
 
 <template>
     <div>
+        <!-- TODO: 寬度設定是否調整 -->
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
-            <!-- TODO: 寬度設定是否調整 -->
-            <div id="map1"
-                :class="{ 'w-100': state.map1?.getTarget() == 'map1', 'h-100': state.mapCount === 1, 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600) }">
+            <div id="map1" :class="{
+            'w-100': state.map1?.getTarget() == 'map1',
+            'h-100': state.mapCount === 1,
+            'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+            'middleMap': state.map1?.getTarget()
+        }">
             </div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
-            <div id="map2"
-                :class="{ 'w-100': state.map2?.getTarget() == 'map2', 'h-100': state.mapCount === 1, 'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600) }">
+            <div id="map2" :class="{
+            'w-100': state.map2?.getTarget() == 'map2',
+            'h-100': state.mapCount === 1,
+            'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+            'middleMap': state.map2?.getTarget()
+        }">
             </div>
         </div>
-        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool"
-        @onMapControl="({ action, value }) => { mapControl({ action, value }) }" />
-
-        <div class="SearchBar d-none d-sm-block position-absolute">
-            <div class="d-flex align-items-center">
-                <img src="@/assets/logo.svg" alt="" class="me-5">
-                <mapSourceOption class="mapSourceOption d-none d-sm-block"
-                :baseMapList="state.temp.baseMapList"
-                :onChangeBaseMaps="({ action, value }) => {
-                    layerControl({ action, value })
-                }" />
+        <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool" :onChangeTarget="(value) => {
+            changeTarget(value)
+        }" @onMapControl="({ action, value }) => {
+            mapControl({ action, value })
+        }" />
+        <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
+            <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
+                <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
+                <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
+                    :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
+            layerControl({ action, value })
+        }" />
             </div>
-            <SearchBar
-            class="mt-4"
-            v-bind="{
-                dimensionMapStatus: state.toSearchDimensionStatus,
-                currentLayers: state.currentLayers,
-                mapCount: state.mapCount,
-                onChangeBaseMaps: ({ action, value }) => {
-                    layerControl({ action, value })
-                }
-            }"
-            @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-            @onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
+            dimensionMapStatus: state.toSearchDimensionStatus,
+            currentLayers: state.currentLayers,
+            mapCount: state.mapCount,
+            onChangeBaseMaps: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+            onChangeMapCount: (qty) => {
+                changeMapCount(qty)
+            },
+        }" :onChangeTarget="(value) => {
+            changeTarget(value)
+        }" @onLayerControl="({ action, value }) => {
+            layerControl({ action, value })
+        }" @conditionWrap="(value) => {
+            conditionWrap(value)
+        }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -710,26 +765,21 @@ export default {
                     v-if="!state.conditionWrap" @click="state.conditionWrap = true">
                     圖層選項
                 </button>
-                <div class="mb-4"
-                v-if="state.conditionWrap"
-                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }">
-                    <condition
-                    v-bind="{
-                        tribeQuery: state.tribeQuery,
-                        mapLayers: state.mapLayers,
-                        currentLayers: state.currentLayers,
-                        onClose: () => {
-                            state.conditionWrap = false
-                        },
-                        showSelectLayerValue: (val) => {
-                            state.selectValueTemp = val
-                        },
-                        moveToMap: (val) => {
-                            moveToMap(val)
-                        }
-                    }"
-                    @onLayerControl="({ action, value }) => { layerControl({ action, value }) }"
-                    />
+                <div class="mb-4" v-if="state.conditionWrap">
+                    <Condition v-bind="{
+            tribeQuery: state.tribeQuery,
+            mapLayers: state.mapLayers,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.conditionWrap = false
+            },
+            showSelectLayerValue: (val) => {
+                state.selectValueTemp = val
+            },
+            moveToMap: (val) => {
+                moveToMap(val)
+            }
+        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
                 <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
@@ -739,133 +789,127 @@ export default {
                     v-if="!state.layerSelect" @click="state.layerSelect = true">
                     已選擇的圖層
                 </button>
-                <div
-                v-if="state.layerSelect">
-                    <LayerSelector
-                    v-bind="{
-                        selectLock: state.selectLock,
-                        currentLayers: state.currentLayers,
-                        onClose: () => {
-                            state.layerSelect = false
-                        },
-                        onLockLayer: () => {
-                            state.selectLock = !state.selectLock
-                        },
-                        onDeleteLayer: ({ action, value }) => {
-                            if (value.layerName == 'all') {
-                                state.deleteLightbox = true
-                            } else {
-                                layerControl({ action, value })
-                            }
-                        },
-                        onDeleteLayerAll: () => {
-                            state.deleteLightbox = true
-                        },
-                        onLayerControl: ({ action, value }) => {
-                            layerControl({ action, value })
-                        },
-                    }" />
+                <div v-if="state.layerSelect">
+                    <LayerSelector v-bind="{
+            selectLock: state.selectLock,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.layerSelect = false
+            },
+            onLockLayer: () => {
+                state.selectLock = !state.selectLock
+            },
+            onDeleteLayer: ({ action, value }) => {
+                if (value.layerName == 'all') {
+                    state.deleteLightbox = true
+                } else {
+                    layerControl({ action, value })
+                }
+            },
+            onLayerControl: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+        }" />
                 </div>
                 <OverLayer :text="'顯示已經選擇的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
         </div>
 
-        <div class="m-Navbar d-flex d-sm-none position-fixed bottom-0 start-0 w-100">
+        <div class="m-Navbar d-flex d-sm-none position-relative w-100">
             <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
-                <condition class="w-100"
-                v-if="state.conditionWrap"
-                v-bind="{
-                    mapLayers: state.mapLayers,
-                    currentLayers: state.currentLayers,
-                    onClose: () => {
-                        state.conditionWrap = false
-                    },
-                    showSelectLayerValue: (val) => {
-                        state.selectValueTemp = val
-                    }
-                }"
-                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                <Condition class="w-100" v-if="state.conditionWrap" v-bind="{
+            mapLayers: state.mapLayers,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.conditionWrap = false
+            },
+            showSelectLayerValue: (val) => {
+                state.selectValueTemp = val
+            }
+        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
                 <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
-                    selectLock: state.selectLock,
-                    currentLayers: state.currentLayers,
-                    onClose: () => {
-                        state.layerSelect = false
-                    },
-                    onChangLayerVisible: (action) => {
-                        layerControl(action)
-                    },
-                    onChangeOrderLayer: ({ action, value }) => {
-                        layerControl({ action, value })
-                    },
-                    onLockLayer: () => {
-                        state.selectLock = !state.selectLock
-                    },
-                    onDeleteLayer: ({ action, value }) => {
-                        if (value.layerName == 'all') {
-                            state.deleteLightbox = true
-                        } else {
-                            layerControl({ action, value })
-                        }
-                    },
-                    onDeleteLayerAll: () => {
-                        state.deleteLightbox = true
-                    },
-                }"
-                :setOpacity="({ action, value }) => {
+            selectLock: state.selectLock,
+            currentLayers: state.currentLayers,
+            onClose: () => {
+                state.layerSelect = false
+            },
+            onLockLayer: () => {
+                state.selectLock = !state.selectLock
+            },
+            onDeleteLayer: ({ action, value }) => {
+                if (value.layerName == 'all') {
+                    state.deleteLightbox = true
+                } else {
                     layerControl({ action, value })
-                }" />
+                }
+            },
+            onChangLayerVisible: (action) => {
+                layerControl(action)
+            },
+            onChangeOrderLayer: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+            onLayerControl: ({ action, value }) => {
+                layerControl({ action, value })
+            },
+        }" />
             </div>
-
-            <mNavbar :dimensionMapStatus="state.toSearchDimensionStatus" :currentLayers="state.currentLayers"
-                :mapCount="state.mapCount" :openConditionWrap="() => {
-                    state.conditionWrap = !state.conditionWrap
-                    state.layerSelect = false
-                }" :openLayerSelect="() => {
+            <mNavbar v-bind="{
+            dimensionMapStatus: state.toSearchDimensionStatus,
+            currentLayers: state.currentLayers,
+            mapCount: state.mapCount,
+            openConditionWrap: () => {
+                state.conditionWrap = !state.conditionWrap
+                state.layerSelect = false
+            },
+            openLayerSelect: () => {
                 state.layerSelect = !state.layerSelect
                 state.conditionWrap = false
-            }"
-            :onLayerControl="({ action, value }) => {
+            },
+            onLayerControl: ({ action, value }) => {
                 layerControl({ action, value })
-            }"
-            :onChangeTarget="(value) => { changeTarget(value) }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            },
+            onChangeMapCount: (qty) => {
+                changeMapCount(qty)
+            },
+            onChangeTarget: (value) => {
+                changeTarget(value)
+            }
+        }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
             <div class="p-4 rounded bg-white" style="width: 250px;">
-                <p class="text-center fw-bold">是否要刪除全部圖層</p>
+                <p class="text-center fw-bold">是否要取消全部圖層</p>
                 <div class=" d-flex justify-content-around">
                     <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
-                        layerControl({
-                            action: 'selectLayerMode',
-                            value: {
-                                layerName: 'all'
-                            }
-                        })
-                        state.deleteLightbox = false
-                    }">確定</button>
+            layerControl({
+                action: 'selectLayerMode',
+                value: {
+                    layerName: 'all'
+                }
+            })
+            state.deleteLightbox = false
+        }">確定</button>
                     <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
-                        state.deleteLightbox = false
-                    }">取消</button>
+            state.deleteLightbox = false
+        }">取消</button>
                 </div>
             </div>
         </div>
 
-        <div id="popup" class="position-absolute bottom-0"
-        :ref="(e) => {
+        <div id="popup" class="popup position-absolute bottom-0" :ref="(e) => {
             state.popup.nodeRef = e
         }">
-            <areaData class="areaData"
-            v-if="state.popup.popupId !== 0"
-            :closeMapData="() => {
-                closeMapData()
-            }"
-            :popup="state.popup"
-            :maxHeight="500" />
+            <areaData class="areaData" v-if="state.popup.popupId !== 0" :closeAreaData="() => {
+            closeAreaData()
+        }" :popup="state.popup" :maxHeight="500" />
         </div>
 
-        <div v-if="store.state.isInit" class="stepOverLayer" id="firstEnter" @click="()=>{
+        <div class="stepOverLayer position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" id="firstEnter"
+            v-if="store.state.isInit" @click="() => {
             store.dispatch('updateLayerStatus', false)
         }"></div>
     </div>
@@ -875,17 +919,6 @@ export default {
 @import '@/assets/styles/all.module.scss'
 .mapWrap
     height: 100vh
-.stepOverLayer
-    position: absolute
-    top: 0
-    left: 0
-    width: 100%
-    height: 100%
-    background: black
-    opacity: 0.5
-.mapWrap .ol-viewport
-    height: 100vh
-    width: 100vw
 .asideTool
     z-index: 220
     left: 20px
@@ -900,6 +933,8 @@ export default {
 .middleLine
     width: 5px
     background: $blue-steel
+.popup
+    z-index: 9999
 .areaData
     width: 450px
     max-height: 550px
@@ -907,10 +942,33 @@ export default {
     box-sizing: border-box
     border-radius: 10px
     border: 1px solid #088
+.middleMap
+    position: relative
+    &::after
+        content: ''
+        position: absolute
+        display: block
+        border: 2px solid #000
+        width: 40px
+        height: 40px
+        top: calc((100% - 40px)/2)
+        left: calc((100% - 40px)/2)
 @media (max-width: 600px)
+    .mapWrap
+        height: 92%
     .m-Navbar
         z-index: 222
+        height: 8%
+    .SearchBar
+        top: 0
+        left: 0
+        .logo
+            width: 180px
+    .asideTool
+        left: 5px
     .middleLine
         height: 1px
         width: 100%
+    .areaData
+        width: 85vw
 </style>

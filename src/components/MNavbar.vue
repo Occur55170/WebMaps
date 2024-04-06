@@ -28,9 +28,9 @@ export default {
             type: Function,
             default: () => {}
         },
-        onChangeTarget: {
+        onChangeMapCount: {
             type: Function,
-            default: () => {}
+            default: ()=>{}
         },
     },
     setup(props, { emit }) {
@@ -68,7 +68,7 @@ export default {
             emit('conditionWrap')
         }
 
-        // FIXME: 手機板打開燈箱點擊燈箱外關閉
+        // TODO: 手機板打開燈箱點擊燈箱外關閉
 
         return {
             props,
@@ -83,23 +83,16 @@ export default {
 
 <template>
     <div class="w-100">
-        <div class="position-fixed top-0 w-100 px-3 d-flex justify-content-between justify-content-sm-end flex-wrap">
-            <img src="@/assets/logo.svg" class="w-50 w-lg-100">
-            <div class="switchControl mt-2 me-0 me-sm-2 d-block rounded-4 p-2" id="switchControl" style="z-index: 99;">
-                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }"
-                @click="() => {
-                    state.targetNum = 1
-                    props.onChangeTarget(1)
-                }">上</div>
-                <div class="text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }"
-                @click="() => {
-                    state.targetNum = 2
-                    props.onChangeTarget(2)
-                }">下</div>
-            </div>
-        </div>
+        <!-- <div class="position-fixed top-0 w-100 px-3 mt-3 d-flex justify-content-between justify-content-sm-end flex-wrap"> -->
+            <!-- <img src="@/assets/logo.svg" class="w-50 w-lg-100"> -->
+            <!-- <mapSourceOption class="mapSourceOption d-none d-sm-block"
+                :baseMapList="state.temp.baseMapList"
+                :onChangeBaseMaps="({ action, value }) => {
+                    layerControl({ action, value })
+                }" /> -->
+        <!-- </div> -->
 
-        <ul class="list-unstyled d-flex align-items-center justify-content-around py-2 flex-nowrap w-100 bg-white mb-0">
+        <ul class="list-unstyled d-flex align-items-center justify-content-around h-100 flex-nowrap w-100 bg-white mb-0">
             <li>
                 <div>
                     <div class="navbarBtn" v-if="props.dimensionMapStatus"
@@ -124,10 +117,10 @@ export default {
             </li>
             <li>
                 <div class="text-white">
-                    <div class="navbarBtn" v-if="props.mapCount === 1" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 2}})">
+                    <div class="navbarBtn" v-if="props.mapCount === 1" @click.prevent="props.onChangeMapCount(2)">
                         <img src="@/assets/img/icon/singleWindow-m.svg">
                     </div>
-                    <div class="navbarBtn" v-if="props.mapCount === 2" @click.prevent="props.onLayerControl({action:'changeMapCount', value: {qty: 1}})">
+                    <div class="navbarBtn" v-if="props.mapCount === 2" @click.prevent="props.onChangeMapCount(1)">
                         <img src="@/assets/img/icon/doubleWindow-m.svg">
                     </div>
                 </div>
@@ -137,25 +130,15 @@ export default {
 </template>
 
 <style lang="sass">
-.switchControl
-    background: rgba(30, 30, 30, 0.9)
-    box-sizing: border-box
-    div
-        padding:5px
-        cursor: pointer
-        box-sizing: border-box
-    .active
-        background: #247BA0
-
 ul
     li
         .navbarBtn
-            width: 60px
-            height: 60px
+            width: 50px
+            height: 50px
             img
                 width: 100%
                 height: 100%
         &:nth-Child(1) .navbarBtn, &:nth-Child(4) .navbarBtn
-            width: 50px
-            height: 50px
+            width: 40px
+            height: 40px
 </style>

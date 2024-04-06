@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-console.log(VITE_URL)
 const routes = [
     {
         path: `${VITE_URL}`,
@@ -22,27 +21,20 @@ const routes = [
         component: () => import('@/view/Wes.vue')
     },
     {
+        path: '/Opp',
+        name: 'Opp',
+        component: () => import('@/view/Opp.vue')
+    },
+    {
         path: `${VITE_URL}/Plane/:id`,
-        name: 'Plane',
+        name: 'plane',
         component: () => import('@/view/Plane.vue')
     },
-    // {
-    //     path: '/opp',
-    //     name: 'opp',
-    //     component: () => import('@/components/opp.vue')
-    // },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes
-})
-router.beforeEach((to, from, next) => {
-    if (!to.name){
-        next({ name: 'map' })
-    } else {
-        next()
-    }
 })
 
 export default router

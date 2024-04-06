@@ -2,10 +2,7 @@
 import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
 import $ from 'jquery'
 import { useRoute, useRouter } from 'vue-router'
-import download from 'downloadjs';
 import axios from 'axios';
-import JSZip from 'JSZip';
-import FileSaver from 'file-saver';
 
 export function batchDownload(url, parameter) {
     return axios({
@@ -17,13 +14,7 @@ export function batchDownload(url, parameter) {
 }
 
 export default {
-    props: {
-        tribeId: {
-            Type: String,
-            default: 0
-        },
-        map: {}
-    },
+    props: {},
     setup(props, { emit }) {
         const router = useRouter()
         const route = useRoute()
@@ -41,7 +32,11 @@ export default {
             coordinates: computed(() => {
                 return (state.tribeData?.basicInformation?.coordinates) ? Object.entries(state.tribeData?.basicInformation?.coordinates) : null
             }),
-            planObj: {}
+            planObj: {},
+            lightSwitch: false,
+            currentText: '',
+            targetUrl: '',
+            loginFailed: false
         })
 
         const tableFilter = function (name) {
@@ -49,34 +44,23 @@ export default {
             return stringArray
         }
 
-        function old(url = 'https://drive.google.com/file/d/1oWnI0mZwdfVCWwha2mdEK0rm_GYt8Tfy/view?usp=drive_link') {
-            const iframe = document.createElement('iframe')
-            iframe.style.display = "none"
-            iframe.style.height = 0
-            iframe.src = url
-
-        }
-        // downloadFile
-        function downloadPdf(url) {
-            axios.request({
-                    url: url,
-                    // method,
-                    responseType: "blob"
-                }).then(response => {
-                    let blob = new Blob([response.data], { type: 'application/pdf' }),
-                    url = window.URL.createObjectURL(blob)
-                    window.open(url)
-                })
+        function downloadPassword() {
+            if(state.currentText === '28368864'){
+                state.lightSwitch = false
+                window.open(state.targetUrl, '_blank')
+            } else {
+                alert('密碼錯誤')
+                state.loginFailed = true
+            }
         }
 
-        function goBack() {
-            router.push({
-                name: 'detail',
-                params: {
-                    id: route.params?.id
-                },
-            })
+        function openLightBox(item) {
+            state.lightSwitch = true
+            state.targetUrl= item.url
+            state.currentText= ''
+            state.loginFailed = false
         }
+
 
         onMounted(async () => {
             await $.ajax({
@@ -90,11 +74,12 @@ export default {
         })
 
         return {
+            route,
             router,
             state,
             tableFilter,
-            downloadPdf,
-            goBack
+            downloadPassword,
+            openLightBox
         }
     }
 }
@@ -105,54 +90,67 @@ export default {
     <div class="detail">
         <div class="redTotem" :class="state.type == 1 ? 'redTotem' : 'blueTotem'"></div>
         <div class="p-4">
-            <div class="d-flex align-items-center justify-content-between">
-                <h1 class="text-brown fw-bold d-flex align-items-center" :class="state.mainTextColor">
+            <div class="d-flex align-items-center justify-content-between w-100">
+                <h1 class="text-brown fw-bold d-flex align-items-center w-100"
+                :class="state.mainTextColor">
                     <img src="@/assets/mapDetail/frame-1.png" v-if="state.type == 1" />
                     <img src="@/assets/mapDetail/frame-2.png" v-else>
-                    聚落座標
+                    永續藍圖計畫工程
                 </h1>
-
-                <div class="d-flex justify-content-end" style="visibility: hidden;">
-                    <button class="btn text-white me-2" style="background: rgba(30, 30, 30, 0.9);">全部下載</button>
-                    <button class="btn text-white" style="background: rgba(30, 30, 30, 0.9);">下載勾選項目</button>
-                </div>
             </div>
-            <div class="row mb-4">
-                <div class="col-6">
+            <div class="row">
+                <div class="col-12 col-lg-6 mb-4 mb-lg-0">
                     <img :src="state.planObj.engineeringPlan" class="w-100" alt="">
                 </div>
-                <div class="col-6 position-relative" style="overflow-y: auto;">
-                    <div class="position-absolute d-flex flex-wrap table" style="width: 95%;">
+                <div class="col-12 col-lg-6 position-relative" style="overflow-y: auto;">
+                    <div class="downloadList position-static position-lg-absolute d-flex flex-wrap table">
                         <div class="thead d-flex shrink-1 flex-nowrap justify-content-between w-100">
-                            <div class="p-1 col-3 text-white" :class="state.mainBgColor">記號</div>
-                            <div class="p-1 col-6 text-white" :class="state.mainBgColor">名稱</div>
+                            <div class="p-1 col-2 col-lg-3 text-white" :class="state.mainBgColor">記號</div>
+                            <div class="p-1 col-7 text-white" :class="state.mainBgColor">名稱</div>
                             <div class="p-1 col-3 text-white" :class="state.mainBgColor">下載</div>
-                            <!-- <div class="p-1 col-2 text-white" :class="state.mainBgColor">選取</div> -->
-                        </div>
+                            </div>
                         <div class="tbody w-100">
                             <div class="d-flex shrink-0 flex-nowrap justify-content-between w-100"
                                 v-for="(item, itemKey) in state.planObj.engineeringPlanInfo" :key="itemKey">
-                                <div class="col-3 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
-                                <div class="col-6 bg-grey-light fw-bold">{{ tableFilter(item.name)[1] }}</div>
+                                <div class=" col-2 col-lg-3 bg-grey-light fw-bold">{{ tableFilter(item.name)[0] }}</div>
+                                <div class="col-7 bg-grey-light fw-bold">{{ tableFilter(item.name)[1] }}</div>
                                 <div class="col-3 bg-grey-light">
-                                    <a :href="item.url" class="btn py-1 text-white bg-grey" target="_blank">
-                                        <img src="@/assets/img/icon/download.svg" class="">
+                                    <a href="" class="btn py-1 text-white bg-grey" target="_blank"
+                                    @click.prevent="openLightBox(item)">
+                                        <img src="@/assets/img/icon/download.svg">
                                     </a>
-                                    <!-- <a href="#" @click="downloadPdf(item.url)">
-                                        <img src="@/assets/img/icon/download.svg" class="">
-                                    </a> -->
                                 </div>
-                                <!-- <div class="col-2 bg-grey-light"><input type="checkbox"></div> -->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <p class="fs-6 mb-4">*本永續藍圖計畫項目由新竹縣政府與各管轄之公所提案，並由原民會核定後執行，故本資料為規劃成果，僅供地方政府參考，非實際執行之在建工程**。</p>
             <div class="d-flex justify-content-center">
                 <a href="#" class="goBack btn bg-black text-white d-inline-block mb-4 cursor-pointer"
-                    @click.prevent="goBack()">
+                    @click.prevent="router.push({
+                        name: 'detail',
+                        params: {
+                            id: route.params?.id
+                        },
+                    })">
                     返回上頁
                 </a>
+            </div>
+        </div>
+        <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center"
+        v-if="state.lightSwitch"
+        @click.prevent="state.lightSwitch = false">
+            <div class="p-4 rounded bg-white d-flex align-items-center" @click.stop>
+                <span>密碼：</span>
+                <div class="mx-2" style="width: 300px;"
+                :class="{'error': state.loginFailed}">
+                    <input class="me-2 w-100 px-2 py-1" type="text" name="password" placeholder="請輸入下載密碼"
+                    v-model="state.currentText"
+                    @input="state.loginFailed = false">
+                </div>
+                <button class="btn bg-steel text-white"
+                @click.prevent="downloadPassword()">輸入</button>
             </div>
         </div>
     </div>
@@ -183,6 +181,21 @@ export default {
         display: flex
         justify-content: center
         align-items: center
+.error
+    position: relative
+    input
+        border: 1px solid red
+    &::after
+        content: '帳號或密碼錯誤；或使用者不存在。'
+        color: red
+        position: absolute
+        top: 100%
+        left: 0
+        font-size: 12px
+.downloadList
+    width: 95%
+@media (max-width: 768px)
+    .downloadList
+        width: 100%
 
-@media (max-width: 600px)
 </style>
