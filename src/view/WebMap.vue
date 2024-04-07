@@ -201,12 +201,11 @@ export default {
                 case 'layerMode':
                     if (value.checked) {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex
-                        // 點選父層後，自動帶入子層群組
+                        // 點選父層後，刪除同樣子層的圖層，帶入當前選擇的圖層
                         let isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
                         let haveInfoBox = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box !== null
                         if (!(isSingleTiles) || haveInfoBox) {
                             let layersAry = targetLayers.getArray()
-
                             layersAry.forEach(element => {
                                 if (!(element.get('id'))) { return }
                                 if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
@@ -216,18 +215,15 @@ export default {
                             nestedSubNodeIndex = state.selectValueTemp
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
+                        let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                         // TODO: 有3D圖層的話，先移除 加入圖層後，再換回3D狀態
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                            ol3d.setEnabled(false)
-                        }
-                        let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                        if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                            targetLayer.getSource().on('change', () => {
-                                ol3d = new OLCesium({
-                                    map: target,
-                                })
-                                ol3d.setEnabled(true)
-                            })
+                            drawDimensionMap(false)
+                            function handleDimension() {
+                                drawDimensionMap(true)
+                                targetLayers.un('propertychange', handleDimension)
+                            }
+                            targetLayers.on('propertychange', handleDimension)
                         }
                         target.addLayer(targetLayer)
                         if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
@@ -373,16 +369,10 @@ export default {
                 if (layerToRemove) {
                     state[`map${state.targetNum}`].removeLayer(layerToRemove);
                 }
-                ol3d = new OLCesium({
-                    map: target,
-                })
-                ol3d.setEnabled(true)
-                Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
-                let scene = ol3d.getCesiumScene({})
-                scene.terrainProvider = Cesium.createWorldTerrain({})
+                drawDimensionMap(true)
                 state[`${ta}LayerStatus`].push('3D')
             } else {
-                ol3d.setEnabled(false)
+                drawDimensionMap(false)
                 state[`${ta}LayerStatus`] = state[`${ta}LayerStatus`].filter(node => node !== '3D')
                 state[`map${state.targetNum}LayerStatus`].forEach(node => {
                     let { nodeIndex, subNodeIndex, nestedSubNodeIndex } = getMapLayers.getLayerIndex(node)
@@ -401,6 +391,21 @@ export default {
                     }
                     return node
                 })
+            }
+        }
+
+        function drawDimensionMap(value) {
+            const target = state.targetNum == 1 ? state.map1 : state.map2
+            if(value) {
+                ol3d = new OLCesium({
+                    map: target,
+                })
+                ol3d.setEnabled(true)
+                Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
+                let scene = ol3d.getCesiumScene({})
+                scene.terrainProvider = Cesium.createWorldTerrain({})
+            } else {
+                ol3d.setEnabled(false)
             }
         }
 
