@@ -1,106 +1,118 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-import Map from 'ol/Map.js'
-import OSM from 'ol/source/OSM.js'
-import Static from 'ol/source/ImageStatic.js'
-import View from 'ol/View.js'
-import proj4 from 'proj4'
-import { Image as ImageLayer, Tile as TileLayer } from 'ol/layer.js'
-import { getCenter } from 'ol/extent.js'
-import { register } from 'ol/proj/proj4.js'
-import { transform } from 'ol/proj.js'
-
-// import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject, getCurrentInstance } from 'vue'
+import $ from 'jquery'
+import { Map, View, Feature } from 'ol'
+import { ImageArcGISRest, OSM } from 'ol/source.js'
 import TileWMS from 'ol/source/TileWMS'
-proj4.defs(
-    'EPSG:27700',
-    '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 ' +
-    '+x_0=400000 +y_0=-100000 +ellps=airy ' +
-    '+towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 ' +
-    '+units=m +no_defs'
-)
-proj4.defs("EPSG:3826", "+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs");
-register(proj4);
+import Overlay from 'ol/Overlay'// 引入覆蓋物模塊
+import { TileArcGISRest } from 'ol/source.js'
+import XYZ from 'ol/source/XYZ'
+import VectorSource from 'ol/source/Vector.js'
+import { Icon, Fill, Stroke, Style } from 'ol/style.js'
+import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
+import ImageWMS from 'ol/source/ImageWMS.js';
+import TileGrid from 'ol/layer/Tile.js';
+import PerspectiveMap from "ol-ext/map/PerspectiveMap"
+import EsriJSON from 'ol/format/EsriJSON.js'
+import { createXYZ } from 'ol/tilegrid.js'
+import { tile as tileStrategy } from 'ol/loadingstrategy.js'
+import { Circle, Polygon, Point } from 'ol/geom.js'
+import Projection from 'ol/proj/Projection.js'
+import GeoJSON from 'ol/format/GeoJSON.js'
+import VectorImageLayer from 'ol/layer/VectorImage.js';
+import TileState from 'ol/TileState.js';
+import 'ol/ol.css'
+import baseMapList from '@/config/baseMapList'
+import 'ol-ext/dist/ol-ext.css'
+import { get as getProjection } from 'ol/proj';
 
-const imageExtent = [200000, 200000, 3000000, 5000000];
-const imageLayer = new ImageLayer();
+import 'ol/ol.css'
+import 'ol-ext/dist/ol-ext.css'
 
-// var EPSG ='EPSG:3031'; // EPSG:3031 - WGS 84 / Antarctic Polar Stereographic
-// proj4.defs([['EPSG:3031','+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs']]);
-// proj4.defs('urn:ogc:def:crs:EPSG::3031', proj4.defs(EPSG)); // add alias
-// var projection = ol.proj.get(EPSG);
-// var extent = ol.proj.transformExtent([-180, -45, 180, -90], 'EPSG:4326', projection);
-// var center = ol.proj.transform([180,-90], 'EPSG:4326', projection);
-// projection.setExtent(extent);
+import OLCesium from 'olcs/OLCesium.js'
+export default {
+    props: {},
+    setup(props, { emit }) {
+        const state = reactive({
+            map1: null,
+            map2: null,
+            defaultCenter: [121.326776, 24.655499],
+            defaultCenterZoom: 14,
+        })
+        const defaultView = new View({
+            projection: 'EPSG:4326',
+            center: state.defaultCenter,
+            zoom: state.defaultCenterZoom,
+        })
+        const osm = new TileLayer({
+            source: new OSM(),
+        })
+        onMounted(async () => {
+            const api = 'http://gis.edtest.site:8010/ogc/temp?LAYER=%E6%96%B0%E7%AB%B9%E7%B8%A3%E5%8E%9F%E4%BD%8F%E6%B0%91%E9%83%A8%E8%90%BD%E7%AF%84%E5%9C%8D&REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&SRS=EPSG:3826&VERSION=1.1.1&FORMAT=image/png&STYLES='
+            const url = new URL(api);
+            // 取得網址部分
+            const origin = url.origin
+            const pathname = url.pathname
+            // 取得query參數
+            const searchParams = url.searchParams;
+            const searchParamsObject = {};
+            for (const [key, value] of searchParams.entries()) {
+                searchParamsObject[key] = value;
+            }
+            const braster = new TileLayer ({
+                source: new TileWMS({
+                    url: origin + pathname,
+                    params: searchParamsObject,
+                    serverType: 'geoserver',
+                    // 需要開啟此
+                    // crossOrigin: 'anonymous',
+                })
+            })
+            state.map1 = new Map({
+                target: 'map1',
+                layers: [
+                    new TileLayer({
+                    source: new OSM(),
+                    }),
+                    braster
+                ],
+                view: defaultView,
+                controls: [],
+            })
 
-const area = reactive({
-    India: [68.17665, 7.96553, 97.40256, 35.49401],
-    Argentina: [-73.41544, -55.25, -53.62835, -21.83231],
-    Nigeria: [2.6917, 4.24059, 14.57718, 13.86592],
-    Sweden: [11.02737, 55.36174, 23.90338, 69.10625],
-    Taiwan: [119.5, 20.5, 124.5, 25.5], // 台湾的 Extent
-})
 
-const map = new Map({
-    target: 'map',
-    layers: [
-        new TileLayer({
-            source: new TileWMS({
-                url: 'https://wms.geo.admin.ch/',
-                crossOrigin: 'anonymous',
-                params: {
-                    'LAYERS': 'ch.swisstopo.pixelkarte-farbe-pk1000.noscale',
-                    'FORMAT': 'image/jpeg',
-                },
-                serverType: 'mapserver',
-            }),
-        }),
-        // imageLayer,
-    ],
-    view: new View({
-        // center: transform(getCenter(imageExtent), 'EPSG:3826', 'EPSG:3857'),
-        // center: transform(getCenter(area.Taiwan), 'EPSG:3826'),
-        center: [-10997148, 4569099],
-        zoom: 4,
-    }),
-});
-
-// const interpolate = document.getElementById('interpolate');
-
-function setSource(e) {
-    // const source = new Static({
-    //     url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/' + 'British_National_Grid.svg/2000px-British_National_Grid.svg.png',
-    //     projection: 'EPSG:3826',
-    //     crossOrigin: '',
-    //     imageExtent: imageExtent,
-    //     // interpolate: interpolate.checked,
-    // });
-
-    const source = new TileWMS({
-        // projection: 'EPSG:3857', // here is the source projection
-        url: 'https://ahocevar.com/geoserver/wms',
-        params: {
-            'LAYERS': 'ne:NE1_HR_LC_SR_W_DR',
-        },
-    })
-    map.addLayer(source);
+            let ol3d = null
+            Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
+            
+                ol3d = new OLCesium({
+                    map: state.map1,
+                    time() {
+                        return Cesium.JulianDate.now();
+                    }
+                })
+                ol3d.setEnabled(true)
+                // let scene = ol3d.getCesiumScene()
+                // scene.terrainProvider = Cesium.createWorldTerrain({})
+        })
+        function showLayer() {
+            console.log(state.map1.getLayers().getArray())
+        }
+        return {
+            state,
+            showLayer
+        }
+    }
 }
-// setSource();
-
-// interpolate.addEventListener('change', setSource);
 </script>
-
 <template>
-    <div id="map" class="map"></div>
-    <div>
-        <button @click="setSource()">999</button>
-        <input type="checkbox" id="interpolate" checked />
-        <label for="interpolate">Interpolate</label>
-    </div>
+    000
+    <div @click="showLayer">show</div>
+    <div id="map1" class="map"></div>
+    8999
 </template>
 <style>
 .map {
-    width: 100%;
-    height: 400px;
+    width: 800px;
+    height: 800px;
 }
 </style>
