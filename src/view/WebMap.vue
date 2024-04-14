@@ -92,6 +92,7 @@ export default {
         })
 
         let ol3d = null
+        Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
 
         const defaultView = new View({
             projection: 'EPSG:4326',
@@ -408,11 +409,16 @@ export default {
             if(value) {
                 ol3d = new OLCesium({
                     map: target,
+                    time() {
+                        return Cesium.JulianDate.now();
+                    }
                 })
                 ol3d.setEnabled(true)
-                Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
-                let scene = ol3d.getCesiumScene({})
+                let scene = ol3d.getCesiumScene()
                 scene.terrainProvider = Cesium.createWorldTerrain({})
+                window.console.log(Cesium)
+                // Cesium.createWorldTerrainAsync().then(tp => scene.terrainProvider = tp);
+                ol3d.setEnabled(true);
             } else {
                 ol3d.setEnabled(false)
             }
@@ -457,7 +463,6 @@ export default {
                         map: state[otherMap],
                     })
                     ol3d.setEnabled(true)
-                    Cesium.Ion.defaultAccessToken = import.meta.env.VITE_Ol3D_TOKEN
                     let scene = ol3d.getCesiumScene({})
                     scene.terrainProvider = Cesium.createWorldTerrain({})
                 }
