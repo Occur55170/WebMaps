@@ -360,7 +360,7 @@ export default {
                     onChangeDimensionMap(value)
                     break;
                 case 'setOpacity':
-                    onSetOpacity(value)
+                    onChangeLayerOpacity(value.key, value.value)
                     break;
             }
             getCurrentMapData()
@@ -403,15 +403,6 @@ export default {
             }
         }
 
-        function onChangeLayerVisible(key) {
-            const target = state.targetNum == 1 ? state.map1 : state.map2
-            const targetLayers = target?.getLayers()
-            if (state.selectLock) { return }
-            let visibleStatus = !(targetLayers.getArray()[key].getVisible())
-            targetLayers.getArray()[key].setVisible(visibleStatus)
-            getCurrentMapData()
-        }
-
         function drawDimensionMap(value) {
             const target = state.targetNum == 1 ? state.map1 : state.map2
             if(value) {
@@ -427,10 +418,21 @@ export default {
             }
         }
 
-        function onSetOpacity(value) {
+        function onChangeLayerVisible(key) {
+            const target = state.targetNum == 1 ? state.map1 : state.map2
+            const targetLayers = target?.getLayers()
+            if (state.selectLock) { return }
+            let visibleStatus = !(targetLayers.getArray()[key].getVisible())
+            targetLayers.getArray()[key].setVisible(visibleStatus)
+            nextTick(() => {
+                getCurrentMapData()
+            })
+        }
+
+        function onChangeLayerOpacity(key, value) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
-            targetLayers.getArray()[value.key].setOpacity(Number(value.value))
+            targetLayers.getArray()[key].setOpacity(Number(value))
         }
 
         function changeMapCount(qty) {
@@ -720,6 +722,7 @@ export default {
             mapControl,
             layerControl,
             onChangeLayerVisible,
+            onChangeLayerOpacity,
             changeTarget,
             conditionWrap,
             closeAreaData,
@@ -814,30 +817,34 @@ export default {
                     已選擇的圖層
                 </button>
                 <div v-if="state.layerSelect">
-                <LayerSelector
-                v-bind="{
-                    selectLock: state.selectLock,
-                    currentLayers: state.currentLayers,
-                    onClose: () => {
-                        state.layerSelect = false
-                    },
-                    onLockLayer: () => {
-                        state.selectLock = !state.selectLock
-                    },
-                    onDeleteLayer: ({ action, value }) => {
-                        if (value.layerName == 'all') {
-                            state.deleteLightbox = true
-                        } else {
+                    <!-- TODO: onChangeLayerOpacity帶入而不是走onLayerControl -->
+                    <LayerSelector
+                    v-bind="{
+                        selectLock: state.selectLock,
+                        currentLayers: state.currentLayers,
+                        onClose: () => {
+                            state.layerSelect = false
+                        },
+                        onLockLayer: () => {
+                            state.selectLock = !state.selectLock
+                        },
+                        onDeleteLayer: ({ action, value }) => {
+                            if (value.layerName == 'all') {
+                                state.deleteLightbox = true
+                            } else {
+                                layerControl({ action, value })
+                            }
+                        },
+                        onLayerControl: ({ action, value }) => {
                             layerControl({ action, value })
+                        },
+                        onChangeLayerVisible: (key) => {
+                            onChangeLayerVisible(key)
+                        },
+                        onChangeLayerOpacity: (key, value) => {
+                            onChangeLayerOpacity(key, value)
                         }
-                    },
-                    onLayerControl: ({ action, value }) => {
-                        layerControl({ action, value })
-                    },
-                    onChangeLayerVisible: (key) => {
-                        onChangeLayerVisible(key)
-                    }
-                }" />
+                    }" />
                 </div>
                 <OverLayer :text="'顯示已經選擇的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
