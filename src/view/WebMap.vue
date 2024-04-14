@@ -194,6 +194,7 @@ export default {
                     break;
             }
         }
+
         function layerControl({ action, value }) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
@@ -216,16 +217,29 @@ export default {
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                        // TODO: 有3D圖層的話，先移除 加入圖層後，再換回3D狀態
+                        // TODO: 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                            drawDimensionMap(false)
-                            function handleDimension() {
-                                drawDimensionMap(true)
-                                targetLayers.un('propertychange', handleDimension)
-                            }
-                            targetLayers.on('propertychange', handleDimension)
+                            console.log(targetLayer, state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
+                            let aa = state.layers[value.nodeIndex].group_layers[value.subNodeIndex]
+                            // drawDimensionMap(false)
+                            // function handleDimension() {
+                            //     drawDimensionMap(true)
+                            //     targetLayers.un('propertychange', handleDimension)
+                            // }
+                            // targetLayers.on('propertychange', handleDimension)
+                            ol3d.getCesiumScene().imageryLayers.addImageryProvider(
+                                new Cesium.WebMapServiceImageryProvider({
+                                    url: aa.tiles_url,
+                                    layers: aa.title,
+                                    parameters: {
+                                        FORMAT: "image/png",
+                                        transparent: true
+                                    },
+                                })
+                            )
+                        } else {
+                            target.addLayer(targetLayer)
                         }
-                        target.addLayer(targetLayer)
                         if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                             const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
                             const timeKey = value.id.split('_nestedSubNode')[0]
@@ -319,11 +333,6 @@ export default {
                         targetLayers.insertAt(value.key - 1, nowTileLayer)
                     }
                     break;
-                case 'changeLayerVisible':
-                    if (state.selectLock) { return }
-                    let visibleStatus = !(targetLayers.getArray()[value.key].getVisible())
-                    targetLayers.getArray()[value.key].setVisible(visibleStatus)
-                    break;
                 case 'baseMap':
                     state.temp[`map${state.targetNum}BaseStatus`] = value.baseId
                     let newTileLayer = new Tile({
@@ -392,6 +401,15 @@ export default {
                     return node
                 })
             }
+        }
+
+        function onChangeLayerVisible(key) {
+            const target = state.targetNum == 1 ? state.map1 : state.map2
+            const targetLayers = target?.getLayers()
+            if (state.selectLock) { return }
+            let visibleStatus = !(targetLayers.getArray()[key].getVisible())
+            targetLayers.getArray()[key].setVisible(visibleStatus)
+            getCurrentMapData()
         }
 
         function drawDimensionMap(value) {
@@ -701,6 +719,7 @@ export default {
             store,
             mapControl,
             layerControl,
+            onChangeLayerVisible,
             changeTarget,
             conditionWrap,
             closeAreaData,
@@ -795,26 +814,30 @@ export default {
                     已選擇的圖層
                 </button>
                 <div v-if="state.layerSelect">
-                    <LayerSelector v-bind="{
-            selectLock: state.selectLock,
-            currentLayers: state.currentLayers,
-            onClose: () => {
-                state.layerSelect = false
-            },
-            onLockLayer: () => {
-                state.selectLock = !state.selectLock
-            },
-            onDeleteLayer: ({ action, value }) => {
-                if (value.layerName == 'all') {
-                    state.deleteLightbox = true
-                } else {
-                    layerControl({ action, value })
-                }
-            },
-            onLayerControl: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-        }" />
+                <LayerSelector
+                v-bind="{
+                    selectLock: state.selectLock,
+                    currentLayers: state.currentLayers,
+                    onClose: () => {
+                        state.layerSelect = false
+                    },
+                    onLockLayer: () => {
+                        state.selectLock = !state.selectLock
+                    },
+                    onDeleteLayer: ({ action, value }) => {
+                        if (value.layerName == 'all') {
+                            state.deleteLightbox = true
+                        } else {
+                            layerControl({ action, value })
+                        }
+                    },
+                    onLayerControl: ({ action, value }) => {
+                        layerControl({ action, value })
+                    },
+                    onChangeLayerVisible: (key) => {
+                        onChangeLayerVisible(key)
+                    }
+                }" />
                 </div>
                 <OverLayer :text="'顯示已經選擇的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>

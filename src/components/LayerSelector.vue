@@ -28,7 +28,11 @@ export default {
         onLayerControl: {
             type: Function,
             default: ()=>{}
-        }
+        },
+        onChangeLayerVisible: {
+            type: Function,
+            default: ()=>{}
+        },
     },
     setup(props, { emit }) {
         const state = reactive({})
@@ -120,12 +124,7 @@ export default {
                                 'Invisible': !node?.visible
                             }"
                             @click.prevent="()=>{
-                                props.onLayerControl({
-                                    action: 'changeLayerVisible',
-                                    value: {
-                                        key: nodeIndex,
-                                    }
-                                })
+                                props.onChangeLayerVisible(nodeIndex)
                             }">
                                 <img src="../assets/img/icon/eyes.svg" alt="">
                             </a>

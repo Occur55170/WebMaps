@@ -157,22 +157,6 @@ export default {
                     })
                 )
                 ol3d.setEnabled(true);
-
-
-                // window.ol3d = ol3d
-
-                // example:
-                // const ol3d = new OLCesium({
-                // map: ol2d,
-                // time() {
-                //     return Cesium.JulianDate.now();
-                // }
-                // });
-                // const scene = ol3d.getCesiumScene();
-                // Cesium.createWorldTerrainAsync().then(tp => scene.terrainProvider = tp);
-
-                // document.getElementById('enable').addEventListener('click', () => ol3d.setEnabled(!ol3d.getEnabled()));
-
             })
         }
 
