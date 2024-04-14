@@ -146,8 +146,6 @@ export default {
 
                 scene.terrainProvider = Cesium.createWorldTerrain()
 
-                // scene.terrainProvider = Cesium.createWorldTerrain()
-
                 ol3d.getCesiumScene().imageryLayers.addImageryProvider(
                     new Cesium.WebMapServiceImageryProvider({
                         url: "https://gis.edtest.site/ogc/temp",
@@ -158,10 +156,6 @@ export default {
                         },
                     })
                 )
-
-                window.scene = scene
-                window.Cesium = Cesium
-                // createWorldImagery
                 ol3d.setEnabled(true);
 
 
