@@ -108,23 +108,13 @@ export default {
 
         // 初始化地圖
         function initMap() {
-            let result = new TileLayer({
-                source: new TileWMS({
-                    url: "https://gis.edtest.site/ogc/temp",
-                    params: {
-                        FORMAT: "image/png",
-                        LAYER: "全台保安林分布",
-                        REQUEST: "GetMap",
-                        SERVICE: "WMS",
-                        STYLE: "default",
-                        VERSION: "1.3.0"
-                    },
-                    serverType: 'geoserver',
-                    crossOrigin: 'anonymous',
-                }),
-                style: 'default',
-                maxZoom: 20,
-            })
+            var worldImagery = new Tile({
+                source: new XYZ({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    maxZoom: 19
+                })
+            });
+            worldImagery.set('name', 'tileLayer');
             Cesium.Ion.defaultAccessToken = import.meta.env.VITE_TEST_TOKEN
             state.map1 = new Map({
                 target: 'map1',
@@ -132,7 +122,8 @@ export default {
                     new Tile({
                         source: new OSM()
                     }),
-                    result
+                    worldImagery,
+                    // new Image({extent: [-13884991, 2870341, -7455066, 6338219],})
                 ],
                 view: defaultView,
                 controls: [],
@@ -141,21 +132,24 @@ export default {
             nextTick(() => {
                 ol3d = new OLCesium({
                     map: state.map1,
+                    sceneOptions: {
+                        mapProjection: new Cesium.WebMercatorProjection()
+                    }
                 })
                 const scene = ol3d.getCesiumScene()
 
                 scene.terrainProvider = Cesium.createWorldTerrain()
 
-                ol3d.getCesiumScene().imageryLayers.addImageryProvider(
-                    new Cesium.WebMapServiceImageryProvider({
-                        url: "https://gis.edtest.site/ogc/temp",
-                        layers: "全台保安林分布", // 图层名称
-                        parameters: {
-                            FORMAT: "image/png",
-                            transparent: true
-                        },
-                    })
-                )
+                // ol3d.getCesiumScene().imageryLayers.addImageryProvider(
+                //     new Cesium.WebMapServiceImageryProvider({
+                //         url: "https://gis.edtest.site/ogc/temp",
+                //         layers: "全台保安林分布", // 图层名称
+                //         parameters: {
+                //             FORMAT: "image/png",
+                //             transparent: true
+                //         },
+                //     })
+                // )
                 ol3d.setEnabled(true);
             })
         }
@@ -795,13 +789,14 @@ export default {
                 onChangeMapCount: (qty) => {
                     changeMapCount(qty)
                 },
-            }" :onChangeTarget="(value) => {
-    changeTarget(value)
-}" @onLayerControl="({ action, value }) => {
-    layerControl({ action, value })
-}" @conditionWrap="(value) => {
-    conditionWrap(value)
-}" />
+                }"
+                :onChangeTarget="(value) => {
+                    changeTarget(value)
+                }" @onLayerControl="({ action, value }) => {
+                    layerControl({ action, value })
+                }" @conditionWrap="(value) => {
+                    conditionWrap(value)
+                }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">

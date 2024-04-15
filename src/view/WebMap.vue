@@ -28,6 +28,8 @@ import currentPositionImg from '@/assets/img/icon/currentPosition.svg'
 
 import mapLayerList from '@/config/mapLayerList'
 import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
+import { isEmpty } from '@/methods.js'
+
 
 export default {
     props: {},
@@ -98,7 +100,7 @@ export default {
             projection: 'EPSG:4326',
             center: state.defaultCenter,
             zoom: state.defaultCenterZoom,
-            minZoom: 8,
+            minZoom: 4,
             maxZoom: 16
         })
 
@@ -115,7 +117,7 @@ export default {
 
             state.map1.addControl(new ScaleLine({
                 units: 'metric', // 比例尺單位
-            }));
+            }))
         }
 
         function addPoint(targetLng, targetLat) {
@@ -217,30 +219,22 @@ export default {
                             nestedSubNodeIndex = state.selectValueTemp
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
+
                         let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                        // FIXME: 不管是否3D模式下都需要2D也需要加入此圖層，因為已選擇圖層目前只做2D部分，但有此方式的情況下會拖累載入速度
+                        target.addLayer(targetLayer)
+
                         // TODO: 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                            console.log(targetLayer, state.layers[value.nodeIndex].group_layers[value.subNodeIndex])
-                            let aa = state.layers[value.nodeIndex].group_layers[value.subNodeIndex]
-                            // drawDimensionMap(false)
-                            // function handleDimension() {
-                            //     drawDimensionMap(true)
-                            //     targetLayers.un('propertychange', handleDimension)
-                            // }
-                            // targetLayers.on('propertychange', handleDimension)
-                            ol3d.getCesiumScene().imageryLayers.addImageryProvider(
-                                new Cesium.WebMapServiceImageryProvider({
-                                    url: aa.tiles_url,
-                                    layers: aa.title,
-                                    parameters: {
-                                        FORMAT: "image/png",
-                                        transparent: true
-                                    },
-                                })
+                            let request = getMapLayers.get3DLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                            let imageryLayers = ol3d.getCesiumScene().imageryLayers
+                            // 給圖層加入layerId
+                            let addEvent = imageryLayers.addImageryProvider(
+                                new Cesium.WebMapServiceImageryProvider(request),
                             )
-                        } else {
-                            target.addLayer(targetLayer)
+                            addEvent.layerId = value.id
                         }
+
                         if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                             const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
                             const timeKey = value.id.split('_nestedSubNode')[0]
@@ -265,7 +259,7 @@ export default {
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
                         let layersAry = targetLayers.getArray()
-                        function removeLayersById(id) {
+                        function removeLayersById() {
                             const deleteKey = value.id.split('_nestedSubNode')[0]
                             const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(deleteKey))
                             toRemoveLayerId.forEach((node) => {
@@ -274,7 +268,6 @@ export default {
                         }
                         removeLayersById()
                         if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
-                            // FIXME: popup 修改
                             // TODO: 結構優化
                             addSelectElement(value);
                             state.popup.popupId = 0
@@ -288,6 +281,26 @@ export default {
                             const timeKey = value.id.split('_nestedSubNode')[0]
                             clearInterval(state.temp[timeKey]);
                             delete state.temp[`${timeKey}count`]
+                        }
+
+                        // FIXME: 刪除3D狀態下的圖層
+                        // TODO: 目標區塊目前是否在3D模式下
+                        if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
+                            const { id, nestedSubNodeIndex, nodeIndex, subNodeIndex } = value
+                            let pickedLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
+
+                            const scene = ol3d.getCesiumScene()
+                            const imageryLayersCount = scene.imageryLayers.length;
+                            for (let i = 0; i < imageryLayersCount; i++) {
+                                let layer = scene.imageryLayers.get(i);
+                                if(layer.imageryProvider.layers === pickedLayer.title) {
+                                    scene.imageryLayers.remove(layer);
+                                }
+                                // 這裡可以訪問每個圖層的相關資訊，例如 name、url、id 等
+                                // console.log(layer)
+                                // console.log(layer.imageryProvider.layers);
+                                // console.log(layer.imageryProvider.url);
+                            }
                         }
 
                         onMapLayerStatus('delete', target.getTarget(), value.id)
@@ -367,6 +380,18 @@ export default {
             getCurrentMapData()
         }
 
+        function getCurrentMapData() {
+            let target = state.targetNum == 1 ? state.map1 : state.map2
+            const layers = target?.getLayers()?.getArray()
+            state.currentLayers = layers?.map(layer => {
+                return {
+                    label: layer.get('label'),
+                    id: layer.get('id'),
+                    visible: layer.getVisible(),
+                }
+            })
+        }
+
         function onChangeDimensionMap(value) {
             let target = state.targetNum == 1 ? state.map1 : state.map2
             let targetLayers = target?.getLayers()
@@ -409,15 +434,13 @@ export default {
             if(value) {
                 ol3d = new OLCesium({
                     map: target,
-                    time() {
-                        return Cesium.JulianDate.now();
+                    sceneOptions: {
+                        mapProjection: new Cesium.WebMercatorProjection()
                     }
                 })
                 ol3d.setEnabled(true)
                 let scene = ol3d.getCesiumScene()
                 scene.terrainProvider = Cesium.createWorldTerrain({})
-                window.console.log(Cesium)
-                // Cesium.createWorldTerrainAsync().then(tp => scene.terrainProvider = tp);
                 ol3d.setEnabled(true);
             } else {
                 ol3d.setEnabled(false)
@@ -522,18 +545,6 @@ export default {
             }
             nextTick(() => {
                 getCurrentMapData()
-            })
-        }
-
-        function getCurrentMapData() {
-            let target = state.targetNum == 1 ? state.map1 : state.map2
-            const layers = target?.getLayers()?.getArray()
-            state.currentLayers = layers?.map(layer => {
-                return {
-                    label: layer.get('label'),
-                    id: layer.get('id'),
-                    visible: layer.getVisible(),
-                }
             })
         }
 
