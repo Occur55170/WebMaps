@@ -224,7 +224,6 @@ export default {
                         // 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                             let request = getMapLayers.get3DLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                            window.console.log(request.layers)
                             ol3d.getCesiumScene().imageryLayers.addImageryProvider(
                                 new Cesium.WebMapServiceImageryProvider(request)
                             )
@@ -765,19 +764,40 @@ export default {
             }
         })
 
-        function show() {
-            console.log(state.map1.getLayers().getArray())
-            ol3d.getCesiumScene().imageryLayers.addImageryProvider(
-                new Cesium.WebMapServiceImageryProvider(
-                    {
-                        layers: "全台保安林分布",
-                        parameters: {
-                            FORMAT: "image/png",
-                            transparent: true
-                        },
-                        url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=全台保安林分布&STYLE=default"
-                    }),
-            )
+        function show() {// 创建一个新的 Cesium 图层
+            // var billboardCollection = new Cesium.BillboardCollection();
+
+
+            // 创建一个 Cesium 影像图层
+            var cesiumImageryProvider = new Cesium.WebMapServiceImageryProvider({
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
+                layers: '0',
+                parameters: {
+                    'FORMAT': 'image/png',
+                    'VERSION': '1.1.1',
+                    'TRANSPARENT': true,
+                    'STYLES': ''
+                }
+            });
+
+            // 将图层添加到 Cesium 场景中
+            var imageryLayer = new Cesium.ImageryLayer(cesiumImageryProvider, {
+                show: true
+            });
+            ol3d.imageryLayers.addImageryProvider(imageryLayer);
+
+            // // 创建点图标
+            // var icon = new Cesium.Billboard();
+            // icon.image = new Cesium.ConstantProperty(new Cesium.ImageMaterialProperty({
+            //     image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhklEQVQ4je3RsRHDIAyF4b/wPkntSpt4CfcSPUuwiSpq2ChFoMrlcpZT8hpRwHfvxMafsy1wgQAYoOPsQBozBAqgx2kA9OrSqstALQLqcxeOcxZUSk6UbBoF5bHLjyvXwI/06nBjh6lk016d2bS9wRQFDfBWXcdnTCzckPH4KxABL2WB9/MC3SYo1RHuhigAAAAASUVORK5CYII='
+            // }));
+
+            // // 添加点图标到图层中
+            // billboardCollection.add(icon);
+
+            // // 将图层添加到场景中
+            // ol3d.getCesiumScene().primitives.add(billboardCollection);
+
         }
 
         return {
@@ -800,6 +820,7 @@ export default {
 </script>
 
 <template>
+    <!-- <div @click="show">show</div> -->
     <div>
         <!-- TODO: 寬度設定是否調整 -->
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">

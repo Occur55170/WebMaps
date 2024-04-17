@@ -191,7 +191,6 @@ export default {
                     })
                     break
                 case 'Point':
-                    // TODO: icon優化
                     if (url){
                         const api = new URL(url)
                         const { origin, pathname, searchParams } = api
@@ -281,16 +280,29 @@ export default {
         return newStr
     },
     get3DLayer: (layer, nestedSubNodeIndex, id) => {
-        const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-        let request = {
-            url,
-            layers: layer.title,
-            parameters: {
-                FORMAT: "image/png",
-                transparent: true
-            },
+        window.console.log(layer, nestedSubNodeIndex, id)
+        let url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+        let request = {}
+        if (url){
+            const api = new URL(url)
+            const { origin, pathname, searchParams } = api
+            const searchParamsObject = {}
+            for (const [key, value] of searchParams.entries()){
+                searchParamsObject[key] = value
+            }
+            request.url = origin + pathname
+            request.parameters = searchParamsObject
         }
 
-        return request
+        return {
+            layers: nestedSubNodeIndex == undefined ? layer.title : '0',
+            url: request.url,
+            parameters: {
+                FORMAT: 'image/png',
+                VERSION: '1.1.1',
+                TRANSPARENT: true,
+                STYLES: ''
+            }
+        }
     }
 }
