@@ -118,6 +118,8 @@ export default {
             state.map1.addControl(new ScaleLine({
                 units: 'metric', // 比例尺單位
             }))
+
+            onChangeDimensionMap('3D')
         }
 
         function addPoint(targetLng, targetLat) {
@@ -207,7 +209,7 @@ export default {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex
                         // 點選父層後，刪除同樣子層的圖層，帶入當前選擇的圖層
                         let isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
-                        let haveInfoBox = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box !== null
+                        let haveInfoBox = !isEmpty(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box)
                         if (!(isSingleTiles) || haveInfoBox) {
                             let layersAry = targetLayers.getArray()
                             layersAry.forEach(element => {
@@ -219,72 +221,46 @@ export default {
                             nestedSubNodeIndex = state.selectValueTemp
                             value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                         }
-
-                        let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                        // FIXME: 不管是否3D模式下都需要2D也需要加入此圖層，因為已選擇圖層目前只做2D部分，但有此方式的情況下會拖累載入速度
-                        target.addLayer(targetLayer)
-
-                        // TODO: 目標區塊目前是否在3D模式下
+                        // 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                             let request = getMapLayers.get3DLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
-                            let imageryLayers = ol3d.getCesiumScene().imageryLayers
-                            // 給圖層加入layerId
-                            let addEvent = imageryLayers.addImageryProvider(
-                                new Cesium.WebMapServiceImageryProvider(request),
+                            window.console.log(request.layers)
+                            ol3d.getCesiumScene().imageryLayers.addImageryProvider(
+                                new Cesium.WebMapServiceImageryProvider(request)
                             )
-                            addEvent.layerId = value.id
-                        }
-
-                        if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
-                            const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
-                            const timeKey = value.id.split('_nestedSubNode')[0]
-                            if (state.temp?.[`${timeKey}count`] === undefined) {
-                                state.temp[`${timeKey}count`] = currentLayerKey
+                            // FIXME: 加入特殊圖層事件，addSpecialLayerEvent
+                            // if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(request.layers)) {
+                            //     mapClickEvent(target, targetLayer.label)
+                            //     addSelectElement(value, targetLayer.get('label'))
+                            // }
+                        } else {
+                            let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                            target.addLayer(targetLayer)
+                            if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
+                                const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
+                                const timeKey = value.id.split('_nestedSubNode')[0]
+                                if (state.temp?.[`${timeKey}count`] === undefined) {
+                                    state.temp[`${timeKey}count`] = currentLayerKey
+                                }
+                                state.temp[timeKey] = setInterval(function () {
+                                    state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
+                                    let newSource = new Static({
+                                        url: tilesImageUrls[state.temp[`${timeKey}count`]],
+                                        projection: 'EPSG:4326',
+                                        imageExtent: imageExtent,
+                                        interpolate: true,
+                                    })
+                                    targetLayer.setSource(newSource)
+                                }, 1000)
                             }
-                            state.temp[timeKey] = setInterval(function () {
-                                state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
-                                let newSource = new Static({
-                                    url: tilesImageUrls[state.temp[`${timeKey}count`]],
-                                    projection: 'EPSG:4326',
-                                    imageExtent: imageExtent,
-                                    interpolate: true,
-                                })
-                                targetLayer.setSource(newSource)
-                            }, 1000)
-                        }
-                        if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
-                            mapClickEvent(target, targetLayer.label)
-                            addSelectElement(value, targetLayer.get('label'))
+                            if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(targetLayer.get('label'))) {
+                                mapClickEvent(target, targetLayer.label)
+                                addSelectElement(value, targetLayer.get('label'))
+                            }
                         }
                         onMapLayerStatus('add', target.getTarget(), value.id)
                     } else {
-                        let layersAry = targetLayers.getArray()
-                        function removeLayersById() {
-                            const deleteKey = value.id.split('_nestedSubNode')[0]
-                            const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(deleteKey))
-                            toRemoveLayerId.forEach((node) => {
-                                target.removeLayer(node);
-                            });
-                        }
-                        removeLayersById()
-                        if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
-                            // TODO: 結構優化
-                            addSelectElement(value);
-                            state.popup.popupId = 0
-                            state.popup.popupData = '';
-                            if (state.popup.overlay) {
-                                target.removeOverlay(state.popup.overlay);
-                                state.popup.overlay = null;
-                            }
-                        }
-                        if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
-                            const timeKey = value.id.split('_nestedSubNode')[0]
-                            clearInterval(state.temp[timeKey]);
-                            delete state.temp[`${timeKey}count`]
-                        }
-
                         // FIXME: 刪除3D狀態下的圖層
-                        // TODO: 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                             const { id, nestedSubNodeIndex, nodeIndex, subNodeIndex } = value
                             let pickedLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
@@ -292,14 +268,34 @@ export default {
                             const scene = ol3d.getCesiumScene()
                             const imageryLayersCount = scene.imageryLayers.length;
                             for (let i = 0; i < imageryLayersCount; i++) {
-                                let layer = scene.imageryLayers.get(i);
+                                let layer = scene.imageryLayers.get(i)
                                 if(layer.imageryProvider.layers === pickedLayer.title) {
                                     scene.imageryLayers.remove(layer);
                                 }
-                                // 這裡可以訪問每個圖層的相關資訊，例如 name、url、id 等
-                                // console.log(layer)
-                                // console.log(layer.imageryProvider.layers);
-                                // console.log(layer.imageryProvider.url);
+                            }
+                        } else {
+                            let layersAry = targetLayers.getArray()
+                            function removeLayersById() {
+                                const deleteKey = value.id.split('_nestedSubNode')[0]
+                                const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(deleteKey))
+                                toRemoveLayerId.forEach((node) => {
+                                    target.removeLayer(node);
+                                });
+                            }
+                            removeLayersById()
+                            if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
+                                addSelectElement(value);
+                                state.popup.popupId = 0
+                                state.popup.popupData = '';
+                                if (state.popup.overlay) {
+                                    target.removeOverlay(state.popup.overlay);
+                                    state.popup.overlay = null;
+                                }
+                            }
+                            if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
+                                const timeKey = value.id.split('_nestedSubNode')[0]
+                                clearInterval(state.temp[timeKey]);
+                                delete state.temp[`${timeKey}count`]
                             }
                         }
 
@@ -380,16 +376,59 @@ export default {
             getCurrentMapData()
         }
 
-        function getCurrentMapData() {
-            let target = state.targetNum == 1 ? state.map1 : state.map2
-            const layers = target?.getLayers()?.getArray()
-            state.currentLayers = layers?.map(layer => {
-                return {
-                    label: layer.get('label'),
-                    id: layer.get('id'),
-                    visible: layer.getVisible(),
+        // FIXME: 加入特殊圖層事件，addSpecialLayerEvent
+        function addSpecialLayerEvent(labelName) {
+            if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(labelName)) {
+                const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
+                const timeKey = value.id.split('_nestedSubNode')[0]
+                if (state.temp?.[`${timeKey}count`] === undefined) {
+                    state.temp[`${timeKey}count`] = currentLayerKey
                 }
-            })
+                state.temp[timeKey] = setInterval(function () {
+                    state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
+                    let newSource = new Static({
+                        url: tilesImageUrls[state.temp[`${timeKey}count`]],
+                        projection: 'EPSG:4326',
+                        imageExtent: imageExtent,
+                        interpolate: true,
+                    })
+                    targetLayer.setSource(newSource)
+                }, 1000)
+            }
+            if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(labelName)) {
+                mapClickEvent(target, labelName)
+                addSelectElement(value, labelName)
+            }
+        }
+
+        function getCurrentMapData() {
+            if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
+                const currentLayerStatus = state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`]
+                state.currentLayers = currentLayerStatus.reduce((acc, layerId, index)=>{
+                    if(layerId === '3D') {return}
+                    const { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } = getMapLayers.getLayerIndex(layerId)
+                    let targetLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
+                    // FIXME:　visible暫時撈不到，功能失效
+                    return [
+                        ...(acc || []),
+                        {
+                            label: targetLayer.single_tiles ? targetLayer.title : targetLayer.tiles_list[nestedSubNodeIndex].title,
+                            id,
+                            visible: 1,
+                        }
+                    ]
+                }, [])
+            } else {
+                const target = state.targetNum == 1 ? state.map1 : state.map2
+                const layers = target?.getLayers()?.getArray()
+                state.currentLayers = layers?.map(layer => {
+                    return {
+                        label: layer.get('label'),
+                        id: layer.get('id'),
+                        visible: layer.getVisible(),
+                    }
+                })
+            }
         }
 
         function onChangeDimensionMap(value) {
@@ -681,7 +720,6 @@ export default {
             })
 
             Promise.all([getBaseData, getLayerData]).then((value) => {
-                // TODO: 優化
                 let result = value[0].data.map((node, nodeIndex) => {
                     return {
                         mapType: 'base',
@@ -729,6 +767,17 @@ export default {
 
         function show() {
             console.log(state.map1.getLayers().getArray())
+            ol3d.getCesiumScene().imageryLayers.addImageryProvider(
+                new Cesium.WebMapServiceImageryProvider(
+                    {
+                        layers: "全台保安林分布",
+                        parameters: {
+                            FORMAT: "image/png",
+                            transparent: true
+                        },
+                        url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=全台保安林分布&STYLE=default"
+                    }),
+            )
         }
 
         return {
