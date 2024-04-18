@@ -17,6 +17,7 @@ import { ScaleLine } from 'ol/control.js'
 import VectorSource from 'ol/source/Vector.js'
 import { Point } from 'ol/geom.js'
 import { Icon, Style } from 'ol/style.js'
+import ImageWMS from 'ol/source/ImageWMS.js'
 
 import OLCesium from 'olcs/OLCesium.js'
 import Static from 'ol/source/ImageStatic.js'
@@ -767,26 +768,73 @@ export default {
 
         function show() {
             // 创建一个 Cesium 影像图层
-            const cesiumImageryProvider = new Cesium.WebMapServiceImageryProvider({
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentalFlood06H150/MapServer/WMSServer',
-                layers: '0',
-                // parameters: {
-                //     FORMAT: 'image/png',
-                //     VERSION: '1.1.1',
-                //     TRANSPARENT: true,
-                //     STYLES: ''
-                // }
+            // const cesiumImageryProvider = new Cesium.WebMapServiceImageryProvider({
+            //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentalFlood06H150/MapServer/WMSServer',
+            //     layers: '0',
+            //     // parameters: {
+            //     //     FORMAT: 'image/png',
+            //     //     VERSION: '1.1.1',
+            //     //     TRANSPARENT: true,
+            //     //     STYLES: ''
+            //     // }
+            //     // url: 'https://gis.edtest.site/ogc/temp',
+            //     // layers: '全台保安林分布',
+            //     parameters: {
+            //         FORMAT: 'image/png',
+            //         VERSION: '1.1.1',
+            //         TRANSPARENT: true,
+            //         STYLES: ''
+            //     }
+            // })
+            // // 将图层添加到 Cesium 场景中
+            // const imageryLayer = new Cesium.ImageryLayer(cesiumImageryProvider);
+            // ol3d.getCesiumScene().imageryLayers.add(imageryLayer);
+            // 創建 ol-cesium 地圖對象
+
+            // 加載 WMS 圖層資料源
+            const wmsSource = new ImageWMS({
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
+                params: {
+                    'LAYERS': '0',
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                },
+            });
+            // 將圖層添加到 Cesium 场景中
+            const imageryLayer = new Cesium.ImageryLayer(new Cesium.SingleTileImageryProvider({
                 // url: 'https://gis.edtest.site/ogc/temp',
-                // layers: '全台保安林分布',
+                url: 'https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=順向坡&STYLE=default',
+                layers: '0',
                 parameters: {
                     FORMAT: 'image/png',
                     VERSION: '1.1.1',
                     TRANSPARENT: true,
                     STYLES: ''
-                }
-            })
-            // 将图层添加到 Cesium 场景中
-            const imageryLayer = new Cesium.ImageryLayer(cesiumImageryProvider);
+                },
+                // rectangle: Cesium.Rectangle.fromDegrees(-180, -90, 180, 90),
+                rectangle: Cesium.Rectangle.fromDegrees(90, 50, 90, 90), // 以經緯度表示範圍
+            }));
+            // {
+            // title: "順向坡分布",
+            // help_btn_display: false,
+            // help_memo: "",
+            // minzoom: 4,
+            // maxzoom: 18,
+            // layer_type: "WMS",
+            // figure_type: "Surface",
+            // single_tiles: true,
+            // tiles_url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=順向坡&STYLE=default",
+            // tiles_list_description: ""
+            // },
+            // {
+                // title: "崩塌點",
+                // minzoom: 4,
+                // maxzoom: 18,
+                // layer_type: "WMS",
+                // figure_type: "Surface",
+                // single_tiles: true,
+                // tiles_url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=崩塌點&STYLE=default",
+            // },
             ol3d.getCesiumScene().imageryLayers.add(imageryLayer);
         }
 

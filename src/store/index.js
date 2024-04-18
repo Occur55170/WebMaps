@@ -6,6 +6,8 @@ export default createStore({
     state: {
         test: 'store',
         isInit: true,
+        // FIXME: isInit，test
+        isInit: false,
         currentWidth: 0
     },
     actions: {

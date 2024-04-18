@@ -235,6 +235,7 @@ export default {
                         } else {
                             let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                             target.addLayer(targetLayer)
+                            window.console.log(targetLayer)
                             // addSpecialLayerEvent(targetLayer.get('label'), targetLayer, value)
                             if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                                 const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
