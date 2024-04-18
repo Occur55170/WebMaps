@@ -23,7 +23,11 @@ export default {
         onChangeTarget: {
             type: Function,
             default: ()=>{}
-        }
+        },
+        onChangeDimensionMap: {
+            type: Function,
+            default: ()=>{}
+        },
     },
     setup(props, { emit }) {
         const state = reactive({
@@ -75,11 +79,11 @@ export default {
             <li class="me-4 position-relative">
                 <div class="MapFeatureBtn text-white">
                     <a href="" v-if="props.dimensionMapStatus"
-                    @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '3D')">
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), props.onChangeDimensionMap('3D')">
                         <img src="@/assets/img/icon/2D.svg">
                     </a>
                     <a href="" v-else
-                    @click.prevent="toolSwitch('threeDimensionalBtn'), onLayerControl('changeDimensionMap', '2D')">
+                    @click.prevent="toolSwitch('threeDimensionalBtn'), props.onChangeDimensionMap('2D')">
                         <img src="@/assets/img/icon/3D.svg">
                     </a>
                 </div>

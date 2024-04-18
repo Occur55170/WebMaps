@@ -201,8 +201,8 @@ export default {
         }
 
         function layerControl({ action, value }) {
-            let target = state.targetNum == 1 ? state.map1 : state.map2
-            let targetLayers = target?.getLayers()
+            const target = state.targetNum == 1 ? state.map1 : state.map2
+            const targetLayers = target?.getLayers()
             switch (action) {
                 case 'layerMode':
                     if (value.checked) {
@@ -235,6 +235,7 @@ export default {
                         } else {
                             let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                             target.addLayer(targetLayer)
+                            // addSpecialLayerEvent(targetLayer.get('label'), targetLayer, value)
                             if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                                 const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
                                 const timeKey = value.id.split('_nestedSubNode')[0]
@@ -365,9 +366,6 @@ export default {
                         return true
                     })
                     break;
-                case 'changeDimensionMap':
-                    onChangeDimensionMap(value)
-                    break;
                 case 'setOpacity':
                     onChangeLayerOpacity(value.key, value.value)
                     break;
@@ -376,7 +374,8 @@ export default {
         }
 
         // FIXME: 加入特殊圖層事件，addSpecialLayerEvent
-        function addSpecialLayerEvent(labelName) {
+        function addSpecialLayerEvent(labelName, targetLayer, value) {
+            const target = state.targetNum == 1 ? state.map1 : state.map2
             if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(labelName)) {
                 const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
                 const timeKey = value.id.split('_nestedSubNode')[0]
@@ -393,8 +392,7 @@ export default {
                     })
                     targetLayer.setSource(newSource)
                 }, 1000)
-            }
-            if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(labelName)) {
+            } else if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(labelName)) {
                 mapClickEvent(target, labelName)
                 addSelectElement(value, labelName)
             }
@@ -813,6 +811,7 @@ export default {
             closeAreaData,
             moveToMap,
             changeMapCount,
+            onChangeDimensionMap,
             show,
         }
     }
@@ -863,13 +862,19 @@ export default {
             onChangeMapCount: (qty) => {
                 changeMapCount(qty)
             },
-        }" :onChangeTarget="(value) => {
-            changeTarget(value)
-        }" @onLayerControl="({ action, value }) => {
-            layerControl({ action, value })
-        }" @conditionWrap="(value) => {
-            conditionWrap(value)
-        }" />
+            }"
+            :onChangeTarget="(value) => {
+                changeTarget(value)
+            }"
+            @onLayerControl="({ action, value }) => {
+                layerControl({ action, value })
+            }"
+            @conditionWrap="(value) => {
+                conditionWrap(value)
+            }"
+            :onChangeDimensionMap="(value)=>{
+                onChangeDimensionMap(value)
+            }" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -938,67 +943,75 @@ export default {
 
         <div class="m-Navbar d-flex d-sm-none position-relative w-100">
             <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
-                <Condition class="w-100" v-if="state.conditionWrap" v-bind="{
-            mapLayers: state.mapLayers,
-            currentLayers: state.currentLayers,
-            onClose: () => {
-                state.conditionWrap = false
-            },
-            showSelectLayerValue: (val) => {
-                state.selectValueTemp = val
-            }
-        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                <Condition class="w-100" v-if="state.conditionWrap"
+                v-bind="{
+                    mapLayers: state.mapLayers,
+                    currentLayers: state.currentLayers,
+                    onClose: () => {
+                        state.conditionWrap = false
+                    },
+                    showSelectLayerValue: (val) => {
+                        state.selectValueTemp = val
+                    }
+                }"
+                @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
                 <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
-            selectLock: state.selectLock,
-            currentLayers: state.currentLayers,
-            onClose: () => {
-                state.layerSelect = false
-            },
-            onLockLayer: () => {
-                state.selectLock = !state.selectLock
-            },
-            onDeleteLayer: ({ action, value }) => {
-                if (value.layerName == 'all') {
-                    state.deleteLightbox = true
-                } else {
-                    layerControl({ action, value })
-                }
-            },
-            onChangLayerVisible: (action) => {
-                layerControl(action)
-            },
-            onChangeOrderLayer: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-            onLayerControl: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-        }" />
+                    selectLock: state.selectLock,
+                    currentLayers: state.currentLayers,
+                    onClose: () => {
+                        state.layerSelect = false
+                    },
+                    onLockLayer: () => {
+                        state.selectLock = !state.selectLock
+                    },
+                    onDeleteLayer: ({ action, value }) => {
+                        if (value.layerName == 'all') {
+                            state.deleteLightbox = true
+                        } else {
+                            layerControl({ action, value })
+                        }
+                    },
+                    onChangLayerVisible: (action) => {
+                        layerControl(action)
+                    },
+                    onChangeOrderLayer: ({ action, value }) => {
+                        layerControl({ action, value })
+                    },
+                    onLayerControl: ({ action, value }) => {
+                        layerControl({ action, value })
+                    },
+                }" />
             </div>
-            <mNavbar v-bind="{
-            dimensionMapStatus: state.toSearchDimensionStatus,
-            currentLayers: state.currentLayers,
-            mapCount: state.mapCount,
-            openConditionWrap: () => {
-                state.conditionWrap = !state.conditionWrap
-                state.layerSelect = false
-            },
-            openLayerSelect: () => {
-                state.layerSelect = !state.layerSelect
-                state.conditionWrap = false
-            },
-            onLayerControl: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-            onChangeMapCount: (qty) => {
-                changeMapCount(qty)
-            },
-            onChangeTarget: (value) => {
-                changeTarget(value)
-            }
-        }" @conditionWrap="(value) => { conditionWrap(value) }" />
+            <mNavbar
+            v-bind="{
+                dimensionMapStatus: state.toSearchDimensionStatus,
+                currentLayers: state.currentLayers,
+                mapCount: state.mapCount,
+                openConditionWrap: () => {
+                    state.conditionWrap = !state.conditionWrap
+                    state.layerSelect = false
+                },
+                openLayerSelect: () => {
+                    state.layerSelect = !state.layerSelect
+                    state.conditionWrap = false
+                },
+                onLayerControl: ({ action, value }) => {
+                    layerControl({ action, value })
+                },
+                onChangeMapCount: (qty) => {
+                    changeMapCount(qty)
+                },
+                onChangeTarget: (value) => {
+                    changeTarget(value)
+                }
+            }"
+            :onChangeDimensionMap="(value)=>{
+                onChangeDimensionMap(value)
+            }"
+            @conditionWrap="(value) => { conditionWrap(value) }"
+            />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
