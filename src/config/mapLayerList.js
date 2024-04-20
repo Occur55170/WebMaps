@@ -38,6 +38,9 @@ export default {
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
             switch (figureType){
                 case 'Point':
+                case 'Surface':
+                case 'Line':
+                    // 活動斷層
                     if (url){
                         const api = new URL(url)
                         // 取得網址部分
@@ -62,63 +65,12 @@ export default {
                         crossOrigin: 'anonymous',
                     })
                     break
-                case 'Surface':
-                    if (url){
-                        const api = new URL(url)
-                        // 取得網址部分
-                        const origin = api.origin
-                        const pathname = api.pathname
-
-                        // 取得query參數
-                        const searchParams = api.searchParams
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver'
-                    })
-                    break
-                case 'Line':
-                    // 活動斷層
-                    if (url){
-                        const api = new URL(url)
-                        // 取得網址部分
-                        const origin = api.origin
-                        const pathname = api.pathname
-
-                        // 取得query參數
-                        const searchParams = api.searchParams
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver'
-                    })
-                    break
                 default:
                     console.log('error-otherWMSLayer:', figureType)
             }
             result = new TileLayer({
                 id,
                 label: `${layer.title}${tileTitle}`,
-                // minZoom: 4,
-                // maxZoom: 18,
                 source: new TileWMS({
                     name: layer.title,
                     url: layerSource.getUrls()[0],
@@ -328,4 +280,17 @@ export default {
         })
         return newStr
     },
+    get3DLayer: (layer, nestedSubNodeIndex, id) => {
+        const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+        let request = {
+            url,
+            layers: layer.title,
+            parameters: {
+                FORMAT: "image/png",
+                transparent: true
+            },
+        }
+
+        return request
+    }
 }

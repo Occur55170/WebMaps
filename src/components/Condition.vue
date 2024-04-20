@@ -7,7 +7,7 @@ import baseMapList from '@/config/baseMapList'
 import VectorImageLayer from 'ol/layer/VectorImage.js'
 import TileState from 'ol/TileState.js'
 import { useRouter } from 'vue-router'
-
+import { isEmpty } from '@/methods.js'
 
 import 'ol-ext/dist/ol-ext.css'
 
@@ -39,7 +39,6 @@ export default {
         }
     },
     setup(props, { emit }) {
-        const mapList = mapLayerList
         const router = useRouter()
         const state = reactive({
             DropDown: null,
@@ -63,7 +62,7 @@ export default {
             let checked = item.elementSource === 'input' ? e.target.checked : true
             let nodeIndex= item.nodeIndex
             let subNodeIndex= item.subNodeIndex
-            let nestedSubNodeIndex = String(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined
+            let nestedSubNodeIndex = !isEmpty(item.nestedSubNodeIndex) ? item.nestedSubNodeIndex : undefined
             let id = (item.single_tiles || !(e.target.selectedOptions)) ? item.id : e.target.selectedOptions[0].id
             onLayerControl('layerMode', {
                 checked,
@@ -112,7 +111,7 @@ export default {
             props,
             state,
             router,
-            mapList,
+            mapLayerList,
             onLayerControl,
             openLayerList,
             LayerCheckBoxChange,
@@ -147,8 +146,7 @@ export default {
                     <div class="ms-3 my-2"
                     v-for="(subNode, subNodeIndex) in node.layers"
                     v-if="state.DropDown == nodeIndex">
-                        <div class="d-flex flex-wrap"
-                        v-if="subNode.single_tiles && subNode.info_box == null">
+                        <div class="d-flex flex-wrap" v-if="subNode.single_tiles && subNode.info_box == null">
                             <input type="checkbox" class="me-2"
                             :id="subNode.id"
                             :checked="isChecked(subNode.id)"
@@ -194,10 +192,12 @@ export default {
                         </div>
                         <div v-else>
                             <div class="my-2">
-                                <input type="checkbox" :checked="props.currentLayers.some(node => {
-                                    let subNodeIds = mapList.getLayerIndex(node.id)
+                                <input type="checkbox"
+                                :checked="props.currentLayers.some(node => {
+                                    let subNodeIds = mapLayerList.getLayerIndex(node.id)
                                     return subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
-                                })" @change="(e) => {
+                                })"
+                                @change="(e) => {
                                     LayerCheckBoxChange(e, {
                                         nodeIndex: nodeIndex,
                                         subNode: subNode,

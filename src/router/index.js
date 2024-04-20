@@ -21,11 +21,6 @@ const routes = [
         component: () => import('@/view/Wes.vue')
     },
     {
-        path: '/Opp',
-        name: 'Opp',
-        component: () => import('@/view/Opp.vue')
-    },
-    {
         path: `${VITE_URL}/Plane/:id`,
         name: 'plane',
         component: () => import('@/view/Plane.vue')
