@@ -1,5 +1,5 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import $ from 'jquery'
 import router from '@/router/index.js'
 import { useStore } from 'vuex'
@@ -8,18 +8,18 @@ export default {
     props: {
         text: {
             type: String,
-            default: '測試'
+            default: '測試',
         },
         styles: {
             type: String,
-            default: ''
+            default: '',
         },
         status: {
             type: Boolean,
-            default: true
-        }
+            default: true,
+        },
     },
-    setup(props, { emit }) {
+    setup(props){
         const store = useStore()
         const route = router
 
@@ -27,22 +27,22 @@ export default {
         const overLayCom = ref(null)
 
         const state = reactive({
-            overLayerHeight: computed(()=>{
+            overLayerHeight: computed(() => {
                 return overLayCom?.value?.offsetHeight + 10
             }),
-            overLayerWidth: computed(()=>{
+            overLayerWidth: computed(() => {
                 return overLayCom?.value?.offsetWidth + 10
             }),
             accordionListRef: null,
-            accordionListRefHeight: computed(()=>{
+            accordionListRefHeight: computed(() => {
                 return state.accordionListRef?.offsetHeight
             }),
-            accordionListRefWidth: computed(()=>{
+            accordionListRefWidth: computed(() => {
                 return state.accordionListRef?.offsetWidth
-            })
+            }),
         })
 
-        onMounted(()=>{
+        onMounted(() => {
             $('.initOverLay').parent().addClass('position-relative')
         })
         return {
@@ -52,36 +52,38 @@ export default {
             route,
             overLayCom,
         }
-    }
+    },
 }
 </script>
 <template>
-    <div class="initOverLay"
-    v-if="store.state.isInit"
-    @click="store.dispatch('updateLayerStatus', false)"
-    :style="{
+  <div class="initOverLay"
+       v-if="store.state.isInit"
+       @click="store.dispatch('updateLayerStatus', false)"
+       :style="{
         height: state.overLayerHeight + 'px',
         width: state.overLayerWidth + 'px',
     }"
-    :ref="(e) => {
+       :ref="(e) => {
         state.accordionListRef = e
     }">
-        <div class="tipText text-white fw-bold fs-3"
-        :style="props.styles"
-        >{{ props.text }}</div>
+    <div class="tipText text-white fw-bold fs-3"
+         :style="props.styles"
+    >{{ props.text }}
     </div>
+  </div>
 </template>
 <style lang="sass">
 .initOverLay
-    position: absolute
-    top: -5px
-    left: -5px
-    width: calc(100% + 10px)
-    height: calc(100% + 10px)
-    border: 3px solid #fff
-    z-index: 99999
+  position: absolute
+  top: -5px
+  left: -5px
+  width: calc(100% + 10px)
+  height: calc(100% + 10px)
+  border: 3px solid #fff
+  z-index: 99999
+
 .tipText
-    position: absolute
-    top: 100%
-    width: 300px
+  position: absolute
+  top: 100%
+  width: 300px
 </style>

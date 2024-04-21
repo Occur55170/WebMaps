@@ -1,29 +1,24 @@
-// import $ from 'jquery'
-import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
-import VectorSource from 'ol/source/Vector.js'
-import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import TileWMS from 'ol/source/TileWMS.js'
-import { bbox, tile } from 'ol/loadingstrategy.js'
-import GeoJSON from 'ol/format/GeoJSON.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-import ImageWMS from 'ol/source/ImageWMS.js'
-import Static from 'ol/source/ImageStatic.js'
+// 引入容器绑定模塊和視圖模塊
+import VectorSource from 'ol/source/Vector'
+import { Image as ImageLayer, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer'
+import TileWMS from 'ol/source/TileWMS'
+import { bbox } from 'ol/loadingstrategy'
+import GeoJSON from 'ol/format/GeoJSON'
+import { Fill, Style } from 'ol/style'
+import Static from 'ol/source/ImageStatic'
 
 import TilegridWMTS from 'ol/tilegrid/WMTS'
 
-import { createXYZ } from 'ol/tilegrid.js'
 import WMTS from 'ol/source/WMTS'
-import { get as getProjection } from 'ol/proj'
-import { getTopLeft, getWidth } from 'ol/extent.js'
+import { getTopLeft } from 'ol/extent'
 
 import 'ol/ol.css' // ol提供的css样式
-
 import proj4 from 'proj4'
-import { register } from 'ol/proj/proj4.js'
+import { register } from 'ol/proj/proj4'
+
 proj4.defs(
     'EPSG:3826',
-    '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs'
+    '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs',
 )
 register(proj4)
 
@@ -103,7 +98,7 @@ export default {
                         tileGrid: new TilegridWMTS({
                             origin: getTopLeft(projectionExtent),
                             matrixIds,
-                            resolutions
+                            resolutions,
                         }),
                         style: 'default',
                         maxZoom: 20,
@@ -117,7 +112,7 @@ export default {
                         type: 'overlay',
                         opacity: 1.0,
                         visible: true,
-                        source: layerSource
+                        source: layerSource,
                     })
                     break
                 default:
@@ -130,7 +125,7 @@ export default {
             const vectorSource = new VectorSource({
                 format: new GeoJSON(),
                 url: layer.tiles_url,
-                strategy: bbox
+                strategy: bbox,
             })
             // TODO: 加入82災害樣式
             const defaultStyles = new Vector().getStyleFunction()()
@@ -138,6 +133,7 @@ export default {
             const layerStyle = (layer.title === '新竹縣原住民部落範圍')
                 ? function(feature){
                     const featureGroupName = feature.values_['部落名稱']
+
                     function getRandomUniqueColor(){
                         const usedColors = new Set()
                         const characters = '0123456789ABCDEF'
@@ -154,12 +150,11 @@ export default {
                         return color
                     }
 
-                    const style = new Style({
+                    return new Style({
                         fill: new Fill({
-                            color: hasSelectColor[featureGroupName] === undefined ? getRandomUniqueColor() : hasSelectColor[featureGroupName]
+                            color: hasSelectColor[featureGroupName] === undefined ? getRandomUniqueColor() : hasSelectColor[featureGroupName],
                         }),
                     })
-                    return style
                 }
                 : defaultStyles
             result = new VectorLayer({
@@ -175,7 +170,11 @@ export default {
                 case 'Line':
                     if (url){
                         const api = new URL(url)
-                        const { origin, pathname, searchParams } = api
+                        const {
+                            origin,
+                            pathname,
+                            searchParams,
+                        } = api
                         const searchParamsObject = {}
                         for (const [key, value] of searchParams.entries()){
                             searchParamsObject[key] = value
@@ -186,7 +185,7 @@ export default {
                     layerSource = new VectorSource({
                         url: layer.tiles_url,
                         format: new GeoJSON({
-                            geometryName: layer.title
+                            geometryName: layer.title,
                         }),
                     })
                     break
@@ -194,7 +193,11 @@ export default {
                     // TODO: icon優化
                     if (url){
                         const api = new URL(url)
-                        const { origin, pathname, searchParams } = api
+                        const {
+                            origin,
+                            pathname,
+                            searchParams,
+                        } = api
                         const searchParamsObject = {}
                         for (const [key, value] of searchParams.entries()){
                             searchParamsObject[key] = value
@@ -205,7 +208,7 @@ export default {
                     layerSource = new VectorSource({
                         url: layer.tiles_url,
                         format: new GeoJSON({
-                            geometryName: layer.title
+                            geometryName: layer.title,
                         }),
                     })
                     break
@@ -215,7 +218,7 @@ export default {
             result = new VectorLayer({
                 id,
                 label: `${layer.title}${tileTitle}`,
-                source: layerSource
+                source: layerSource,
             })
         }
         if (layerType === 'Image'){
@@ -236,7 +239,7 @@ export default {
                             currentLayerKey: 0,
                             tilesImageUrls: layer.tiles_image_urls,
                             imageExtent: layer.image_options.image_extent,
-                        }
+                        },
                     })
                     break
                 default:
@@ -246,8 +249,17 @@ export default {
         return result
     },
     getLayerIndex: (id) => {
-        let nodeIndex; let subNodeIndex; let nestedSubNodeIndex
-        if (!(id)){ return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } }
+        let nodeIndex
+        let subNodeIndex
+        let nestedSubNodeIndex
+        if (!(id)){
+            return {
+                nodeIndex,
+                subNodeIndex,
+                nestedSubNodeIndex,
+                id,
+            }
+        }
         id.split('_').forEach((element, key) => {
             switch (key){
                 case 0:
@@ -261,7 +273,12 @@ export default {
                     break
             }
         })
-        return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id }
+        return {
+            nodeIndex,
+            subNodeIndex,
+            nestedSubNodeIndex,
+            id,
+        }
     },
     resetLayerId: (id, keyName, newVal) => {
         // FIXME: 使用上面getLayerIndex 做拆解
@@ -276,21 +293,21 @@ export default {
         let newStr = ''
         Object.entries(result).forEach((node, key) => {
             newStr += `${node[0]}${node[1]}`
-            if (key + 1 !== Object.entries(result).length){ newStr += '_' }
+            if (key + 1 !== Object.entries(result).length){
+                newStr += '_'
+            }
         })
         return newStr
     },
     get3DLayer: (layer, nestedSubNodeIndex, id) => {
         const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-        let request = {
+        return {
             url,
             layers: layer.title,
             parameters: {
-                FORMAT: "image/png",
-                transparent: true
+                FORMAT: 'image/png',
+                transparent: true,
             },
         }
-
-        return request
-    }
+    },
 }

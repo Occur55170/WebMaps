@@ -1,6 +1,5 @@
-import { Tile, Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js'
+import { Tile } from 'ol/layer'
 import XYZ from 'ol/source/XYZ' // 引入XYZ地圖格式
-import OSM from 'ol/source/OSM.js'
 
 let baseMapDataList = []
 
@@ -13,18 +12,17 @@ export default {
             layer = value.layer
         }
 
-        const newTileLayer = new Tile({
+        return new Tile({
             preload: Infinity,
             name: layer.name,
             label: layer.label,
             type: layer.mapType,
             baseId: layer.baseId,
             source: new XYZ({
-                url: layer.url
+                url: layer.url,
             }),
             crossOrigin: 'anonymous',
         })
-        return newTileLayer
     },
     setBaseMapData: (result) => {
         baseMapDataList = result
@@ -34,7 +32,7 @@ export default {
     },
     showBaseMapData: () => {
         console.log(baseMapDataList)
-    }
+    },
 }
 
 export function getBaseMapAll(){
