@@ -280,9 +280,9 @@ export default {
         return newStr
     },
     get3DLayer: (layer, nestedSubNodeIndex, id) => {
-        window.console.log(layer, nestedSubNodeIndex, id)
-        let url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-        let request = {}
+        const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
+        window.console.log(layer, nestedSubNodeIndex, id, url)
+        const request = {}
         if (url){
             const api = new URL(url)
             const { origin, pathname, searchParams } = api
@@ -294,8 +294,13 @@ export default {
             request.parameters = searchParamsObject
         }
 
+        let layers = nestedSubNodeIndex === undefined ? layer.title : '0'
+        window.console.log(layer.title)
+        if (['近五年淹水調查位置(點)', '近五年淹水調查位置(面)'].includes(layer.title)){
+            layers = '0'
+        }
         return {
-            layers: nestedSubNodeIndex == undefined ? layer.title : '0',
+            layers,
             url: request.url,
             parameters: {
                 FORMAT: 'image/png',

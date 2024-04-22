@@ -227,16 +227,10 @@ export default {
                             ol3d.getCesiumScene().imageryLayers.addImageryProvider(
                                 new Cesium.WebMapServiceImageryProvider(request)
                             )
-                            // FIXME: 加入特殊圖層事件，addSpecialLayerEvent
-                            // if (['新竹縣原住民部落範圍', '近年歷史災害82處部落點位', '雨量站', '工程鑽探', '土石流潛勢溪流', '落石分布'].includes(request.layers)) {
-                            //     mapClickEvent(target, targetLayer.label)
-                            //     addSelectElement(value, targetLayer.get('label'))
-                            // }
                         } else {
                             let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                             target.addLayer(targetLayer)
-                            window.console.log(targetLayer)
-                            // addSpecialLayerEvent(targetLayer.get('label'), targetLayer, value)
+                            // FIXME: addSpecialLayerEvent(targetLayer.get('label'), targetLayer, value)
                             if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
                                 const { currentLayerKey, tilesImageUrls, imageExtent } = targetLayer.get('ext')
                                 const timeKey = value.id.split('_nestedSubNode')[0]
@@ -270,6 +264,7 @@ export default {
                             const imageryLayersCount = scene.imageryLayers.length;
                             for (let i = 0; i < imageryLayersCount; i++) {
                                 let layer = scene.imageryLayers.get(i)
+                                window.console.log(layer)
                                 if(layer.imageryProvider.layers === pickedLayer.title) {
                                     scene.imageryLayers.remove(layer);
                                 }
