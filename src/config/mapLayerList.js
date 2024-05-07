@@ -21,6 +21,7 @@ import 'ol/ol.css' // ol提供的css样式
 
 import proj4 from 'proj4'
 import { register } from 'ol/proj/proj4.js'
+import { isEmpty } from '@/methods.js'
 proj4.defs(
     'EPSG:3826',
     '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs'
@@ -32,7 +33,7 @@ export default {
         let result, layerSource
         const layerType = layer.layer_type
         const figureType = layer.figure_type
-        const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
+        const tileTitle = layer.single_tiles ? '' : `-${layer.tiles_list[nestedSubNodeIndex]?.title}`
         const request = []
         if (layerType === 'WMS'){
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
@@ -281,7 +282,7 @@ export default {
     },
     get3DLayer: (layer, nestedSubNodeIndex, id) => {
         const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-        window.console.log(layer, nestedSubNodeIndex, id, url)
+        const layersConfig = ['近五年淹水調查位置(點)', '近五年淹水調查位置(面)']
         const request = {}
         if (url){
             const api = new URL(url)
@@ -295,10 +296,10 @@ export default {
         }
 
         let layers = nestedSubNodeIndex === undefined ? layer.title : '0'
-        window.console.log(layer.title)
-        if (['近五年淹水調查位置(點)', '近五年淹水調查位置(面)'].includes(layer.title)){
+        if (layersConfig.includes(layer.title)){
             layers = '0'
         }
+
         return {
             layers,
             url: request.url,
@@ -306,8 +307,10 @@ export default {
                 FORMAT: 'image/png',
                 VERSION: '1.1.1',
                 TRANSPARENT: true,
-                STYLES: ''
-            }
+                STYLES: '',
+                id,
+                layers_Name: layer.single_tiles ? layer.title : `${ layer.title }-${ layer.tiles_list[nestedSubNodeIndex].title }`
+            },
         }
     }
 }

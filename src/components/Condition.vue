@@ -51,6 +51,7 @@ export default {
         function onLayerControl(action, value) {
             emit('onLayerControl', { action, value })
         }
+
         function openLayerList(value) {
             if (state.DropDown !== value) {
                 state.DropDown = value
@@ -58,6 +59,7 @@ export default {
                 state.DropDown = null
             }
         }
+
         function LayerCheckBoxChange(e, item) {
             let checked = item.elementSource === 'input' ? e.target.checked : true
             let nodeIndex= item.nodeIndex
@@ -128,9 +130,8 @@ export default {
     <div class="condition bg-white">
         <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold border-bottom">
             <p class="mb-0 fs-5">圖層選項</p>
-            <a href="#"
-                class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center"
-                @click.prevent="props.onClose"></a>
+            <a href="#" class="closeBtn bg-dark text-decoration-none rounded-circle position-absolute d-flex align-items-center justify-content-center"
+            @click.prevent="props.onClose"></a>
         </div>
         <div class="py-3 px-4 content" style="max-height: 40vh;overflow-y: scroll;">
             <div class="mb-2 landBoundary">
@@ -221,10 +222,10 @@ export default {
                                             id: subNode.id,
                                         })
                                     }">
-                                    <option :value="key" :id="item.id" v-for="(item, key) in subNode.tiles_list"
-                                        v-bind:key="key">{{ item.title }}</option>
+                                    <option :value="key" :id="item.id"
+                                    v-for="(item, key) in subNode.tiles_list"
+                                    v-bind:key="key">{{ item.title }}</option>
                                 </select>
-
                             </div>
                             <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
                                 <span class="me-2 d-flex flex-wrap align-items-center mb-1"

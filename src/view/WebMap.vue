@@ -210,24 +210,39 @@ export default {
                         // 點選父層後，刪除同樣子層的圖層，帶入當前選擇的圖層
                         let isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
                         let haveInfoBox = !isEmpty(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box)
-                        if (!(isSingleTiles) || haveInfoBox) {
-                            let layersAry = targetLayers.getArray()
-                            layersAry.forEach(element => {
-                                if (!(element.get('id'))) { return }
-                                if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
-                                    target.removeLayer(element)
-                                }
-                            })
-                            nestedSubNodeIndex = state.selectValueTemp
-                            value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
-                        }
                         // 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                            let request = getMapLayers.get3DLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                            if (!(isSingleTiles) || haveInfoBox) {
+                                const scene = ol3d.getCesiumScene()
+                                const imageryLayersCount = scene.imageryLayers.length;
+                                for (let i = 0; i < imageryLayersCount; i++) {
+                                    let layer = scene.imageryLayers.get(i)
+                                    let id = layer?.imageryProvider._resource?.queryParameters?.id
+                                    const imageNodeIndex = getMapLayers.getLayerIndex(id)?.nodeIndex
+                                    const imageSubNodeIndex = getMapLayers.getLayerIndex(id)?.subNodeIndex
+                                    if((value.nodeIndex == imageNodeIndex) && (value.subNodeIndex == imageSubNodeIndex)) {
+                                        scene.imageryLayers.remove(layer)
+                                    }
+                                }
+                                nestedSubNodeIndex = state.selectValueTemp
+                                value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
+                            }
+                            const request = getMapLayers.get3DLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                             ol3d.getCesiumScene().imageryLayers.addImageryProvider(
                                 new Cesium.WebMapServiceImageryProvider(request)
                             )
                         } else {
+                            if (!(isSingleTiles) || haveInfoBox) {
+                                let layersAry = targetLayers.getArray()
+                                layersAry.forEach(element => {
+                                    if (!(element.get('id'))) { return }
+                                    if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
+                                        target.removeLayer(element)
+                                    }
+                                })
+                                nestedSubNodeIndex = state.selectValueTemp
+                                value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
+                            }
                             let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                             target.addLayer(targetLayer)
                             // FIXME: addSpecialLayerEvent(targetLayer.get('label'), targetLayer, value)
@@ -259,14 +274,15 @@ export default {
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                             const { id, nestedSubNodeIndex, nodeIndex, subNodeIndex } = value
                             let pickedLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
-
                             const scene = ol3d.getCesiumScene()
                             const imageryLayersCount = scene.imageryLayers.length;
                             for (let i = 0; i < imageryLayersCount; i++) {
                                 let layer = scene.imageryLayers.get(i)
-                                window.console.log(layer)
-                                if(layer.imageryProvider.layers === pickedLayer.title) {
-                                    scene.imageryLayers.remove(layer);
+                                const id = layer?.imageryProvider._resource?.queryParameters?.id
+                                const imageNodeIndex = getMapLayers.getLayerIndex(id)?.nodeIndex
+                                const imageSubNodeIndex = getMapLayers.getLayerIndex(id)?.subNodeIndex
+                                if(pickedLayer.title === id || ((nodeIndex == imageNodeIndex) && (subNodeIndex == imageSubNodeIndex))) {
+                                    scene.imageryLayers.remove(layer)
                                 }
                             }
                         } else {
@@ -294,7 +310,6 @@ export default {
                                 delete state.temp[`${timeKey}count`]
                             }
                         }
-
                         onMapLayerStatus('delete', target.getTarget(), value.id)
                     }
                     break;
@@ -396,21 +411,20 @@ export default {
 
         function getCurrentMapData() {
             if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
-                const currentLayerStatus = state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`]
-                state.currentLayers = currentLayerStatus.reduce((acc, layerId, index)=>{
-                    if(layerId === '3D') {return}
-                    const { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } = getMapLayers.getLayerIndex(layerId)
-                    let targetLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
-                    // FIXME:　visible暫時撈不到，功能失效
-                    return [
-                        ...(acc || []),
-                        {
-                            label: targetLayer.single_tiles ? targetLayer.title : targetLayer.tiles_list[nestedSubNodeIndex].title,
-                            id,
+                state.currentLayers = []
+                const scene = ol3d.getCesiumScene()
+                const imageryLayersCount = scene.imageryLayers.length;
+                for (let i = 0; i < imageryLayersCount; i++) {
+                    let layer = scene.imageryLayers.get(i)
+                    let provider = layer.imageryProvider;
+                    if (provider instanceof Cesium.WebMapServiceImageryProvider) {
+                        state.currentLayers.push({
+                            label: provider._resource?.queryParameters.layers_name,
+                            id: provider._resource?.queryParameters.id,
                             visible: 1,
-                        }
-                    ]
-                }, [])
+                        })
+                    }
+                }
             } else {
                 const target = state.targetNum == 1 ? state.map1 : state.map2
                 const layers = target?.getLayers()?.getArray()
@@ -466,6 +480,9 @@ export default {
             if(value) {
                 ol3d = new OLCesium({
                     map: target,
+                    time() {
+                        return Cesium.JulianDate.now();
+                    },
                     sceneOptions: {
                         mapProjection: new Cesium.WebMercatorProjection()
                     }
@@ -516,6 +533,9 @@ export default {
                 if (state[`${otherMap}LayerStatus`]?.indexOf('3D') !== -1) {
                     ol3d = new OLCesium({
                         map: state[otherMap],
+                        time() {
+                            return Cesium.JulianDate.now();
+                        },
                     })
                     ol3d.setEnabled(true)
                     let scene = ol3d.getCesiumScene({})
@@ -561,6 +581,9 @@ export default {
                     if (state[`map${value}LayerStatus`]?.indexOf('3D') !== -1) {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
+                            time() {
+                                return Cesium.JulianDate.now();
+                            },
                         })
                         ol3d.setEnabled(true)
                     }
@@ -780,18 +803,6 @@ export default {
             });
             ol3d.imageryLayers.addImageryProvider(imageryLayer);
 
-            // // 创建点图标
-            // var icon = new Cesium.Billboard();
-            // icon.image = new Cesium.ConstantProperty(new Cesium.ImageMaterialProperty({
-            //     image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhklEQVQ4je3RsRHDIAyF4b/wPkntSpt4CfcSPUuwiSpq2ChFoMrlcpZT8hpRwHfvxMafsy1wgQAYoOPsQBozBAqgx2kA9OrSqstALQLqcxeOcxZUSk6UbBoF5bHLjyvXwI/06nBjh6lk016d2bS9wRQFDfBWXcdnTCzckPH4KxABL2WB9/MC3SYo1RHuhigAAAAASUVORK5CYII='
-            // }));
-
-            // // 添加点图标到图层中
-            // billboardCollection.add(icon);
-
-            // // 将图层添加到场景中
-            // ol3d.getCesiumScene().primitives.add(billboardCollection);
-
         }
 
         return {
@@ -844,9 +855,9 @@ export default {
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
                 <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
                 <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
-                    :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
-            layerControl({ action, value })
-        }" />
+                :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
+                    layerControl({ action, value })
+                }" />
             </div>
             <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
             dimensionMapStatus: state.toSearchDimensionStatus,

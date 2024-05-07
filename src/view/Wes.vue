@@ -270,7 +270,7 @@ export default {
                             const imageryLayersCount = scene.imageryLayers.length;
                             for (let i = 0; i < imageryLayersCount; i++) {
                                 let layer = scene.imageryLayers.get(i)
-                                if(layer.imageryProvider.layers === pickedLayer.title) {
+                                if (layer.imageryProvider.layers === pickedLayer.title) {
                                     scene.imageryLayers.remove(layer);
                                 }
                             }
@@ -405,8 +405,8 @@ export default {
         function getCurrentMapData() {
             if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                 const currentLayerStatus = state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`]
-                state.currentLayers = currentLayerStatus.reduce((acc, layerId, index)=>{
-                    if(layerId === '3D') {return}
+                state.currentLayers = currentLayerStatus.reduce((acc, layerId, index) => {
+                    if (layerId === '3D') { return }
                     const { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } = getMapLayers.getLayerIndex(layerId)
                     let targetLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
                     // FIXME:　visible暫時撈不到，功能失效
@@ -471,7 +471,7 @@ export default {
 
         function drawDimensionMap(value) {
             const target = state.targetNum == 1 ? state.map1 : state.map2
-            if(value) {
+            if (value) {
                 ol3d = new OLCesium({
                     map: target,
                     sceneOptions: {
@@ -766,76 +766,44 @@ export default {
             }
         })
 
-        function show() {
+        function add() {
             // 创建一个 Cesium 影像图层
-            // const cesiumImageryProvider = new Cesium.WebMapServiceImageryProvider({
-            //     url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentalFlood06H150/MapServer/WMSServer',
-            //     layers: '0',
-            //     // parameters: {
-            //     //     FORMAT: 'image/png',
-            //     //     VERSION: '1.1.1',
-            //     //     TRANSPARENT: true,
-            //     //     STYLES: ''
-            //     // }
-            //     // url: 'https://gis.edtest.site/ogc/temp',
-            //     // layers: '全台保安林分布',
-            //     parameters: {
-            //         FORMAT: 'image/png',
-            //         VERSION: '1.1.1',
-            //         TRANSPARENT: true,
-            //         STYLES: ''
-            //     }
-            // })
-            // // 将图层添加到 Cesium 场景中
-            // const imageryLayer = new Cesium.ImageryLayer(cesiumImageryProvider);
-            // ol3d.getCesiumScene().imageryLayers.add(imageryLayer);
-            // 創建 ol-cesium 地圖對象
-
-            // 加載 WMS 圖層資料源
-            const wmsSource = new ImageWMS({
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
-                params: {
-                    'LAYERS': '0',
-                    'VERSION': '1.1.1',
-                    'FORMAT': 'image/png',
-                },
-            });
-            // 將圖層添加到 Cesium 场景中
-            const imageryLayer = new Cesium.ImageryLayer(new Cesium.SingleTileImageryProvider({
-                // url: 'https://gis.edtest.site/ogc/temp',
-                url: 'https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=順向坡&STYLE=default',
+            const cesiumImageryProvider = new Cesium.WebMapServiceImageryProvider({
+                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022PotentalFlood06H150/MapServer/WMSServer',
                 layers: '0',
                 parameters: {
                     FORMAT: 'image/png',
                     VERSION: '1.1.1',
                     TRANSPARENT: true,
-                    STYLES: ''
+                    STYLES: '',
+                    ID: 'aa'
                 },
-                // rectangle: Cesium.Rectangle.fromDegrees(-180, -90, 180, 90),
-                rectangle: Cesium.Rectangle.fromDegrees(90, 50, 90, 90), // 以經緯度表示範圍
-            }));
-            // {
-            // title: "順向坡分布",
-            // help_btn_display: false,
-            // help_memo: "",
-            // minzoom: 4,
-            // maxzoom: 18,
-            // layer_type: "WMS",
-            // figure_type: "Surface",
-            // single_tiles: true,
-            // tiles_url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=順向坡&STYLE=default",
-            // tiles_list_description: ""
-            // },
-            // {
-                // title: "崩塌點",
-                // minzoom: 4,
-                // maxzoom: 18,
-                // layer_type: "WMS",
-                // figure_type: "Surface",
-                // single_tiles: true,
-                // tiles_url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=崩塌點&STYLE=default",
-            // },
+                clock: '11',
+                ext: {
+                    currentLayerKey: 0,
+                }
+            })
+            // 将图层添加到 Cesium 场景中
+            const imageryLayer = new Cesium.ImageryLayer(cesiumImageryProvider);
             ol3d.getCesiumScene().imageryLayers.add(imageryLayer);
+            // 創建 ol-cesium 地圖對象
+        }
+
+        function show() {
+            window.console.log('ol3d', ol3d)
+            let imageryLayers = ol3d.getCesiumScene().imageryLayers
+            let imageryLayersCount = imageryLayers.length
+            for (let i = 0; i < imageryLayersCount; i++) {
+                let layer = imageryLayers.get(i)
+                window.console.log(layer.imageryProvider._resource?.queryParameters)
+                // imageryProvider
+                // _queryParameters
+
+                // get queryParameters
+                // if (layer.imageryProvider.layers === pickedLayer.title) {
+                //     imageryLayers.remove(layer);
+                // }
+            }
         }
 
         return {
@@ -851,63 +819,65 @@ export default {
             closeAreaData,
             moveToMap,
             changeMapCount,
-            show,
+            add,
+            show
         }
     }
 }
 </script>
 
 <template>
+    <div @click="add">add</div>
     <div @click="show">show</div>
     <div>
         <!-- TODO: 寬度設定是否調整 -->
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
             <div id="map1" :class="{
-            'w-100': state.map1?.getTarget() == 'map1',
-            'h-100': state.mapCount === 1,
-            'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
-            'middleMap': state.map1?.getTarget()
-        }">
+                'w-100': state.map1?.getTarget() == 'map1',
+                'h-100': state.mapCount === 1,
+                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+                'middleMap': state.map1?.getTarget()
+            }">
             </div>
             <div class="middleLine" v-if="state.mapCount === 2"></div>
             <div id="map2" :class="{
-            'w-100': state.map2?.getTarget() == 'map2',
-            'h-100': state.mapCount === 1,
-            'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
-            'middleMap': state.map2?.getTarget()
-        }">
+                'w-100': state.map2?.getTarget() == 'map2',
+                'h-100': state.mapCount === 1,
+                'h-50': state.mapCount === 2 && (state.comSize.wrapWidth < 600),
+                'middleMap': state.map2?.getTarget()
+            }">
             </div>
         </div>
         <asideTool class="asideTool position-absolute top-50 translate-middle-y" id="asideTool" :onChangeTarget="(value) => {
             changeTarget(value)
         }" @onMapControl="({ action, value }) => {
-            mapControl({ action, value })
-        }" />
+    mapControl({ action, value })
+}" />
         <div class="SearchBar d-block d-sm-block position-fixed w-100 w-sm-auto position-sm-absolute p-3 p-sm-0">
             <div class="d-flex align-items-center justify-content-between justify-content-sm-start">
                 <img src="@/assets/logo.svg" alt="" class="logo col-5 col-sm-auto me-0 me-sm-5">
                 <mapSourceOption class="mapSourceOption col-5 col-sm-auto d-block d-sm-block"
                     :baseMapList="state.temp.baseMapList" :onChangeBaseMaps="({ action, value }) => {
-            layerControl({ action, value })
-        }" />
+                        layerControl({ action, value })
+                    }" />
             </div>
             <SearchBar class="mt-4 d-none d-sm-block" v-bind="{
-            dimensionMapStatus: state.toSearchDimensionStatus,
-            currentLayers: state.currentLayers,
-            mapCount: state.mapCount,
-            onChangeBaseMaps: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-            onChangeMapCount: (qty) => {
-                changeMapCount(qty)
-            },
-        }" :onChangeTarget="(value) => {
-            changeTarget(value)
-        }" @onLayerControl="({ action, value }) => {
-            layerControl({ action, value })
-        }" @conditionWrap="(value) => {
-            conditionWrap(value)
-        }" />
+                dimensionMapStatus: state.toSearchDimensionStatus,
+                currentLayers: state.currentLayers,
+                mapCount: state.mapCount,
+                onChangeBaseMaps: ({ action, value }) => {
+                    layerControl({ action, value })
+                },
+                onChangeMapCount: (qty) => {
+                    changeMapCount(qty)
+                },
+            }" :onChangeTarget="(value) => {
+    changeTarget(value)
+}" @onLayerControl="({ action, value }) => {
+    layerControl({ action, value })
+}" @conditionWrap="(value) => {
+    conditionWrap(value)
+}" />
         </div>
 
         <div class="conditionCom d-none d-sm-block position-absolute">
@@ -918,19 +888,19 @@ export default {
                 </button>
                 <div class="mb-4" v-if="state.conditionWrap">
                     <Condition v-bind="{
-            tribeQuery: state.tribeQuery,
-            mapLayers: state.mapLayers,
-            currentLayers: state.currentLayers,
-            onClose: () => {
-                state.conditionWrap = false
-            },
-            showSelectLayerValue: (val) => {
-                state.selectValueTemp = val
-            },
-            moveToMap: (val) => {
-                moveToMap(val)
-            }
-        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                        tribeQuery: state.tribeQuery,
+                        mapLayers: state.mapLayers,
+                        currentLayers: state.currentLayers,
+                        onClose: () => {
+                            state.conditionWrap = false
+                        },
+                        showSelectLayerValue: (val) => {
+                            state.selectValueTemp = val
+                        },
+                        moveToMap: (val) => {
+                            moveToMap(val)
+                        }
+                    }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
                 <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
@@ -942,8 +912,7 @@ export default {
                 </button>
                 <div v-if="state.layerSelect">
                     <!-- TODO: onChangeLayerOpacity帶入而不是走onLayerControl -->
-                    <LayerSelector
-                    v-bind="{
+                    <LayerSelector v-bind="{
                         selectLock: state.selectLock,
                         currentLayers: state.currentLayers,
                         onClose: () => {
@@ -977,66 +946,66 @@ export default {
         <div class="m-Navbar d-flex d-sm-none position-relative w-100">
             <div class="position-absolute bottom-100 w-100" style="max-height: 70vh;overflow-y: scroll;">
                 <Condition class="w-100" v-if="state.conditionWrap" v-bind="{
-            mapLayers: state.mapLayers,
-            currentLayers: state.currentLayers,
-            onClose: () => {
-                state.conditionWrap = false
-            },
-            showSelectLayerValue: (val) => {
-                state.selectValueTemp = val
-            }
-        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+                    mapLayers: state.mapLayers,
+                    currentLayers: state.currentLayers,
+                    onClose: () => {
+                        state.conditionWrap = false
+                    },
+                    showSelectLayerValue: (val) => {
+                        state.selectValueTemp = val
+                    }
+                }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
             </div>
             <div v-if="state.layerSelect">
                 <LayerSelector class="position-absolute bottom-100 w-100" v-bind="{
-            selectLock: state.selectLock,
-            currentLayers: state.currentLayers,
-            onClose: () => {
-                state.layerSelect = false
-            },
-            onLockLayer: () => {
-                state.selectLock = !state.selectLock
-            },
-            onDeleteLayer: ({ action, value }) => {
-                if (value.layerName == 'all') {
-                    state.deleteLightbox = true
-                } else {
-                    layerControl({ action, value })
-                }
-            },
-            onChangLayerVisible: (action) => {
-                layerControl(action)
-            },
-            onChangeOrderLayer: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-            onLayerControl: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-        }" />
+                    selectLock: state.selectLock,
+                    currentLayers: state.currentLayers,
+                    onClose: () => {
+                        state.layerSelect = false
+                    },
+                    onLockLayer: () => {
+                        state.selectLock = !state.selectLock
+                    },
+                    onDeleteLayer: ({ action, value }) => {
+                        if (value.layerName == 'all') {
+                            state.deleteLightbox = true
+                        } else {
+                            layerControl({ action, value })
+                        }
+                    },
+                    onChangLayerVisible: (action) => {
+                        layerControl(action)
+                    },
+                    onChangeOrderLayer: ({ action, value }) => {
+                        layerControl({ action, value })
+                    },
+                    onLayerControl: ({ action, value }) => {
+                        layerControl({ action, value })
+                    },
+                }" />
             </div>
             <mNavbar v-bind="{
-            dimensionMapStatus: state.toSearchDimensionStatus,
-            currentLayers: state.currentLayers,
-            mapCount: state.mapCount,
-            openConditionWrap: () => {
-                state.conditionWrap = !state.conditionWrap
-                state.layerSelect = false
-            },
-            openLayerSelect: () => {
-                state.layerSelect = !state.layerSelect
-                state.conditionWrap = false
-            },
-            onLayerControl: ({ action, value }) => {
-                layerControl({ action, value })
-            },
-            onChangeMapCount: (qty) => {
-                changeMapCount(qty)
-            },
-            onChangeTarget: (value) => {
-                changeTarget(value)
-            }
-        }" @conditionWrap="(value) => { conditionWrap(value) }" />
+                dimensionMapStatus: state.toSearchDimensionStatus,
+                currentLayers: state.currentLayers,
+                mapCount: state.mapCount,
+                openConditionWrap: () => {
+                    state.conditionWrap = !state.conditionWrap
+                    state.layerSelect = false
+                },
+                openLayerSelect: () => {
+                    state.layerSelect = !state.layerSelect
+                    state.conditionWrap = false
+                },
+                onLayerControl: ({ action, value }) => {
+                    layerControl({ action, value })
+                },
+                onChangeMapCount: (qty) => {
+                    changeMapCount(qty)
+                },
+                onChangeTarget: (value) => {
+                    changeTarget(value)
+                }
+            }" @conditionWrap="(value) => { conditionWrap(value) }" />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
@@ -1044,17 +1013,17 @@ export default {
                 <p class="text-center fw-bold">是否要取消全部圖層</p>
                 <div class=" d-flex justify-content-around">
                     <button class="rounded px-3 py-1 bg-steel text-white border-0" @click="() => {
-            layerControl({
-                action: 'selectLayerMode',
-                value: {
-                    layerName: 'all'
-                }
-            })
-            state.deleteLightbox = false
-        }">確定</button>
+                        layerControl({
+                            action: 'selectLayerMode',
+                            value: {
+                                layerName: 'all'
+                            }
+                        })
+                        state.deleteLightbox = false
+                    }">確定</button>
                     <button class="rounded px-3 py-1 bg-secondary bg-gradient text-white border-0" @click="() => {
-            state.deleteLightbox = false
-        }">取消</button>
+                        state.deleteLightbox = false
+                    }">取消</button>
                 </div>
             </div>
         </div>
@@ -1063,14 +1032,14 @@ export default {
             state.popup.nodeRef = e
         }">
             <areaData class="areaData" v-if="state.popup.popupId !== 0" :closeAreaData="() => {
-            closeAreaData()
-        }" :popup="state.popup" :maxHeight="500" />
+                closeAreaData()
+            }" :popup="state.popup" :maxHeight="500" />
         </div>
 
         <div class="stepOverLayer position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" id="firstEnter"
             v-if="store.state.isInit" @click="() => {
-            store.dispatch('updateLayerStatus', false)
-        }"></div>
+                store.dispatch('updateLayerStatus', false)
+            }"></div>
     </div>
 </template>
 
