@@ -35,14 +35,14 @@ export default {
         const figureType = layer.figure_type
         const tileTitle = layer.single_tiles ? '' : `-${layer.tiles_list[nestedSubNodeIndex]?.title}`
         const request = []
-        if (layerType === 'WMS'){
+        if (layerType === 'WMS') {
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-            switch (figureType){
+            switch (figureType) {
                 case 'Point':
                 case 'Surface':
                 case 'Line':
                     // 活動斷層
-                    if (url){
+                    if (url) {
                         const api = new URL(url)
                         // 取得網址部分
                         const origin = api.origin
@@ -51,7 +51,7 @@ export default {
                         // 取得query參數
                         const searchParams = api.searchParams
                         const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
+                        for (const [key, value] of searchParams.entries()) {
                             searchParamsObject[key] = value
                         }
                         request[0] = origin + pathname
@@ -85,8 +85,8 @@ export default {
             })
         }
 
-        if (layerType === 'WMTS'){
-            switch (figureType){
+        if (layerType === 'WMTS') {
+            switch (figureType) {
                 case 'Surface':
                     // FIX: 匯出會變成gif
                     const projection = 'EPSG:3857'
@@ -127,7 +127,7 @@ export default {
         }
 
         // only 部落圖層點擊用layer
-        if (layerType === 'WFS'){
+        if (layerType === 'WFS') {
             const vectorSource = new VectorSource({
                 format: new GeoJSON(),
                 url: layer.tiles_url,
@@ -137,15 +137,15 @@ export default {
             const defaultStyles = new Vector().getStyleFunction()()
             const hasSelectColor = {}
             const layerStyle = (layer.title === '新竹縣原住民部落範圍')
-                ? function(feature){
+                ? function (feature) {
                     const featureGroupName = feature.values_['部落名稱']
-                    function getRandomUniqueColor(){
+                    function getRandomUniqueColor() {
                         const usedColors = new Set()
                         const characters = '0123456789ABCDEF'
                         let color
                         do {
                             color = '#'
-                            for (let i = 0; i < 6; i++){
+                            for (let i = 0; i < 6; i++) {
                                 color += characters[Math.floor(Math.random() * 16)]
                             }
                         } while (usedColors.has(color))
@@ -170,15 +170,15 @@ export default {
                 style: layerStyle,
             })
         }
-        if (layerType === 'GeoJson'){
+        if (layerType === 'GeoJson') {
             const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-            switch (figureType){
+            switch (figureType) {
                 case 'Line':
-                    if (url){
+                    if (url) {
                         const api = new URL(url)
                         const { origin, pathname, searchParams } = api
                         const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
+                        for (const [key, value] of searchParams.entries()) {
                             searchParamsObject[key] = value
                         }
                         request[0] = origin + pathname
@@ -192,11 +192,11 @@ export default {
                     })
                     break
                 case 'Point':
-                    if (url){
+                    if (url) {
                         const api = new URL(url)
                         const { origin, pathname, searchParams } = api
                         const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
+                        for (const [key, value] of searchParams.entries()) {
                             searchParamsObject[key] = value
                         }
                         request[0] = origin + pathname
@@ -218,8 +218,8 @@ export default {
                 source: layerSource
             })
         }
-        if (layerType === 'Image'){
-            switch (figureType){
+        if (layerType === 'Image') {
+            switch (figureType) {
                 case 'Surface':
                     const imageLayer = new Static({
                         url: layer.tiles_image_urls[0],
@@ -247,9 +247,9 @@ export default {
     },
     getLayerIndex: (id) => {
         let nodeIndex; let subNodeIndex; let nestedSubNodeIndex
-        if (!(id)){ return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } }
+        if (!(id)) { return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } }
         id.split('_').forEach((element, key) => {
-            switch (key){
+            switch (key) {
                 case 0:
                     nodeIndex = Number(element.split('node')[1])
                     break
@@ -276,36 +276,30 @@ export default {
         let newStr = ''
         Object.entries(result).forEach((node, key) => {
             newStr += `${node[0]}${node[1]}`
-            if (key + 1 !== Object.entries(result).length){ newStr += '_' }
+            if (key + 1 !== Object.entries(result).length) { newStr += '_' }
         })
         return newStr
     },
     get3DLayer: (layer, nestedSubNodeIndex, id) => {
         const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-        const layersConfig = ['近五年淹水調查位置(點)', '近五年淹水調查位置(面)']
         const request = {}
-        if (url){
+        if (url) {
             const api = new URL(url)
             const { origin, pathname, searchParams } = api
             const searchParamsObject = {}
-            for (const [key, value] of searchParams.entries()){
+            for (const [key, value] of searchParams.entries()) {
                 searchParamsObject[key] = value
             }
             request.url = origin + pathname
             request.parameters = searchParamsObject
         }
 
-        let layers = nestedSubNodeIndex === undefined ? layer.title : '0'
-        if (layersConfig.includes(layer.title)){
-            layers = '0'
-        }
-
         return {
-            layers,
+            layers: request.parameters.LAYERS || request.parameters.LAYER || request.parameters.TYPENAME || 'rainStation',
             url: request.url,
             parameters: {
                 FORMAT: 'image/png',
-                VERSION: '1.1.1',
+                VERSION: request.parameters.VERSION,
                 TRANSPARENT: true,
                 STYLES: '',
                 id,
