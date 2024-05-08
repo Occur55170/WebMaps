@@ -16,6 +16,7 @@ import 'ol/ol.css' // ol提供的css样式
 import proj4 from 'proj4'
 import { register } from 'ol/proj/proj4.js'
 import { isEmpty } from '@/methods.js'
+
 proj4.defs(
     'EPSG:3826',
     '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs',
@@ -301,7 +302,7 @@ export default {
         }
 
         return {
-            layers: request.parameters.LAYERS || request.parameters.LAYER || request.parameters.TYPENAME || 'rainStation',
+            layers: request.parameters.LAYERS || request.parameters.LAYER || request.parameters.TYPENAME || 0,
             url: request.url,
             parameters: {
                 FORMAT: 'image/png',
@@ -314,3 +315,50 @@ export default {
         }
     }
 }
+
+// 3D圖層bug
+// 土石流、山崩
+// -土石流潛勢溪流 //error，載入過久
+// -工程鑽探 // error
+// -斷層地質敏感區範圍 //沒錯誤訊息??
+// 原住民與文化資源
+// -新竹縣原住民部落範圍: 有畫面，但無互動事件
+// -近年歷史災害82處部落點位: 有畫面，但無互動事件
+// 基礎設施與公共服務
+// -地方政府 // error!!
+// -雨量站 //error
+// 基礎設施與公共服務
+// -縣市界 //error
+// 沒錯誤沒畫面
+// 港口
+// 護理之家
+// 即時預測
+// -雷達回波預測: 在2D情況下就404
+// -累積雨量預測: 在2D情況下就404
+// -氣溫預測: 在2D情況下就404
+// -風場預測: 在2D情況下就404
+
+
+// // 圖層服務的 URL
+// const serviceUrl = "https://gis.edtest.site/ogc/temp?SERVICE=WMS&REQUEST=GetCapabilities";
+
+// // 發送請求獲取 Capabilities 文件
+// fetch(serviceUrl)
+//     .then(response => response.text())
+//     .then(data => {
+//         // 解析 Capabilities 文件
+//         const parser = new DOMParser();
+//         const xmlDoc = parser.parseFromString(data, "text/xml");
+
+//         // 獲取所有圖層名稱
+//         const layerNames = xmlDoc.querySelectorAll("Layer > Name");
+//         const layers = Array.from(layerNames).map(name => name.textContent);
+
+//         // 輸出可用的圖層列表
+//         console.log("可用的圖層列表：", layers);
+//     })
+//     .catch(error => {
+//         console.error("發生錯誤：", error);
+//     });
+
+// 可用的圖層列表： (85) ['temp', '水系', 'riverpoly', 'riverlin', '土石流', '土石流潛勢溪流', '土石流潛勢溪流影響範圍', '大規模崩塌潛勢區', '大規模崩塌影響範圍', '順向坡', '落石分布', '山崩與地滑敏感區_新竹縣市', '潛在崩塌', '工程鑽井', '防災資訊', '避難場所', '生態資料', '全台保安林分布', '重要野鳥棲息地', '紅皮書受脅植物分布點位緩衝帶', '紅皮書受脅植物重要棲地', '國家風景區', 'VA0218V04', 'VA0206V03', 'VA0205V04', 'VA0204V04', 'VA0203V05', 'VA0083V04', 'VA0076V04', 'VA0075V04', 'VA0074V04', 'VA0018V04', 'VA0017V05', 'VA0003V04', 'VA0002V04', '自來水', '蓄水池.shp — 蓄水池', '取水口.shp — 取水口', '自來水管線.shp — 自來水管線', '災害徵兆調查結果', '潛在崩塌範圍(水保局)', '崩塌點', '居民口述疑似地滑區', '坡趾滲水', '新竹原住民', '新竹縣原住民部落範圍', '重要地標、地物', '近年歷史災害82處部落點位', '道路', '馬美道路', '隧道', '舊十八兒道路', '縣道122和竹63', '竹62', '竹60及其他路', '石磊道路', '無路名道路', '其他道路', '露營區', '新竹縣露營區.shp — 新竹縣露營區', '土地使用分區', '國家公園', '都市計畫使用分區', '非都市土地使用分區', '非都市土地使用編定', '國土利用現況調查成果圖', '國土生態綠網', '國有林事業區', '自然保留區', '自然保護區', '野生動物保護區', '野生動物重要棲息環境', '全國國土綠網區域保育軸帶', '生物多樣性熱區', '重要關注里山地景', '國土綠網關注獨流溪', '國土綠網關注農田圳溝或埤塘池沼', '國土綠網關注河川', '國土生態綠網關注區域', '全國國土綠網分區圖', '其他圖層', '雨量站', '警察局', '消防局', '學校']

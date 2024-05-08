@@ -21,6 +21,8 @@ import 'ol-ext/dist/ol-ext.css'
 import Overlay from 'ol/Overlay'
 import currentPositionImg from '@/assets/img/icon/currentPosition.svg'
 
+import { isEmpty } from '@/methods.js'
+
 import mapLayerList from '@/config/mapLayerList'
 import baseMapList, { getBaseMapAll } from '@/config/baseMapList'
 import * as Cesium from 'cesium'
@@ -120,8 +122,6 @@ export default {
             state.map1.addControl(new ScaleLine({
                 units: 'metric', // 比例尺單位
             }))
-
-            onChangeDimensionMap('3D')
         }
 
         function addPoint(targetLng, targetLat){
@@ -468,7 +468,6 @@ export default {
                     }
                 })
             }
-        }
         }
 
         function onChangeDimensionMap(value){
