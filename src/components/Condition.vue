@@ -1,11 +1,8 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
+import { reactive, watch } from 'vue'
 import $ from 'jquery'
 
 import mapLayerList from '@/config/mapLayerList'
-import baseMapList from '@/config/baseMapList'
-import VectorImageLayer from 'ol/layer/VectorImage.js'
-import TileState from 'ol/TileState.js'
 import { useRouter } from 'vue-router'
 import { isEmpty } from '@/methods.js'
 
@@ -15,41 +12,50 @@ export default {
     props: {
         onClose: {
             type: Function,
-            default: () => { }
+            default: () => {
+            },
         },
         mapLayers: {
             type: Array,
-            default: []
+            // eslint-disable-next-line vue/require-valid-default-prop
+            default: [],
         },
         currentLayers: {
             type: Array,
-            default: []
+            // eslint-disable-next-line vue/require-valid-default-prop
+            default: [],
         },
         showSelectLayerValue: {
             type: Function,
-            default: () => { }
+            default: () => {
+            },
         },
         tribeQuery: {
             type: Object,
-            default: {}
+            // eslint-disable-next-line vue/require-valid-default-prop
+            default: {},
         },
         moveToMap: {
             type: Function,
-            default: () => { }
-        }
+            default: () => {
+            },
+        },
     },
-    setup(props, { emit }) {
+    setup(props, { emit }){
         const router = useRouter()
         const state = reactive({
             DropDown: null,
             TilesListValue: 0,
             conditionYear: '',
             conditionTown: '',
-            selectLayerOption: []
+            selectLayerOption: [],
         })
 
-        function onLayerControl(action, value) {
-            emit('onLayerControl', { action, value })
+        function onLayerControl(action, value){
+            emit('onLayerControl', {
+                action,
+                value,
+            })
         }
 
         function openLayerList(value) {
@@ -72,37 +78,37 @@ export default {
                 subNodeIndex,
                 nestedSubNodeIndex,
                 // 判斷是否有子層即是勾選的還是下拉
-                id
+                id,
             })
         }
 
-        async function getTribes() {
+        async function getTribes(){
             const result = await $.ajax(`https://api.edtest.site/tribes?${'years=' + state.conditionYear}&${'township=' + state.conditionTown}`, 'GET')
             state.selectLayerOption = result
         }
 
-        function tribeYear(event) {
+        function tribeYear(event){
             state.conditionYear = event.target.value
             getTribes()
         }
 
-        function tribeTown(event) {
-            if(event.target.value !== 'false') {
+        function tribeTown(event){
+            if (event.target.value !== 'false'){
                 state.conditionTown = event.target.value
                 getTribes()
             }
         }
 
-        function moveMap(params) {
-            if(params.target.value !== 'false') {
-                let selectValue = state.selectLayerOption.find(node => node.tribeCode == params.target.value)
+        function moveMap(params){
+            if (params.target.value !== 'false'){
+                const selectValue = state.selectLayerOption.find(node => node.tribeCode === params.target.value)
                 props.moveToMap(selectValue.coordinates)
             }
         }
 
         function isChecked(subNodeId){
-            let anchorStr = subNodeId.replace(/undefined$/, "0")
-            return props.currentLayers.some(node => node.id === subNodeId || node.id == anchorStr)
+            const anchorStr = subNodeId.replace(/undefined$/, '0')
+            return props.currentLayers.some(node => node.id === subNodeId || node.id === anchorStr)
         }
 
         watch(() => state.TilesListValue, (newVal, oldVal) => {
@@ -120,9 +126,9 @@ export default {
             tribeYear,
             tribeTown,
             moveMap,
-            isChecked
+            isChecked,
         }
-    }
+    },
 }
 </script>
 
@@ -161,44 +167,44 @@ export default {
                                     elementSource: 'input',
                                     id: subNode.id
                                 })
-                            }" />
-                            <label :for="subNode.id">
+                            }"/>
+              <label :for="subNode.id">
                                 <span class="me-2">
                                     {{ subNode.title }}
                                 </span>
-                                <img alt="" :src="subNode.icon" v-if="subNode.icon">
-                            </label>
-                            <div v-if="subNode.title === '新竹縣原住民部落範圍'" class="w-100">
-                                <select class="me-2" placeholder="請選擇年度" v-if="props.tribeQuery['years'] !== undefined"
-                                    @change="tribeYear">
-                                    <option :value="item" v-for="(item, key) in props.tribeQuery['years']">
-                                        {{ item }}
-                                    </option>
-                                </select>
-                                <select class="me-2" placeholder="請選擇鄉鎮"
-                                    v-if="props.tribeQuery['township'] !== undefined"
-                                    @change="tribeTown">
-                                    <option :value="false">請選擇</option>
-                                    <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
-                                        {{ item }}
-                                    </option>
-                                </select>
-                                <select class="me-2" v-if="state.selectLayerOption.length !== 0" @change="moveMap">
-                                    <option :value="false">請選擇</option>
-                                    <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
-                                        {{ item.tribeName }}
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-                        <div v-else>
-                            <div class="my-2">
-                                <input type="checkbox"
-                                :checked="props.currentLayers.some(node => {
+                <img alt="" :src="subNode.icon" v-if="subNode.icon">
+              </label>
+              <div v-if="subNode.title === '新竹縣原住民部落範圍'" class="w-100">
+                <select class="me-2" placeholder="請選擇年度" v-if="props.tribeQuery['years'] !== undefined"
+                        @change="tribeYear">
+                  <option :value="item" v-for="(item, key) in props.tribeQuery['years']">
+                    {{ item }}
+                  </option>
+                </select>
+                <select class="me-2" placeholder="請選擇鄉鎮"
+                        v-if="props.tribeQuery['township'] !== undefined"
+                        @change="tribeTown">
+                  <option :value="false">請選擇</option>
+                  <option :value="item" v-for="(item, key) in props.tribeQuery['township']">
+                    {{ item }}
+                  </option>
+                </select>
+                <select class="me-2" v-if="state.selectLayerOption.length !== 0" @change="moveMap">
+                  <option :value="false">請選擇</option>
+                  <option :value="item.tribeCode" v-for="(item, key) in state.selectLayerOption">
+                    {{ item.tribeName }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div v-else>
+              <div class="my-2">
+                <input type="checkbox"
+                       :checked="props.currentLayers.some(node => {
                                     let subNodeIds = mapLayerList.getLayerIndex(node.id)
-                                    return subNodeIds.nodeIndex == nodeIndex && subNodeIds.subNodeIndex == subNodeIndex
+                                    return subNodeIds.nodeIndex === nodeIndex && subNodeIds.subNodeIndex === subNodeIndex
                                 })"
-                                @change="(e) => {
+                       @change="(e) => {
                                     LayerCheckBoxChange(e, {
                                         nodeIndex: nodeIndex,
                                         subNode: subNode,
@@ -209,9 +215,9 @@ export default {
                                         id: subNode.id
                                     })
                                 }">
-                                {{ subNode.title }}
-                                <select name="" id="" class="mx-2" v-model="state.TilesListValue"
-                                    v-if="subNode.tiles_list != null" @change="(e) => {
+                {{ subNode.title }}
+                <select name="" id="" class="mx-2" v-model="state.TilesListValue"
+                        v-if="subNode.tiles_list != null" @change="(e) => {
                                         LayerCheckBoxChange(e, {
                                             nodeIndex: nodeIndex,
                                             subNode: subNode,
@@ -229,59 +235,71 @@ export default {
                             </div>
                             <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;">
                                 <span class="me-2 d-flex flex-wrap align-items-center mb-1"
-                                    v-for="(iconSrc) in subNode.info_box.items_group" v-bind:key="iconSrc">
+                                      v-for="(iconSrc) in subNode.info_box.items_group" v-bind:key="iconSrc">
                                     <img :src="iconSrc.icon" alt="" class="me-1" v-if="iconSrc.icon">
                                     <span class="fw-bold">{{ iconSrc.text }}</span>
                                 </span>
-                            </div>
-                        </div>
-
-                        <!-- TODO 修改樣式 -->
-                        <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;" v-if="subNode.legend">
-                            <a class="me-1" :href="subNode.legend" target="_blank" style="text-decoration: none; color: #a87777;">圖例連結</a>
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
+
+            <!-- TODO 修改樣式 -->
+            <div class="d-flex flex-wrap px-2 pt-1" style="background: #f4f4f4;" v-if="subNode.legend">
+              <a class="me-1" :href="subNode.legend" target="_blank"
+                 style="text-decoration: none; color: #a87777;">圖例連結</a>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <style lang="sass" scoped>
 .condition
-    border-radius: 10px
+  border-radius: 10px
+
 .closeBtn
-    right:10px
+  right: 10px
+  width: 20px
+  height: 20px
+  padding: 0
+
+  &::after
+    content: ''
+    background: #fff
+    height: 2px
+    width: 60%
+    display: block
+
+.content
+  overflow-y: scroll
+  background: #fff
+
+  .landBoundary
+    max-height: 500px
+
+  .title
+    cursor: pointer
+
+    svg
+      transform: rotateZ(0)
+
+    .openTitle
+      transform: rotateZ(90deg)
+
+  svg
     width: 20px
     height: 20px
-    padding: 0
-    &::after
-        content: ''
-        background: #fff
-        height: 2px
-        width: 60%
-        display: block
-.content
-    overflow-y: scroll
-    background: #fff
-    .landBoundary
-        max-height: 500px
-    .title
-        cursor: pointer
-        svg
-            transform: rotateZ(0)
-        .openTitle
-            transform: rotateZ(90deg)
-    svg
-        width: 20px
-        height: 20px
-    img
-        width: 16px
-        height: 16px
-    .wrap
-        display: none
+
+  img
+    width: 16px
+    height: 16px
+
+  .wrap
+    display: none
+
 @media (max-width: 600px)
-    .condition
-        border-radius: 0
+  .condition
+    border-radius: 0
 
 </style>

@@ -1,32 +1,35 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-import $ from 'jquery'
+import { reactive } from 'vue'
 
 export default {
     props: {
         currentLayers: {
             type: Array,
-            default: []
+            // eslint-disable-next-line vue/require-valid-default-prop
+            default: [],
         },
         mapCount: {
             type: Number,
-            default: 1
+            default: 1,
         },
         dimensionMapStatus: {
             type: Boolean,
-            default: false
+            default: false,
         },
         openConditionWrap: {
             type: Function,
-            default: () => {}
+            default: () => {
+            },
         },
         openLayerSelect: {
             type: Function,
-            default: () => {}
+            default: () => {
+            },
         },
         onLayerControl: {
             type: Function,
-            default: () => {}
+            default: () => {
+            },
         },
         onChangeMapCount: {
             type: Function,
@@ -47,11 +50,11 @@ export default {
             targetNum: 1,
         })
 
-        function toolSwitch(target, value) {
+        function toolSwitch(target, value){
             // 其他全部關掉
             Object.keys(state.toolSwitch).forEach(node => {
-                if (node === target) {
-                    if(state.toolSwitch[target]) {
+                if (node === target){
+                    if (state.toolSwitch[target]){
                         state.toolSwitch[target] = false
                     } else {
                         state.toolSwitch[target] = true
@@ -61,14 +64,18 @@ export default {
                 }
             })
         }
-        function onLayerControl(action, value) {
-            if (action === 'changeMapCount') {
-                state.toolSwitch['splitWindowBtn'] = false
+
+        function onLayerControl(action, value){
+            if (action === 'changeMapCount'){
+                state.toolSwitch.splitWindowBtn = false
             }
-            props.onLayerControl({ action, value })
+            props.onLayerControl({
+                action,
+                value,
+            })
         }
 
-        function conditionWrap() {
+        function conditionWrap(){
             emit('conditionWrap')
         }
 
@@ -78,23 +85,24 @@ export default {
             props,
             state,
             toolSwitch,
+            // eslint-disable-next-line vue/no-dupe-keys
             onLayerControl,
             conditionWrap,
         }
-    }
+    },
 }
 </script>
 
 <template>
-    <div class="w-100">
-        <!-- <div class="position-fixed top-0 w-100 px-3 mt-3 d-flex justify-content-between justify-content-sm-end flex-wrap"> -->
-            <!-- <img src="@/assets/logo.svg" class="w-50 w-lg-100"> -->
-            <!-- <mapSourceOption class="mapSourceOption d-none d-sm-block"
-                :baseMapList="state.temp.baseMapList"
-                :onChangeBaseMaps="({ action, value }) => {
-                    layerControl({ action, value })
-                }" /> -->
-        <!-- </div> -->
+  <div class="w-100">
+    <!-- <div class="position-fixed top-0 w-100 px-3 mt-3 d-flex justify-content-between justify-content-sm-end flex-wrap"> -->
+    <!-- <img src="@/assets/logo.svg" class="w-50 w-lg-100"> -->
+    <!-- <mapSourceOption class="mapSourceOption d-none d-sm-block"
+        :baseMapList="state.temp.baseMapList"
+        :onChangeBaseMaps="({ action, value }) => {
+            layerControl({ action, value })
+        }" /> -->
+    <!-- </div> -->
 
         <ul class="list-unstyled d-flex align-items-center justify-content-around h-100 flex-nowrap w-100 bg-white mb-0">
             <li>
@@ -135,14 +143,16 @@ export default {
 
 <style lang="sass">
 ul
-    li
-        .navbarBtn
-            width: 50px
-            height: 50px
-            img
-                width: 100%
-                height: 100%
-        &:nth-Child(1) .navbarBtn, &:nth-Child(4) .navbarBtn
-            width: 40px
-            height: 40px
+  li
+    .navbarBtn
+      width: 50px
+      height: 50px
+
+      img
+        width: 100%
+        height: 100%
+
+    &:nth-Child(1) .navbarBtn, &:nth-Child(4) .navbarBtn
+      width: 40px
+      height: 40px
 </style>

@@ -1,24 +1,25 @@
 <script>
-import { useSlots, onBeforeMount, onMounted, onBeforeUnmount, ref, reactive, computed, watch, nextTick, defineAsyncComponent, useCssModule, inject } from 'vue'
-import $ from 'jquery'
+import { reactive } from 'vue'
 
 export default {
     props: {
         currentLayers: {
             type: Array,
-            default: []
+            // eslint-disable-next-line vue/require-valid-default-prop
+            default: [],
         },
         mapCount: {
             type: Number,
-            default: 1
+            default: 1,
         },
         dimensionMapStatus: {
             type: Boolean,
-            default: false
+            default: false,
         },
         onChangeMapCount: {
             type: Function,
-            default: ()=>{}
+            default: () => {
+            },
         },
         onChangeTarget: {
             type: Function,
@@ -39,11 +40,11 @@ export default {
             targetNum: 1,
         })
 
-        function toolSwitch(target, value) {
+        function toolSwitch(target, value){
             // 其他全部關掉
             Object.keys(state.toolSwitch).forEach(node => {
-                if (node === target) {
-                    if(state.toolSwitch[target]) {
+                if (node === target){
+                    if (state.toolSwitch[target]){
                         state.toolSwitch[target] = false
                     } else {
                         state.toolSwitch[target] = true
@@ -53,11 +54,15 @@ export default {
                 }
             })
         }
-        function onLayerControl(action, value) {
-            emit('onLayerControl', { action, value })
+
+        function onLayerControl(action, value){
+            emit('onLayerControl', {
+                action,
+                value,
+            })
         }
 
-        function conditionWrap() {
+        function conditionWrap(){
             emit('conditionWrap')
         }
 
@@ -68,7 +73,7 @@ export default {
             onLayerControl,
             conditionWrap,
         }
-    }
+    },
 }
 </script>
 
@@ -114,54 +119,62 @@ export default {
             </li>
         </ul>
 
-        <div class="switchControl d-flex position-fixed rounded-pill p-2" id="switchControl"
-        style="z-index: 99;">
-            <OverLayer :text="'左右視窗切換工具'" />
-            <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
+    <div class="switchControl d-flex position-fixed rounded-pill p-2" id="switchControl"
+         style="z-index: 99;">
+      <OverLayer :text="'左右視窗切換工具'"/>
+      <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 1 }" @click="() => {
                 state.targetNum = 1
                 props.onChangeTarget(1)
-            }">左</div>
-            <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
+            }">左
+      </div>
+      <div class="fs-3 text-white rounded-pill" :class="{ 'active': state.targetNum === 2 }" @click="() => {
                 state.targetNum = 2
                 props.onChangeTarget(2)
-            }">右</div>
-        </div>
+            }">右
+      </div>
     </div>
+  </div>
 </template>
 
 <style lang="sass" scoped>
 .MapFeatureBtn
-    display: block
-    border-radius: 10px
-    width: 68px
-    height: 68px
-    box-sizing: border-box
-    img
-        width: 100%
-        height: 100%
-        &:hover
-            filter: brightness(0.9)
-    svg
-        font-size: 24px
-        width: 100%
-        height: 100%
+  display: block
+  border-radius: 10px
+  width: 68px
+  height: 68px
+  box-sizing: border-box
+
+  img
+    width: 100%
+    height: 100%
+
+    &:hover
+      filter: brightness(0.9)
+
+  svg
+    font-size: 24px
+    width: 100%
+    height: 100%
 
 .switchControl
-    top: 10px
-    left: 50%
-    background: rgba(30, 30, 30, 0.9)
+  top: 10px
+  left: 50%
+  background: rgba(30, 30, 30, 0.9)
+  box-sizing: border-box
+  transform: translateX(-50%)
+
+  div
+    padding: 5px 28px
+    cursor: pointer
     box-sizing: border-box
-    transform: translateX(-50%)
-    div
-        padding:5px 28px
-        cursor: pointer
-        box-sizing: border-box
-    .active
-        background: #247BA0
+
+  .active
+    background: #247BA0
+
 @media (max-width: 1300px)
-    .switchControl
-        top: 10px
-        left: unset
-        right: 10px
-        transform: unset
+  .switchControl
+    top: 10px
+    left: unset
+    right: 10px
+    transform: unset
 </style>
