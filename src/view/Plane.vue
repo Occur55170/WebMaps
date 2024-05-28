@@ -62,7 +62,7 @@ export default {
 
         onMounted(async () => {
             await $.ajax({
-                url: `https://api.edtest.site/engineering_plan?tribeCode=${route.params?.id}`,
+                url: `https://blueprint.indigenoustribe.tw/api/engineering_plan?tribeCode=${route.params?.id}`,
                 method: 'GET',
             }).done(res => {
                 state.planObj = res

@@ -38,7 +38,7 @@ export default {
 
         async function getTribeData(tribeId){
             return await $.ajax({
-                url: `https://api.edtest.site/tribe?tribeCode=${tribeId}`,
+                url: `https://blueprint.indigenoustribe.tw/api/tribe?tribeCode=${tribeId}`,
                 method: 'GET',
             }).done(res => {
                 return res
@@ -51,7 +51,7 @@ export default {
 
         async function getDisasterData(id){
             return await $.ajax({
-                url: `https://api.edtest.site/historicalDiseaster?id=${id}`,
+                url: `https://blueprint.indigenoustribe.tw/api/historicalDiseaster?id=${id}`,
                 method: 'GET',
             }).done(res => {
                 return res
@@ -64,7 +64,7 @@ export default {
 
         async function getRainfallStation(stationName){
             return await $.ajax({
-                url: `https://api.edtest.site/rainData?stationName=${stationName}`,
+                url: `https://blueprint.indigenoustribe.tw/api/rainData?stationName=${stationName}`,
                 method: 'GET',
             }).done(res => {
                 return res
@@ -77,7 +77,7 @@ export default {
 
         async function getHarvestDrill(projNo){
             return await $.ajax({
-                url: `https://api.edtest.site/harvestDrill?projNo=${projNo}`,
+                url: `https://blueprint.indigenoustribe.tw/api/harvestDrill?projNo=${projNo}`,
                 method: 'GET',
             }).done(res => {
                 return res

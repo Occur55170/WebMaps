@@ -83,7 +83,7 @@ export default {
         }
 
         async function getTribes(){
-            const result = await $.ajax(`https://api.edtest.site/tribes?${'years=' + state.conditionYear}&${'township=' + state.conditionTown}`, 'GET')
+            const result = await $.ajax(`https://blueprint.indigenoustribe.tw/api/tribes?${'years=' + state.conditionYear}&${'township=' + state.conditionTown}`, 'GET')
             state.selectLayerOption = result
         }
 

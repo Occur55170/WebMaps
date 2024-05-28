@@ -40,7 +40,7 @@ export default {
 
         onMounted(async () => {
             await $.ajax({
-                url: `https://api.edtest.site/tribe?tribeCode=${route.params?.id}`,
+                url: `https://blueprint.indigenoustribe.tw/api/tribe?tribeCode=${route.params?.id}`,
                 method: 'GET',
             }).done(res => {
                 state.tribeData = res

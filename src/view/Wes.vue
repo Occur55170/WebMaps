@@ -728,7 +728,7 @@ export default {
             }
             if (layerName === '新竹縣原住民部落範圍'){
                 $.ajax({
-                    url: 'https://api.edtest.site/tribeQuery',
+                    url: 'https://blueprint.indigenoustribe.tw/api/tribeQuery',
                     method: 'GET',
                     success: (res) => {
                         state.tribeQuery = res
@@ -753,14 +753,14 @@ export default {
 
         onMounted(async () => {
             let getBaseData = $.ajax({
-                url: 'https://api.edtest.site/underLayers',
+                url: 'https://blueprint.indigenoustribe.tw/api/underLayers',
                 method: 'GET',
             }).done(res => {
                 return res
             })
 
             let getLayerData = $.ajax({
-                url: 'https://api.edtest.site/layers',
+                url: 'https://blueprint.indigenoustribe.tw/api/layers',
                 method: 'GET',
             }).done(res => {
                 return res
