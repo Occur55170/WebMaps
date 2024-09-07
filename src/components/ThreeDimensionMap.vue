@@ -1,24 +1,22 @@
 <script>
 export default {
-    props: {},
-    setup(props, { emit }) {
-        const state = reactive({})
-        const viewer = new Cesium.Viewer("cesiumContainer", {
-            terrain: Cesium.Terrain.fromWorldTerrain(),
-        });
+  props: {},
+  setup(props, { emit }){
+    const state = reactive({})
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrain: Cesium.Terrain.fromWorldTerrain(),
+    })
 
-
-
-        return {
-            state,
-            props,
-        }
+    return {
+      state,
+      props,
     }
+  },
 }
 </script>
 
 <template>
-    <div id="cesiumContainer" class="fullSize"></div>
+  <div id="cesiumContainer" class="fullSize"></div>
 </template>
 
 <style>
@@ -28,11 +26,13 @@ export default {
   padding: 4px;
   border-radius: 4px;
 }
+
 #toolbar input {
   vertical-align: middle;
   padding-top: 2px;
   padding-bottom: 2px;
 }
+
 #toolbar .header {
   font-weight: bold;
 }

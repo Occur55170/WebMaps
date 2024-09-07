@@ -6,7 +6,7 @@ export default createStore({
     state: {
         test: 'store',
         isInit: true,
-        currentWidth: 0
+        currentWidth: 0,
     },
     actions: {
         updateLayerStatus(context, status){
@@ -22,7 +22,7 @@ export default createStore({
         },
         SETWINDOWSWIDTH(state, payload){
             state.currentWidth = payload
-        }
+        },
     },
     getters: {
         // isEmbedded: (state, getters, rootState) => {

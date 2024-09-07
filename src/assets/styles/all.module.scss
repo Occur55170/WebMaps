@@ -1,127 +1,152 @@
-@import './_variables.scss';
+@import "./_variables.scss";
 
 // bg
-.black-deep {background: $black-deep;}
-.bg-steel {background: $blue-steel}
-.bg-light {background: $blue-light}
-.bg-grey {background: $grey;}
-.bg-grey-light {background: $grey-light;}
-.bg-red-light {background: $red-light;}
-.bg-brown {background: $brown;}
-.bg-orange {background: $orange;}
-.bg-blueDeep {background: $blue-deep;}
-.grey-depend {background: $grey-depend;}
+.black-deep {
+  background: $black-deep;
+}
+.bg-steel {
+  background: $blue-steel;
+}
+.bg-light {
+  background: $blue-light;
+}
+.bg-grey {
+  background: $grey;
+}
+.bg-grey-light {
+  background: $grey-light;
+}
+.bg-red-light {
+  background: $red-light;
+}
+.bg-brown {
+  background: $brown;
+}
+.bg-orange {
+  background: $orange;
+}
+.bg-blueDeep {
+  background: $blue-deep;
+}
+.grey-depend {
+  background: $grey-depend;
+}
 // text
-.text-brown {color: $brown;}
-.text-orange {color: $orange;}
-.text-steel {color: $blue-steel;}
+.text-brown {
+  color: $brown;
+}
+.text-orange {
+  color: $orange;
+}
+.text-steel {
+  color: $blue-steel;
+}
 
 // icon
 .icon {
-    width: 10px;
-    height: 10px;
-    border-radius: 99em;
-    margin-right: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 99em;
+  margin-right: 5px;
 }
 .icon-topic-01 {
-    content: '';
-    background: $blue-steel;
+  content: "";
+  background: $blue-steel;
 }
 .icon-topic-02 {
-    content: '';
-    background: $blue-light;
+  content: "";
+  background: $blue-light;
 }
 .icon-topic-03 {
-    content: '';
-    background: $grey;
+  content: "";
+  background: $grey;
 }
 .icon-topic-04 {
-    content: '';
-    background: $red;
+  content: "";
+  background: $red;
 }
 .icon-topic-05 {
-    content: '';
-    background: $blue;
+  content: "";
+  background: $blue;
 }
 .icon-topic-06 {
-    content: '';
-    background: $black-deep;
+  content: "";
+  background: $black-deep;
 }
 .icon-topic-07 {
-    content: '';
-    background: $yellow-deep;
+  content: "";
+  background: $yellow-deep;
 }
 .icon-topic-08 {
-    content: '';
-    background: $orange-deep;
+  content: "";
+  background: $orange-deep;
 }
 .icon-topic-09 {
-    content: '';
-    background: $green-light;
+  content: "";
+  background: $green-light;
 }
 .icon-topic-10 {
-    content: '';
-    background: $pink-light;
+  content: "";
+  background: $pink-light;
 }
 .icon-topic-11 {
-    content: '';
-    background: $blue-dark;
+  content: "";
+  background: $blue-dark;
 }
 .icon-topic-12 {
-    content: '';
-    background: $purple-light;
+  content: "";
+  background: $purple-light;
 }
 .icon-topic-13 {
-    content: '';
-    background: $red-dark;
+  content: "";
+  background: $red-dark;
 }
 .icon-topic-14 {
-    content: '';
-    background: $grey-dark;
+  content: "";
+  background: $grey-dark;
 }
 .icon-topic-15 {
-    content: '';
-    background: $yellow-gold;
+  content: "";
+  background: $yellow-gold;
 }
 .icon-topic-16 {
-    content: '';
-    background: $green-forest;
+  content: "";
+  background: $green-forest;
 }
 .icon-topic-17 {
-    content: '';
-    background: $blue-sky;
+  content: "";
+  background: $blue-sky;
 }
 .icon-topic-18 {
-    content: '';
-    background: $indigo-dark;
+  content: "";
+  background: $indigo-dark;
 }
 .icon-topic-19 {
-    content: '';
-    background: $pink-rose;
+  content: "";
+  background: $pink-rose;
 }
 .icon-topic-20 {
-    content: '';
-    background: $brown-light;
+  content: "";
+  background: $brown-light;
 }
 .icon-topic-21 {
-    content: '';
-    background: $cyan-deep;
+  content: "";
+  background: $cyan-deep;
 }
 .icon-topic-22 {
-    content: '';
-    background: $grey-silver;
+  content: "";
+  background: $grey-silver;
 }
 
 // other
 .disabled {
-    pointer-events: none;
-    opacity: 0.5;
+  pointer-events: none;
+  opacity: 0.5;
 }
 .hidden {
-    display: none !important;
+  display: none !important;
 }
 
 .cursor-pointer {
-    cursor: pointer;
+  cursor: pointer;
 }
-

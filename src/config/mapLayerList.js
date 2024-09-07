@@ -1,331 +1,283 @@
-// import $ from 'jquery'
-import { Map, View, Feature } from 'ol' // 引入容器绑定模塊和視圖模塊
-import VectorSource from 'ol/source/Vector.js'
-import { Tile, Tile as TileLayer, Image as ImageLayer, Vector, Vector as VectorLayer } from 'ol/layer.js'
-import TileWMS from 'ol/source/TileWMS.js'
-import { bbox, tile } from 'ol/loadingstrategy.js'
-import GeoJSON from 'ol/format/GeoJSON.js'
-import { Circle, Polygon, Point } from 'ol/geom.js'
-import { Icon, Fill, Stroke, Style } from 'ol/style.js'
-import ImageWMS from 'ol/source/ImageWMS.js'
-import Static from 'ol/source/ImageStatic.js'
-
-import TilegridWMTS from 'ol/tilegrid/WMTS'
-
-import { createXYZ } from 'ol/tilegrid.js'
+import VectorSource from 'ol/source/Vector'
+import { Image as ImageLayer, Tile as TileLayer, Vector, Vector as VectorLayer } from 'ol/layer'
+import TileWMS from 'ol/source/TileWMS'
+import { bbox } from 'ol/loadingstrategy'
+import GeoJSON from 'ol/format/GeoJSON'
+import Static from 'ol/source/ImageStatic'
 import WMTS from 'ol/source/WMTS'
-import { get as getProjection } from 'ol/proj'
-import { getTopLeft, getWidth } from 'ol/extent.js'
-
-import 'ol/ol.css' // ol提供的css样式
-
+import TilegridWMTS from 'ol/tilegrid/WMTS'
+import 'ol/ol.css'
 import proj4 from 'proj4'
-import { register } from 'ol/proj/proj4.js'
+import { register } from 'ol/proj/proj4'
+import { getTopLeft } from 'ol/extent'
+import { Fill, Style } from 'ol/style'
+
 proj4.defs(
     'EPSG:3826',
-    '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs'
+    '+proj=tmerc +lat_0=0 +lon_0=121 +k=0.9999 +x_0=250000 +y_0=0 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs +type=crs',
 )
 register(proj4)
 
-export default {
-    getLayer: (layer, nestedSubNodeIndex, id) => {
-        let result, layerSource
-        const layerType = layer.layer_type
-        const figureType = layer.figure_type
-        const tileTitle = layer.single_tiles ? '' : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
-        const request = []
-        if (layerType === 'WMS'){
-            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-            switch (figureType){
-                case 'Point':
-                    if (url){
-                        const api = new URL(url)
-                        // 取得網址部分
-                        const origin = api.origin
-                        const pathname = api.pathname
+/**
+ * 提取URL和參數的函數
+ * @param {string} url - 完整的URL字符串
+ * @returns {[string, Object]} 返回一個包含基本URL和參數對象的數組
+ */
+const extractUrlAndParams = (url) => {
+    if (!url) return ['', {}]
+    const api = new URL(url)
+    const origin = api.origin
+    const pathname = api.pathname
+    const searchParams = api.searchParams
+    const searchParamsObject = {}
+    for (const [key, value] of searchParams.entries()){
+        searchParamsObject[key] = value
+    }
+    return [origin + pathname, searchParamsObject]
+}
 
-                        // 取得query參數
-                        const searchParams = api.searchParams
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver',
-                        crossOrigin: 'anonymous',
-                    })
-                    break
-                case 'Surface':
-                    if (url){
-                        const api = new URL(url)
-                        // 取得網址部分
-                        const origin = api.origin
-                        const pathname = api.pathname
+/**
+ * 根據圖層類型創建對應的圖層
+ * @param {Object} layer - 圖層信息
+ * @param {number} nestedSubNodeIndex - 子節點索引
+ * @param {string} id - 圖層ID
+ * @returns {TileLayer|ImageLayer|VectorLayer} 返回對應的圖層對象
+ */
+const getLayer = (layer, nestedSubNodeIndex, id) => {
+    let result, layerSource
+    const layerType = layer.layer_type
+    const figureType = layer.figure_type
+    const tileTitle = layer.single_tiles
+        ? ''
+        : `- ${layer.tiles_list[nestedSubNodeIndex]?.title}`
 
-                        // 取得query參數
-                        const searchParams = api.searchParams
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver'
-                    })
-                    break
-                case 'Line':
-                    // 活動斷層
-                    if (url){
-                        const api = new URL(url)
-                        // 取得網址部分
-                        const origin = api.origin
-                        const pathname = api.pathname
+    if (layerType === 'WMS'){
+        const url = layer.single_tiles
+            ? layer.tiles_url
+            : layer.tiles_list[nestedSubNodeIndex].tile_url
+        const [requestUrl, requestParams] = extractUrlAndParams(url)
 
-                        // 取得query參數
-                        const searchParams = api.searchParams
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new TileWMS({
-                        maxzoom: 18,
-                        minzoom: 3,
-                        url: request[0],
-                        params: request[1],
-                        serverType: 'mapserver'
-                    })
-                    break
-                default:
-                    console.log('error-otherWMSLayer:', figureType)
-            }
-            result = new TileLayer({
-                id,
-                label: `${layer.title}${tileTitle}`,
-                // minZoom: 4,
-                // maxZoom: 18,
-                source: new TileWMS({
-                    name: layer.title,
-                    url: layerSource.getUrls()[0],
-                    params: layerSource.getParams(),
-                    serverType: 'geoserver',
-                    crossOrigin: 'anonymous',
-                    projection: layerSource.getParams()?.SRS,
-                }),
-                style: 'default',
-                maxZoom: 20,
-            })
+        layerSource = new TileWMS({
+            maxzoom: 18,
+            minzoom: 3,
+            url: requestUrl,
+            params: requestParams,
+            serverType: 'mapserver',
+            crossOrigin: 'anonymous',
+        })
+
+        result = new TileLayer({
+            id,
+            label: `${layer.title}${tileTitle}`,
+            source: new TileWMS({
+                name: layer.title,
+                url: layerSource.getUrls()[0],
+                params: layerSource.getParams(),
+                serverType: 'geoserver',
+                crossOrigin: 'anonymous',
+                projection: layerSource.getParams()?.SRS,
+            }),
+            style: 'default',
+            maxZoom: 20,
+        })
+    }
+
+    if (layerType === 'WMTS'){
+        const projection = 'EPSG:3857'
+        const projectionExtent = [
+            -20037508.342789244, -20037508.342789244, 20037508.342789244,
+            20037508.342789244,
+        ]
+        const matrixIds = Array.from({ length: 21 }, (_, i) => i)
+        const resolutions = Array.from(
+            { length: 21 },
+            (_, i) => 156543.03392804097 / Math.pow(2, i),
+        )
+
+        layerSource = new WMTS({
+            url: layer.tiles_url,
+            layer: layer.name,
+            requestEncoding: 'REST',
+            matrixSet: 'GoogleMapsCompatible',
+            format: 'image/png',
+            transparent: true,
+            projection,
+            tileGrid: new TilegridWMTS({
+                origin: getTopLeft(projectionExtent),
+                matrixIds,
+                resolutions,
+            }),
+            style: 'default',
+            maxZoom: 20,
+        })
+
+        result = new TileLayer({
+            name: layer.name,
+            id,
+            label: `${layer.title}${tileTitle}`,
+            title: layer.title,
+            type: 'overlay',
+            opacity: 1.0,
+            visible: true,
+            source: layerSource,
+        })
+    }
+
+    if (layerType === 'WFS'){
+        const vectorSource = new VectorSource({
+            format: new GeoJSON(),
+            url: layer.tiles_url,
+            strategy: bbox,
+        })
+
+        const defaultStyles = new Vector().getStyleFunction()()
+        const hasSelectColor = {}
+
+        const getRandomUniqueColor = () => {
+            const usedColors = new Set()
+            const characters = '0123456789ABCDEF'
+            let color
+            do {
+                color = '#'
+                for (let i = 0; i < 6; i++){
+                    color += characters[Math.floor(Math.random() * 16)]
+                }
+            } while (usedColors.has(color))
+            usedColors.add(color)
+            return color
         }
 
-        if (layerType === 'WMTS'){
-            switch (figureType){
-                case 'Surface':
-                    // FIX: 匯出會變成gif
-                    const projection = 'EPSG:3857'
-                    const projectionExtent = [-20037508.342789244, -20037508.342789244, 20037508.342789244, 20037508.342789244]
-                    const matrixIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-                    const resolutions = [156543.03392804097, 78271.51696402048, 39135.75848201024, 19567.87924100512, 9783.93962050256, 4891.96981025128, 2445.98490512564, 1222.99245256282, 611.49622628141, 305.748113140705, 152.8740565703525, 76.43702828517625, 38.21851414258813, 19.109257071294063, 9.554628535647032, 4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.29858214173896974, 0.14929107086948487]
-                    layerSource = new WMTS({
-                        url: layer.tiles_url,
-                        layer: layer.name,
-                        requestEncoding: 'REST',
-                        matrixSet: 'GoogleMapsCompatible',
-                        format: 'image/png',
-                        transparente: true,
-                        projection,
-                        tileGrid: new TilegridWMTS({
-                            origin: getTopLeft(projectionExtent),
-                            matrixIds,
-                            resolutions
-                        }),
-                        style: 'default',
-                        maxZoom: 20,
-                    })
-
-                    result = new TileLayer({
-                        name: layer.name,
-                        id,
-                        label: `${layer.title}${tileTitle}`,
-                        title: layer.title,
-                        type: 'overlay',
-                        opacity: 1.0,
-                        visible: true,
-                        source: layerSource
-                    })
-                    break
-                default:
-                    console.log('error-otherWMSLayer:', figureType)
-            }
-        }
-
-        // only 部落圖層點擊用layer
-        if (layerType === 'WFS'){
-            const vectorSource = new VectorSource({
-                format: new GeoJSON(),
-                url: layer.tiles_url,
-                strategy: bbox
-            })
-            // TODO: 加入82災害樣式
-            const defaultStyles = new Vector().getStyleFunction()()
-            const hasSelectColor = {}
-            const layerStyle = (layer.title === '新竹縣原住民部落範圍')
-                ? function(feature){
-                    const featureGroupName = feature.values_['部落名稱']
-                    function getRandomUniqueColor(){
-                        const usedColors = new Set()
-                        const characters = '0123456789ABCDEF'
-                        let color
-                        do {
-                            color = '#'
-                            for (let i = 0; i < 6; i++){
-                                color += characters[Math.floor(Math.random() * 16)]
-                            }
-                        } while (usedColors.has(color))
-
-                        usedColors.add(color)
-                        hasSelectColor[featureGroupName] = color
-                        return color
+        const layerStyle =
+            layer.title === '新竹縣原住民部落範圍'
+                ? (feature) => {
+                    const featureGroupName = feature.get('部落名稱')
+                    if (!hasSelectColor[featureGroupName]){
+                        hasSelectColor[featureGroupName] = getRandomUniqueColor()
                     }
-
-                    const style = new Style({
+                    return new Style({
                         fill: new Fill({
-                            color: hasSelectColor[featureGroupName] === undefined ? getRandomUniqueColor() : hasSelectColor[featureGroupName]
+                            color: hasSelectColor[featureGroupName],
                         }),
                     })
-                    return style
                 }
                 : defaultStyles
-            result = new VectorLayer({
-                id,
-                label: `${layer.title}${tileTitle}`,
-                source: vectorSource,
-                style: layerStyle,
-            })
-        }
-        if (layerType === 'GeoJson'){
-            const url = layer.single_tiles ? layer.tiles_url : layer.tiles_list[nestedSubNodeIndex].tile_url
-            switch (figureType){
-                case 'Line':
-                    if (url){
-                        const api = new URL(url)
-                        const { origin, pathname, searchParams } = api
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new VectorSource({
-                        url: layer.tiles_url,
-                        format: new GeoJSON({
-                            geometryName: layer.title
-                        }),
-                    })
-                    break
-                case 'Point':
-                    // TODO: icon優化
-                    if (url){
-                        const api = new URL(url)
-                        const { origin, pathname, searchParams } = api
-                        const searchParamsObject = {}
-                        for (const [key, value] of searchParams.entries()){
-                            searchParamsObject[key] = value
-                        }
-                        request[0] = origin + pathname
-                        request[1] = searchParamsObject
-                    }
-                    layerSource = new VectorSource({
-                        url: layer.tiles_url,
-                        format: new GeoJSON({
-                            geometryName: layer.title
-                        }),
-                    })
-                    break
-                default:
-                    console.log('error-otherWMSLayer:', figureType)
-            }
-            result = new VectorLayer({
-                id,
-                label: `${layer.title}${tileTitle}`,
-                source: layerSource
-            })
-        }
-        if (layerType === 'Image'){
-            switch (figureType){
-                case 'Surface':
-                    const imageLayer = new Static({
-                        url: layer.tiles_image_urls[0],
-                        projection: 'EPSG:4326',
-                        imageExtent: layer.image_options.image_extent,
-                        interpolate: true,
-                    })
 
-                    result = new ImageLayer({
-                        id,
-                        label: `${layer.title}${tileTitle}`,
-                        source: imageLayer,
-                        ext: {
-                            currentLayerKey: 0,
-                            tilesImageUrls: layer.tiles_image_urls,
-                            imageExtent: layer.image_options.image_extent,
-                        }
-                    })
-                    break
-                default:
-                    console.log('error-otherWMSLayer:', figureType)
-            }
-        }
-        return result
-    },
-    getLayerIndex: (id) => {
-        let nodeIndex; let subNodeIndex; let nestedSubNodeIndex
-        if (!(id)){ return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id } }
-        id.split('_').forEach((element, key) => {
-            switch (key){
-                case 0:
-                    nodeIndex = Number(element.split('node')[1])
-                    break
-                case 1:
-                    subNodeIndex = Number(element.split('subNode')[1])
-                    break
-                case 2:
-                    nestedSubNodeIndex = element.split('nestedSubNode')[1] !== 'undefined' ? Number(element.split('nestedSubNode')[1]) : 'undefined'
-                    break
-            }
+        result = new VectorLayer({
+            id,
+            label: `${layer.title}${tileTitle}`,
+            source: vectorSource,
+            style: layerStyle,
         })
-        return { nodeIndex, subNodeIndex, nestedSubNodeIndex, id }
-    },
-    resetLayerId: (id, keyName, newVal) => {
-        // FIXME: 使用上面getLayerIndex 做拆解
-        const result = {}
-        id.split('_').forEach(item => {
-            const [key, value] = item.split('ode')
-            result[key + 'ode'] = value
+    }
+
+    if (layerType === 'GeoJson'){
+        const url = layer.single_tiles
+            ? layer.tiles_url
+            : layer.tiles_list[nestedSubNodeIndex].tile_url
+        const [requestUrl, requestParams] = extractUrlAndParams(url)
+
+        layerSource = new VectorSource({
+            url: requestUrl,
+            format: new GeoJSON({ geometryName: layer.title }),
         })
 
-        result[keyName] = newVal
-
-        let newStr = ''
-        Object.entries(result).forEach((node, key) => {
-            newStr += `${node[0]}${node[1]}`
-            if (key + 1 !== Object.entries(result).length){ newStr += '_' }
+        result = new VectorLayer({
+            id,
+            label: `${layer.title}${tileTitle}`,
+            source: layerSource,
         })
-        return newStr
-    },
+    }
+
+    if (layerType === 'Image' && figureType === 'Surface'){
+        const imageLayer = new Static({
+            url: layer.tiles_image_urls[0],
+            projection: 'EPSG:4326',
+            imageExtent: layer.image_options.image_extent,
+            interpolate: true,
+        })
+
+        result = new ImageLayer({
+            id,
+            label: `${layer.title}${tileTitle}`,
+            source: imageLayer,
+            ext: {
+                currentLayerKey: 0,
+                tilesImageUrls: layer.tiles_image_urls,
+                imageExtent: layer.image_options.image_extent,
+            },
+        })
+    }
+
+    return result
+}
+
+/**
+ * 解析圖層ID，並返回索引對象
+ * @param {string} id - 圖層ID
+ * @returns {Object} 返回包含索引的對象
+ */
+const getLayerIndex = (id) => {
+    let nodeIndex
+    let subNodeIndex
+    let nestedSubNodeIndex
+
+    if (!id){
+        return {
+            nodeIndex,
+            subNodeIndex,
+            nestedSubNodeIndex,
+            id,
+        }
+    }
+
+    id.split('_').forEach((element, key) => {
+        switch (key){
+            case 0:
+                nodeIndex = Number(element.split('node')[1])
+                break
+            case 1:
+                subNodeIndex = Number(element.split('subNode')[1])
+                break
+            case 2:
+                nestedSubNodeIndex =
+                    element.split('nestedSubNode')[1] !== 'undefined'
+                        ? Number(element.split('nestedSubNode')[1])
+                        : undefined
+                break
+        }
+    })
+
+    return {
+        nodeIndex,
+        subNodeIndex,
+        nestedSubNodeIndex,
+        id,
+    }
+}
+
+/**
+ * 重置圖層ID
+ * @param {string} id - 原始ID
+ * @param {string} keyName - 要修改的鍵名
+ * @param {string} newVal - 新值
+ * @returns {string} 返回新的ID
+ */
+const resetLayerId = (id, keyName, newVal) => {
+    const result = {}
+    id.split('_').forEach((item) => {
+        const [key, value] = item.split('ode')
+        result[key + 'ode'] = value
+    })
+
+    result[keyName] = newVal
+
+    return Object.entries(result)
+    .map(([key, value]) => `${key}${value}`)
+    .join('_')
+}
+
+export default {
+    getLayer,
+    getLayerIndex,
+    resetLayerId,
 }
