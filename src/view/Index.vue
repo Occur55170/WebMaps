@@ -3,14 +3,14 @@ import { reactive } from 'vue'
 import router from '@/router/index.js'
 
 export default {
-  setup(props, { emit }){
-    const state = reactive({})
-    const route = router
-    return {
-      state,
-      route,
-    }
-  },
+    setup(props, { emit }){
+        const state = reactive({})
+        const route = router
+        return {
+            state,
+            route,
+        }
+    },
 }
 </script>
 
@@ -19,56 +19,37 @@ export default {
     <div class="wrapCom">
       <div class="startCon d-flex justify-content-between">
         <div class="content px-0 px-sm-5 position-relative">
-          <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt=""/>
+          <img src="@/assets/img/logo.svg" class="logo w-100 w-sm-80" alt="">
           <p class="fs-sm-6 fs-5">
-            原鄉部落面臨氣候變遷造成環境風險顯著升高，衝擊族人安全與部落居住環境品質，為提供最新安全且優質的居住環境指南，建立部落永續藍圖平台，共築宜居好家園!
-          </p>
-          <a
-              href=""
-              class="d-inline-block"
-              @click.prevent="route.push({ name: 'map' })"
-          >
-            <img src="@/assets/img/enterMapBtn.svg" alt=""/>
+            原鄉部落面臨氣候變遷造成環境風險顯著升高，衝擊族人安全與部落居住環境品質，為提供最新安全且優質的居住環境指南，建立部落永續藍圖平台，共築宜居好家園!</p>
+          <a href="" class="d-inline-block" @click.prevent="route.push({name: 'map'})">
+            <img src="@/assets/img/enterMapBtn.svg" alt="">
           </a>
         </div>
         <div class="overLay">
-          <img
-              src="@/assets/img/indexOverlay.png"
-              class="d-block w-100"
-              alt=""
-          />
+          <img src="@/assets/img/indexOverlay.png" class="d-block w-100" alt="">
         </div>
       </div>
     </div>
-    <div
-        class="qualify fw-bold d-flex flex-wrap flex-xxl-nowrap justify-content-center align-items-center mx-0 py-5"
-    >
-      <div
-          class="d-flex align-items-start justify-content-center my-5 me-4 px-3 px-sm-5 px-xxl-0 flex-wrap"
-      >
-        <img
-            src="../assets/img/IndexLeft.png"
-            alt=""
-            class="mb-5 mb-sm-0 me-sm-5"
-        />
+    <div class="qualify fw-bold d-flex flex-wrap flex-xxl-nowrap justify-content-center align-items-center mx-0 py-5">
+      <div class="d-flex align-items-start justify-content-center my-5 me-4 px-3 px-sm-5 px-xxl-0 flex-wrap">
+        <img src="../assets/img/IndexLeft.png" alt="" class="mb-5 mb-sm-0 me-sm-5">
         <div>
-          <p class="title fs-2 fw-bold">本平台使用對象</p>
+          <p class="title fs-2 fw-bold">
+            本平台使用對象
+          </p>
           <ul class="list-unstyled">
             <li>一般民眾</li>
             <li>縣市、鄉鎮政府</li>
           </ul>
         </div>
       </div>
-      <div
-          class="d-flex align-items-start justify-content-center my-5 px-3 px-sm-5 px-xxl-0 flex-wrap"
-      >
-        <img
-            src="../assets/img/IndexRight.png"
-            alt=""
-            class="mb-5 mb-sm-0 me-sm-5"
-        />
+      <div class="d-flex align-items-start justify-content-center my-5 px-3 px-sm-5 px-xxl-0 flex-wrap">
+        <img src="../assets/img/IndexRight.png" alt="" class="mb-5 mb-sm-0 me-sm-5">
         <div>
-          <p class="title fs-2 fw-bold">災害主題</p>
+          <p class="title fs-2 fw-bold">
+            災害主題
+          </p>
           <ul class="row list-unstyled mx-0">
             <li class="col-6 col-sm-4 col-xxl-4">水系</li>
             <li class="col-6 col-sm-4 col-xxl-4">自來水</li>
@@ -90,24 +71,14 @@ export default {
     </div>
     <footer class="border-top px-2 px-sm-0 py-3">
       <div class="mt-3 mb-4">
-        <p class="mb-1 text-center">
-          圖台系統版權
-          台灣整合防災工程技術顧問有限公司版權所有。本網站所有資料僅供參考用途，不得作為任何形式證明或主張
-        </p>
+        <p class="mb-1 text-center">圖台系統版權
+          台灣整合防災工程技術顧問有限公司版權所有。本網站所有資料僅供參考用途，不得作為任何形式證明或主張</p>
       </div>
-      <div
-          class="tip d-flex flex-xl-nowrap flex-wrap justify-content-sm-around justify-content-start"
-      >
-        <span class="mb-2 mb-lg-0"
-        >管理單位：台灣整合防災工程技術顧問有限公司</span
-        >
-        <span class="mb-2 mb-lg-0"
-        >公司地址：236新北市土城區中央路三段281巷15弄14號</span
-        >
+      <div class="tip d-flex flex-xl-nowrap flex-wrap justify-content-sm-around justify-content-start">
+        <span class="mb-2 mb-lg-0">管理單位：台灣整合防災工程技術顧問有限公司</span>
+        <span class="mb-2 mb-lg-0">公司地址：236新北市土城區中央路三段281巷15弄14號</span>
         <span class="mb-2 mb-lg-0">E-mail：salahayo3192@gmail.com</span>
-        <span class="mb-2 mb-lg-0"
-        >Copyright © 2023 台灣整合防災工程技術顧問有限公司</span
-        >
+        <span class="mb-2 mb-lg-0">Copyright © 2023 台灣整合防災工程技術顧問有限公司</span>
       </div>
     </footer>
   </div>

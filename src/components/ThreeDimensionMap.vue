@@ -1,17 +1,19 @@
 <script>
-export default {
-  props: {},
-  setup(props, { emit }){
-    const state = reactive({})
-    const viewer = new Cesium.Viewer('cesiumContainer', {
-      terrain: Cesium.Terrain.fromWorldTerrain(),
-    })
+import { reactive } from 'vue'
 
-    return {
-      state,
-      props,
-    }
-  },
+export default {
+    props: {},
+    setup(props){
+        const state = reactive({})
+        // const viewer = new Cesium.Viewer('cesiumContainer', {
+        //     terrain: Cesium.Terrain.fromWorldTerrain(),
+        // })
+
+        return {
+            state,
+            props,
+        }
+    },
 }
 </script>
 

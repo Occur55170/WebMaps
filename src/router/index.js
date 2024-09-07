@@ -17,9 +17,9 @@ const routes = [
         component: () => import('@/view/MapDetails.vue'),
     },
     {
-        path: '/Opp',
-        name: 'Opp',
-        component: () => import('@/view/Opp.vue'),
+        path: '/Wes',
+        name: 'Wes',
+        component: () => import('@/view/Wes.vue'),
     },
     {
         path: `${VITE_URL}/Plane/:id`,

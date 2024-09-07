@@ -2,34 +2,32 @@
 import { getCurrentInstance, onMounted, reactive } from 'vue'
 
 export default {
-  setup(props, { emit }){
-    const { proxy } = getCurrentInstance()
-    const state = reactive({
-      innerHeight: 0,
-    })
+    setup(props, { emit }){
+        const { proxy } = getCurrentInstance()
+        const state = reactive({
+            innerHeight: 0,
+        })
 
-    onMounted(() => {
-      state.innerHeight = window.innerHeight
-      window.addEventListener('resize', (e) => {
-        state.innerHeight = e.target.innerHeight
-      })
-    })
+        onMounted(() => {
+            state.innerHeight = window.innerHeight
+            window.addEventListener('resize', (e) => {
+                state.innerHeight = e.target.innerHeight
+            })
+        })
 
-    return {
-      window,
-      state,
-    }
-  },
+        return {
+            window,
+            state,
+        }
+    },
 }
 </script>
 
 <template>
-  <routerView
-      class="wrap"
-      :style="{
-      height: state.innerHeight + 'px',
-    }"
-  />
+  <routerView class="wrap"
+              :style="{
+        'height': state.innerHeight + 'px'
+    }"/>
 </template>
 
 <style lang="sass">

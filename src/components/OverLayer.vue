@@ -5,73 +5,70 @@ import router from '@/router/index.js'
 import { useStore } from 'vuex'
 
 export default {
-  props: {
-    text: {
-      type: String,
-      default: '測試',
+    props: {
+        text: {
+            type: String,
+            default: '測試',
+        },
+        styles: {
+            type: String,
+            default: '',
+        },
+        status: {
+            type: Boolean,
+            default: true,
+        },
     },
-    styles: {
-      type: String,
-      default: '',
+    setup(props){
+        const store = useStore()
+        const route = router
+
+        // 透過ref綁定此元件，元件再以position的方式黏貼在父層上，在抓取此元件寬高做出白邊線效果
+        const overLayCom = ref(null)
+
+        const state = reactive({
+            overLayerHeight: computed(() => {
+                return overLayCom?.value?.offsetHeight + 10
+            }),
+            overLayerWidth: computed(() => {
+                return overLayCom?.value?.offsetWidth + 10
+            }),
+            accordionListRef: null,
+            accordionListRefHeight: computed(() => {
+                return state.accordionListRef?.offsetHeight
+            }),
+            accordionListRefWidth: computed(() => {
+                return state.accordionListRef?.offsetWidth
+            }),
+        })
+
+        onMounted(() => {
+            $('.initOverLay').parent().addClass('position-relative')
+        })
+        return {
+            state,
+            props,
+            store,
+            route,
+            overLayCom,
+        }
     },
-    status: {
-      type: Boolean,
-      default: true,
-    },
-  },
-  setup(props, { emit }){
-    const store = useStore()
-    const route = router
-
-    // 透過ref綁定此元件，元件再以position的方式黏貼在父層上，在抓取此元件寬高做出白邊線效果
-    const overLayCom = ref(null)
-
-    const state = reactive({
-      overLayerHeight: computed(() => {
-        return overLayCom?.value?.offsetHeight + 10
-      }),
-      overLayerWidth: computed(() => {
-        return overLayCom?.value?.offsetWidth + 10
-      }),
-      accordionListRef: null,
-      accordionListRefHeight: computed(() => {
-        return state.accordionListRef?.offsetHeight
-      }),
-      accordionListRefWidth: computed(() => {
-        return state.accordionListRef?.offsetWidth
-      }),
-    })
-
-    onMounted(() => {
-      $('.initOverLay').parent().addClass('position-relative')
-    })
-    return {
-      state,
-      props,
-      store,
-      route,
-      overLayCom,
-    }
-  },
 }
 </script>
 <template>
-  <div
-      class="initOverLay"
-      v-if="store.state.isInit"
-      @click="store.dispatch('updateLayerStatus', false)"
-      :style="{
-      height: state.overLayerHeight + 'px',
-      width: state.overLayerWidth + 'px',
+  <div class="initOverLay"
+       v-if="store.state.isInit"
+       @click="store.dispatch('updateLayerStatus', false)"
+       :style="{
+        height: state.overLayerHeight + 'px',
+        width: state.overLayerWidth + 'px',
     }"
-      :ref="
-      (e) => {
-        state.accordionListRef = e;
-      }
-    "
-  >
-    <div class="tipText text-white fw-bold fs-3" :style="props.styles">
-      {{ props.text }}
+       :ref="(e) => {
+        state.accordionListRef = e
+    }">
+    <div class="tipText text-white fw-bold fs-3"
+         :style="props.styles"
+    >{{ props.text }}
     </div>
   </div>
 </template>

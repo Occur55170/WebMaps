@@ -6,59 +6,59 @@ import frame1 from '@/assets/mapDetail/frame-1.png'
 import frame2 from '@/assets/mapDetail/frame-2.png'
 
 export default {
-  props: {},
-  setup(props, { emit }){
-    const router = useRouter()
-    const route = useRoute()
-    const state = reactive({
-      redArray: [134],
-      mainTextColor: computed(() => {
-        return state.redArray.includes(Number(route.params.id)) ? 'text-brown' : 'text-steel'
-      }),
-      mainBgColor: computed(() => {
-        return state.redArray.includes(Number(route.params.id)) ? 'bg-brown' : 'bg-steel'
-      }),
-      type: computed(() => {
-        return state.redArray.includes(Number(route.params.id)) ? 1 : 2
-      }),
-      coordinates: computed(() => {
-        return (state.tribeData?.basicInformation?.coordinates) ? Object.entries(state.tribeData?.basicInformation?.coordinates) : null
-      }),
-      tribeData: {},
-    })
+    props: {},
+    setup(props, { emit }){
+        const router = useRouter()
+        const route = useRoute()
+        const state = reactive({
+            redArray: [134],
+            mainTextColor: computed(() => {
+                return state.redArray.includes(Number(route.params.id)) ? 'text-brown' : 'text-steel'
+            }),
+            mainBgColor: computed(() => {
+                return state.redArray.includes(Number(route.params.id)) ? 'bg-brown' : 'bg-steel'
+            }),
+            type: computed(() => {
+                return state.redArray.includes(Number(route.params.id)) ? 1 : 2
+            }),
+            coordinates: computed(() => {
+                return (state.tribeData?.basicInformation?.coordinates) ? Object.entries(state.tribeData?.basicInformation?.coordinates) : null
+            }),
+            tribeData: {},
+        })
 
-    function onMapControl(action){
-      emit('onMapControl', { action })
-    }
+        function onMapControl(action){
+            emit('onMapControl', { action })
+        }
 
-    function goTop(){
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth',
-      })
-    }
+        function goTop(){
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth',
+            })
+        }
 
-    onMounted(async () => {
-      await $.ajax({
-        url: `https://blueprint.indigenoustribe.tw/api/tribe?tribeCode=${route.params?.id}`,
-        method: 'GET',
-      }).done(res => {
-        state.tribeData = res
-      }).fail(FailMethod => {
-        console.log('Fail', FailMethod)
-      })
-    })
+        onMounted(async () => {
+            await $.ajax({
+                url: `https://blueprint.indigenoustribe.tw/api/tribe?tribeCode=${route.params?.id}`,
+                method: 'GET',
+            }).done(res => {
+                state.tribeData = res
+            }).fail(FailMethod => {
+                console.log('Fail', FailMethod)
+            })
+        })
 
-    return {
-      route,
-      router,
-      state,
-      onMapControl,
-      goTop,
-      frame1,
-      frame2,
-    }
-  },
+        return {
+            route,
+            router,
+            state,
+            onMapControl,
+            goTop,
+            frame1,
+            frame2,
+        }
+    },
 }
 
 </script>
@@ -379,6 +379,7 @@ export default {
       height: 25px
       width: 100px
       display: block
+
       margin: 0 5px
 
     &::after
@@ -388,6 +389,7 @@ export default {
       height: 25px
       width: 100px
       display: block
+
       margin: 0 5px
 
 .redTotem
@@ -456,7 +458,6 @@ export default {
       display: flex
       justify-content: center
       align-items: center
-
 
 @media (max-width: 600px)
 
