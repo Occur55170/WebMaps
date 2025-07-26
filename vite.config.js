@@ -61,7 +61,7 @@ export default defineConfig(({ mode }) => {
                 },
             },
         },
-        base: `${process.env.BUILD_TARGET === 'mapDemo' ? '/Map_Demo' : '/'}`,
+        base: '/WebMaps/',
         build: {
             outDir: 'docs',
             sourcemap: true,
