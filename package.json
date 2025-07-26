@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "build:mapDemo": "cross-env BUILD_TARGET=mapDemo vite build",
+    "build:WebMaps": "cross-env BUILD_TARGET=WebMaps vite build",
     "build:test": "cross-env BUILD_TARGET=test vite build",
     "preview": "vite preview"
   },

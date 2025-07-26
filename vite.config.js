@@ -8,8 +8,8 @@ import cesium from 'vite-plugin-cesium'
 import path from 'path' // 需安装此模块
 
 function getBasePath(){
-    if (process.env.BUILD_TARGET === 'mapDemo'){
-        return '/Map_Demo'
+    if (process.env.BUILD_TARGET === 'WebMaps'){
+        return '/WebMaps'
     } else if (process.env.BUILD_TARGET === 'test'){
         return '/test'
     } else{
@@ -23,13 +23,10 @@ export default defineConfig(({ mode }) => {
 
     const env = loadEnv(mode, process.cwd(), '')
     // console.log(env.NODE_ENV)
-    // import.meta.env.
     return {
         define: {
-            VITE_UPLOAD_URL: '"https://img.jgbsmart.com"',
             VITE_URL: `"${getBasePath()}"`,
             VITE_APP_TITLE: `"${env.VITE_APP_TITLE}"`,
-            VITE_APP_TEST: '"999"',
         },
         plugins: [
             vue(),
@@ -61,7 +58,7 @@ export default defineConfig(({ mode }) => {
                 },
             },
         },
-        base: '/WebMaps/',
+        base: env.VITE_BASE_PATH || '/',
         build: {
             outDir: 'docs',
             sourcemap: true,
@@ -72,9 +69,5 @@ export default defineConfig(({ mode }) => {
             },
         },
         envDir: path.resolve(__dirname, './env'),
-        server: {
-            host: '0.0.0.0', // 允許來自任何主機的連接
-            port: 5173,
-        },
     }
 })
