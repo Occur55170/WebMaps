@@ -63,6 +63,7 @@ export default defineConfig(({ mode }) => {
         },
         base: `${process.env.BUILD_TARGET === 'mapDemo' ? '/Map_Demo' : '/'}`,
         build: {
+            outDir: 'docs',
             sourcemap: true,
         },
         resolve: {
@@ -73,7 +74,7 @@ export default defineConfig(({ mode }) => {
         envDir: path.resolve(__dirname, './env'),
         server: {
             host: '0.0.0.0', // 允許來自任何主機的連接
-            port: 5173, // 設定端口為 5137
+            port: 5173,
         },
     }
 })
