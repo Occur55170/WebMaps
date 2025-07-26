@@ -33,10 +33,10 @@ export default {
         const baseMaps = baseMapList
         const store = useStore()
         const state = reactive({
-            // defaultCenter: [120.971859, 24.801583],
-            // defaultCenterZoom: 14,
-            defaultCenter: [121.326776, 24.655499],
+            defaultCenter: [120.971859, 24.801583],
             defaultCenterZoom: 14,
+            // defaultCenter: [121.326776, 24.655499],
+            // defaultCenterZoom: 14,
             targetNum: 1,
             conditionWrap: false,
             layerSelect: false,
@@ -115,6 +115,7 @@ export default {
             }))
 
             onChangeDimensionMap('3D')
+            add()
         }
 
         function addPoint(targetLng, targetLat) {
@@ -813,30 +814,17 @@ export default {
         })
 
         function add() {
-            let layerData = {
-                title: "自來水管線",
-                icon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAaCAIAAAAIbfoLAAAACXBIWXMAAA3zAAAN8wEv/T3+AAAAHklEQVQ4jWP8//8/A3GAiUh1o0pHlY4qHVXKwMAAAH2ZAzGV2JpAAAAAAElFTkSuQmCC",
-                help_btn_display: false,
-                help_memo: "",
-                minzoom: 4,
-                maxzoom: 18,
-                layer_type: "WMS",
-                figure_type: "Surface",
-                single_tiles: true,
-                tiles_url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=自來水管線.shp — 自來水管線&STYLE=default",
-                tiles_list_description: ""
-            }
             ol3d.getCesiumScene().imageryLayers.addImageryProvider(
                 new Cesium.WebMapServiceImageryProvider({
-                    url: "https://gis.edtest.site/ogc/temp?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&FORMAT=image/png&LAYER=自來水管線.shp — 自來水管線&STYLE=default",
-                    layers: '自來水管線.shp — 自來水管線',
+                    url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FaultGeoSensitiveArea/MapServer/WMSServer',
+                    layers: '0',
                     parameters: {
-                        FORMAT: 'image/png',
-                        VERSION: '1.3.0',
-                        TRANSPARENT: true,
-                        STYLES: '',
+                        'FORMAT': 'image/png',
+                        'VERSION': '1.1.1',
+                        'TRANSPARENT': 'TRUE',
+                        'SRS': 'EPSG:4326' // 更改投影为 EPSG:4326 (WGS84)
                     },
-                })
+                }),
             )
         }
 
@@ -955,7 +943,8 @@ export default {
             moveToMap: (val) => {
                 moveToMap(val)
             }
-        }" @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
+        }"
+        @onLayerControl="({ action, value }) => { layerControl({ action, value }) }" />
                 </div>
                 <OverLayer :text="'可選擇要加入的圖層'" :styles="'right: 105%;top: 0;text-align: right;'" />
             </div>
@@ -1042,34 +1031,6 @@ export default {
                     },
                 }" />
             </div>
-            <mNavbar
-            v-bind="{
-                dimensionMapStatus: state.toSearchDimensionStatus,
-                currentLayers: state.currentLayers,
-                mapCount: state.mapCount,
-                openConditionWrap: () => {
-                    state.conditionWrap = !state.conditionWrap
-                    state.layerSelect = false
-                },
-                openLayerSelect: () => {
-                    state.layerSelect = !state.layerSelect
-                    state.conditionWrap = false
-                },
-                onLayerControl: ({ action, value }) => {
-                    layerControl({ action, value })
-                },
-                onChangeMapCount: (qty) => {
-                    changeMapCount(qty)
-                },
-                onChangeTarget: (value) => {
-                    changeTarget(value)
-                }
-            }"
-            :onChangeDimensionMap="(value)=>{
-                onChangeDimensionMap(value)
-            }"
-            @conditionWrap="(value) => { conditionWrap(value) }"
-            />
         </div>
 
         <div class="lightWrap w-100 h-100 d-flex justify-content-center align-items-center" v-if="state.deleteLightbox">
@@ -1099,11 +1060,6 @@ export default {
             closeAreaData()
         }" :popup="state.popup" :maxHeight="500" />
         </div>
-
-        <div class="stepOverLayer position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" id="firstEnter"
-            v-if="store.state.isInit" @click="() => {
-            store.dispatch('updateLayerStatus', false)
-        }"></div>
     </div>
 </template>
 
