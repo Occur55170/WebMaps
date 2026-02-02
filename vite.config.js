@@ -7,12 +7,12 @@ import IconsResolver from 'unplugin-icons/resolver'
 import cesium from 'vite-plugin-cesium'
 import path from 'path' // 需安装此模块
 
-function getBasePath(){
-    if (process.env.BUILD_TARGET === 'WebMaps'){
+function getBasePath() {
+    if (process.env.BUILD_TARGET === 'WebMaps') {
         return '/WebMaps'
-    } else if (process.env.BUILD_TARGET === 'test'){
+    } else if (process.env.BUILD_TARGET === 'test') {
         return '/test'
-    } else{
+    } else {
         return ''
     }
 }
@@ -41,23 +41,6 @@ export default defineConfig(({ mode }) => {
                 includePaths: ['./src/styles'],
             },
         ],
-        css: {
-            preprocessorOptions: {
-                scss: {
-                    additionalData: '@import "./src/assets/styles/global.module.scss";',
-                    javascriptEnabled: true,
-                },
-            },
-        },
-        configureWebpack: {
-            externals: { jquery: '$' },
-            resolve: {
-                alias: {
-                    '@': fileURLToPath(new URL('./src', import.meta.url)),
-                    vue: '@vue/runtime-dom',
-                },
-            },
-        },
         base: env.VITE_BASE_PATH || '/',
         build: {
             outDir: 'docs',

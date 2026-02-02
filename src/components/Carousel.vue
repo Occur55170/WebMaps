@@ -4,11 +4,11 @@ import { Carousel, Pagination, Slide } from 'vue3-carousel'
 import 'vue3-carousel/dist/carousel.css'
 
 const props = defineProps({
-    carouselList: {
-        type: Array,
-        // eslint-disable-next-line vue/require-valid-default-prop
-        default: [],
-    },
+  carouselList: {
+    type: Array,
+    // eslint-disable-next-line vue/require-valid-default-prop
+    default: [],
+  },
 })
 const emit = defineEmits([])
 const state = reactive({})
@@ -36,12 +36,12 @@ const state = reactive({})
       </div>
     </Slide>
     <template #addons>
-      <Pagination/>
+      <Pagination />
     </template>
   </Carousel>
 </template>
 <style lang="sass" scoped>
-@import '@/assets/styles/all.module.scss'
+@use '@/assets/styles/all.module.scss'
 .carousel__item
   min-height: 200px
   width: 100%

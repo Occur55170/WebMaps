@@ -9,27 +9,23 @@ export default createStore({
         currentWidth: 0,
     },
     actions: {
-        updateLayerStatus(context, status){
+        updateLayerStatus(context, status) {
             context.commit('SETOVERLAYERSTATUS', status)
         },
-        updateWindowWidth(context, status){
+        updateWindowWidth(context, status) {
             context.commit('SETWINDOWSWIDTH', status)
         },
     },
     mutations: {
-        SETOVERLAYERSTATUS(state, payload){
+        SETOVERLAYERSTATUS(state, payload) {
             state.isInit = payload
         },
-        SETWINDOWSWIDTH(state, payload){
+        SETWINDOWSWIDTH(state, payload) {
             state.currentWidth = payload
         },
     },
     getters: {
-        // isEmbedded: (state, getters, rootState) => {
-        //     return window.location === window.parent.location
-        // }
     },
     modules: {
-        // general,
     },
 })

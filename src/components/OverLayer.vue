@@ -1,6 +1,6 @@
 <script>
 import { computed, onMounted, reactive, ref } from 'vue'
-import $ from 'jquery'
+
 import router from '@/router/index.js'
 import { useStore } from 'vuex'
 
@@ -19,7 +19,7 @@ export default {
             default: true,
         },
     },
-    setup(props){
+    setup(props) {
         const store = useStore()
         const route = router
 
@@ -43,7 +43,10 @@ export default {
         })
 
         onMounted(() => {
-            $('.initOverLay').parent().addClass('position-relative')
+            const el = document.querySelector('.initOverLay')
+            if (el && el.parentElement) {
+                el.parentElement.classList.add('position-relative')
+            }
         })
         return {
             state,
@@ -56,21 +59,15 @@ export default {
 }
 </script>
 <template>
-  <div class="initOverLay"
-       v-if="store.state.isInit"
-       @click="store.dispatch('updateLayerStatus', false)"
-       :style="{
+    <div class="initOverLay" v-if="store.state.isInit" @click="store.dispatch('updateLayerStatus', false)" :style="{
         height: state.overLayerHeight + 'px',
         width: state.overLayerWidth + 'px',
-    }"
-       :ref="(e) => {
+    }" :ref="(e) => {
         state.accordionListRef = e
     }">
-    <div class="tipText text-white fw-bold fs-3"
-         :style="props.styles"
-    >{{ props.text }}
+        <div class="tipText text-white fw-bold fs-3" :style="props.styles">{{ props.text }}
+        </div>
     </div>
-  </div>
 </template>
 <style lang="sass">
 .initOverLay

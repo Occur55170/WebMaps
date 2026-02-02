@@ -2,7 +2,7 @@
 import { getCurrentInstance, onMounted, reactive } from 'vue'
 
 export default {
-    setup(props, { emit }){
+    setup(props, { emit }) {
         const { proxy } = getCurrentInstance()
         const state = reactive({
             innerHeight: 0,
@@ -24,10 +24,9 @@ export default {
 </script>
 
 <template>
-  <routerView class="wrap"
-    :style="{
+    <routerView class="wrap" :style="{
         'height': state.innerHeight + 'px'
-    }"/>
+    }" />
 </template>
 
 <style lang="sass">

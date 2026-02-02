@@ -2,18 +2,18 @@
 import { reactive } from 'vue'
 
 export default {
-    props: {},
-    setup(props){
-        const state = reactive({})
-        // const viewer = new Cesium.Viewer('cesiumContainer', {
-        //     terrain: Cesium.Terrain.fromWorldTerrain(),
-        // })
+  props: {},
+  setup(props) {
+    const state = reactive({})
+    // const viewer = new Cesium.Viewer('cesiumContainer', {
+    //     terrain: Cesium.Terrain.fromWorldTerrain(),
+    // })
 
-        return {
-            state,
-            props,
-        }
-    },
+    return {
+      state,
+      props,
+    }
+  },
 }
 </script>
 
@@ -22,7 +22,7 @@ export default {
 </template>
 
 <style>
-/* @import url(../templates/bucket.css); */
+/* @use url(../templates/bucket.css); */
 #toolbar {
   background: rgba(42, 42, 42, 0.8);
   padding: 4px;

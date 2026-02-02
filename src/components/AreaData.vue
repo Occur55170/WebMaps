@@ -1,228 +1,219 @@
 <script>
 import { onMounted, onUpdated, reactive } from 'vue'
-import $ from 'jquery'
+import axios from 'axios'
 import { useRouter } from 'vue-router'
 
 export default {
-    props: {
-        popup: {
-            type: Object,
-            // eslint-disable-next-line vue/require-valid-default-prop
-            default: {},
-        },
-        closeAreaData: {
-            Type: Function,
-            default: () => {
-            },
-        },
-        maxHeight: {
-            Type: Number,
-            default: 0,
-        },
-        coordinate: {
-            type: Object,
-            // eslint-disable-next-line vue/require-valid-default-prop
-            default: {},
-        },
+  props: {
+    popup: {
+      type: Object,
+      // eslint-disable-next-line vue/require-valid-default-prop
+      default: {},
     },
-    setup(props, { emit }){
-        const router = useRouter()
-        const state = reactive({
-            type: 0,
-            media: 'photo',
-            scrollY: false,
-            tribeData: {},
-            showAreaDataWindow: false,
-            oldPopupId: '',
-        })
-
-        async function getTribeData(tribeId){
-            return await $.ajax({
-                url: `https://blueprint.indigenoustribe.tw/api/tribe?tribeCode=${tribeId}`,
-                method: 'GET',
-            }).done(res => {
-                return res
-            }).fail(() => {
-                state.type = 0
-                props.closeAreaData()
-                return false
-            })
-        }
-
-        async function getDisasterData(id){
-            return await $.ajax({
-                url: `https://blueprint.indigenoustribe.tw/api/historicalDiseaster?id=${id}`,
-                method: 'GET',
-            }).done(res => {
-                return res
-            }).fail(() => {
-                state.type = 0
-                props.closeAreaData()
-                return false
-            })
-        }
-
-        async function getRainfallStation(stationName){
-            return await $.ajax({
-                url: `https://blueprint.indigenoustribe.tw/api/rainData?stationName=${stationName}`,
-                method: 'GET',
-            }).done(res => {
-                return res
-            }).fail(() => {
-                state.type = 0
-                props.closeAreaData()
-                return false
-            })
-        }
-
-        async function getHarvestDrill(projNo){
-            return await $.ajax({
-                url: `https://blueprint.indigenoustribe.tw/api/harvestDrill?projNo=${projNo}`,
-                method: 'GET',
-            }).done(res => {
-                return res
-            }).fail(() => {
-                state.type = 0
-                props.closeAreaData()
-                return false
-            })
-        }
-
-        function getPotentialDebrisFlowTorrent(data){
-            return {
-                basic: data.get('Basin'),
-                full: data.get('Full'),
-                risk: data.get('Risk'),
-                note01: data.get('Note01'),
-                note02: data.get('Note02'),
-                stra_1: data.get('Stra_1'),
-                stra_2: data.get('Stra_2'),
-                link: `https://246.ardswc.gov.tw/Content/Debris/${data.get('Debrisno')}.jpg`,
-            }
-        }
-
-        function getRockfall(data){
-            return {
-                activity: data.get('ACTIVITY'),
-                slideKind: data.get('SLIDE_KIND'),
-                slideType: data.get('SLOPE_TYPE'),
-                slideAng: data.get('SLUMP_ANG'),
-                identifier: data.get('IDENTIFIER'),
-            }
-        }
-
-        async function initialize(popup){
-            if (popup == null){
-                state.type = 0
-                this.props?.closeAreaData()
-                return
-            }
-
-            if (popup.popupData === '新竹縣原住民部落範圍'){
-                getTribeData(popup.popupId).then((result) => {
-                    state.type = 1
-                    state.tribeData = result
-                }).then(() => {
-                    state.showAreaDataWindow = true
-                })
-                return
-            }
-            if (popup.popupData === '近年歷史災害82處部落點位'){
-                getDisasterData(`近年歷史災害82處部落點位.${popup.popupId}`).then((result) => {
-                    state.type = 2
-                    state.tribeData = result.data
-                }).then(() => {
-                    state.showAreaDataWindow = true
-                })
-                return
-            }
-            if (popup.popupData === '雨量站'){
-                getRainfallStation(popup.popupId).then((result) => {
-                    state.type = 3
-                    if (result.data !== null){
-                        state.tribeData = result.data
-                    }
-                }).then(() => {
-                    state.showAreaDataWindow = true
-                })
-                return
-            }
-            if (popup.popupData === '工程鑽探'){
-                console.log('搜尋工程鑽探')
-                console.log(popup.coordinate)
-                getHarvestDrill(popup.popupId).then((result) => {
-                    state.type = 4
-                    if (result.data !== null){
-                        state.harvestDrill = result.data
-                        state.coordinate = popup.coordinate
-                    }
-                }).then(() => {
-                    state.showAreaDataWindow = true
-                })
-                return
-            }
-            if (popup.popupData === '土石流潛勢溪流'){
-                state.type = 5
-                state.potentialDebrisFlowTorrent = getPotentialDebrisFlowTorrent(props.popup.temp)
-                state.showAreaDataWindow = true
-                return
-            }
-
-            if (popup.popupData === '落石分布'){
-                state.type = 6
-                state.rockfall = getRockfall(popup.temp)
-                state.showAreaDataWindow = true
-            }
-        }
-
-        onMounted(() => {
-            initialize(props.popup)
-            state.oldPopupId = props.popup.popupId
-        })
-        onUpdated(() => {
-            if (state.oldPopupId === props.popup.popupId) return
-            initialize(props.popup)
-            state.oldPopupId = props.popup.popupId
-        })
-
-        return {
-            router,
-            props,
-            state,
-        }
+    closeAreaData: {
+      Type: Function,
+      default: () => {
+      },
     },
+    maxHeight: {
+      Type: Number,
+      default: 0,
+    },
+    coordinate: {
+      type: Object,
+      // eslint-disable-next-line vue/require-valid-default-prop
+      default: {},
+    },
+  },
+  setup(props, { emit }) {
+    const router = useRouter()
+    const state = reactive({
+      type: 0,
+      media: 'photo',
+      scrollY: false,
+      tribeData: {},
+      showAreaDataWindow: false,
+      oldPopupId: '',
+    })
+
+    async function getTribeData(tribeId) {
+      return await axios.get(`https://blueprint.indigenoustribe.tw/api/tribe?tribeCode=${tribeId}`)
+        .then(res => {
+          return res.data
+        }).catch(() => {
+          state.type = 0
+          props.closeAreaData()
+          return false
+        })
+    }
+
+    async function getDisasterData(id) {
+      return await axios.get(`https://blueprint.indigenoustribe.tw/api/historicalDiseaster?id=${id}`)
+        .then(res => {
+          return res.data
+        }).catch(() => {
+          state.type = 0
+          props.closeAreaData()
+          return false
+        })
+    }
+
+    async function getRainfallStation(stationName) {
+      return await axios.get(`https://blueprint.indigenoustribe.tw/api/rainData?stationName=${stationName}`)
+        .then(res => {
+          return res.data
+        }).catch(() => {
+          state.type = 0
+          props.closeAreaData()
+          return false
+        })
+    }
+
+    async function getHarvestDrill(projNo) {
+      return await axios.get(`https://blueprint.indigenoustribe.tw/api/harvestDrill?projNo=${projNo}`)
+        .then(res => {
+          return res.data
+        }).catch(() => {
+          state.type = 0
+          props.closeAreaData()
+          return false
+        })
+    }
+
+    function getPotentialDebrisFlowTorrent(data) {
+      return {
+        basic: data.get('Basin'),
+        full: data.get('Full'),
+        risk: data.get('Risk'),
+        note01: data.get('Note01'),
+        note02: data.get('Note02'),
+        stra_1: data.get('Stra_1'),
+        stra_2: data.get('Stra_2'),
+        link: `https://246.ardswc.gov.tw/Content/Debris/${data.get('Debrisno')}.jpg`,
+      }
+    }
+
+    function getRockfall(data) {
+      return {
+        activity: data.get('ACTIVITY'),
+        slideKind: data.get('SLIDE_KIND'),
+        slideType: data.get('SLOPE_TYPE'),
+        slideAng: data.get('SLUMP_ANG'),
+        identifier: data.get('IDENTIFIER'),
+      }
+    }
+
+    async function initialize(popup) {
+      if (popup == null) {
+        state.type = 0
+        this.props?.closeAreaData()
+        return
+      }
+
+      if (popup.popupData === '新竹縣原住民部落範圍') {
+        getTribeData(popup.popupId).then((result) => {
+          state.type = 1
+          state.tribeData = result
+        }).then(() => {
+          state.showAreaDataWindow = true
+        })
+        return
+      }
+      if (popup.popupData === '近年歷史災害82處部落點位') {
+        getDisasterData(`近年歷史災害82處部落點位.${popup.popupId}`).then((result) => {
+          state.type = 2
+          state.tribeData = result.data
+        }).then(() => {
+          state.showAreaDataWindow = true
+        })
+        return
+      }
+      if (popup.popupData === '雨量站') {
+        getRainfallStation(popup.popupId).then((result) => {
+          state.type = 3
+          if (result.data !== null) {
+            state.tribeData = result.data
+          }
+        }).then(() => {
+          state.showAreaDataWindow = true
+        })
+        return
+      }
+      if (popup.popupData === '工程鑽探') {
+        console.log('搜尋工程鑽探')
+        console.log(popup.coordinate)
+        getHarvestDrill(popup.popupId).then((result) => {
+          state.type = 4
+          if (result.data !== null) {
+            state.harvestDrill = result.data
+            state.coordinate = popup.coordinate
+          }
+        }).then(() => {
+          state.showAreaDataWindow = true
+        })
+        return
+      }
+      if (popup.popupData === '土石流潛勢溪流') {
+        state.type = 5
+        state.potentialDebrisFlowTorrent = getPotentialDebrisFlowTorrent(props.popup.temp)
+        state.showAreaDataWindow = true
+        return
+      }
+
+      if (popup.popupData === '落石分布') {
+        state.type = 6
+        state.rockfall = getRockfall(popup.temp)
+        state.showAreaDataWindow = true
+      }
+    }
+
+    onMounted(() => {
+      initialize(props.popup)
+      state.oldPopupId = props.popup.popupId
+    })
+    onUpdated(() => {
+      if (state.oldPopupId === props.popup.popupId) return
+      initialize(props.popup)
+      state.oldPopupId = props.popup.popupId
+    })
+
+    return {
+      router,
+      props,
+      state,
+    }
+  },
 }
 
 </script>
 
 <template>
   <div class="bg-white rounded py-2" style="overflow-y: auto;" v-if="state.showAreaDataWindow" :style="{
-        'max-height': props.maxHeight + 'px',
-    }">
+    'max-height': props.maxHeight + 'px',
+  }">
     <div v-if="state.type === 1">
       <div class="row mx-0 align-items-center flex-nowrap text-center p-2 fw-bold">
         <p>詳細資訊</p>
         <!-- TODO: 關閉事件 -->
-        <div class="position-absolute col-auto end-0 cursor-pointer" style="top: 10px;"
-             @click="props.closeAreaData">
+        <div class="position-absolute col-auto end-0 cursor-pointer" style="top: 10px;" @click="props.closeAreaData">
           <svg width="32" height="32" viewBox="0 0 24 24">
             <path fill="currentColor"
-                  d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z"/>
+              d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10s-4.477 10-10 10zm0-11.414L9.172 7.757L7.757 9.172L10.586 12l-2.829 2.828l1.415 1.415L12 13.414l2.828 2.829l1.415-1.415L13.414 12l2.829-2.828l-1.415-1.415L12 10.586z" />
           </svg>
         </div>
       </div>
-      <areaImg :coordinate="props.popup.coordinate" :type="state.type"/>
+      <areaImg :coordinate="props.popup.coordinate" :type="state.type" />
       <div class="row mx-0 align-items-center p-2 position-relative">
         <div class="d-flex flex-nowrap align-items-center justify-content-between my-2">
           <span>{{ state.tribeData?.basicInformation?.tribeName }} </span>
           <div class="p-2 bg-steel w-auto text-white d-inline-block rounded-2 cursor-pointer" @click="() => {
-                        router.push({
-                            name: 'detail',
-                            params: {
-                                id: props.popup.popupId
-                            },
-                        })
-                    }">更多資訊
+            router.push({
+              name: 'detail',
+              params: {
+                id: props.popup.popupId
+              },
+            })
+          }">更多資訊
           </div>
         </div>
         <p>描述: {{ state.tribeData?.basicInformation?.description }}</p>
@@ -301,24 +292,24 @@ export default {
           <p>單位:mm </p>
           <table class="rainfall border-bottom border-grey w-100">
             <thead>
-            <tr class="text-center">
-              <td class="bg-blueDeep text-white border border-white p-2">10分鐘</td>
-              <td class="bg-blueDeep text-white border border-white p-2">時雨量</td>
-              <td class="bg-blueDeep text-white border border-white p-2">3小時</td>
-              <td class="bg-blueDeep text-white border border-white p-2">6小時</td>
-              <td class="bg-blueDeep text-white border border-white p-2">12小時</td>
-              <td class="bg-blueDeep text-white border border-white p-2">24小時</td>
-            </tr>
+              <tr class="text-center">
+                <td class="bg-blueDeep text-white border border-white p-2">10分鐘</td>
+                <td class="bg-blueDeep text-white border border-white p-2">時雨量</td>
+                <td class="bg-blueDeep text-white border border-white p-2">3小時</td>
+                <td class="bg-blueDeep text-white border border-white p-2">6小時</td>
+                <td class="bg-blueDeep text-white border border-white p-2">12小時</td>
+                <td class="bg-blueDeep text-white border border-white p-2">24小時</td>
+              </tr>
             </thead>
             <tbody>
-            <tr class="text-center">
-              <td class="p-2">{{ state.tribeData?.min_10 }}</td>
-              <td class="p-2">{{ state.tribeData?.hour_1 }}</td>
-              <td class="p-2">{{ state.tribeData?.hour_3 }}</td>
-              <td class="p-2">{{ state.tribeData?.hour_6 }}</td>
-              <td class="p-2">{{ state.tribeData?.hour_12 }}</td>
-              <td class="p-2">{{ state.tribeData?.hour_24 }}</td>
-            </tr>
+              <tr class="text-center">
+                <td class="p-2">{{ state.tribeData?.min_10 }}</td>
+                <td class="p-2">{{ state.tribeData?.hour_1 }}</td>
+                <td class="p-2">{{ state.tribeData?.hour_3 }}</td>
+                <td class="p-2">{{ state.tribeData?.hour_6 }}</td>
+                <td class="p-2">{{ state.tribeData?.hour_12 }}</td>
+                <td class="p-2">{{ state.tribeData?.hour_24 }}</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -355,7 +346,7 @@ export default {
           <div class="col-4 p-1 bg-red-light text-white d-flex justify-content-center align-items-center">連結:
           </div>
           <a :href="'https://geotech.gsmma.gov.tw/imoeagis/Home/Map?' + 'lng=' + state.coordinate[0] + '&lat=' + state.coordinate[1]"
-             class="col-8 py-1 px-2 bg-grey-light text-start">
+            class="col-8 py-1 px-2 bg-grey-light text-start">
             網址鏈接
           </a>
         </div>
@@ -433,7 +424,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@import '@/assets/styles/all.module.scss'
+@use '@/assets/styles/all.module.scss'
 @media (max-width: 600px)
   .rainfall
     td
