@@ -25,16 +25,14 @@ export default {
 
 <template>
   <routerView class="wrap"
-              :style="{
+    :style="{
         'height': state.innerHeight + 'px'
     }"/>
 </template>
 
 <style lang="sass">
 .wrap
-  // height: 100vh
   width: 100%
-
 .lightWrap
   z-index: 999
   position: fixed

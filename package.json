@@ -4,7 +4,7 @@
   "version": "1.0.2",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "cross-env BUILD_TARGET=WebMaps vite",
     "build": "vite build",
     "build:WebMaps": "cross-env BUILD_TARGET=WebMaps vite build",
     "build:test": "cross-env BUILD_TARGET=test vite build",
@@ -43,7 +43,7 @@
     "eslint-plugin-n": "^16.0.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-vue": "^9.25.0",
-    "sass": "^1.56.2",
+    "sass": "^1.97.3",
     "unplugin-icons": "^0.14.14",
     "unplugin-vue-components": "^0.22.11",
     "vite": "^4.2.0",

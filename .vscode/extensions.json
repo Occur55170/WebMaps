@@ -1,3 +1,12 @@
 {
-  "recommendations": ["Vue.volar"]
+    "[vue]": {
+        "editor.defaultFormatter": "Vue.volar"
+    },
+    "files.associations": {
+        "*.sass": "sass"
+    },
+    "emmet.includeLanguages": {
+        "vue-html": "html",
+        "vue": "html"
+    }
 }
