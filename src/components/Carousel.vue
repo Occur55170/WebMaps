@@ -41,7 +41,7 @@ const state = reactive({})
   </Carousel>
 </template>
 <style lang="sass" scoped>
-@use '@/assets/styles/all.module.scss'
+// @use '@/assets/styles/all.scss'
 .carousel__item
   min-height: 200px
   width: 100%

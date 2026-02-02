@@ -148,7 +148,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@use '@/assets/styles/all.module.scss'
+// @use '@/assets/styles/all.scss'
 .detail
   height: auto
   background-image: url('@/assets/mapDetail/background.svg')

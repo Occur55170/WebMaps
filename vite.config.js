@@ -41,6 +41,16 @@ export default defineConfig(({ mode }) => {
                 includePaths: ['./src/styles'],
             },
         ],
+        css: {
+            preprocessorOptions: {
+                scss: {
+                    additionalData: '@use "./src/assets/styles/_variables.scss" as *;',
+                },
+                sass: {
+                    additionalData: '@use "./src/assets/styles/_variables.scss" as *\n',
+                },
+            },
+        },
         base: env.VITE_BASE_PATH || '/',
         build: {
             outDir: 'docs',

@@ -818,29 +818,6 @@ export default {
             }
         })
 
-        function show() {// 创建一个新的 Cesium 图层
-            // var billboardCollection = new Cesium.BillboardCollection();
-
-
-            // 创建一个 Cesium 影像图层
-            var cesiumImageryProvider = new Cesium.WebMapServiceImageryProvider({
-                url: 'https://dwgis1.ncdr.nat.gov.tw/server/services/MAP0627/Map2022FloodingPoint1721/MapServer/WMSServer',
-                layers: '0',
-                parameters: {
-                    'FORMAT': 'image/png',
-                    'VERSION': '1.1.1',
-                    'TRANSPARENT': true,
-                    'STYLES': ''
-                }
-            });
-
-            // 将图层添加到 Cesium 场景中
-            var imageryLayer = new Cesium.ImageryLayer(cesiumImageryProvider, {
-                show: true
-            });
-            ol3d.imageryLayers.addImageryProvider(imageryLayer);
-
-        }
 
         return {
             state,
@@ -856,14 +833,12 @@ export default {
             moveToMap,
             changeMapCount,
             onChangeDimensionMap,
-            show,
         }
     },
 }
 </script>
 
 <template>
-    <!-- <div @click="show">show</div> -->
     <div>
         <!-- TODO: 寬度設定是否調整 -->
         <div class="w-100 d-flex justify-content-between flex-sm-row flex-wrap flex-sm-nowrap mapWrap" id="mapWrap">
@@ -1085,7 +1060,7 @@ export default {
 </template>
 
 <style lang="sass">
-@use '@/assets/styles/all.module.scss'
+// @use '@/assets/styles/all.scss'
 .mapWrap
   height: 100vh
 

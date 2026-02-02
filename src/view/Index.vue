@@ -85,7 +85,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@use '@/assets/styles/all.module.scss'
+// @use '@/assets/styles/all.scss'
 .wrapCom
   background-image: url('@/assets/img/indexBackground.svg')
   background-repeat: no-repeat

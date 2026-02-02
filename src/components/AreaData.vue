@@ -424,7 +424,7 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@use '@/assets/styles/all.module.scss'
+// @use '@/assets/styles/all.scss'
 @media (max-width: 600px)
   .rainfall
     td

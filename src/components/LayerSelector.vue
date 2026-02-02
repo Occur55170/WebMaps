@@ -125,8 +125,8 @@ export default {
               <a href="" :class="{
                 'Invisible': !node?.visible
               }" @click.prevent="() => {
-                              props.onChangeLayerVisible(nodeIndex)
-                            }">
+                props.onChangeLayerVisible(nodeIndex)
+              }">
                 <img src="../assets/img/icon/eyes.svg" alt="">
               </a>
               <a href="" @click.prevent="props.onDeleteLayer({
@@ -151,7 +151,8 @@ export default {
 </template>
 
 <style lang="sass" scoped>
-@use '@/assets/styles/all.module.scss'
+// @use '@/assets/styles/all.scss' as *;
+
 .layerSelect
   border-radius: 10px
 
