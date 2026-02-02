@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => {
 
     // console.log(env.NODE_ENV)
     return {
+        base: '/WebMaps/',
         define: {
             VITE_URL: `"${baseUrl}"`,
             VITE_APP_TITLE: `"${env.VITE_APP_TITLE}"`,
@@ -51,7 +52,7 @@ export default defineConfig(({ mode }) => {
                 },
             },
         },
-        base: env.VITE_BASE_PATH || '/',
+
         build: {
             outDir: 'docs',
             sourcemap: true,
