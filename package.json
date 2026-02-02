@@ -8,7 +8,9 @@
     "build": "vite build",
     "build:WebMaps": "cross-env BUILD_TARGET=WebMaps vite build",
     "build:test": "cross-env BUILD_TARGET=test vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.6",

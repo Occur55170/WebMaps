@@ -216,16 +216,16 @@ export default {
                     if (value.checked) {
                         let nestedSubNodeIndex = value.nestedSubNodeIndex
                         // 點選父層後，刪除同樣子層的圖層，帶入當前選擇的圖層
-                        let isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
-                        let haveInfoBox = !isEmpty(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box)
+                        const isSingleTiles = state.layers[value.nodeIndex].group_layers[value.subNodeIndex].single_tiles
+                        const haveInfoBox = !isEmpty(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].info_box)
                         // 目標區塊目前是否在3D模式下
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                             if (!(isSingleTiles) || haveInfoBox) {
                                 const scene = ol3d.getCesiumScene()
-                                const imageryLayersCount = scene.imageryLayers.length;
+                                const imageryLayersCount = scene.imageryLayers.length
                                 for (let i = 0; i < imageryLayersCount; i++) {
-                                    let layer = scene.imageryLayers.get(i)
-                                    let id = layer?.imageryProvider._resource?.queryParameters?.id
+                                    const layer = scene.imageryLayers.get(i)
+                                    const id = layer?.imageryProvider._resource?.queryParameters?.id
                                     const imageNodeIndex = getMapLayers.getLayerIndex(id)?.nodeIndex
                                     const imageSubNodeIndex = getMapLayers.getLayerIndex(id)?.subNodeIndex
                                     if ((value.nodeIndex == imageNodeIndex) && (value.subNodeIndex == imageSubNodeIndex)) {
@@ -241,7 +241,7 @@ export default {
                             )
                         } else {
                             if (!(isSingleTiles) || haveInfoBox) {
-                                let layersAry = targetLayers.getArray()
+                                const layersAry = targetLayers.getArray()
                                 layersAry.forEach(element => {
                                     if (!(element.get('id'))) { return }
                                     if (element.get('id').includes(`node${value.nodeIndex}_subNode${value.subNodeIndex}_nestedSubNode`)) {
@@ -251,7 +251,7 @@ export default {
                                 nestedSubNodeIndex = state.selectValueTemp
                                 value.id = getMapLayers.resetLayerId(value.id, 'nestedSubNode', state.selectValueTemp)
                             }
-                            let targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
+                            const targetLayer = getMapLayers.getLayer(state.layers[value.nodeIndex].group_layers[value.subNodeIndex], nestedSubNodeIndex, value.id)
                             target.addLayer(targetLayer)
                             // FIXME: addSpecialLayerEvent(targetLayer.get('label'), targetLayer, value)
                             if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(targetLayer.get('label'))) {
@@ -262,10 +262,10 @@ export default {
                                 }
                                 state.temp[timeKey] = setInterval(function () {
                                     state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
-                                    let newSource = new Static({
+                                    const newSource = new Static({
                                         url: tilesImageUrls[state.temp[`${timeKey}count`]],
                                         projection: 'EPSG:4326',
-                                        imageExtent: imageExtent,
+                                        imageExtent,
                                         interpolate: true,
                                     })
                                     targetLayer.setSource(newSource)
@@ -281,11 +281,11 @@ export default {
                         // FIXME: 刪除3D狀態下的圖層
                         if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                             const { id, nestedSubNodeIndex, nodeIndex, subNodeIndex } = value
-                            let pickedLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
+                            const pickedLayer = state.layers[nodeIndex].group_layers[subNodeIndex]
                             const scene = ol3d.getCesiumScene()
-                            const imageryLayersCount = scene.imageryLayers.length;
+                            const imageryLayersCount = scene.imageryLayers.length
                             for (let i = 0; i < imageryLayersCount; i++) {
-                                let layer = scene.imageryLayers.get(i)
+                                const layer = scene.imageryLayers.get(i)
                                 const id = layer?.imageryProvider._resource?.queryParameters?.id
                                 const imageNodeIndex = getMapLayers.getLayerIndex(id)?.nodeIndex
                                 const imageSubNodeIndex = getMapLayers.getLayerIndex(id)?.subNodeIndex
@@ -294,27 +294,27 @@ export default {
                                 }
                             }
                         } else {
-                            let layersAry = targetLayers.getArray()
+                            const layersAry = targetLayers.getArray()
                             function removeLayersById() {
                                 const deleteKey = value.id.split('_nestedSubNode')[0]
                                 const toRemoveLayerId = layersAry.filter(element => element?.get('id')?.includes(deleteKey))
                                 toRemoveLayerId.forEach((node) => {
-                                    target.removeLayer(node);
-                                });
+                                    target.removeLayer(node)
+                                })
                             }
                             removeLayersById()
-                            if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === "WFS") {
-                                addSelectElement(value);
+                            if (state.layers[value.nodeIndex].group_layers[value.subNodeIndex].layer_type === 'WFS') {
+                                addSelectElement(value)
                                 state.popup.popupId = 0
-                                state.popup.popupData = '';
+                                state.popup.popupData = ''
                                 if (state.popup.overlay) {
-                                    target.removeOverlay(state.popup.overlay);
-                                    state.popup.overlay = null;
+                                    target.removeOverlay(state.popup.overlay)
+                                    state.popup.overlay = null
                                 }
                             }
                             if (['雷達回波預測', '累積雨量預測', '氣溫預測'].includes(state.layers[value.nodeIndex].group_layers[value.subNodeIndex].title)) {
                                 const timeKey = value.id.split('_nestedSubNode')[0]
-                                clearInterval(state.temp[timeKey]);
+                                clearInterval(state.temp[timeKey])
                                 delete state.temp[`${timeKey}count`]
                             }
                         }
@@ -408,7 +408,7 @@ export default {
                         }
                         return true
                     })
-                    break;
+                    break
                 case 'setOpacity':
                     onChangeLayerOpacity(value.key, value.value)
                     break
@@ -427,10 +427,10 @@ export default {
                 }
                 state.temp[timeKey] = setInterval(function () {
                     state.temp[`${timeKey}count`] = state.temp[`${timeKey}count`] + 1 > 4 ? 0 : state.temp[`${timeKey}count`] + 1
-                    let newSource = new Static({
+                    const newSource = new Static({
                         url: tilesImageUrls[state.temp[`${timeKey}count`]],
                         projection: 'EPSG:4326',
-                        imageExtent: imageExtent,
+                        imageExtent,
                         interpolate: true,
                     })
                     targetLayer.setSource(newSource)
@@ -445,10 +445,10 @@ export default {
             if (state[`${state.targetNum == 1 ? 'map1' : 'map2'}LayerStatus`].includes('3D')) {
                 state.currentLayers = []
                 const scene = ol3d.getCesiumScene()
-                const imageryLayersCount = scene.imageryLayers.length;
+                const imageryLayersCount = scene.imageryLayers.length
                 for (let i = 0; i < imageryLayersCount; i++) {
-                    let layer = scene.imageryLayers.get(i)
-                    let provider = layer.imageryProvider;
+                    const layer = scene.imageryLayers.get(i)
+                    const provider = layer.imageryProvider
                     if (provider instanceof Cesium.WebMapServiceImageryProvider) {
                         state.currentLayers.push({
                             label: provider._resource?.queryParameters.layers_name,
@@ -517,7 +517,7 @@ export default {
                 ol3d = new OLCesium({
                     map: target,
                     time() {
-                        return Cesium.JulianDate.now();
+                        return Cesium.JulianDate.now()
                     },
                     sceneOptions: {
                         mapProjection: new Cesium.WebMercatorProjection(),
@@ -574,7 +574,7 @@ export default {
                     ol3d = new OLCesium({
                         map: state[otherMap],
                         time() {
-                            return Cesium.JulianDate.now();
+                            return Cesium.JulianDate.now()
                         },
                     })
                     ol3d.setEnabled(true)
@@ -622,7 +622,7 @@ export default {
                         ol3d = new OLCesium({
                             map: state[`map${value}`],
                             time() {
-                                return Cesium.JulianDate.now();
+                                return Cesium.JulianDate.now()
                             },
                         })
                         ol3d.setEnabled(true)
@@ -773,7 +773,7 @@ export default {
                 })
 
             Promise.all([getBaseData, getLayerData]).then((value) => {
-                let result = value[0].data.map((node, nodeIndex) => {
+                const result = value[0].data.map((node, nodeIndex) => {
                     return {
                         mapType: 'base',
                         baseId: nodeIndex,
@@ -817,7 +817,6 @@ export default {
                 store.dispatch('updateWindowWidth', window.innerWidth)
             }
         })
-
 
         return {
             state,
