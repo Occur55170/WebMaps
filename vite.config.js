@@ -53,11 +53,11 @@ export default defineConfig(({ mode }) => {
         css: {
             preprocessorOptions: {
                 scss: {
-                    additionalData: '@use "./src/assets/styles/_variables.scss" as *;',
+                    additionalData: `@use "${path.resolve(__dirname, 'src/assets/styles/_variables.scss').replace(/\\/g, '/')}" as *;`,
                     api: 'modern-compiler',
                 },
                 sass: {
-                    additionalData: '@use "./src/assets/styles/_variables.scss" as *\n',
+                    additionalData: `@use "${path.resolve(__dirname, 'src/assets/styles/_variables.scss').replace(/\\/g, '/')}" as *\n`,
                     api: 'modern-compiler',
                 },
             },
@@ -68,9 +68,9 @@ export default defineConfig(({ mode }) => {
             sourcemap: true,
             rollupOptions: {
                 output: {
-                    entryFileNames: `[name]-${getBuildTimestamp()}.js`,
-                    chunkFileNames: `[name]-${getBuildTimestamp()}.js`,
-                    assetFileNames: `[name]-${getBuildTimestamp()}.[ext]`,
+                    entryFileNames: `[name]-${getBuildTimestamp()}-[hash].js`,
+                    chunkFileNames: `[name]-${getBuildTimestamp()}-[hash].js`,
+                    assetFileNames: `[name]-${getBuildTimestamp()}-[hash].[ext]`,
                 },
             },
         },
