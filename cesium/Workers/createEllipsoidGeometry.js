@@ -1,1 +1,26 @@
-define(["./defaultValue-f6d5e6da","./EllipsoidGeometry-fd18adbd","./Transforms-fce95115","./Matrix3-81054f0f","./Math-2ce22ee9","./Matrix2-413c4048","./RuntimeError-9b4ce3fb","./combine-0c102d93","./ComponentDatatype-ab629b88","./WebGLConstants-7f557f93","./GeometryAttribute-81ff775c","./GeometryAttributes-1e4ddcd2","./GeometryOffsetAttribute-2579b8d2","./IndexDatatype-d3db4e7d","./VertexFormat-fbdec922"],(function(e,t,r,o,i,n,a,m,u,s,l,y,d,f,G){"use strict";return function(r,o){return e.defined(o)&&(r=t.EllipsoidGeometry.unpack(r,o)),t.EllipsoidGeometry.createGeometry(r)}}));
+/**
+ * @license
+ * Cesium - https://github.com/CesiumGS/cesium
+ * Version 1.140.0
+ *
+ * Copyright 2011-2022 Cesium Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Columbus View (Pat. Pend.)
+ *
+ * Portions licensed separately.
+ * See https://github.com/CesiumGS/cesium/blob/main/LICENSE.md for full licensing details.
+ */
+
+import{a as e}from"./chunk-E7KYDCM5.js";import"./chunk-ICALLYLG.js";import"./chunk-EQ4YRVWL.js";import"./chunk-W37FE5GR.js";import"./chunk-Q5BPHJQF.js";import"./chunk-NMVKML6W.js";import"./chunk-2TE5NTVD.js";import"./chunk-CUUSNIVQ.js";import"./chunk-BXMEEOCS.js";import"./chunk-23ZQ2IVV.js";import"./chunk-XUSCFAVF.js";import"./chunk-BTSYJ5XU.js";import"./chunk-EDVBB7SS.js";import"./chunk-FFBVWF2L.js";import"./chunk-QKUIYMGC.js";import"./chunk-WBOV35NL.js";import"./chunk-TNSUQXWK.js";import{e as o}from"./chunk-ILRYTWTP.js";function i(r,t){return o(t)&&(r=e.unpack(r,t)),e.createGeometry(r)}var a=i;export{a as default};
